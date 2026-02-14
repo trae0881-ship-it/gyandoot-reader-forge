@@ -4,21 +4,43 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, CheckCircle } from "lucide-react";
+import { Heart, CheckCircle, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { initiatePayment, type PaymentGateway } from "@/lib/payment";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const PRESET_AMOUNTS = [100, 500, 1000, 5000];
 
 const Donate = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const [amount, setAmount] = useState<number>(500);
   const [name, setName] = useState("");
   const [email, setEmail] = useState(user?.email ?? "");
   const [donated, setDonated] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [gateway, setGateway] = useState<PaymentGateway>("razorpay");
 
-  const handleDonate = () => {
-    // Razorpay integration placeholder
-    setDonated(true);
+  const handleDonate = async () => {
+    if (!user) {
+      toast({ title: "कृपया पहले लॉगिन करें", description: "Donation के लिए login ज़रूरी है।", variant: "destructive" });
+      navigate("/auth");
+      return;
+    }
+    setLoading(true);
+    await initiatePayment(
+      { amount, type: "donation", gateway, name, email },
+      () => {
+        setDonated(true);
+        setLoading(false);
+      },
+      (error) => {
+        toast({ title: "Payment Failed", description: error, variant: "destructive" });
+        setLoading(false);
+      }
+    );
   };
 
   if (donated) {
@@ -74,10 +96,40 @@ const Donate = () => {
                 <Label>Email</Label>
                 <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" className="mt-1" />
               </div>
-              <Button size="lg" className="w-full" onClick={handleDonate} disabled={amount < 1}>
-                <Heart className="mr-2 h-4 w-4" /> Donate ₹{amount}
+
+              {/* Payment Gateway Selection */}
+              <div>
+                <Label className="mb-2 block">Payment Method</Label>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant={gateway === "razorpay" ? "default" : "outline"}
+                    onClick={() => setGateway("razorpay")}
+                    className="flex-1"
+                  >
+                    Razorpay
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={gateway === "paypal" ? "default" : "outline"}
+                    onClick={() => setGateway("paypal")}
+                    className="flex-1"
+                  >
+                    PayPal
+                  </Button>
+                </div>
+              </div>
+
+              <Button size="lg" className="w-full" onClick={handleDonate} disabled={amount < 1 || loading}>
+                {loading ? (
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</>
+                ) : (
+                  <><Heart className="mr-2 h-4 w-4" /> Donate ₹{amount}</>
+                )}
               </Button>
-              <p className="text-xs text-center text-muted-foreground">Secure payment via Razorpay</p>
+              <p className="text-xs text-center text-muted-foreground">
+                Secure payment via {gateway === "razorpay" ? "Razorpay" : "PayPal"}
+              </p>
             </CardContent>
           </Card>
         </div>

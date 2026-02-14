@@ -1,15 +1,24 @@
 import { useParams, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { BookOpen, Eye, Lock, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useState } from "react";
+import { initiatePayment, type PaymentGateway } from "@/lib/payment";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const BookDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [purchasing, setPurchasing] = useState(false);
+  const [gateway, setGateway] = useState<PaymentGateway>("razorpay");
 
   const { data: book, isLoading } = useQuery({
     queryKey: ["book", slug],
@@ -36,17 +45,32 @@ const BookDetail = () => {
   const { data: hasPurchased } = useQuery({
     queryKey: ["purchase", book?.id, user?.id],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("purchases")
-        .select("id")
-        .eq("book_id", book!.id)
-        .eq("user_id", user!.id)
-        .eq("status", "completed")
-        .maybeSingle();
+      const { data } = await supabase.rpc("has_purchased_book", { _user_id: user!.id, _book_id: book!.id });
       return !!data;
     },
     enabled: !!book?.id && !!user?.id && !book?.is_free,
   });
+
+  const handlePurchase = async () => {
+    if (!user) {
+      toast({ title: "कृपया पहले लॉगिन करें", description: "Purchase के लिए login ज़रूरी है।", variant: "destructive" });
+      navigate("/auth");
+      return;
+    }
+    setPurchasing(true);
+    await initiatePayment(
+      { amount: book!.price, type: "purchase", gateway, book_id: book!.id },
+      () => {
+        toast({ title: "Purchase Successful!", description: "You can now read the full book." });
+        queryClient.invalidateQueries({ queryKey: ["purchase", book!.id, user!.id] });
+        setPurchasing(false);
+      },
+      (error) => {
+        toast({ title: "Payment Failed", description: error, variant: "destructive" });
+        setPurchasing(false);
+      }
+    );
+  };
 
   if (isLoading) {
     return (
@@ -95,11 +119,32 @@ const BookDetail = () => {
               )}
 
               {!canRead && !book.is_free && (
-                <div className="mt-6">
-                  <Button size="lg">
-                    <Lock className="mr-2 h-4 w-4" /> Purchase to Read — ₹{book.price}
+                <div className="mt-6 space-y-3">
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant={gateway === "razorpay" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setGateway("razorpay")}
+                    >
+                      Razorpay
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={gateway === "paypal" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setGateway("paypal")}
+                    >
+                      PayPal
+                    </Button>
+                  </div>
+                  <Button size="lg" onClick={handlePurchase} disabled={purchasing}>
+                    {purchasing ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</>
+                    ) : (
+                      <><Lock className="mr-2 h-4 w-4" /> Purchase to Read — ₹{book.price}</>
+                    )}
                   </Button>
-                  <p className="mt-2 text-sm text-muted-foreground">Razorpay payment integration coming soon.</p>
                 </div>
               )}
             </div>

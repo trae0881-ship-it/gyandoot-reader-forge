@@ -14,9 +14,9 @@ const Footer = () => {
   return (
     <footer className="border-t border-border bg-foreground text-background">
       <div className="container py-14">
-        <div className="grid gap-10 md:grid-cols-4">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-5">
           {/* Brand */}
-          <div>
+          <div className="lg:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4" aria-label="Homepage">
               <BookOpen className="h-6 w-6 text-secondary" />
               <span className="font-serif text-lg font-bold text-secondary">GyandootNova</span>
@@ -38,24 +38,42 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Explore links */}
+          {/* Explore */}
           <div>
             <h4 className="font-serif font-semibold mb-4 text-secondary">Explore</h4>
             <nav aria-label="Footer explore links" className="flex flex-col gap-2.5 text-sm text-background/60">
               <Link to="/" className="hover:text-secondary transition-colors">Home</Link>
+              <Link to="/about" className="hover:text-secondary transition-colors">About Us</Link>
               <Link to="/books" className="hover:text-secondary transition-colors">Books</Link>
-              <Link to="/articles" className="hover:text-secondary transition-colors">Articles & Programs</Link>
-              <Link to="/donate" className="hover:text-secondary transition-colors">Donate</Link>
+              <Link to="/articles" className="hover:text-secondary transition-colors">Articles</Link>
+              <Link to="/services" className="hover:text-secondary transition-colors">Services</Link>
+              <Link to="/portfolio" className="hover:text-secondary transition-colors">Portfolio</Link>
+              <Link to="/testimonials" className="hover:text-secondary transition-colors">Testimonials</Link>
             </nav>
           </div>
 
-          {/* Contact */}
+          {/* Support */}
           <div>
-            <h4 className="font-serif font-semibold mb-4 text-secondary">Contact</h4>
-            <div className="space-y-2.5 text-sm text-background/60">
-              <p className="flex items-center gap-2"><Mail className="h-4 w-4 text-secondary" /> contact@gyandootnova.com</p>
-              <p>New Delhi, India</p>
-            </div>
+            <h4 className="font-serif font-semibold mb-4 text-secondary">Support</h4>
+            <nav aria-label="Footer support links" className="flex flex-col gap-2.5 text-sm text-background/60">
+              <Link to="/contact" className="hover:text-secondary transition-colors">Contact</Link>
+              <Link to="/faq" className="hover:text-secondary transition-colors">FAQ</Link>
+              <Link to="/support" className="hover:text-secondary transition-colors">Help Center</Link>
+              <Link to="/donate" className="hover:text-secondary transition-colors">Donate</Link>
+              <Link to="/careers" className="hover:text-secondary transition-colors">Careers</Link>
+              <Link to="/sitemap" className="hover:text-secondary transition-colors">Sitemap</Link>
+            </nav>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h4 className="font-serif font-semibold mb-4 text-secondary">Legal</h4>
+            <nav aria-label="Footer legal links" className="flex flex-col gap-2.5 text-sm text-background/60">
+              <Link to="/privacy-policy" className="hover:text-secondary transition-colors">Privacy Policy</Link>
+              <Link to="/terms-conditions" className="hover:text-secondary transition-colors">Terms & Conditions</Link>
+              <Link to="/refund-policy" className="hover:text-secondary transition-colors">Refund & Cancellation</Link>
+              <Link to="/shipping-policy" className="hover:text-secondary transition-colors">Shipping & Delivery</Link>
+            </nav>
           </div>
 
           {/* Newsletter */}
@@ -75,14 +93,19 @@ const Footer = () => {
                 Join
               </Button>
             </form>
+            <div className="mt-4 flex items-start gap-2">
+              <Mail className="h-4 w-4 text-secondary mt-0.5" />
+              <p className="text-sm text-background/60">contact@gyandootnova.com</p>
+            </div>
           </div>
         </div>
 
         <div className="mt-10 border-t border-background/10 pt-6 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-background/40">
           <p>© {new Date().getFullYear()} GyandootNova. All rights reserved.</p>
           <div className="flex gap-4">
-            <a href="#" className="hover:text-secondary transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-secondary transition-colors">Terms of Service</a>
+            <Link to="/privacy-policy" className="hover:text-secondary transition-colors">Privacy Policy</Link>
+            <Link to="/terms-conditions" className="hover:text-secondary transition-colors">Terms of Service</Link>
+            <Link to="/refund-policy" className="hover:text-secondary transition-colors">Refund Policy</Link>
           </div>
         </div>
       </div>

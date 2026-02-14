@@ -163,7 +163,7 @@ async function handlePaypal(
   }
 
   // Get access token
-  const tokenRes = await fetch("https://api-m.paypal.com/v1/oauth2/token", {
+  const tokenRes = await fetch("https://api-m.sandbox.paypal.com/v1/oauth2/token", {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -185,7 +185,7 @@ async function handlePaypal(
   // Convert INR to USD (approximate, for PayPal)
   const usdAmount = (amount / 83).toFixed(2);
 
-  const orderRes = await fetch("https://api-m.paypal.com/v2/checkout/orders", {
+  const orderRes = await fetch("https://api-m.sandbox.paypal.com/v2/checkout/orders", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

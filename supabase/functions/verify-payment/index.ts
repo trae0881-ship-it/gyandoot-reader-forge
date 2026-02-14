@@ -147,7 +147,7 @@ async function verifyPaypal(supabase: any, user: any, orderId: string, type: str
   }
 
   // Get access token
-  const tokenRes = await fetch("https://api-m.paypal.com/v1/oauth2/token", {
+  const tokenRes = await fetch("https://api-m.sandbox.paypal.com/v1/oauth2/token", {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -158,7 +158,7 @@ async function verifyPaypal(supabase: any, user: any, orderId: string, type: str
   const { access_token } = await tokenRes.json();
 
   // Capture the order
-  const captureRes = await fetch(`https://api-m.paypal.com/v2/checkout/orders/${orderId}/capture`, {
+  const captureRes = await fetch(`https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderId}/capture`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

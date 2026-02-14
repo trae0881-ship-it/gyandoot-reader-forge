@@ -61,6 +61,132 @@ Deno.serve(async (req) => {
   }
 });
 
+async function sendReceipt(
+  supabase: any,
+  user: any,
+  type: string,
+  orderId: string,
+  paymentId: string,
+  gateway: string
+) {
+  const resendKey = Deno.env.get("RESEND_API_KEY");
+  if (!resendKey) {
+    console.warn("RESEND_API_KEY not set, skipping email receipt");
+    return;
+  }
+
+  try {
+    let amount = 0;
+    let bookTitle = "";
+    let recipientEmail = user.email;
+    let recipientName = "";
+
+    if (type === "purchase") {
+      const { data: purchase } = await supabase
+        .from("purchases")
+        .select("book_id, created_at")
+        .eq("razorpay_order_id", orderId)
+        .single();
+      if (purchase?.book_id) {
+        const { data: book } = await supabase
+          .from("books")
+          .select("title, price")
+          .eq("id", purchase.book_id)
+          .single();
+        if (book) {
+          bookTitle = book.title;
+          amount = book.price;
+        }
+      }
+    } else {
+      const { data: donation } = await supabase
+        .from("donations")
+        .select("amount, donor_name, donor_email")
+        .eq("razorpay_order_id", orderId)
+        .single();
+      if (donation) {
+        amount = donation.amount;
+        recipientName = donation.donor_name || "";
+        if (donation.donor_email) recipientEmail = donation.donor_email;
+      }
+    }
+
+    const date = new Date().toLocaleDateString("en-IN", {
+      year: "numeric", month: "long", day: "numeric",
+    });
+
+    const subject = type === "purchase"
+      ? `GyandootNova — Book Purchase Receipt`
+      : `GyandootNova — Donation Receipt`;
+
+    const html = type === "purchase"
+      ? `
+        <div style="font-family: 'Georgia', serif; max-width: 600px; margin: 0 auto; padding: 30px; background: #fff;">
+          <div style="text-align: center; border-bottom: 3px solid #B71C1C; padding-bottom: 20px; margin-bottom: 25px;">
+            <h1 style="color: #B71C1C; margin: 0; font-size: 28px;">📚 GyandootNova</h1>
+            <p style="color: #666; margin-top: 5px;">Purchase Confirmation</p>
+          </div>
+          <p>Namaste${recipientName ? ` ${recipientName}` : ""},</p>
+          <p>Thank you for your purchase! Your book is now ready to read.</p>
+          <div style="background: #FFF8E1; border-left: 4px solid #FBC02D; padding: 15px 20px; margin: 20px 0; border-radius: 4px;">
+            <p style="margin: 0 0 8px; font-weight: bold; color: #333;">📖 ${bookTitle}</p>
+            <p style="margin: 0; color: #555;">Amount: <strong>₹${amount}</strong></p>
+            <p style="margin: 8px 0 0; color: #888; font-size: 13px;">Payment ID: ${paymentId}</p>
+            <p style="margin: 4px 0 0; color: #888; font-size: 13px;">Date: ${date}</p>
+            <p style="margin: 4px 0 0; color: #888; font-size: 13px;">Gateway: ${gateway.charAt(0).toUpperCase() + gateway.slice(1)}</p>
+          </div>
+          <p>You can start reading your book anytime by visiting your library.</p>
+          <div style="text-align: center; margin-top: 25px;">
+            <a href="https://gyandootnova.lovable.app/books" style="background: #B71C1C; color: white; text-decoration: none; padding: 12px 30px; border-radius: 6px; font-weight: bold;">Open My Books</a>
+          </div>
+          <hr style="margin-top: 30px; border: none; border-top: 1px solid #eee;" />
+          <p style="color: #999; font-size: 12px; text-align: center;">GyandootNova — Illuminating spiritual seekers with sacred knowledge.</p>
+        </div>`
+      : `
+        <div style="font-family: 'Georgia', serif; max-width: 600px; margin: 0 auto; padding: 30px; background: #fff;">
+          <div style="text-align: center; border-bottom: 3px solid #B71C1C; padding-bottom: 20px; margin-bottom: 25px;">
+            <h1 style="color: #B71C1C; margin: 0; font-size: 28px;">🙏 GyandootNova</h1>
+            <p style="color: #666; margin-top: 5px;">Donation Receipt</p>
+          </div>
+          <p>Namaste${recipientName ? ` ${recipientName}` : ""},</p>
+          <p>Thank you for your generous donation! Your kindness helps spread spiritual knowledge to seekers everywhere.</p>
+          <div style="background: #E8F5E9; border-left: 4px solid #4CAF50; padding: 15px 20px; margin: 20px 0; border-radius: 4px;">
+            <p style="margin: 0 0 8px; font-weight: bold; color: #333;">❤️ Donation Amount: <strong>₹${amount}</strong></p>
+            <p style="margin: 8px 0 0; color: #888; font-size: 13px;">Payment ID: ${paymentId}</p>
+            <p style="margin: 4px 0 0; color: #888; font-size: 13px;">Date: ${date}</p>
+            <p style="margin: 4px 0 0; color: #888; font-size: 13px;">Gateway: ${gateway.charAt(0).toUpperCase() + gateway.slice(1)}</p>
+          </div>
+          <p>May your generosity bring blessings and light into your life. 🙏</p>
+          <hr style="margin-top: 30px; border: none; border-top: 1px solid #eee;" />
+          <p style="color: #999; font-size: 12px; text-align: center;">GyandootNova — Illuminating spiritual seekers with sacred knowledge.</p>
+        </div>`;
+
+    const emailRes = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${resendKey}`,
+      },
+      body: JSON.stringify({
+        from: "GyandootNova <onboarding@resend.dev>",
+        to: [recipientEmail],
+        subject,
+        html,
+      }),
+    });
+
+    if (!emailRes.ok) {
+      const errText = await emailRes.text();
+      console.error("Resend email error:", errText);
+    } else {
+      console.log("Receipt email sent to", recipientEmail);
+    }
+  } catch (err) {
+    console.error("Email send error:", err);
+    // Non-critical — don't fail the payment
+  }
+}
+
 async function verifyRazorpay(
   supabase: any, user: any, orderId: string, paymentId: string, signature: string, type: string
 ) {
@@ -124,11 +250,15 @@ async function verifyRazorpay(
       .single();
     if (purchase?.book_id) {
       await supabase.rpc("increment_purchase_count", { _book_id: purchase.book_id }).catch(() => {
-        // Non-critical, log and continue
         console.warn("Could not increment purchase count");
       });
     }
   }
+
+  // Send receipt email (non-blocking)
+  sendReceipt(supabase, user, type, orderId, paymentId, "razorpay").catch((e) =>
+    console.error("Receipt email failed:", e)
+  );
 
   return new Response(
     JSON.stringify({ success: true, message: "Payment verified" }),
@@ -189,7 +319,7 @@ async function verifyPaypal(supabase: any, user: any, orderId: string, type: str
   const { error: updateError } = await supabase
     .from(table)
     .update({
-      razorpay_payment_id: captureId, // reusing column for PayPal capture ID
+      razorpay_payment_id: captureId,
       status: "completed",
     })
     .eq("razorpay_order_id", orderId)
@@ -202,6 +332,11 @@ async function verifyPaypal(supabase: any, user: any, orderId: string, type: str
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
+
+  // Send receipt email (non-blocking)
+  sendReceipt(supabase, user, type, orderId, captureId, "paypal").catch((e) =>
+    console.error("Receipt email failed:", e)
+  );
 
   return new Response(
     JSON.stringify({ success: true, message: "Payment verified" }),

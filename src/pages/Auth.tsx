@@ -74,7 +74,7 @@ const Auth = () => {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <BookOpen className="mx-auto h-8 w-8 text-primary" />
-            <CardTitle className="font-serif text-2xl">{isLogin ? "Welcome Back" : "Create Account"}</CardTitle>
+            <CardTitle className="font-serif text-2xl">GyandootNova</CardTitle>
             <CardDescription>{isLogin ? "Sign in to your GyandootNova account" : "Join GyandootNova today"}</CardDescription>
           </CardHeader>
           <CardContent>

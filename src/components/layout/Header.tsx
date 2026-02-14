@@ -11,8 +11,11 @@ const Header = () => {
 
   const navLinks = [
     { to: "/", label: "Home" },
+    { to: "/about", label: "About Us" },
     { to: "/books", label: "Books" },
     { to: "/articles", label: "Articles" },
+    { to: "/services", label: "Services" },
+    { to: "/contact", label: "Contact" },
   ];
 
   return (
@@ -24,7 +27,7 @@ const Header = () => {
         </Link>
 
         {/* Desktop nav */}
-        <nav aria-label="Main navigation" className="hidden items-center gap-8 md:flex">
+        <nav aria-label="Main navigation" className="hidden items-center gap-6 lg:flex">
           {navLinks.map((link) => (
             <Link
               key={link.to}
@@ -66,7 +69,7 @@ const Header = () => {
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden"
+          className="lg:hidden"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
         >
@@ -76,7 +79,7 @@ const Header = () => {
 
       {/* Mobile nav */}
       {mobileOpen && (
-        <div className="border-t border-border bg-background p-4 md:hidden">
+        <div className="border-t border-border bg-background p-4 lg:hidden">
           <nav aria-label="Mobile navigation" className="flex flex-col gap-3">
             {navLinks.map((link) => (
               <Link key={link.to} to={link.to} className="text-sm font-medium" onClick={() => setMobileOpen(false)}>

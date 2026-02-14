@@ -22,7 +22,7 @@ const Footer = () => {
               <span className="font-serif text-lg font-bold text-secondary">GyandootNova</span>
             </Link>
             <p className="text-sm text-background/60 leading-relaxed">
-              A spiritual publication and knowledge platform dedicated to illuminating seekers with sacred books, articles, and transformative programs.
+              Illuminating spiritual seekers with sacred books, articles, and transformative programs.
             </p>
             <div className="mt-5 flex gap-3">
               {[Facebook, Twitter, Instagram, Youtube].map((Icon, i) => (

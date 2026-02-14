@@ -40,7 +40,7 @@ const BookReader = () => {
   const { data: hasPurchased } = useQuery({
     queryKey: ["purchase-check", book?.id, user?.id],
     queryFn: async () => {
-      const { data } = await supabase.from("purchases").select("id").eq("book_id", book!.id).eq("user_id", user!.id).eq("status", "completed").maybeSingle();
+      const { data } = await supabase.rpc("has_purchased_book", { _user_id: user!.id, _book_id: book!.id });
       return !!data;
     },
     enabled: !!book?.id && !!user?.id && !book?.is_free,

@@ -305,6 +305,30 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_user_donations: {
+        Args: { _user_id: string }
+        Returns: {
+          amount: number
+          created_at: string
+          donor_email: string
+          donor_name: string
+          id: string
+          status: string
+        }[]
+      }
+      get_user_purchases: {
+        Args: { _user_id: string }
+        Returns: {
+          book_id: string
+          created_at: string
+          id: string
+          status: string
+        }[]
+      }
+      has_purchased_book: {
+        Args: { _book_id: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

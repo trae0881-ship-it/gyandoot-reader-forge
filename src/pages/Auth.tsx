@@ -98,7 +98,7 @@ const Auth = () => {
 
   return (
     <Layout>
-      <section className="flex flex-1 items-center justify-center py-12 px-4">
+      <section className="flex flex-1 items-center justify-center py-8 px-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <img src={logoImg} alt="GyandootNova" className="mx-auto h-16 w-16 rounded-full object-cover" />

@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import {
   ChevronLeft, ChevronRight, ArrowLeft, Sun, Moon, Minus, Plus,
-  BookOpen, Bookmark, BookmarkCheck, StickyNote, X, Save, Highlighter, Trash2
+  BookOpen, Bookmark, BookmarkCheck, StickyNote, X, Save, Highlighter, Trash2, PanelRight
 } from "lucide-react";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -37,6 +37,7 @@ const BookReader = () => {
 
   // Panels
   const [showNotes, setShowNotes] = useState(false);
+  const [showHighlightsPanel, setShowHighlightsPanel] = useState(false);
   const [noteText, setNoteText] = useState("");
   const [showHighlightBar, setShowHighlightBar] = useState(false);
   const [selectionInfo, setSelectionInfo] = useState<{
@@ -405,11 +406,22 @@ const BookReader = () => {
                   variant="ghost"
                   size="icon"
                   title="Notes"
-                  onClick={() => setShowNotes(!showNotes)}
+                  onClick={() => { setShowNotes(!showNotes); setShowHighlightsPanel(false); }}
                   className={showNotes ? "text-primary" : ""}
                 >
                   <StickyNote className="h-4 w-4" />
                 </Button>
+                {highlights.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    title="Highlights"
+                    onClick={() => { setShowHighlightsPanel(!showHighlightsPanel); setShowNotes(false); }}
+                    className={showHighlightsPanel ? "text-yellow-600" : ""}
+                  >
+                    <Highlighter className="h-4 w-4" />
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="icon"
@@ -452,6 +464,45 @@ const BookReader = () => {
                 <Save className="mr-1.5 h-3.5 w-3.5" />
                 {saveNoteMutation.isPending ? "Saving…" : "Save Note"}
               </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Highlights panel */}
+      {showHighlightsPanel && user && highlights.length > 0 && (
+        <div className={`sticky top-[57px] z-30 border-b px-4 py-3 ${darkMode ? "border-gray-700 bg-gray-800" : "bg-muted/60 backdrop-blur"}`}>
+          <div className="mx-auto max-w-3xl">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-medium flex items-center gap-1.5">
+                <Highlighter className="h-4 w-4 text-yellow-500" />
+                {highlights.length} Highlight{highlights.length !== 1 ? "s" : ""} — {chapter.title}
+              </p>
+              <Button size="sm" variant="ghost" onClick={() => setShowHighlightsPanel(false)}><X className="h-4 w-4" /></Button>
+            </div>
+            <div className="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1">
+              {highlights.map((h, i) => (
+                <div
+                  key={h.id}
+                  className="flex items-start gap-2 group rounded-md p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700/40 cursor-pointer hover:border-yellow-400 transition-colors"
+                  onClick={() => {
+                    const el = contentRef.current?.querySelector(`p[data-para-idx="${h.paragraph_index}"]`);
+                    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                    setShowHighlightsPanel(false);
+                  }}
+                >
+                  <span className="text-xs font-bold text-yellow-600 shrink-0 mt-0.5">#{i + 1}</span>
+                  <p className="text-xs text-foreground flex-1 line-clamp-2">"{h.selected_text}"</p>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100"
+                    onClick={(e) => { e.stopPropagation(); deleteHighlightMutation.mutate(h.id); }}
+                  >
+                    <Trash2 className="h-3 w-3 text-destructive" />
+                  </Button>
+                </div>
+              ))}
             </div>
           </div>
         </div>

@@ -7,11 +7,39 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { BookOpen } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
 import { lovable } from "@/integrations/lovable/index";
 import { Separator } from "@/components/ui/separator";
+import logoImg from "@/assets/logo.jpeg";
+
+
+const ForgotPasswordLink = ({ email }: { email: string }) => {
+  const { toast } = useToast();
+  const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleForgot = async () => {
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email || " ", {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      setSent(true);
+      toast({ title: "Reset link sent!", description: "Check your email for the password reset link." });
+    }
+    setLoading(false);
+  };
+
+  if (sent) return <span className="text-xs text-green-600">Reset link sent!</span>;
+  return (
+    <button type="button" onClick={handleForgot} disabled={loading} className="text-xs text-primary hover:underline disabled:opacity-50">
+      {loading ? "Sending..." : "Forgot password?"}
+    </button>
+  );
+};
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -70,12 +98,12 @@ const Auth = () => {
 
   return (
     <Layout>
-      <section className="flex min-h-[60vh] items-center justify-center py-12">
+      <section className="flex min-h-[60vh] items-center justify-center py-12 px-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <BookOpen className="mx-auto h-8 w-8 text-primary" />
+            <img src={logoImg} alt="GyandootNova" className="mx-auto h-16 w-16 rounded-full object-cover" />
             <CardTitle className="font-serif text-2xl">GyandootNova</CardTitle>
-            <CardDescription>{isLogin ? "Sign in to your GyandootNova account" : "Join GyandootNova today"}</CardDescription>
+            <CardDescription>{isLogin ? "Sign in to your account" : "Join GyandootNova today"}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button
@@ -115,6 +143,11 @@ const Auth = () => {
               <div>
                 <Label>Password</Label>
                 <Input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="mt-1" />
+                {isLogin && (
+                  <div className="mt-1 text-right">
+                    <ForgotPasswordLink email={email} />
+                  </div>
+                )}
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}

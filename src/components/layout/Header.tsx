@@ -1,8 +1,9 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Menu, X, BookOpen, Heart, User, LogOut, Shield } from "lucide-react";
+import { Menu, X, Heart, User, LogOut, Shield } from "lucide-react";
 import { useState } from "react";
+import logoImg from "@/assets/logo.jpeg";
 
 const Header = () => {
   const { user, isAdmin, signOut } = useAuth();
@@ -22,7 +23,7 @@ const Header = () => {
     <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center justify-between">
         <Link to="/" className="flex items-center gap-2" aria-label="Go to homepage">
-          <BookOpen className="h-6 w-6 text-primary" />
+          <img src={logoImg} alt="GyandootNova logo" className="h-8 w-8 rounded-full object-cover" />
           <span className="font-serif text-lg font-bold text-primary">GyandootNova</span>
         </Link>
 

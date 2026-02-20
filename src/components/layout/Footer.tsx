@@ -92,7 +92,7 @@ const Footer = () => {
               <Link to="/support" className="hover:text-secondary transition-colors">Help Center</Link>
               <Link to="/donate" className="hover:text-secondary transition-colors">Donate</Link>
               <Link to="/careers" className="hover:text-secondary transition-colors">Careers</Link>
-              <Link to="/sitemap" className="hover:text-secondary transition-colors">Sitemap</Link>
+              <a href="https://gyandootnova.in/sitemap.xml" target="_blank" rel="noopener noreferrer" className="hover:text-secondary transition-colors">Sitemap</a>
               {whatsappLink && (
                 <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-secondary transition-colors">
                   <MessageCircle className="h-3.5 w-3.5" /> WhatsApp Us

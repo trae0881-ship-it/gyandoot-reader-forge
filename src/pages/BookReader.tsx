@@ -79,6 +79,8 @@ const BookReader = () => {
   const [showHighlightsPanel, setShowHighlightsPanel] = useState(false);
   const [showTOC, setShowTOC] = useState(false);
   const [noteText, setNoteText] = useState("");
+  const [highlightColorFilter, setHighlightColorFilter] = useState<string | null>(null);
+  const [tocSearch, setTocSearch] = useState("");
 
   // Highlight selection
   const [showHighlightBar, setShowHighlightBar] = useState(false);
@@ -433,8 +435,18 @@ const BookReader = () => {
                 <X className="h-4 w-4" />
               </Button>
             </div>
+            {/* Search */}
+            <div className={`px-3 py-2 border-b ${darkMode ? "border-gray-700" : "border-border"}`}>
+              <input
+                type="text"
+                value={tocSearch}
+                onChange={(e) => setTocSearch(e.target.value)}
+                placeholder="Search chapters…"
+                className={`w-full rounded-md border px-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-primary ${darkMode ? "bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-500" : "bg-background border-input placeholder:text-muted-foreground"}`}
+              />
+            </div>
             <div className="flex-1 overflow-y-auto py-2">
-              {chapters?.map((ch, i) => {
+              {chapters?.filter((ch) => !tocSearch || ch.title.toLowerCase().includes(tocSearch.toLowerCase())).map((ch, i) => {
                 const isCurrent = ch.slug === chapterSlug;
                 return (
                   <button
@@ -599,23 +611,39 @@ const BookReader = () => {
       {showHighlightsPanel && user && highlights.length > 0 && (
         <div className={`sticky top-[49px] z-30 border-b px-4 py-3 ${darkMode ? "border-gray-700 bg-gray-800" : "bg-muted/60 backdrop-blur"}`}>
           <div className="mx-auto max-w-3xl">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <Highlighter className="h-4 w-4 text-muted-foreground" />
                 <p className="text-sm font-medium">
                   {highlights.length} Highlight{highlights.length !== 1 ? "s" : ""} — {chapter.title}
                 </p>
-                {/* Color filter dots */}
-                <div className="flex gap-1 ml-1">
-                  {HIGHLIGHT_COLORS.filter((c) => highlights.some((h) => h.color === c.id)).map((c) => (
-                    <span key={c.id} className={`h-2.5 w-2.5 rounded-full ${c.dotClass}`} title={c.label} />
-                  ))}
-                </div>
               </div>
               <Button size="sm" variant="ghost" onClick={() => setShowHighlightsPanel(false)}><X className="h-4 w-4" /></Button>
             </div>
-            <div className="flex flex-col gap-2 max-h-52 overflow-y-auto pr-1">
-              {highlights.map((h, i) => {
+            {/* Color filter buttons */}
+            <div className="flex items-center gap-1.5 mb-3 flex-wrap">
+              <button
+                onClick={() => setHighlightColorFilter(null)}
+                className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${highlightColorFilter === null ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:border-foreground"}`}
+              >
+                All ({highlights.length})
+              </button>
+              {HIGHLIGHT_COLORS.filter((c) => highlights.some((h) => h.color === c.id)).map((c) => {
+                const count = highlights.filter((h) => h.color === c.id).length;
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => setHighlightColorFilter(highlightColorFilter === c.id ? null : c.id)}
+                    className={`text-xs px-2.5 py-1 rounded-full border transition-colors flex items-center gap-1 ${highlightColorFilter === c.id ? `${c.markClass} border-current font-semibold` : "border-border text-muted-foreground hover:border-foreground"}`}
+                  >
+                    <span className={`h-2 w-2 rounded-full ${c.dotClass}`} />
+                    {c.label} ({count})
+                  </button>
+                );
+              })}
+            </div>
+            <div className="flex flex-col gap-2 max-h-44 overflow-y-auto pr-1">
+              {highlights.filter((h) => !highlightColorFilter || h.color === highlightColorFilter).map((h, i) => {
                 const cc = getColorConfig(h.color);
                 return (
                   <div

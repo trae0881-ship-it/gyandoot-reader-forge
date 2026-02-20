@@ -14,7 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Tag, Plus, Pencil, Trash2, Copy, RefreshCw, Layers, Download, CheckCircle2, BookOpen, X } from "lucide-react";
+import { Tag, Plus, Pencil, Trash2, Copy, RefreshCw, Layers, Download, CheckCircle2, BookOpen, X, Send, Mail } from "lucide-react";
 
 type Book = { id: string; title: string; author: string };
 
@@ -75,6 +75,14 @@ const AdminCoupons = () => {
   const [bulkForm, setBulkForm] = useState(defaultBulkForm);
   const [bulkResult, setBulkResult] = useState<string[] | null>(null);
   const [bulkLoading, setBulkLoading] = useState(false);
+
+  // Send coupon email state
+  const [sendOpen, setSendOpen] = useState(false);
+  const [sendCoupon, setSendCoupon] = useState<Coupon | null>(null);
+  const [sendEmails, setSendEmails] = useState("");
+  const [sendMessage, setSendMessage] = useState("");
+  const [sendLoading, setSendLoading] = useState(false);
+  const [sendResult, setSendResult] = useState<{ sent: number; failed: number } | null>(null);
 
   // Fetch all books for the selector
   const { data: books } = useQuery({
@@ -216,6 +224,60 @@ const AdminCoupons = () => {
     URL.revokeObjectURL(url);
   };
 
+  const handleSendCouponEmail = async () => {
+    if (!sendCoupon) return;
+    setSendLoading(true);
+    setSendResult(null);
+
+    const emailList = sendEmails
+      .split(/[\n,;]+/)
+      .map((e) => e.trim())
+      .filter(Boolean);
+
+    const discountLabel =
+      sendCoupon.discount_type === "percent"
+        ? `${sendCoupon.discount_value}%`
+        : `₹${sendCoupon.discount_value}`;
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const res = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/send-coupon-email`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({
+            emails: emailList,
+            coupon_code: sendCoupon.code,
+            discount_label: discountLabel,
+            description: sendCoupon.description,
+            message: sendMessage,
+          }),
+        }
+      );
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Failed to send emails");
+      setSendResult({ sent: result.sent, failed: result.failed });
+      toast({ title: `Sent to ${result.sent} recipient${result.sent !== 1 ? "s" : ""}!` });
+    } catch (err: any) {
+      toast({ title: "Error sending emails", description: err.message, variant: "destructive" });
+    } finally {
+      setSendLoading(false);
+    }
+  };
+
+  const openSendDialog = (coupon: Coupon) => {
+    setSendCoupon(coupon);
+    setSendEmails("");
+    setSendMessage("");
+    setSendResult(null);
+    setSendOpen(true);
+  };
+
   const openCreate = () => {
     setEditCoupon(null);
     setForm({ ...defaultForm, code: generateCode() });
@@ -352,6 +414,9 @@ const AdminCoupons = () => {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
+                      <Button size="sm" variant="ghost" title="Send via Email" onClick={() => openSendDialog(c)}>
+                        <Mail className="h-4 w-4" />
+                      </Button>
                       <Button size="sm" variant="ghost" onClick={() => openEdit(c)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -696,6 +761,78 @@ const AdminCoupons = () => {
                   disabled={bulkLoading || !bulkForm.discount_value || Number(bulkForm.count) < 1}
                 >
                   {bulkLoading ? "Generating…" : `Generate ${bulkForm.count || 0} Codes`}
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+      {/* Send Coupon Email Dialog */}
+      <Dialog open={sendOpen} onOpenChange={(o) => { setSendOpen(o); if (!o) { setSendCoupon(null); setSendResult(null); } }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5 text-primary" /> Send Coupon via Email
+            </DialogTitle>
+            <DialogDescription>
+              {sendCoupon && (
+                <span>Sending coupon <strong className="font-mono text-primary">{sendCoupon.code}</strong> ({sendCoupon.discount_type === "percent" ? `${sendCoupon.discount_value}%` : `₹${sendCoupon.discount_value}`} OFF)</span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          {sendResult ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-4 rounded-lg bg-primary/5 border border-primary/20">
+                <CheckCircle2 className="h-6 w-6 text-primary flex-shrink-0" />
+                <div>
+                  <p className="font-semibold text-foreground">Emails sent!</p>
+                  <p className="text-sm text-muted-foreground">
+                    {sendResult.sent} delivered{sendResult.failed > 0 ? `, ${sendResult.failed} failed` : ""}
+                  </p>
+                </div>
+              </div>
+              <Button className="w-full" variant="outline" onClick={() => { setSendResult(null); setSendEmails(""); setSendMessage(""); }}>
+                Send to More Recipients
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <Label className="flex items-center gap-1.5">
+                  <Mail className="h-4 w-4" /> Recipient Emails *
+                </Label>
+                <Textarea
+                  value={sendEmails}
+                  onChange={(e) => setSendEmails(e.target.value)}
+                  placeholder={"user1@example.com\nuser2@example.com, user3@example.com"}
+                  className="mt-1 font-mono text-sm h-32 resize-none"
+                />
+                <p className="text-xs text-muted-foreground mt-1">Separate emails with new lines, commas, or semicolons.</p>
+              </div>
+
+              <div>
+                <Label>Personal Message (optional)</Label>
+                <Textarea
+                  value={sendMessage}
+                  onChange={(e) => setSendMessage(e.target.value)}
+                  placeholder="e.g. As a valued customer, enjoy this exclusive discount on your next purchase!"
+                  className="mt-1 text-sm h-20 resize-none"
+                  maxLength={500}
+                />
+              </div>
+
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setSendOpen(false)}>Cancel</Button>
+                <Button
+                  onClick={handleSendCouponEmail}
+                  disabled={sendLoading || !sendEmails.trim()}
+                >
+                  {sendLoading ? (
+                    "Sending…"
+                  ) : (
+                    <><Send className="h-4 w-4 mr-2" /> Send Emails</>
+                  )}
                 </Button>
               </DialogFooter>
             </div>

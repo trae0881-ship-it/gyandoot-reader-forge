@@ -12,6 +12,7 @@ import Articles from "./pages/Articles";
 import ArticleDetail from "./pages/ArticleDetail";
 import Donate from "./pages/Donate";
 import Auth from "./pages/Auth";
+import Profile from "./pages/Profile";
 import About from "./pages/About";
 import Services from "./pages/Services";
 import Contact from "./pages/Contact";
@@ -54,6 +55,7 @@ const App = () => (
             <Route path="/donate" element={<Donate />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/about" element={<About />} />
             <Route path="/services" element={<Services />} />
             <Route path="/contact" element={<Contact />} />

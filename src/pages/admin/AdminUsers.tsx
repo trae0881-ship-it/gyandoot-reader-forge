@@ -1,10 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -31,6 +32,7 @@ const AdminUsers = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
+  const [confirmDisableUser, setConfirmDisableUser] = useState<UserRow | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin-users"],
@@ -164,8 +166,9 @@ const AdminUsers = () => {
                           size="sm"
                           variant="outline"
                           className="text-destructive border-destructive hover:bg-destructive/10"
-                          onClick={() => toggleMutation.mutate({ user_id: user.id, action: "disable" })}
+                          onClick={() => setConfirmDisableUser(user)}
                           disabled={toggleMutation.isPending || user.role === "admin"}
+                          title={user.role === "admin" ? "Admin accounts cannot be disabled" : "Disable user account"}
                         >
                           <ShieldOff className="h-4 w-4 mr-1" /> Disable
                         </Button>
@@ -346,6 +349,32 @@ const AdminUsers = () => {
           )}
         </DialogContent>
       </Dialog>
+      {/* Confirm Disable Dialog */}
+      <AlertDialog open={!!confirmDisableUser} onOpenChange={(o) => !o && setConfirmDisableUser(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Disable User Account?</AlertDialogTitle>
+            <AlertDialogDescription>
+              <strong>{confirmDisableUser?.display_name || confirmDisableUser?.email}</strong> ka account disable ho jayega.
+              Yeh user ab login nahi kar payega jab tak aap account dobara enable na karein.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (confirmDisableUser) {
+                  toggleMutation.mutate({ user_id: confirmDisableUser.id, action: "disable" });
+                  setConfirmDisableUser(null);
+                }
+              }}
+            >
+              Yes, Disable
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -81,7 +81,23 @@ Deno.serve(async (req) => {
           const hasUses = !coupon.max_uses || coupon.used_count < coupon.max_uses;
           const meetsMin = verifiedAmount >= (coupon.min_order_amount ?? 0);
 
-          if (notExpired && hasUses && meetsMin) {
+          // Enforce book restriction server-side
+          let bookAllowed = true;
+          const { count: restrictionCount } = await supabase
+            .from("coupon_books")
+            .select("id", { count: "exact", head: true })
+            .eq("coupon_id", coupon_id);
+
+          if ((restrictionCount ?? 0) > 0) {
+            const { count: matchCount } = await supabase
+              .from("coupon_books")
+              .select("id", { count: "exact", head: true })
+              .eq("coupon_id", coupon_id)
+              .eq("book_id", book_id);
+            bookAllowed = (matchCount ?? 0) > 0;
+          }
+
+          if (notExpired && hasUses && meetsMin && bookAllowed) {
             let discount = 0;
             if (coupon.discount_type === "percent") {
               discount = Math.round((verifiedAmount * coupon.discount_value / 100) * 100) / 100;

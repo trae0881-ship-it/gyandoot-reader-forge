@@ -14,7 +14,9 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Tag, Plus, Pencil, Trash2, Copy, RefreshCw, Layers, Download, CheckCircle2 } from "lucide-react";
+import { Tag, Plus, Pencil, Trash2, Copy, RefreshCw, Layers, Download, CheckCircle2, BookOpen, X } from "lucide-react";
+
+type Book = { id: string; title: string; author: string };
 
 type Coupon = {
   id: string;
@@ -28,6 +30,7 @@ type Coupon = {
   is_active: boolean;
   expires_at: string | null;
   created_at: string;
+  restricted_books?: Book[];
 };
 
 const defaultForm = {
@@ -67,10 +70,20 @@ const AdminCoupons = () => {
   const [editCoupon, setEditCoupon] = useState<Coupon | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState(defaultForm);
+  const [selectedBookIds, setSelectedBookIds] = useState<string[]>([]);
   const [bulkOpen, setBulkOpen] = useState(false);
   const [bulkForm, setBulkForm] = useState(defaultBulkForm);
   const [bulkResult, setBulkResult] = useState<string[] | null>(null);
   const [bulkLoading, setBulkLoading] = useState(false);
+
+  // Fetch all books for the selector
+  const { data: books } = useQuery({
+    queryKey: ["admin-books-list"],
+    queryFn: async () => {
+      const { data } = await supabase.from("books").select("id, title, author").order("title");
+      return (data ?? []) as Book[];
+    },
+  });
 
   const { data: coupons, isLoading } = useQuery({
     queryKey: ["admin-coupons"],
@@ -80,7 +93,19 @@ const AdminCoupons = () => {
         .select("*")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data ?? []) as unknown as Coupon[];
+
+      // For each coupon, fetch its restricted books
+      const couponList = (data ?? []) as unknown as Coupon[];
+      const { data: couponBooks } = await supabase
+        .from("coupon_books" as any)
+        .select("coupon_id, book_id, books(id, title, author)");
+
+      const cbMap: Record<string, Book[]> = {};
+      for (const cb of (couponBooks ?? []) as any[]) {
+        if (!cbMap[cb.coupon_id]) cbMap[cb.coupon_id] = [];
+        if (cb.books) cbMap[cb.coupon_id].push(cb.books as Book);
+      }
+      return couponList.map((c) => ({ ...c, restricted_books: cbMap[c.id] ?? [] }));
     },
   });
 
@@ -96,12 +121,26 @@ const AdminCoupons = () => {
         is_active: values.is_active,
         expires_at: values.expires_at ? new Date(values.expires_at).toISOString() : null,
       };
+
+      let couponId = editCoupon?.id;
       if (editCoupon) {
         const { error } = await supabase.from("coupons" as any).update(payload).eq("id", editCoupon.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("coupons" as any).insert(payload);
+        const { data, error } = await supabase.from("coupons" as any).insert(payload).select("id").single();
         if (error) throw error;
+        couponId = (data as any).id;
+      }
+
+      // Sync book restrictions
+      if (couponId) {
+        // Delete existing restrictions then re-insert
+        await supabase.from("coupon_books" as any).delete().eq("coupon_id", couponId);
+        if (selectedBookIds.length > 0) {
+          await supabase.from("coupon_books" as any).insert(
+            selectedBookIds.map((book_id) => ({ coupon_id: couponId, book_id }))
+          );
+        }
       }
     },
     onSuccess: () => {
@@ -110,6 +149,7 @@ const AdminCoupons = () => {
       setDialogOpen(false);
       setEditCoupon(null);
       setForm(defaultForm);
+      setSelectedBookIds([]);
     },
     onError: (e: any) => toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
@@ -179,6 +219,7 @@ const AdminCoupons = () => {
   const openCreate = () => {
     setEditCoupon(null);
     setForm({ ...defaultForm, code: generateCode() });
+    setSelectedBookIds([]);
     setDialogOpen(true);
   };
 
@@ -194,7 +235,14 @@ const AdminCoupons = () => {
       is_active: coupon.is_active,
       expires_at: coupon.expires_at ? coupon.expires_at.slice(0, 16) : "",
     });
+    setSelectedBookIds((coupon.restricted_books ?? []).map((b) => b.id));
     setDialogOpen(true);
+  };
+
+  const toggleBook = (bookId: string) => {
+    setSelectedBookIds((prev) =>
+      prev.includes(bookId) ? prev.filter((id) => id !== bookId) : [...prev, bookId]
+    );
   };
 
   const isExpired = (c: Coupon) => !!c.expires_at && new Date(c.expires_at) < new Date();
@@ -227,6 +275,7 @@ const AdminCoupons = () => {
                 <TableHead>Uses</TableHead>
                 <TableHead>Min. Order</TableHead>
                 <TableHead>Expires</TableHead>
+                <TableHead>Books</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Active</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -268,6 +317,20 @@ const AdminCoupons = () => {
                     {c.expires_at
                       ? <span className={isExpired(c) ? "text-destructive" : ""}>{new Date(c.expires_at).toLocaleDateString("en-IN")}</span>
                       : "Never"}
+                  </TableCell>
+                  <TableCell>
+                    {(c.restricted_books ?? []).length === 0 ? (
+                      <span className="text-xs text-muted-foreground">All books</span>
+                    ) : (
+                      <div className="flex flex-wrap gap-1 max-w-[160px]">
+                        {(c.restricted_books ?? []).slice(0, 2).map((b) => (
+                          <Badge key={b.id} variant="secondary" className="text-xs truncate max-w-[100px]">{b.title}</Badge>
+                        ))}
+                        {(c.restricted_books ?? []).length > 2 && (
+                          <Badge variant="outline" className="text-xs">+{(c.restricted_books ?? []).length - 2}</Badge>
+                        )}
+                      </div>
+                    )}
                   </TableCell>
                   <TableCell>
                     {isExpired(c) ? (
@@ -312,7 +375,7 @@ const AdminCoupons = () => {
       </Card>
 
       {/* Create / Edit Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) { setEditCoupon(null); setForm(defaultForm); } }}>
+      <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) { setEditCoupon(null); setForm(defaultForm); setSelectedBookIds([]); } }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>{editCoupon ? "Edit Coupon" : "Create Coupon"}</DialogTitle>
@@ -403,6 +466,45 @@ const AdminCoupons = () => {
                 onChange={(e) => setForm({ ...form, expires_at: e.target.value })}
                 className="mt-1"
               />
+            </div>
+
+            <div>
+              <Label className="flex items-center gap-1.5">
+                <BookOpen className="h-4 w-4" /> Book Restrictions
+                <span className="text-xs text-muted-foreground font-normal ml-1">(leave empty = valid for all books)</span>
+              </Label>
+              <div className="mt-2 border rounded-md max-h-40 overflow-y-auto divide-y">
+                {books?.length === 0 && (
+                  <p className="text-xs text-muted-foreground p-3">No books found.</p>
+                )}
+                {books?.map((book) => {
+                  const selected = selectedBookIds.includes(book.id);
+                  return (
+                    <button
+                      key={book.id}
+                      type="button"
+                      onClick={() => toggleBook(book.id)}
+                      className={`w-full flex items-center justify-between px-3 py-2 text-sm text-left hover:bg-muted/50 transition-colors ${selected ? "bg-primary/5" : ""}`}
+                    >
+                      <span className={selected ? "font-medium text-primary" : ""}>{book.title}</span>
+                      {selected && <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />}
+                    </button>
+                  );
+                })}
+              </div>
+              {selectedBookIds.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {selectedBookIds.map((id) => {
+                    const b = books?.find((b) => b.id === id);
+                    return b ? (
+                      <Badge key={id} variant="secondary" className="gap-1 pr-1">
+                        {b.title}
+                        <button type="button" onClick={() => toggleBook(id)} className="hover:text-destructive"><X className="h-3 w-3" /></button>
+                      </Badge>
+                    ) : null;
+                  })}
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-2">

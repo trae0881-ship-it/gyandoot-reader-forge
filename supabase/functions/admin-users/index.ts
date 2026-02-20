@@ -1,9 +1,90 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { Resend } from "npm:resend@4.0.0";
+
+const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+async function sendAccountStatusEmail(email: string, displayName: string | null, action: "enable" | "disable") {
+  const name = displayName || email;
+  const isDisabled = action === "disable";
+
+  const subject = isDisabled
+    ? "Your account has been disabled — GyandootNova"
+    : "Your account has been re-enabled — GyandootNova";
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="UTF-8"></head>
+    <body style="margin:0;padding:0;background-color:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f9f9f9;padding:40px 0;">
+        <tr>
+          <td align="center">
+            <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;border:1px solid #e5e7eb;overflow:hidden;">
+              <!-- Header -->
+              <tr>
+                <td style="background-color:${isDisabled ? "#dc2626" : "#16a34a"};padding:28px 40px;text-align:center;">
+                  <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;letter-spacing:-0.3px;">GyandootNova</h1>
+                  <p style="margin:6px 0 0;color:rgba(255,255,255,0.85);font-size:13px;">Account Notification</p>
+                </td>
+              </tr>
+              <!-- Body -->
+              <tr>
+                <td style="padding:36px 40px;">
+                  <p style="margin:0 0 16px;font-size:16px;color:#111827;">Hello, <strong>${name}</strong>,</p>
+                  ${isDisabled ? `
+                  <p style="margin:0 0 16px;font-size:15px;color:#374151;line-height:1.6;">
+                    Your account on <strong>GyandootNova</strong> has been <strong style="color:#dc2626;">disabled</strong> by an administrator.
+                  </p>
+                  <p style="margin:0 0 16px;font-size:15px;color:#374151;line-height:1.6;">
+                    You will not be able to log in until your account is re-enabled. If you believe this is a mistake, please contact our support team.
+                  </p>
+                  ` : `
+                  <p style="margin:0 0 16px;font-size:15px;color:#374151;line-height:1.6;">
+                    Great news! Your account on <strong>GyandootNova</strong> has been <strong style="color:#16a34a;">re-enabled</strong> by an administrator.
+                  </p>
+                  <p style="margin:0 0 16px;font-size:15px;color:#374151;line-height:1.6;">
+                    You can now log in and access all your books, reading progress, and other features as before.
+                  </p>
+                  <div style="text-align:center;margin:28px 0;">
+                    <a href="https://gyandoot-reader-forge.lovable.app/auth" style="background-color:#16a34a;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:15px;font-weight:600;display:inline-block;">Login to Your Account</a>
+                  </div>
+                  `}
+                  <p style="margin:24px 0 0;font-size:13px;color:#9ca3af;">
+                    If you have questions, reply to this email or contact us at support@gyandootnova.com
+                  </p>
+                </td>
+              </tr>
+              <!-- Footer -->
+              <tr>
+                <td style="background-color:#f9fafb;padding:20px 40px;border-top:1px solid #e5e7eb;text-align:center;">
+                  <p style="margin:0;font-size:12px;color:#9ca3af;">© 2025 GyandootNova. All rights reserved.</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+
+  try {
+    await resend.emails.send({
+      from: "GyandootNova <onboarding@resend.dev>",
+      to: [email],
+      subject,
+      html,
+    });
+  } catch (err) {
+    console.error("Email send error:", err);
+    // Don't fail the request if email fails
+  }
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -83,12 +164,22 @@ Deno.serve(async (req) => {
 
     if (!user_id || !action) return new Response(JSON.stringify({ error: "Missing user_id or action" }), { status: 400, headers: corsHeaders });
 
+    // Fetch target user info before action
+    const { data: targetUser, error: fetchErr } = await supabaseAdmin.auth.admin.getUserById(user_id);
+    if (fetchErr || !targetUser?.user) return new Response(JSON.stringify({ error: "User not found" }), { status: 404, headers: corsHeaders });
+
+    const targetEmail = targetUser.user.email ?? "";
+    const { data: profileData } = await supabaseAdmin.from("profiles").select("display_name").eq("user_id", user_id).maybeSingle();
+    const displayName = profileData?.display_name ?? null;
+
     if (action === "disable") {
       const { error } = await supabaseAdmin.auth.admin.updateUserById(user_id, { ban_duration: "876600h" });
       if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: corsHeaders });
+      await sendAccountStatusEmail(targetEmail, displayName, "disable");
     } else if (action === "enable") {
       const { error } = await supabaseAdmin.auth.admin.updateUserById(user_id, { ban_duration: "none" });
       if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: corsHeaders });
+      await sendAccountStatusEmail(targetEmail, displayName, "enable");
     } else {
       return new Response(JSON.stringify({ error: "Invalid action" }), { status: 400, headers: corsHeaders });
     }

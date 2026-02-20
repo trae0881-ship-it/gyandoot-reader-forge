@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import {
   ChevronLeft, ChevronRight, ArrowLeft, Sun, Moon, Minus, Plus,
-  BookOpen, Bookmark, BookmarkCheck, StickyNote, X, Save, Highlighter, Trash2, PanelRight
+  BookOpen, Bookmark, BookmarkCheck, StickyNote, X, Save, Highlighter, Trash2, List, Check
 } from "lucide-react";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -21,6 +21,45 @@ interface Highlight {
   end_offset: number;
   color: string;
 }
+
+/* ─── Highlight color config ─────────────────────────────────────────── */
+const HIGHLIGHT_COLORS: { id: string; label: string; swatch: string; markClass: string; panelClass: string; dotClass: string }[] = [
+  {
+    id: "yellow",
+    label: "Yellow",
+    swatch: "bg-yellow-300",
+    markClass: "bg-yellow-200 dark:bg-yellow-600/60",
+    panelClass: "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-700/40",
+    dotClass: "bg-yellow-400",
+  },
+  {
+    id: "green",
+    label: "Green",
+    swatch: "bg-green-400",
+    markClass: "bg-green-200 dark:bg-green-600/60",
+    panelClass: "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700/40",
+    dotClass: "bg-green-500",
+  },
+  {
+    id: "blue",
+    label: "Blue",
+    swatch: "bg-blue-400",
+    markClass: "bg-blue-200 dark:bg-blue-600/60",
+    panelClass: "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700/40",
+    dotClass: "bg-blue-500",
+  },
+  {
+    id: "pink",
+    label: "Pink",
+    swatch: "bg-pink-400",
+    markClass: "bg-pink-200 dark:bg-pink-600/60",
+    panelClass: "bg-pink-50 dark:bg-pink-900/20 border-pink-200 dark:border-pink-700/40",
+    dotClass: "bg-pink-500",
+  },
+];
+
+const getColorConfig = (color: string) =>
+  HIGHLIGHT_COLORS.find((c) => c.id === color) ?? HIGHLIGHT_COLORS[0];
 
 /* ─── Main Component ─────────────────────────────────────────────────── */
 const BookReader = () => {
@@ -38,8 +77,12 @@ const BookReader = () => {
   // Panels
   const [showNotes, setShowNotes] = useState(false);
   const [showHighlightsPanel, setShowHighlightsPanel] = useState(false);
+  const [showTOC, setShowTOC] = useState(false);
   const [noteText, setNoteText] = useState("");
+
+  // Highlight selection
   const [showHighlightBar, setShowHighlightBar] = useState(false);
+  const [selectedColor, setSelectedColor] = useState("yellow");
   const [selectionInfo, setSelectionInfo] = useState<{
     text: string; paraIdx: number; start: number; end: number;
   } | null>(null);
@@ -261,7 +304,6 @@ const BookReader = () => {
       return;
     }
 
-    // Find paragraph index
     const range = sel.getRangeAt(0);
     const container = range.startContainer.parentElement;
     const paragraphs = contentRef.current?.querySelectorAll("p[data-para-idx]");
@@ -273,7 +315,7 @@ const BookReader = () => {
     }
 
     const rect = range.getBoundingClientRect();
-    setHighlightBarPos({ x: rect.left + rect.width / 2, y: rect.top + window.scrollY - 48 });
+    setHighlightBarPos({ x: rect.left + rect.width / 2, y: rect.top + window.scrollY - 60 });
     setSelectionInfo({
       text: sel.toString(),
       paraIdx,
@@ -283,15 +325,16 @@ const BookReader = () => {
     setShowHighlightBar(true);
   }, [user]);
 
-  const saveHighlight = () => {
+  const saveHighlight = (color: string) => {
     if (!selectionInfo) return;
     addHighlightMutation.mutate({
       selected_text: selectionInfo.text,
       paragraph_index: selectionInfo.paraIdx,
       start_offset: selectionInfo.start,
       end_offset: selectionInfo.end,
-      color: "yellow",
+      color,
     });
+    setSelectedColor(color);
     window.getSelection()?.removeAllRanges();
     setShowHighlightBar(false);
     setSelectionInfo(null);
@@ -304,8 +347,7 @@ const BookReader = () => {
       return <p key={idx} data-para-idx={idx} className="mb-4">{text}</p>;
     }
 
-    // Build segments with highlights applied
-    const segments: { text: string; highlighted: boolean; highlightId?: string }[] = [];
+    const segments: { text: string; highlighted: boolean; highlightId?: string; color?: string }[] = [];
     let lastEnd = 0;
     const sorted = [...paraHighlights].sort((a, b) => a.start_offset - b.start_offset);
 
@@ -313,7 +355,7 @@ const BookReader = () => {
       const start = Math.max(0, h.start_offset);
       const end = Math.min(text.length, h.end_offset);
       if (start > lastEnd) segments.push({ text: text.slice(lastEnd, start), highlighted: false });
-      if (end > start) segments.push({ text: text.slice(start, end), highlighted: true, highlightId: h.id  });
+      if (end > start) segments.push({ text: text.slice(start, end), highlighted: true, highlightId: h.id, color: h.color });
       lastEnd = end;
     });
     if (lastEnd < text.length) segments.push({ text: text.slice(lastEnd), highlighted: false });
@@ -324,7 +366,7 @@ const BookReader = () => {
           seg.highlighted ? (
             <mark
               key={si}
-              className="bg-yellow-200 dark:bg-yellow-700/60 rounded px-0.5 cursor-pointer group relative"
+              className={`${getColorConfig(seg.color ?? "yellow").markClass} rounded px-0.5 cursor-pointer`}
               title="Click to remove highlight"
               onClick={() => seg.highlightId && deleteHighlightMutation.mutate(seg.highlightId)}
             >
@@ -372,16 +414,88 @@ const BookReader = () => {
         <Progress value={scrollProgress} className="h-1 rounded-none" />
       </div>
 
-      {/* Floating highlight toolbar */}
+      {/* TOC Sidebar overlay */}
+      {showTOC && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-[55] bg-black/40 backdrop-blur-sm"
+            onClick={() => setShowTOC(false)}
+          />
+          {/* Drawer */}
+          <aside className={`fixed top-0 left-0 z-[56] h-full w-72 shadow-2xl flex flex-col ${darkMode ? "bg-gray-900 border-r border-gray-700" : "bg-background border-r border-border"}`}>
+            <div className={`flex items-center justify-between px-4 py-3 border-b ${darkMode ? "border-gray-700" : "border-border"}`}>
+              <div>
+                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Table of Contents</p>
+                <h3 className="font-serif font-bold text-sm leading-tight mt-0.5 line-clamp-1">{book.title}</h3>
+              </div>
+              <Button size="icon" variant="ghost" onClick={() => setShowTOC(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="flex-1 overflow-y-auto py-2">
+              {chapters?.map((ch, i) => {
+                const isCurrent = ch.slug === chapterSlug;
+                return (
+                  <button
+                    key={ch.id}
+                    onClick={() => {
+                      navigate(`/books/${slug}/${ch.slug}`);
+                      setShowTOC(false);
+                    }}
+                    className={`w-full text-left px-4 py-2.5 flex items-start gap-3 transition-colors group ${
+                      isCurrent
+                        ? "bg-primary/10 text-primary border-l-2 border-primary"
+                        : darkMode
+                        ? "hover:bg-gray-800 text-gray-300"
+                        : "hover:bg-muted text-foreground"
+                    }`}
+                  >
+                    <span className={`text-xs shrink-0 mt-0.5 font-mono w-5 text-right ${isCurrent ? "text-primary font-bold" : "text-muted-foreground"}`}>
+                      {ch.chapter_number}
+                    </span>
+                    <span className={`text-sm leading-snug ${isCurrent ? "font-semibold" : ""}`}>
+                      {ch.title}
+                      {ch.is_preview && (
+                        <span className="ml-1.5 text-[10px] bg-muted text-muted-foreground px-1 rounded">Preview</span>
+                      )}
+                    </span>
+                    {isCurrent && <Check className="h-3.5 w-3.5 shrink-0 ml-auto mt-0.5 text-primary" />}
+                  </button>
+                );
+              })}
+            </div>
+            {/* Progress footer */}
+            <div className={`px-4 py-3 border-t ${darkMode ? "border-gray-700" : "border-border"}`}>
+              <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
+                <span>Chapter {currentIndex + 1} of {totalChapters}</span>
+                <span>{Math.round(chapterProgress)}%</span>
+              </div>
+              <Progress value={chapterProgress} className="h-1.5" />
+            </div>
+          </aside>
+        </>
+      )}
+
+      {/* Floating highlight color toolbar */}
       {showHighlightBar && selectionInfo && (
         <div
-          className="fixed z-[60] flex items-center gap-1 rounded-lg border bg-popover shadow-lg px-2 py-1 -translate-x-1/2"
+          className="fixed z-[60] flex items-center gap-1.5 rounded-xl border bg-popover shadow-xl px-2.5 py-2 -translate-x-1/2"
           style={{ left: highlightBarPos.x, top: highlightBarPos.y }}
         >
-          <Button size="sm" variant="ghost" className="h-7 gap-1.5 text-xs" onClick={saveHighlight}>
-            <Highlighter className="h-3.5 w-3.5 text-yellow-500" /> Highlight
-          </Button>
-          <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setShowHighlightBar(false)}>
+          <Highlighter className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          <div className="flex items-center gap-1">
+            {HIGHLIGHT_COLORS.map((c) => (
+              <button
+                key={c.id}
+                title={c.label}
+                onClick={() => saveHighlight(c.id)}
+                className={`h-5 w-5 rounded-full ${c.swatch} border-2 transition-all hover:scale-110 ${selectedColor === c.id ? "border-foreground scale-110" : "border-transparent"}`}
+              />
+            ))}
+          </div>
+          <div className="w-px h-4 bg-border mx-0.5" />
+          <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => setShowHighlightBar(false)}>
             <X className="h-3.5 w-3.5" />
           </Button>
         </div>
@@ -390,9 +504,21 @@ const BookReader = () => {
       {/* Toolbar */}
       <div className={`sticky top-0 z-40 border-b px-4 py-2 ${darkMode ? "border-gray-700 bg-gray-900/95" : "bg-background/95 backdrop-blur"}`}>
         <div className="mx-auto flex max-w-3xl items-center justify-between">
-          <Button variant="ghost" size="sm" asChild>
-            <Link to={`/books/${slug}`}><ArrowLeft className="mr-1 h-4 w-4" /> {book.title}</Link>
-          </Button>
+          <div className="flex items-center gap-1">
+            {/* TOC button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              title="Table of Contents"
+              onClick={() => setShowTOC(!showTOC)}
+              className={showTOC ? "text-primary" : ""}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to={`/books/${slug}`}><ArrowLeft className="mr-1 h-4 w-4" /><span className="hidden sm:inline">{book.title}</span></Link>
+            </Button>
+          </div>
           <div className="flex items-center gap-1">
             <Button variant="ghost" size="icon" onClick={() => setFontSize((s) => Math.max(14, s - 2))}><Minus className="h-4 w-4" /></Button>
             <span className="text-xs w-6 text-center">{fontSize}</span>
@@ -417,7 +543,7 @@ const BookReader = () => {
                     size="icon"
                     title="Highlights"
                     onClick={() => { setShowHighlightsPanel(!showHighlightsPanel); setShowNotes(false); }}
-                    className={showHighlightsPanel ? "text-yellow-600" : ""}
+                    className={showHighlightsPanel ? "text-primary" : ""}
                   >
                     <Highlighter className="h-4 w-4" />
                   </Button>
@@ -441,7 +567,7 @@ const BookReader = () => {
 
       {/* Notes panel */}
       {showNotes && user && (
-        <div className={`sticky top-[57px] z-30 border-b px-4 py-3 ${darkMode ? "border-gray-700 bg-gray-800" : "bg-muted/60 backdrop-blur"}`}>
+        <div className={`sticky top-[49px] z-30 border-b px-4 py-3 ${darkMode ? "border-gray-700 bg-gray-800" : "bg-muted/60 backdrop-blur"}`}>
           <div className="mx-auto max-w-3xl">
             <div className="flex items-center justify-between mb-2">
               <p className="text-sm font-medium flex items-center gap-1.5">
@@ -471,38 +597,49 @@ const BookReader = () => {
 
       {/* Highlights panel */}
       {showHighlightsPanel && user && highlights.length > 0 && (
-        <div className={`sticky top-[57px] z-30 border-b px-4 py-3 ${darkMode ? "border-gray-700 bg-gray-800" : "bg-muted/60 backdrop-blur"}`}>
+        <div className={`sticky top-[49px] z-30 border-b px-4 py-3 ${darkMode ? "border-gray-700 bg-gray-800" : "bg-muted/60 backdrop-blur"}`}>
           <div className="mx-auto max-w-3xl">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-medium flex items-center gap-1.5">
-                <Highlighter className="h-4 w-4 text-yellow-500" />
-                {highlights.length} Highlight{highlights.length !== 1 ? "s" : ""} — {chapter.title}
-              </p>
+              <div className="flex items-center gap-2">
+                <Highlighter className="h-4 w-4 text-muted-foreground" />
+                <p className="text-sm font-medium">
+                  {highlights.length} Highlight{highlights.length !== 1 ? "s" : ""} — {chapter.title}
+                </p>
+                {/* Color filter dots */}
+                <div className="flex gap-1 ml-1">
+                  {HIGHLIGHT_COLORS.filter((c) => highlights.some((h) => h.color === c.id)).map((c) => (
+                    <span key={c.id} className={`h-2.5 w-2.5 rounded-full ${c.dotClass}`} title={c.label} />
+                  ))}
+                </div>
+              </div>
               <Button size="sm" variant="ghost" onClick={() => setShowHighlightsPanel(false)}><X className="h-4 w-4" /></Button>
             </div>
-            <div className="flex flex-col gap-2 max-h-48 overflow-y-auto pr-1">
-              {highlights.map((h, i) => (
-                <div
-                  key={h.id}
-                  className="flex items-start gap-2 group rounded-md p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700/40 cursor-pointer hover:border-yellow-400 transition-colors"
-                  onClick={() => {
-                    const el = contentRef.current?.querySelector(`p[data-para-idx="${h.paragraph_index}"]`);
-                    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-                    setShowHighlightsPanel(false);
-                  }}
-                >
-                  <span className="text-xs font-bold text-yellow-600 shrink-0 mt-0.5">#{i + 1}</span>
-                  <p className="text-xs text-foreground flex-1 line-clamp-2">"{h.selected_text}"</p>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100"
-                    onClick={(e) => { e.stopPropagation(); deleteHighlightMutation.mutate(h.id); }}
+            <div className="flex flex-col gap-2 max-h-52 overflow-y-auto pr-1">
+              {highlights.map((h, i) => {
+                const cc = getColorConfig(h.color);
+                return (
+                  <div
+                    key={h.id}
+                    className={`flex items-start gap-2 group rounded-md p-2.5 border cursor-pointer transition-colors hover:opacity-90 ${cc.panelClass}`}
+                    onClick={() => {
+                      const el = contentRef.current?.querySelector(`p[data-para-idx="${h.paragraph_index}"]`);
+                      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                      setShowHighlightsPanel(false);
+                    }}
                   >
-                    <Trash2 className="h-3 w-3 text-destructive" />
-                  </Button>
-                </div>
-              ))}
+                    <span className={`h-3 w-3 rounded-full ${cc.dotClass} shrink-0 mt-0.5`} />
+                    <p className="text-xs text-foreground flex-1 line-clamp-2">"{h.selected_text}"</p>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-6 w-6 shrink-0 opacity-0 group-hover:opacity-100"
+                      onClick={(e) => { e.stopPropagation(); deleteHighlightMutation.mutate(h.id); }}
+                    >
+                      <Trash2 className="h-3 w-3 text-destructive" />
+                    </Button>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -515,10 +652,20 @@ const BookReader = () => {
         </div>
         <h1 className="font-serif text-3xl font-bold mb-4">{chapter.title}</h1>
         {user && highlights.length > 0 && (
-          <p className="text-xs text-muted-foreground mb-8 flex items-center gap-1">
-            <Highlighter className="h-3 w-3 text-yellow-500" />
-            {highlights.length} highlight{highlights.length !== 1 ? "s" : ""} in this chapter — click any to remove
-          </p>
+          <div className="mb-8 flex items-center gap-2 flex-wrap">
+            {HIGHLIGHT_COLORS.filter((c) => highlights.some((h) => h.color === c.id)).map((c) => (
+              <span key={c.id} className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${c.markClass}`}>
+                <span className={`h-1.5 w-1.5 rounded-full ${c.dotClass}`} />
+                {highlights.filter((h) => h.color === c.id).length} {c.label}
+              </span>
+            ))}
+            <button
+              className="text-xs text-muted-foreground hover:text-foreground ml-1"
+              onClick={() => setShowHighlightsPanel(true)}
+            >
+              — View all ↗
+            </button>
+          </div>
         )}
         <div
           ref={contentRef}

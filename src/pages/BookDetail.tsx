@@ -83,6 +83,7 @@ const BookDetail = () => {
     const { data, error } = await supabase.rpc("apply_coupon" as any, {
       _code: couponCode.trim(),
       _order_amount: book.price,
+      _book_id: book.id,
     });
     setCouponLoading(false);
     if (error || !data) {

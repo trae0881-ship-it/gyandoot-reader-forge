@@ -208,6 +208,39 @@ export type Database = {
           },
         ]
       }
+      coupon_books: {
+        Row: {
+          book_id: string
+          coupon_id: string
+          id: string
+        }
+        Insert: {
+          book_id: string
+          coupon_id: string
+          id?: string
+        }
+        Update: {
+          book_id?: string
+          coupon_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupon_books_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coupon_books_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coupons: {
         Row: {
           code: string
@@ -548,10 +581,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      apply_coupon: {
-        Args: { _code: string; _order_amount: number }
-        Returns: Json
-      }
+      apply_coupon:
+        | { Args: { _code: string; _order_amount: number }; Returns: Json }
+        | {
+            Args: { _book_id?: string; _code: string; _order_amount: number }
+            Returns: Json
+          }
       get_user_donations: {
         Args: { _user_id: string }
         Returns: {

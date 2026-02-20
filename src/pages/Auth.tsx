@@ -33,7 +33,7 @@ const ForgotPasswordLink = ({ email }: { email: string }) => {
     setLoading(false);
   };
 
-  if (sent) return <span className="text-xs text-green-600">Reset link sent!</span>;
+  if (sent) return <span className="text-xs text-primary">Reset link sent!</span>;
   return (
     <button type="button" onClick={handleForgot} disabled={loading} className="text-xs text-primary hover:underline disabled:opacity-50">
       {loading ? "Sending..." : "Forgot password?"}
@@ -63,7 +63,15 @@ const Auth = () => {
     if (isLogin) {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
-        toast({ title: "Error", description: error.message, variant: "destructive" });
+        // Show user-friendly message for banned accounts
+        const isBanned = error.message.toLowerCase().includes("ban") || error.message.toLowerCase().includes("user not allowed");
+        toast({
+          title: isBanned ? "Account Disabled" : "Login Failed",
+          description: isBanned
+            ? "Your account has been disabled by the administrator. Please contact support."
+            : error.message,
+          variant: "destructive",
+        });
       } else {
         navigate("/");
       }

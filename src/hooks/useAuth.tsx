@@ -25,10 +25,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // If token is invalid or user is banned, force sign out
+      if (event === "TOKEN_REFRESHED" && !session) {
+        await supabase.auth.signOut();
+        setSession(null);
+        setUser(null);
+        setIsAdmin(false);
+        setLoading(false);
+        return;
+      }
+
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
+        // Check if user is banned (banned_until in the future)
+        const bannedUntil = (session.user as any).banned_until;
+        if (bannedUntil && new Date(bannedUntil) > new Date()) {
+          await supabase.auth.signOut();
+          setSession(null);
+          setUser(null);
+          setIsAdmin(false);
+          setLoading(false);
+          return;
+        }
         setTimeout(() => checkAdmin(session.user.id), 0);
       } else {
         setIsAdmin(false);
@@ -36,12 +56,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        checkAdmin(session.user.id);
+    supabase.auth.getSession().then(async ({ data: { session }, error }) => {
+      if (error || !session) {
+        setSession(null);
+        setUser(null);
+        setIsAdmin(false);
+        setLoading(false);
+        return;
       }
+      // Check banned status on load
+      const bannedUntil = (session.user as any).banned_until;
+      if (bannedUntil && new Date(bannedUntil) > new Date()) {
+        await supabase.auth.signOut();
+        setSession(null);
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+      setSession(session);
+      setUser(session.user);
+      checkAdmin(session.user.id);
       setLoading(false);
     });
 

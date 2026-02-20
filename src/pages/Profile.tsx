@@ -8,9 +8,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import {
   BookOpen, Heart, User, Calendar, IndianRupee, PlayCircle,
-  Bookmark, StickyNote, Highlighter
+  Bookmark, StickyNote, Highlighter, Download, FileText
 } from "lucide-react";
 
 const Profile = () => {
@@ -278,23 +279,59 @@ const Profile = () => {
         {notes && notes.length > 0 && (
           <>
             <section className="mb-10">
-              <h2 className="font-serif text-xl font-bold mb-4 flex items-center gap-2">
-                <StickyNote className="h-5 w-5 text-primary" /> My Notes
-              </h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-serif text-xl font-bold flex items-center gap-2">
+                  <StickyNote className="h-5 w-5 text-primary" /> My Notes
+                </h2>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-1.5 text-xs"
+                    onClick={() => {
+                      const content = notes.map((n: any, i: number) =>
+                        `Note ${i + 1} (${new Date(n.updated_at).toLocaleDateString("en-IN")}):\n${n.content}`
+                      ).join("\n\n---\n\n");
+                      const blob = new Blob([content], { type: "text/plain" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url; a.download = "my-notes.txt"; a.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                  >
+                    <FileText className="h-3.5 w-3.5" /> Export .txt
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-1.5 text-xs"
+                    onClick={() => {
+                      const htmlRows = notes.map((n: any, i: number) =>
+                        `<tr><td style="padding:8px;border:1px solid #ddd;vertical-align:top;font-weight:600;white-space:nowrap">Note ${i + 1}<br/><small style="font-weight:normal;color:#888">${new Date(n.updated_at).toLocaleDateString("en-IN")}</small></td><td style="padding:8px;border:1px solid #ddd">${n.content.replace(/\n/g, "<br/>")}</td></tr>`
+                      ).join("");
+                      const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>My Notes – GyandootNova</title><style>body{font-family:Georgia,serif;max-width:800px;margin:40px auto;color:#1a1a1a}h1{color:#7c3aed}table{width:100%;border-collapse:collapse;margin-top:20px}</style></head><body><h1>My Notes</h1><p>Exported on ${new Date().toLocaleDateString("en-IN")} from GyandootNova</p><table>${htmlRows}</table></body></html>`;
+                      const blob = new Blob([html], { type: "text/html" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url; a.download = "my-notes.html"; a.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                  >
+                    <Download className="h-3.5 w-3.5" /> Export PDF
+                  </Button>
+                </div>
+              </div>
               <div className="space-y-3">
-                {notes.slice(0, 5).map((note: any) => (
+                {notes.map((note: any, i: number) => (
                   <Card key={note.id}>
                     <CardContent className="py-3 px-4">
-                      <p className="text-sm text-foreground line-clamp-2">{note.content}</p>
+                      <p className="text-sm text-foreground whitespace-pre-wrap">{note.content}</p>
                       <p className="text-xs text-muted-foreground mt-1">
                         Updated {new Date(note.updated_at).toLocaleDateString("en-IN")}
                       </p>
                     </CardContent>
                   </Card>
                 ))}
-                {notes.length > 5 && (
-                  <p className="text-xs text-muted-foreground text-center">+ {notes.length - 5} more notes</p>
-                )}
               </div>
             </section>
             <Separator className="my-8" />

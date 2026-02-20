@@ -36,14 +36,25 @@ export async function initiatePayment(
   const gateway = params.gateway || "razorpay";
 
   try {
+    // For purchases, session is required. For donations, it's optional.
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      onFailure("Please log in to continue");
+
+    if (params.type === "purchase" && !session) {
+      onFailure("Please log in to purchase books");
       return;
     }
 
+    // Invoke edge function — pass auth header only if logged in
+    const invokeOptions = session
+      ? { body: { ...params, gateway } }
+      : {
+          body: { ...params, gateway },
+          headers: { Authorization: "Bearer anonymous" },
+        };
+
     const res = await supabase.functions.invoke("create-order", {
       body: { ...params, gateway },
+      headers: session ? {} : { Authorization: "" },
     });
 
     if (res.error || !res.data) {
@@ -54,9 +65,9 @@ export async function initiatePayment(
     const orderData = res.data;
 
     if (gateway === "razorpay") {
-      await handleRazorpayCheckout(orderData, params, session.access_token, onSuccess, onFailure);
+      await handleRazorpayCheckout(orderData, params, session?.access_token ?? null, onSuccess, onFailure);
     } else if (gateway === "paypal") {
-      handlePaypalCheckout(orderData, params, session.access_token, onSuccess, onFailure);
+      handlePaypalCheckout(orderData, params, session?.access_token ?? null, onSuccess, onFailure);
     }
   } catch (err: any) {
     onFailure(err.message || "Payment failed");
@@ -66,7 +77,7 @@ export async function initiatePayment(
 async function handleRazorpayCheckout(
   orderData: any,
   params: CreateOrderParams,
-  accessToken: string,
+  accessToken: string | null,
   onSuccess: () => void,
   onFailure: (error: string) => void
 ) {
@@ -80,7 +91,6 @@ async function handleRazorpayCheckout(
     description: params.type === "purchase" ? "Book Purchase" : "Donation",
     order_id: orderData.order_id,
     handler: async (response: any) => {
-      // Verify payment server-side
       const verifyRes = await supabase.functions.invoke("verify-payment", {
         body: {
           gateway: "razorpay",
@@ -89,6 +99,7 @@ async function handleRazorpayCheckout(
           signature: response.razorpay_signature,
           type: params.type,
         },
+        headers: accessToken ? {} : { Authorization: "" },
       });
 
       if (verifyRes.error || !verifyRes.data?.success) {
@@ -114,7 +125,7 @@ async function handleRazorpayCheckout(
 function handlePaypalCheckout(
   orderData: any,
   params: CreateOrderParams,
-  accessToken: string,
+  accessToken: string | null,
   onSuccess: () => void,
   onFailure: (error: string) => void
 ) {
@@ -123,20 +134,18 @@ function handlePaypalCheckout(
     return;
   }
 
-  // Open PayPal in a popup
   const popup = window.open(orderData.approve_url, "paypal-checkout", "width=500,height=700");
 
-  // Poll for popup close
   const timer = setInterval(async () => {
     if (popup?.closed) {
       clearInterval(timer);
-      // Verify payment after popup closes
       const verifyRes = await supabase.functions.invoke("verify-payment", {
         body: {
           gateway: "paypal",
           order_id: orderData.order_id,
           type: params.type,
         },
+        headers: accessToken ? {} : { Authorization: "" },
       });
 
       if (verifyRes.error || !verifyRes.data?.success) {

@@ -16,24 +16,23 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Authenticate user
+    const { amount, type, book_id, name, email, gateway = "razorpay" } = await req.json();
+
+    // For purchases, auth is required. For donations, auth is optional.
+    let user: any = null;
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
+      const { data: { user: authUser } } = await supabase.auth.getUser(token);
+      user = authUser ?? null;
     }
 
-    const { amount, type, book_id, name, email, gateway = "razorpay" } = await req.json();
+    if (type === "purchase" && !user) {
+      return new Response(JSON.stringify({ error: "Login required to purchase books" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     if (!amount || amount < 1) {
       return new Response(JSON.stringify({ error: "Invalid amount" }), {
@@ -133,11 +132,12 @@ async function handleRazorpay(
       status: "pending",
     });
   } else {
+    // Donations: user_id is optional (anonymous allowed)
     await supabase.from("donations").insert({
-      user_id: user.id,
+      user_id: user?.id ?? null,
       amount,
       donor_name: name || null,
-      donor_email: email || user.email,
+      donor_email: email || user?.email || null,
       razorpay_order_id: order.id,
       status: "pending",
     });
@@ -182,7 +182,7 @@ async function handlePaypal(
 
   const { access_token } = await tokenRes.json();
 
-  // Convert INR to USD (approximate, for PayPal)
+  // Convert INR to USD (approximate)
   const usdAmount = (amount / 83).toFixed(2);
 
   const orderRes = await fetch("https://api-m.paypal.com/v2/checkout/orders", {
@@ -217,15 +217,15 @@ async function handlePaypal(
     await supabase.from("purchases").insert({
       user_id: user.id,
       book_id,
-      razorpay_order_id: ppOrder.id, // reusing column for PayPal order ID
+      razorpay_order_id: ppOrder.id,
       status: "pending",
     });
   } else {
     await supabase.from("donations").insert({
-      user_id: user.id,
+      user_id: user?.id ?? null,
       amount,
       donor_name: name || null,
-      donor_email: email || user.email,
+      donor_email: email || user?.email || null,
       razorpay_order_id: ppOrder.id,
       status: "pending",
     });

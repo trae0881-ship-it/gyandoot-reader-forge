@@ -16,21 +16,13 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Authenticate user
+    // Auth is optional — required only for purchases
+    let user: any = null;
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
+      const { data: { user: authUser } } = await supabase.auth.getUser(token);
+      user = authUser ?? null;
     }
 
     const { gateway, order_id, payment_id, signature, type } = await req.json();
@@ -38,6 +30,13 @@ Deno.serve(async (req) => {
     if (!order_id || !type) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), {
         status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (type === "purchase" && !user) {
+      return new Response(JSON.stringify({ error: "Login required for purchase verification" }), {
+        status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -78,7 +77,7 @@ async function sendReceipt(
   try {
     let amount = 0;
     let bookTitle = "";
-    let recipientEmail = user.email;
+    let recipientEmail = user?.email || "";
     let recipientName = "";
 
     if (type === "purchase") {
@@ -109,6 +108,11 @@ async function sendReceipt(
         recipientName = donation.donor_name || "";
         if (donation.donor_email) recipientEmail = donation.donor_email;
       }
+    }
+
+    if (!recipientEmail) {
+      console.warn("No recipient email, skipping receipt");
+      return;
     }
 
     const date = new Date().toLocaleDateString("en-IN", {
@@ -183,7 +187,6 @@ async function sendReceipt(
     }
   } catch (err) {
     console.error("Email send error:", err);
-    // Non-critical — don't fail the payment
   }
 }
 
@@ -205,7 +208,7 @@ async function verifyRazorpay(
     });
   }
 
-  // Verify signature using HMAC SHA256
+  // Verify signature
   const body = orderId + "|" + paymentId;
   const key = new TextEncoder().encode(keySecret);
   const msg = new TextEncoder().encode(body);
@@ -221,17 +224,23 @@ async function verifyRazorpay(
     });
   }
 
-  // Update record
   const table = type === "purchase" ? "purchases" : "donations";
-  const { error: updateError } = await supabase
+
+  // For donations, match by order_id only (no user_id filter for anonymous)
+  let updateQuery = supabase
     .from(table)
     .update({
       razorpay_payment_id: paymentId,
       razorpay_signature: signature,
       status: "completed",
     })
-    .eq("razorpay_order_id", orderId)
-    .eq("user_id", user.id);
+    .eq("razorpay_order_id", orderId);
+
+  if (type === "purchase" && user) {
+    updateQuery = updateQuery.eq("user_id", user.id);
+  }
+
+  const { error: updateError } = await updateQuery;
 
   if (updateError) {
     console.error("DB update error:", updateError);
@@ -276,7 +285,6 @@ async function verifyPaypal(supabase: any, user: any, orderId: string, type: str
     });
   }
 
-  // Get access token
   const tokenRes = await fetch("https://api-m.paypal.com/v1/oauth2/token", {
     method: "POST",
     headers: {
@@ -287,7 +295,6 @@ async function verifyPaypal(supabase: any, user: any, orderId: string, type: str
   });
   const { access_token } = await tokenRes.json();
 
-  // Capture the order
   const captureRes = await fetch(`https://api-m.paypal.com/v2/checkout/orders/${orderId}/capture`, {
     method: "POST",
     headers: {
@@ -313,17 +320,22 @@ async function verifyPaypal(supabase: any, user: any, orderId: string, type: str
     });
   }
 
-  // Update record
   const captureId = captureData.purchase_units?.[0]?.payments?.captures?.[0]?.id || "";
   const table = type === "purchase" ? "purchases" : "donations";
-  const { error: updateError } = await supabase
+
+  let updateQuery = supabase
     .from(table)
     .update({
       razorpay_payment_id: captureId,
       status: "completed",
     })
-    .eq("razorpay_order_id", orderId)
-    .eq("user_id", user.id);
+    .eq("razorpay_order_id", orderId);
+
+  if (type === "purchase" && user) {
+    updateQuery = updateQuery.eq("user_id", user.id);
+  }
+
+  const { error: updateError } = await updateQuery;
 
   if (updateError) {
     console.error("DB update error:", updateError);
@@ -333,7 +345,6 @@ async function verifyPaypal(supabase: any, user: any, orderId: string, type: str
     });
   }
 
-  // Send receipt email (non-blocking)
   sendReceipt(supabase, user, type, orderId, captureId, "paypal").catch((e) =>
     console.error("Receipt email failed:", e)
   );

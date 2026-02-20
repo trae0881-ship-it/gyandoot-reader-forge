@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { BookOpen, Eye, Lock, Loader2 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { BookOpen, Eye, Lock, Loader2, PlayCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import { initiatePayment, type PaymentGateway } from "@/lib/payment";
@@ -51,6 +52,20 @@ const BookDetail = () => {
     enabled: !!book?.id && !!user?.id && !book?.is_free,
   });
 
+  const { data: readingProgress } = useQuery({
+    queryKey: ["reading-progress", book?.id, user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("reading_progress")
+        .select("chapter_id, chapter_number, scroll_percent")
+        .eq("user_id", user!.id)
+        .eq("book_id", book!.id)
+        .single();
+      return data;
+    },
+    enabled: !!book?.id && !!user?.id,
+  });
+
   const handlePurchase = async () => {
     if (!user) {
       toast({ title: "कृपया पहले लॉगिन करें", description: "Purchase के लिए login ज़रूरी है।", variant: "destructive" });
@@ -90,6 +105,16 @@ const BookDetail = () => {
 
   const canRead = book.is_free || hasPurchased;
 
+  // Find the chapter slug for "continue reading"
+  const continueChapter = readingProgress
+    ? chapters?.find((c) => c.id === readingProgress.chapter_id)
+    : null;
+  const continueChapterSlug = continueChapter?.slug ?? chapters?.[0]?.slug;
+  const totalChapters = chapters?.length ?? 0;
+  const bookProgressPct = readingProgress && totalChapters > 0
+    ? Math.round(((readingProgress.chapter_number - 1) / totalChapters) * 100 + (readingProgress.scroll_percent / totalChapters))
+    : 0;
+
   return (
     <Layout>
       <section className="py-12">
@@ -110,7 +135,7 @@ const BookDetail = () => {
             <div className="md:col-span-2">
               <h1 className="font-serif text-3xl font-bold md:text-4xl">{book.title}</h1>
               <p className="mt-1 text-lg text-muted-foreground">by {book.author}</p>
-              <span className={`mt-3 inline-block rounded-full px-3 py-1 text-sm font-medium ${book.is_free ? "bg-green-100 text-green-700" : "bg-secondary/20 text-secondary-foreground"}`}>
+              <span className={`mt-3 inline-block rounded-full px-3 py-1 text-sm font-medium ${book.is_free ? "bg-muted text-primary" : "bg-secondary/20 text-secondary-foreground"}`}>
                 {book.is_free ? "Free to Read" : `₹${book.price}`}
               </span>
 
@@ -150,7 +175,38 @@ const BookDetail = () => {
             </div>
           </div>
 
+          {/* Continue Reading / Start Reading Banner */}
+          {canRead && continueChapterSlug && (
+            <div className="mt-8 rounded-xl border border-primary/20 bg-primary/5 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-muted-foreground mb-1">
+                  {readingProgress ? "Continue where you left off" : "Start reading"}
+                </p>
+                {readingProgress ? (
+                  <>
+                    <p className="font-semibold text-foreground">
+                      Chapter {readingProgress.chapter_number}: {continueChapter?.title}
+                    </p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Progress value={bookProgressPct} className="h-2 flex-1 max-w-xs" />
+                      <span className="text-xs text-muted-foreground shrink-0">{bookProgressPct}% complete</span>
+                    </div>
+                  </>
+                ) : (
+                  <p className="font-semibold text-foreground">{chapters?.[0]?.title ?? "First Chapter"}</p>
+                )}
+              </div>
+              <Button asChild className="shrink-0">
+                <Link to={`/books/${slug}/${continueChapterSlug}`}>
+                  <PlayCircle className="mr-2 h-4 w-4" />
+                  {readingProgress ? "Continue Reading" : "Start Reading"}
+                </Link>
+              </Button>
+            </div>
+          )}
+
           {/* Table of Contents */}
+
           {chapters && chapters.length > 0 && (
             <div className="mt-12">
               <h2 className="font-serif text-2xl font-bold mb-4">Table of Contents</h2>
@@ -165,7 +221,7 @@ const BookDetail = () => {
                             {ch.chapter_number}
                           </span>
                           <span className="font-medium">{ch.title}</span>
-                          {ch.is_preview && <span className="text-xs text-green-600 font-medium">Preview</span>}
+                          {ch.is_preview && <span className="text-xs text-primary font-medium">Preview</span>}
                         </div>
                         {accessible ? (
                           <Button size="sm" variant="ghost" asChild>

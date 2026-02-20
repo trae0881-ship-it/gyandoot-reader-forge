@@ -4,10 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import Layout from "@/components/layout/Layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { BookOpen, Heart, User, Calendar, IndianRupee, ExternalLink } from "lucide-react";
+import { BookOpen, Heart, User, Calendar, IndianRupee, PlayCircle } from "lucide-react";
 
 const Profile = () => {
   const { user, loading } = useAuth();
@@ -23,10 +24,12 @@ const Profile = () => {
     queryFn: async () => {
       const { data, error } = await supabase.rpc("get_user_purchases", { _user_id: user!.id });
       if (error) throw error;
-      // fetch book details for each purchase
       const bookIds = (data ?? []).map((p: any) => p.book_id);
       if (!bookIds.length) return [];
-      const { data: books } = await supabase.from("books").select("id, title, slug, cover_url, price, is_free").in("id", bookIds);
+      const { data: books } = await supabase
+        .from("books")
+        .select("id, title, slug, cover_url, price, is_free")
+        .in("id", bookIds);
       return (data ?? []).map((p: any) => ({
         ...p,
         book: books?.find((b) => b.id === p.book_id),
@@ -48,8 +51,25 @@ const Profile = () => {
     queryKey: ["user-profile", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase.from("profiles").select("display_name, avatar_url").eq("user_id", user!.id).single();
+      const { data } = await supabase
+        .from("profiles")
+        .select("display_name, avatar_url")
+        .eq("user_id", user!.id)
+        .single();
       return data;
+    },
+  });
+
+  // Fetch all reading progress records for this user
+  const { data: allProgress } = useQuery({
+    queryKey: ["all-reading-progress", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("reading_progress")
+        .select("book_id, chapter_number, scroll_percent, updated_at")
+        .eq("user_id", user!.id);
+      return data ?? [];
     },
   });
 
@@ -58,6 +78,9 @@ const Profile = () => {
 
   const totalDonated = donations?.reduce((sum: number, d: any) => sum + Number(d.amount), 0) ?? 0;
   const completedPurchases = purchases?.filter((p: any) => p.status === "completed") ?? [];
+
+  const getBookProgress = (bookId: string) =>
+    allProgress?.find((pr) => pr.book_id === bookId);
 
   return (
     <Layout>
@@ -109,33 +132,56 @@ const Profile = () => {
             </Card>
           ) : (
             <div className="grid sm:grid-cols-2 gap-4">
-              {completedPurchases.map((p: any) => (
-                <Card key={p.id} className="flex items-start gap-4 p-4">
-                  {p.book?.cover_url ? (
-                    <img src={p.book.cover_url} alt={p.book?.title} className="h-20 w-14 object-cover rounded-md shrink-0" />
-                  ) : (
-                    <div className="h-20 w-14 bg-muted rounded-md flex items-center justify-center shrink-0">
-                      <BookOpen className="h-6 w-6 text-muted-foreground" />
+              {completedPurchases.map((p: any) => {
+                const progress = getBookProgress(p.book_id);
+                const progressPct = progress
+                  ? Math.min(Math.round((progress.chapter_number / 10) * 100), 100)
+                  : 0;
+                return (
+                  <Card key={p.id} className="flex flex-col p-4 gap-3">
+                    <div className="flex items-start gap-4">
+                      {p.book?.cover_url ? (
+                        <img src={p.book.cover_url} alt={p.book?.title} className="h-20 w-14 object-cover rounded-md shrink-0" />
+                      ) : (
+                        <div className="h-20 w-14 bg-muted rounded-md flex items-center justify-center shrink-0">
+                          <BookOpen className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-sm leading-tight line-clamp-2">{p.book?.title ?? "Unknown Book"}</h3>
+                        <Badge variant="secondary" className="text-xs mt-1">{p.status}</Badge>
+                        <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {new Date(p.created_at).toLocaleDateString("en-IN")}
+                        </p>
+                      </div>
                     </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm leading-tight line-clamp-2">{p.book?.title ?? "Unknown Book"}</h3>
-                    <Badge variant="secondary" className="text-xs mt-1">{p.status}</Badge>
-                    <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {new Date(p.created_at).toLocaleDateString("en-IN")}
-                    </p>
+
+                    {/* Reading progress */}
+                    {progress ? (
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span>Chapter {progress.chapter_number}</span>
+                          <span>{progressPct}% complete</span>
+                        </div>
+                        <Progress value={progressPct} className="h-1.5" />
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">Not started yet</p>
+                    )}
+
                     {p.book?.slug && (
                       <Link
                         to={`/books/${p.book.slug}`}
-                        className="inline-flex items-center gap-1 text-xs text-primary mt-2 hover:underline"
+                        className="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline"
                       >
-                        Read Book <ExternalLink className="h-3 w-3" />
+                        <PlayCircle className="h-3.5 w-3.5" />
+                        {progress ? "Continue Reading" : "Start Reading"}
                       </Link>
                     )}
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                );
+              })}
             </div>
           )}
         </section>

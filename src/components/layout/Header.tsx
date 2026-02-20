@@ -80,7 +80,9 @@ const Header = () => {
           </Button>
           {user ? (
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">{user.email?.split("@")[0]}</span>
+              <Link to="/profile" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                {user.email?.split("@")[0]}
+              </Link>
               <Button variant="ghost" size="icon" onClick={signOut} aria-label="Sign out">
                 <LogOut className="h-4 w-4" />
               </Button>
@@ -137,9 +139,14 @@ const Header = () => {
               </Link>
             )}
             {user ? (
-              <Button variant="outline" size="sm" onClick={() => { signOut(); setMobileOpen(false); }}>
-                Sign Out
-              </Button>
+              <div className="flex flex-col gap-2">
+                <Link to="/profile" className="text-sm font-medium text-primary" onClick={() => setMobileOpen(false)}>
+                  My Profile
+                </Link>
+                <Button variant="outline" size="sm" onClick={() => { signOut(); setMobileOpen(false); }}>
+                  Sign Out
+                </Button>
+              </div>
             ) : (
               <Button variant="outline" size="sm" onClick={() => { navigate("/auth"); setMobileOpen(false); }}>
                 Sign In

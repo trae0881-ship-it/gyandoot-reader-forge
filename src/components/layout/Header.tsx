@@ -36,15 +36,15 @@ const Header = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center justify-between">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="w-full max-w-screen-2xl mx-auto flex h-14 items-center justify-between px-4 lg:px-8">
         <Link to="/" className="flex items-center gap-2" aria-label="Go to homepage">
           <img src={logoImg} alt="GyandootNova logo" className="h-8 w-8 rounded-full object-cover" />
           <span className="font-serif text-lg font-bold text-primary">GyandootNova</span>
         </Link>
 
         {/* Desktop nav */}
-        <nav aria-label="Main navigation" className="hidden items-center gap-6 lg:flex">
+        <nav aria-label="Main navigation" className="hidden items-center gap-4 xl:flex">
           {navLinks.map((link) => (
             <Link
               key={link.to}
@@ -98,7 +98,7 @@ const Header = () => {
         <Button
           variant="ghost"
           size="icon"
-          className="lg:hidden"
+          className="xl:hidden"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
         >
@@ -108,7 +108,7 @@ const Header = () => {
 
       {/* Mobile nav */}
       {mobileOpen && (
-        <div className="border-t border-border bg-background p-4 lg:hidden">
+        <div className="border-t border-border bg-background p-4 xl:hidden">
           <nav aria-label="Mobile navigation" className="flex flex-col gap-3">
             {navLinks.map((link) => (
               <Link key={link.to} to={link.to} className="text-sm font-medium" onClick={() => setMobileOpen(false)}>

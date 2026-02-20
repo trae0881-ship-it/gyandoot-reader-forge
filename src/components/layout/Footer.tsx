@@ -1,10 +1,33 @@
 import { Link } from "react-router-dom";
-import { BookOpen, Heart, Mail, Facebook, Twitter, Youtube, Instagram } from "lucide-react";
+import { BookOpen, Mail, Facebook, Twitter, Youtube, Instagram, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Footer = () => {
   const [email, setEmail] = useState("");
+
+  const { data: settings } = useQuery({
+    queryKey: ["site-settings"],
+    queryFn: async () => {
+      const { data } = await supabase.from("settings").select("key, value");
+      const map: Record<string, string> = {};
+      data?.forEach((s) => { map[s.key] = s.value ?? ""; });
+      return map;
+    },
+  });
+
+  const whatsappNumber = settings?.whatsapp_number?.replace(/\s+/g, "") ?? "";
+  const whatsappLink = whatsappNumber ? `https://wa.me/${whatsappNumber.replace("+", "")}` : null;
+
+  const socialLinks = [
+    { icon: Facebook, href: settings?.facebook_url || null, label: "Facebook" },
+    { icon: Twitter, href: settings?.twitter_url || null, label: "Twitter" },
+    { icon: Instagram, href: settings?.instagram_url || null, label: "Instagram" },
+    { icon: Youtube, href: settings?.youtube_url || null, label: "YouTube" },
+    { icon: MessageCircle, href: whatsappLink, label: "WhatsApp" },
+  ].filter((s) => s.href);
 
   const handleNewsletter = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,17 +47,25 @@ const Footer = () => {
             <p className="text-sm text-background/60 leading-relaxed">
               Illuminating spiritual seekers with sacred books, articles, and transformative programs.
             </p>
-            <div className="mt-5 flex gap-3">
-              {[Facebook, Twitter, Instagram, Youtube].map((Icon, i) => (
+            <div className="mt-5 flex flex-wrap gap-3">
+              {socialLinks.length > 0 ? socialLinks.map(({ icon: Icon, href, label }) => (
                 <a
-                  key={i}
-                  href="#"
-                  aria-label={`Social link ${i + 1}`}
+                  key={label}
+                  href={href!}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
                   className="flex h-9 w-9 items-center justify-center rounded-full bg-background/10 text-background/70 transition-colors hover:bg-secondary hover:text-secondary-foreground"
                 >
                   <Icon className="h-4 w-4" />
                 </a>
-              ))}
+              )) : (
+                [Facebook, Twitter, Instagram, Youtube, MessageCircle].map((Icon, i) => (
+                  <span key={i} className="flex h-9 w-9 items-center justify-center rounded-full bg-background/10 text-background/20">
+                    <Icon className="h-4 w-4" />
+                  </span>
+                ))
+              )}
             </div>
           </div>
 
@@ -62,6 +93,11 @@ const Footer = () => {
               <Link to="/donate" className="hover:text-secondary transition-colors">Donate</Link>
               <Link to="/careers" className="hover:text-secondary transition-colors">Careers</Link>
               <Link to="/sitemap" className="hover:text-secondary transition-colors">Sitemap</Link>
+              {whatsappLink && (
+                <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-secondary transition-colors">
+                  <MessageCircle className="h-3.5 w-3.5" /> WhatsApp Us
+                </a>
+              )}
             </nav>
           </div>
 

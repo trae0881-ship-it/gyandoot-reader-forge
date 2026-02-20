@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { amount, type, book_id, name, email, gateway = "razorpay" } = await req.json();
+    const { amount, type, book_id, name, email, gateway = "razorpay", coupon_id } = await req.json();
 
     // For purchases, auth is required. For donations, auth is optional.
     let user: any = null;
@@ -65,12 +65,39 @@ Deno.serve(async (req) => {
         });
       }
       verifiedAmount = book.price;
+
+      // Apply coupon discount if coupon_id provided
+      if (coupon_id) {
+        const { data: coupon } = await supabase
+          .from("coupons")
+          .select("id, discount_type, discount_value, min_order_amount, max_uses, used_count, is_active, expires_at")
+          .eq("id", coupon_id)
+          .eq("is_active", true)
+          .single();
+
+        if (coupon) {
+          const now = new Date();
+          const notExpired = !coupon.expires_at || new Date(coupon.expires_at) > now;
+          const hasUses = !coupon.max_uses || coupon.used_count < coupon.max_uses;
+          const meetsMin = verifiedAmount >= (coupon.min_order_amount ?? 0);
+
+          if (notExpired && hasUses && meetsMin) {
+            let discount = 0;
+            if (coupon.discount_type === "percent") {
+              discount = Math.round((verifiedAmount * coupon.discount_value / 100) * 100) / 100;
+            } else {
+              discount = Math.min(coupon.discount_value, verifiedAmount);
+            }
+            verifiedAmount = Math.max(verifiedAmount - discount, 1);
+          }
+        }
+      }
     }
 
     if (gateway === "razorpay") {
-      return await handleRazorpay(supabase, user, verifiedAmount, type, book_id, name, email);
+      return await handleRazorpay(supabase, user, verifiedAmount, type, book_id, name, email, coupon_id);
     } else if (gateway === "paypal") {
-      return await handlePaypal(supabase, user, verifiedAmount, type, book_id, name, email);
+      return await handlePaypal(supabase, user, verifiedAmount, type, book_id, name, email, coupon_id);
     } else {
       return new Response(JSON.stringify({ error: "Unsupported gateway" }), {
         status: 400,
@@ -88,7 +115,7 @@ Deno.serve(async (req) => {
 
 async function handleRazorpay(
   supabase: any, user: any, amount: number, type: string,
-  book_id?: string, name?: string, email?: string
+  book_id?: string, name?: string, email?: string, coupon_id?: string
 ) {
   const keyId = Deno.env.get("RAZORPAY_KEY_ID");
   const keySecret = Deno.env.get("RAZORPAY_KEY_SECRET");
@@ -131,8 +158,11 @@ async function handleRazorpay(
       razorpay_order_id: order.id,
       status: "pending",
     });
+    // Increment coupon usage if applied
+    if (coupon_id) {
+      await supabase.rpc("increment_coupon_usage", { _coupon_id: coupon_id });
+    }
   } else {
-    // Donations: user_id is optional (anonymous allowed)
     await supabase.from("donations").insert({
       user_id: user?.id ?? null,
       amount,
@@ -151,7 +181,7 @@ async function handleRazorpay(
 
 async function handlePaypal(
   supabase: any, user: any, amount: number, type: string,
-  book_id?: string, name?: string, email?: string
+  book_id?: string, name?: string, email?: string, coupon_id?: string
 ) {
   const clientId = Deno.env.get("PAYPAL_CLIENT_ID");
   const clientSecret = Deno.env.get("PAYPAL_CLIENT_SECRET");

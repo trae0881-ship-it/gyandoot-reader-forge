@@ -1,14 +1,30 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Menu, X, Heart, User, LogOut, Shield } from "lucide-react";
+import { Menu, X, Heart, User, LogOut, Shield, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import logoImg from "@/assets/logo.jpeg";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Header = () => {
   const { user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const { data: settings } = useQuery({
+    queryKey: ["site-settings"],
+    queryFn: async () => {
+      const { data } = await supabase.from("settings").select("key, value");
+      const map: Record<string, string> = {};
+      data?.forEach((s) => { map[s.key] = s.value ?? ""; });
+      return map;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const whatsappNumber = settings?.whatsapp_number?.replace(/\s+/g, "") ?? "";
+  const whatsappLink = whatsappNumber ? `https://wa.me/${whatsappNumber.replace("+", "")}` : null;
 
   const navLinks = [
     { to: "/", label: "Home" },
@@ -42,6 +58,16 @@ const Header = () => {
             <Link to="/admin" className="flex items-center gap-1 text-sm font-medium text-primary">
               <Shield className="h-4 w-4" /> Admin
             </Link>
+          )}
+          {whatsappLink && (
+            <a
+              href={whatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80"
+            >
+              <MessageCircle className="h-4 w-4" /> WhatsApp
+            </a>
           )}
           <Button
             size="sm"
@@ -94,6 +120,17 @@ const Header = () => {
             >
               Donate Now
             </Link>
+            {whatsappLink && (
+              <a
+                href={whatsappLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-sm font-medium text-primary"
+                onClick={() => setMobileOpen(false)}
+              >
+                <MessageCircle className="h-4 w-4" /> WhatsApp Us
+              </a>
+            )}
             {isAdmin && (
               <Link to="/admin" className="text-sm font-medium text-primary" onClick={() => setMobileOpen(false)}>
                 Admin Panel

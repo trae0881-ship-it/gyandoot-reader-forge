@@ -8,7 +8,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { BookOpen, Heart, User, Calendar, IndianRupee, PlayCircle } from "lucide-react";
+import {
+  BookOpen, Heart, User, Calendar, IndianRupee, PlayCircle,
+  Bookmark, StickyNote, Highlighter
+} from "lucide-react";
 
 const Profile = () => {
   const { user, loading } = useAuth();
@@ -60,7 +63,6 @@ const Profile = () => {
     },
   });
 
-  // Fetch all reading progress records for this user
   const { data: allProgress } = useQuery({
     queryKey: ["all-reading-progress", user?.id],
     enabled: !!user,
@@ -69,6 +71,45 @@ const Profile = () => {
         .from("reading_progress")
         .select("book_id, chapter_number, scroll_percent, updated_at")
         .eq("user_id", user!.id);
+      return data ?? [];
+    },
+  });
+
+  const { data: bookmarks } = useQuery({
+    queryKey: ["user-bookmarks", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("bookmarks")
+        .select("id, chapter_title, book_title, book_slug, chapter_slug, chapter_number, created_at")
+        .eq("user_id", user!.id)
+        .order("created_at", { ascending: false });
+      return data ?? [];
+    },
+  });
+
+  const { data: notes } = useQuery({
+    queryKey: ["user-notes", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("chapter_notes")
+        .select("id, content, updated_at, book_id, chapter_id")
+        .eq("user_id", user!.id)
+        .order("updated_at", { ascending: false });
+      return data ?? [];
+    },
+  });
+
+  const { data: highlights } = useQuery({
+    queryKey: ["user-highlights", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("text_highlights")
+        .select("id, selected_text, created_at, book_id, chapter_id")
+        .eq("user_id", user!.id)
+        .order("created_at", { ascending: false });
       return data ?? [];
     },
   });
@@ -99,21 +140,26 @@ const Profile = () => {
         </section>
 
         {/* Stats row */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
           <Card className="text-center p-4">
             <BookOpen className="h-6 w-6 text-primary mx-auto mb-1" />
             <p className="text-2xl font-bold">{completedPurchases.length}</p>
-            <p className="text-xs text-muted-foreground">Books Purchased</p>
+            <p className="text-xs text-muted-foreground">Books</p>
           </Card>
           <Card className="text-center p-4">
-            <Heart className="h-6 w-6 text-secondary mx-auto mb-1" />
-            <p className="text-2xl font-bold">{donations?.length ?? 0}</p>
-            <p className="text-xs text-muted-foreground">Donations Made</p>
+            <Bookmark className="h-6 w-6 text-primary mx-auto mb-1" />
+            <p className="text-2xl font-bold">{bookmarks?.length ?? 0}</p>
+            <p className="text-xs text-muted-foreground">Bookmarks</p>
           </Card>
-          <Card className="text-center p-4 col-span-2 md:col-span-1">
-            <IndianRupee className="h-6 w-6 text-primary mx-auto mb-1" />
-            <p className="text-2xl font-bold">₹{totalDonated.toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground">Total Donated</p>
+          <Card className="text-center p-4">
+            <StickyNote className="h-6 w-6 text-primary mx-auto mb-1" />
+            <p className="text-2xl font-bold">{notes?.length ?? 0}</p>
+            <p className="text-xs text-muted-foreground">Notes</p>
+          </Card>
+          <Card className="text-center p-4">
+            <Highlighter className="h-6 w-6 text-yellow-500 mx-auto mb-1" />
+            <p className="text-2xl font-bold">{highlights?.length ?? 0}</p>
+            <p className="text-xs text-muted-foreground">Highlights</p>
           </Card>
         </div>
 
@@ -157,7 +203,6 @@ const Profile = () => {
                       </div>
                     </div>
 
-                    {/* Reading progress */}
                     {progress ? (
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -188,6 +233,74 @@ const Profile = () => {
 
         <Separator className="my-8" />
 
+        {/* Bookmarks */}
+        <section className="mb-10">
+          <h2 className="font-serif text-xl font-bold mb-4 flex items-center gap-2">
+            <Bookmark className="h-5 w-5 text-primary" /> Bookmarks
+          </h2>
+          {(!bookmarks || bookmarks.length === 0) ? (
+            <Card>
+              <CardContent className="py-8 text-center text-muted-foreground">
+                <Bookmark className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                <p className="text-sm">No bookmarks yet. Tap the bookmark icon while reading any chapter.</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-2">
+              {bookmarks.map((bm: any) => (
+                <Card key={bm.id} className="hover:shadow-sm transition-shadow">
+                  <CardContent className="flex items-center justify-between py-3 px-4">
+                    <div>
+                      <Link
+                        to={`/books/${bm.book_slug}/${bm.chapter_slug}`}
+                        className="font-medium text-sm hover:text-primary transition-colors"
+                      >
+                        {bm.chapter_title}
+                      </Link>
+                      <p className="text-xs text-muted-foreground mt-0.5">{bm.book_title} · Ch. {bm.chapter_number}</p>
+                    </div>
+                    <Link
+                      to={`/books/${bm.book_slug}/${bm.chapter_slug}`}
+                      className="text-xs text-primary hover:underline shrink-0 ml-3"
+                    >
+                      Read →
+                    </Link>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <Separator className="my-8" />
+
+        {/* Notes */}
+        {notes && notes.length > 0 && (
+          <>
+            <section className="mb-10">
+              <h2 className="font-serif text-xl font-bold mb-4 flex items-center gap-2">
+                <StickyNote className="h-5 w-5 text-primary" /> My Notes
+              </h2>
+              <div className="space-y-3">
+                {notes.slice(0, 5).map((note: any) => (
+                  <Card key={note.id}>
+                    <CardContent className="py-3 px-4">
+                      <p className="text-sm text-foreground line-clamp-2">{note.content}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Updated {new Date(note.updated_at).toLocaleDateString("en-IN")}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+                {notes.length > 5 && (
+                  <p className="text-xs text-muted-foreground text-center">+ {notes.length - 5} more notes</p>
+                )}
+              </div>
+            </section>
+            <Separator className="my-8" />
+          </>
+        )}
+
         {/* Donation History */}
         <section>
           <h2 className="font-serif text-xl font-bold mb-4 flex items-center gap-2">
@@ -207,7 +320,9 @@ const Profile = () => {
                 <Card key={d.id}>
                   <CardContent className="flex items-center justify-between py-4 px-5">
                     <div>
-                      <p className="font-semibold text-foreground">₹{Number(d.amount).toLocaleString()}</p>
+                      <p className="font-semibold text-foreground flex items-center gap-1">
+                        <IndianRupee className="h-3.5 w-3.5" />{Number(d.amount).toLocaleString()}
+                      </p>
                       <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                         <Calendar className="h-3 w-3" />
                         {new Date(d.created_at).toLocaleDateString("en-IN")}

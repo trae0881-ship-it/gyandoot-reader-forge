@@ -58,6 +58,60 @@ export type Database = {
           },
         ]
       }
+      bookmarks: {
+        Row: {
+          book_id: string
+          book_slug: string
+          book_title: string
+          chapter_id: string
+          chapter_number: number
+          chapter_slug: string
+          chapter_title: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          book_id: string
+          book_slug?: string
+          book_title?: string
+          chapter_id: string
+          chapter_number?: number
+          chapter_slug?: string
+          chapter_title?: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          book_id?: string
+          book_slug?: string
+          book_title?: string
+          chapter_id?: string
+          chapter_number?: number
+          chapter_slug?: string
+          chapter_title?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookmarks_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookmarks_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "book_chapters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       books: {
         Row: {
           author: string
@@ -108,6 +162,51 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      chapter_notes: {
+        Row: {
+          book_id: string
+          chapter_id: string
+          content: string
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          book_id: string
+          chapter_id: string
+          content?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          book_id?: string
+          chapter_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chapter_notes_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chapter_notes_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "book_chapters"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       donations: {
         Row: {
@@ -326,6 +425,60 @@ export type Database = {
           value?: string | null
         }
         Relationships: []
+      }
+      text_highlights: {
+        Row: {
+          book_id: string
+          chapter_id: string
+          color: string
+          created_at: string
+          end_offset: number
+          id: string
+          paragraph_index: number
+          selected_text: string
+          start_offset: number
+          user_id: string
+        }
+        Insert: {
+          book_id: string
+          chapter_id: string
+          color?: string
+          created_at?: string
+          end_offset?: number
+          id?: string
+          paragraph_index?: number
+          selected_text: string
+          start_offset?: number
+          user_id: string
+        }
+        Update: {
+          book_id?: string
+          chapter_id?: string
+          color?: string
+          created_at?: string
+          end_offset?: number
+          id?: string
+          paragraph_index?: number
+          selected_text?: string
+          start_offset?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "text_highlights_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "text_highlights_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "book_chapters"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

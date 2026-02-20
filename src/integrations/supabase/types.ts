@@ -208,6 +208,51 @@ export type Database = {
           },
         ]
       }
+      coupons: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          discount_type: string
+          discount_value: number
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          max_uses: number | null
+          min_order_amount: number | null
+          updated_at: string
+          used_count: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          discount_type?: string
+          discount_value: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          min_order_amount?: number | null
+          updated_at?: string
+          used_count?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          min_order_amount?: number | null
+          updated_at?: string
+          used_count?: number
+        }
+        Relationships: []
+      }
       donations: {
         Row: {
           amount: number
@@ -503,6 +548,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      apply_coupon: {
+        Args: { _code: string; _order_amount: number }
+        Returns: Json
+      }
       get_user_donations: {
         Args: { _user_id: string }
         Returns: {
@@ -533,6 +582,14 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_coupon_usage: {
+        Args: { _coupon_id: string }
+        Returns: undefined
+      }
+      increment_purchase_count: {
+        Args: { _book_id: string }
+        Returns: undefined
       }
     }
     Enums: {

@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, Eye, Lock, Loader2, PlayCircle } from "lucide-react";
+import { BookOpen, Eye, Lock, Loader2, PlayCircle, Tag, X, CheckCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import { initiatePayment, type PaymentGateway } from "@/lib/payment";
@@ -20,6 +21,16 @@ const BookDetail = () => {
   const queryClient = useQueryClient();
   const [purchasing, setPurchasing] = useState(false);
   const [gateway, setGateway] = useState<PaymentGateway>("razorpay");
+  const [couponCode, setCouponCode] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    coupon_id: string;
+    code: string;
+    discount_amount: number;
+    final_amount: number;
+    discount_type: string;
+    discount_value: number;
+  } | null>(null);
 
   const { data: book, isLoading } = useQuery({
     queryKey: ["book", slug],
@@ -66,19 +77,53 @@ const BookDetail = () => {
     enabled: !!book?.id && !!user?.id,
   });
 
+  const applyCoupon = async () => {
+    if (!couponCode.trim() || !book) return;
+    setCouponLoading(true);
+    const { data, error } = await supabase.rpc("apply_coupon" as any, {
+      _code: couponCode.trim(),
+      _order_amount: book.price,
+    });
+    setCouponLoading(false);
+    if (error || !data) {
+      toast({ title: "Error", description: "Could not validate coupon", variant: "destructive" });
+      return;
+    }
+    if (!data.valid) {
+      toast({ title: "Invalid Coupon", description: data.error, variant: "destructive" });
+      return;
+    }
+    setAppliedCoupon(data);
+    toast({ title: `Coupon Applied! 🎉`, description: `You save ₹${data.discount_amount}` });
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+  };
+
   const handlePurchase = async () => {
     if (!user) {
       toast({ title: "कृपया पहले लॉगिन करें", description: "Purchase के लिए login ज़रूरी है।", variant: "destructive" });
       navigate("/auth");
       return;
     }
+    const finalAmount = appliedCoupon ? appliedCoupon.final_amount : book!.price;
     setPurchasing(true);
     await initiatePayment(
-      { amount: book!.price, type: "purchase", gateway, book_id: book!.id },
+      {
+        amount: finalAmount,
+        type: "purchase",
+        gateway,
+        book_id: book!.id,
+        coupon_id: appliedCoupon?.coupon_id,
+      } as any,
       () => {
         toast({ title: "Purchase Successful!", description: "You can now read the full book." });
         queryClient.invalidateQueries({ queryKey: ["purchase", book!.id, user!.id] });
         setPurchasing(false);
+        setAppliedCoupon(null);
+        setCouponCode("");
       },
       (error) => {
         toast({ title: "Payment Failed", description: error, variant: "destructive" });
@@ -146,28 +191,65 @@ const BookDetail = () => {
               {!canRead && !book.is_free && (
                 <div className="mt-6 space-y-3">
                   <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant={gateway === "razorpay" ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setGateway("razorpay")}
-                    >
-                      Razorpay
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={gateway === "paypal" ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setGateway("paypal")}
-                    >
-                      PayPal
-                    </Button>
+                    <Button type="button" variant={gateway === "razorpay" ? "default" : "outline"} size="sm" onClick={() => setGateway("razorpay")}>Razorpay</Button>
+                    <Button type="button" variant={gateway === "paypal" ? "default" : "outline"} size="sm" onClick={() => setGateway("paypal")}>PayPal</Button>
                   </div>
+
+                  {/* Coupon Section */}
+                  {!appliedCoupon ? (
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          value={couponCode}
+                          onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                          placeholder="Coupon code (optional)"
+                          className="pl-9 font-mono uppercase"
+                          onKeyDown={(e) => e.key === "Enter" && applyCoupon()}
+                        />
+                      </div>
+                      <Button type="button" variant="outline" onClick={applyCoupon} disabled={couponLoading || !couponCode.trim()}>
+                        {couponLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between rounded-lg border border-primary/30 bg-primary/5 px-4 py-2">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-primary" />
+                        <span className="text-sm font-medium">
+                          <span className="font-mono text-primary">{appliedCoupon.code}</span>
+                          {" — "}
+                          {appliedCoupon.discount_type === "percent"
+                            ? `${appliedCoupon.discount_value}% off`
+                            : `₹${appliedCoupon.discount_amount} off`}
+                        </span>
+                      </div>
+                      <button onClick={removeCoupon} className="text-muted-foreground hover:text-destructive ml-2">
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Price display */}
+                  <div className="flex items-center gap-3">
+                    {appliedCoupon && (
+                      <span className="text-muted-foreground line-through text-sm">₹{book.price}</span>
+                    )}
+                    <span className="text-xl font-bold text-primary">
+                      ₹{appliedCoupon ? appliedCoupon.final_amount : book.price}
+                    </span>
+                    {appliedCoupon && (
+                      <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                        Save ₹{appliedCoupon.discount_amount}
+                      </span>
+                    )}
+                  </div>
+
                   <Button size="lg" onClick={handlePurchase} disabled={purchasing}>
                     {purchasing ? (
                       <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</>
                     ) : (
-                      <><Lock className="mr-2 h-4 w-4" /> Purchase to Read — ₹{book.price}</>
+                      <><Lock className="mr-2 h-4 w-4" /> Purchase to Read — ₹{appliedCoupon ? appliedCoupon.final_amount : book.price}</>
                     )}
                   </Button>
                 </div>

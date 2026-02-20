@@ -1,7 +1,7 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { BookOpen, FileText, Heart, ShoppingCart, LayoutDashboard, LogOut, ArrowLeft, Settings, Users } from "lucide-react";
+import { BookOpen, FileText, Heart, ShoppingCart, LayoutDashboard, LogOut, ArrowLeft, Settings, Users, Tag } from "lucide-react";
 import { useEffect } from "react";
 
 const navItems = [
@@ -9,6 +9,7 @@ const navItems = [
   { to: "/admin/users", label: "Users", icon: Users },
   { to: "/admin/books", label: "Books", icon: BookOpen },
   { to: "/admin/posts", label: "Posts", icon: FileText },
+  { to: "/admin/coupons", label: "Coupons", icon: Tag },
   { to: "/admin/donations", label: "Donations", icon: Heart },
   { to: "/admin/purchases", label: "Purchases", icon: ShoppingCart },
   { to: "/admin/settings", label: "Settings", icon: Settings },

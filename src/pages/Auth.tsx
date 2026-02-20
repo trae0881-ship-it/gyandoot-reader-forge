@@ -76,7 +76,7 @@ const Auth = () => {
         navigate("/");
       }
     } else {
-      const { error } = await supabase.auth.signUp({
+      const { data: signUpData, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -88,6 +88,17 @@ const Auth = () => {
         toast({ title: "Error", description: error.message, variant: "destructive" });
       } else {
         toast({ title: "Check your email", description: "We've sent you a verification link." });
+        // Send welcome email in background (don't block UI)
+        if (signUpData?.user?.email) {
+          fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-welcome-email`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email: signUpData.user.email, display_name: displayName }),
+            }
+          ).catch(console.error);
+        }
       }
     }
     setLoading(false);

@@ -31,6 +31,7 @@ import AdminBooks from "./pages/admin/AdminBooks";
 import AdminPosts from "./pages/admin/AdminPosts";
 import AdminDonations from "./pages/admin/AdminDonations";
 import AdminPurchases from "./pages/admin/AdminPurchases";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="/articles" element={<Articles />} />
             <Route path="/articles/:slug" element={<ArticleDetail />} />
             <Route path="/donate" element={<Donate />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/about" element={<About />} />
             <Route path="/services" element={<Services />} />

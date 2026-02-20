@@ -33,6 +33,7 @@ import AdminPosts from "./pages/admin/AdminPosts";
 import AdminDonations from "./pages/admin/AdminDonations";
 import AdminPurchases from "./pages/admin/AdminPurchases";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminUsers from "./pages/admin/AdminUsers";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
@@ -71,6 +72,7 @@ const App = () => (
             <Route path="/sitemap" element={<SitemapPage />} />
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
+              <Route path="users" element={<AdminUsers />} />
               <Route path="books" element={<AdminBooks />} />
               <Route path="posts" element={<AdminPosts />} />
               <Route path="donations" element={<AdminDonations />} />

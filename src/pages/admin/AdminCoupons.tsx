@@ -8,11 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { Tag, Plus, Pencil, Trash2, Copy, RefreshCw } from "lucide-react";
+import { Tag, Plus, Pencil, Trash2, Copy, RefreshCw, Layers, Download, CheckCircle2 } from "lucide-react";
 
 type Coupon = {
   id: string;
@@ -39,9 +41,24 @@ const defaultForm = {
   expires_at: "",
 };
 
-const generateCode = () =>
-  Math.random().toString(36).substring(2, 8).toUpperCase() +
-  Math.random().toString(36).substring(2, 6).toUpperCase();
+const defaultBulkForm = {
+  prefix: "",
+  count: "5",
+  description: "",
+  discount_type: "percent" as "percent" | "fixed",
+  discount_value: "",
+  max_uses: "1",
+  min_order_amount: "",
+  is_active: true,
+  expires_at: "",
+};
+
+const generateCode = (prefix = "") => {
+  const rand =
+    Math.random().toString(36).substring(2, 6).toUpperCase() +
+    Math.random().toString(36).substring(2, 5).toUpperCase();
+  return prefix ? `${prefix.toUpperCase()}-${rand}` : rand;
+};
 
 const AdminCoupons = () => {
   const { toast } = useToast();
@@ -50,6 +67,10 @@ const AdminCoupons = () => {
   const [editCoupon, setEditCoupon] = useState<Coupon | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState(defaultForm);
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkForm, setBulkForm] = useState(defaultBulkForm);
+  const [bulkResult, setBulkResult] = useState<string[] | null>(null);
+  const [bulkLoading, setBulkLoading] = useState(false);
 
   const { data: coupons, isLoading } = useQuery({
     queryKey: ["admin-coupons"],
@@ -115,6 +136,46 @@ const AdminCoupons = () => {
     onError: (e: any) => toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
 
+  const handleBulkGenerate = async () => {
+    const count = Math.min(Math.max(Number(bulkForm.count) || 1, 1), 100);
+    if (!bulkForm.discount_value) return;
+    setBulkLoading(true);
+
+    // Generate unique codes
+    const codes = Array.from({ length: count }, () => generateCode(bulkForm.prefix));
+    const payload = codes.map((code) => ({
+      code,
+      description: bulkForm.description || null,
+      discount_type: bulkForm.discount_type,
+      discount_value: Number(bulkForm.discount_value),
+      max_uses: bulkForm.max_uses ? Number(bulkForm.max_uses) : null,
+      min_order_amount: bulkForm.min_order_amount ? Number(bulkForm.min_order_amount) : 0,
+      is_active: bulkForm.is_active,
+      expires_at: bulkForm.expires_at ? new Date(bulkForm.expires_at).toISOString() : null,
+    }));
+
+    const { error } = await supabase.from("coupons" as any).insert(payload);
+    setBulkLoading(false);
+    if (error) {
+      toast({ title: "Error generating coupons", description: error.message, variant: "destructive" });
+      return;
+    }
+    setBulkResult(codes);
+    queryClient.invalidateQueries({ queryKey: ["admin-coupons"] });
+    toast({ title: `${count} coupons generated!` });
+  };
+
+  const downloadCodes = (codes: string[]) => {
+    const content = codes.join("\n");
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "coupon-codes.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const openCreate = () => {
     setEditCoupon(null);
     setForm({ ...defaultForm, code: generateCode() });
@@ -146,9 +207,14 @@ const AdminCoupons = () => {
           <Tag className="h-6 w-6 text-primary" />
           <h1 className="font-serif text-3xl font-bold">Coupons</h1>
         </div>
-        <Button onClick={openCreate}>
-          <Plus className="h-4 w-4 mr-2" /> New Coupon
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => { setBulkResult(null); setBulkForm(defaultBulkForm); setBulkOpen(true); }}>
+            <Layers className="h-4 w-4 mr-2" /> Bulk Generate
+          </Button>
+          <Button onClick={openCreate}>
+            <Plus className="h-4 w-4 mr-2" /> New Coupon
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -378,6 +444,162 @@ const AdminCoupons = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Bulk Generate Dialog */}
+      <Dialog open={bulkOpen} onOpenChange={(o) => { setBulkOpen(o); if (!o) { setBulkResult(null); setBulkForm(defaultBulkForm); } }}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Layers className="h-5 w-5 text-primary" /> Bulk Coupon Generator
+            </DialogTitle>
+            <DialogDescription>
+              Generate multiple unique coupon codes at once for distribution campaigns.
+            </DialogDescription>
+          </DialogHeader>
+
+          {bulkResult ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-primary font-medium">
+                <CheckCircle2 className="h-5 w-5" />
+                {bulkResult.length} coupons generated successfully!
+              </div>
+              <Textarea
+                readOnly
+                value={bulkResult.join("\n")}
+                className="font-mono text-sm h-48 resize-none"
+              />
+              <div className="flex gap-2">
+                <Button className="flex-1" onClick={() => downloadCodes(bulkResult)}>
+                  <Download className="h-4 w-4 mr-2" /> Download as .txt
+                </Button>
+                <Button variant="outline" onClick={() => { navigator.clipboard.writeText(bulkResult.join("\n")); toast({ title: "All codes copied!" }); }}>
+                  <Copy className="h-4 w-4 mr-2" /> Copy All
+                </Button>
+              </div>
+              <Button variant="ghost" className="w-full" onClick={() => { setBulkResult(null); setBulkForm(defaultBulkForm); }}>
+                Generate More
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Number of Codes (max 100)</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={bulkForm.count}
+                    onChange={(e) => setBulkForm({ ...bulkForm, count: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Prefix (optional)</Label>
+                  <Input
+                    value={bulkForm.prefix}
+                    onChange={(e) => setBulkForm({ ...bulkForm, prefix: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "") })}
+                    placeholder="e.g. SALE"
+                    className="mt-1 font-mono uppercase"
+                    maxLength={8}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label>Description (optional)</Label>
+                <Input
+                  value={bulkForm.description}
+                  onChange={(e) => setBulkForm({ ...bulkForm, description: e.target.value })}
+                  placeholder="e.g. Diwali Campaign 2025"
+                  className="mt-1"
+                />
+              </div>
+
+              <Separator />
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Discount Type *</Label>
+                  <Select value={bulkForm.discount_type} onValueChange={(v: "percent" | "fixed") => setBulkForm({ ...bulkForm, discount_type: v })}>
+                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="percent">Percentage (%)</SelectItem>
+                      <SelectItem value="fixed">Fixed Amount (₹)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Discount Value *</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    max={bulkForm.discount_type === "percent" ? "100" : undefined}
+                    value={bulkForm.discount_value}
+                    onChange={(e) => setBulkForm({ ...bulkForm, discount_value: e.target.value })}
+                    placeholder={bulkForm.discount_type === "percent" ? "e.g. 20" : "e.g. 50"}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Uses per Code</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    value={bulkForm.max_uses}
+                    onChange={(e) => setBulkForm({ ...bulkForm, max_uses: e.target.value })}
+                    placeholder="1"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Min Order (₹)</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    value={bulkForm.min_order_amount}
+                    onChange={(e) => setBulkForm({ ...bulkForm, min_order_amount: e.target.value })}
+                    placeholder="No minimum"
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label>Expiry Date & Time (optional)</Label>
+                <Input
+                  type="datetime-local"
+                  value={bulkForm.expires_at}
+                  onChange={(e) => setBulkForm({ ...bulkForm, expires_at: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="bulk_active"
+                  checked={bulkForm.is_active}
+                  onCheckedChange={(v) => setBulkForm({ ...bulkForm, is_active: v })}
+                />
+                <Label htmlFor="bulk_active">Activate immediately</Label>
+              </div>
+
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setBulkOpen(false)}>Cancel</Button>
+                <Button
+                  onClick={handleBulkGenerate}
+                  disabled={bulkLoading || !bulkForm.discount_value || Number(bulkForm.count) < 1}
+                >
+                  {bulkLoading ? "Generating…" : `Generate ${bulkForm.count || 0} Codes`}
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

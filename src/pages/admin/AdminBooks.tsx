@@ -271,7 +271,17 @@ const AdminBooks = () => {
             <div className="space-y-4">
               <div><Label>Title *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="mt-1" placeholder="Book title" /></div>
               <div><Label>Author</Label><Input value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} className="mt-1" /></div>
-              <div><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="mt-1" rows={3} /></div>
+              <div>
+                <Label>Description</Label>
+                <div className="mt-1">
+                  <RichTextEditor
+                    value={form.description}
+                    onChange={(html) => setForm({ ...form, description: html })}
+                    placeholder="Book description with headings, images, etc."
+                    minHeight={200}
+                  />
+                </div>
+              </div>
 
               {/* Cover Image */}
               <div>

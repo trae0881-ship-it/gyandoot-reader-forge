@@ -1,11 +1,15 @@
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { FileText, Loader2, Search } from "lucide-react";
 
 const Articles = () => {
+  const [search, setSearch] = useState("");
+
   const { data: posts, isLoading } = useQuery({
     queryKey: ["posts"],
     queryFn: async () => {
@@ -18,6 +22,18 @@ const Articles = () => {
     },
   });
 
+  const filtered = useMemo(() => {
+    if (!posts) return [];
+    if (!search.trim()) return posts;
+    const q = search.trim().toLowerCase();
+    return posts.filter(
+      (p) =>
+        p.title.toLowerCase().includes(q) ||
+        (p.excerpt ?? "").toLowerCase().includes(q) ||
+        p.post_type.toLowerCase().includes(q)
+    );
+  }, [posts, search]);
+
   return (
     <Layout>
       <section className="py-12">
@@ -25,11 +41,22 @@ const Articles = () => {
           <h1 className="font-serif text-4xl font-bold">Articles & Programs</h1>
           <p className="mt-2 text-muted-foreground">Spiritual insights and transformative programs</p>
 
+          {/* Search */}
+          <div className="mt-6 relative max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search articles..."
+              className="pl-10"
+            />
+          </div>
+
           {isLoading ? (
             <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
-          ) : posts && posts.length > 0 ? (
+          ) : filtered.length > 0 ? (
             <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {posts.map((post) => (
+              {filtered.map((post) => (
                 <Link key={post.id} to={`/articles/${post.slug}`}>
                   <Card className="group h-full transition-shadow hover:shadow-lg">
                     {post.cover_url && (
@@ -54,7 +81,7 @@ const Articles = () => {
           ) : (
             <div className="py-20 text-center">
               <FileText className="mx-auto h-10 w-10 text-muted-foreground/40" />
-              <p className="mt-3 text-muted-foreground">No articles published yet.</p>
+              <p className="mt-3 text-muted-foreground">{search ? "No articles found." : "No articles published yet."}</p>
             </div>
           )}
         </div>

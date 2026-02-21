@@ -1,7 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
-import { Menu, X, Heart, User, LogOut, Shield, MessageCircle } from "lucide-react";
+import { Menu, X, Heart, User, LogOut, Shield, MessageCircle, Search } from "lucide-react";
 import { useState } from "react";
 import logoImg from "@/assets/logo.jpeg";
 import { useQuery } from "@tanstack/react-query";
@@ -11,6 +12,18 @@ const Header = () => {
   const { user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/books?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
+      setSearchOpen(false);
+      setMobileOpen(false);
+    }
+  };
 
   const { data: settings } = useQuery({
     queryKey: ["site-settings"],
@@ -58,6 +71,28 @@ const Header = () => {
             <Link to="/admin" className="flex items-center gap-1 text-sm font-medium text-primary">
               <Shield className="h-4 w-4" /> Admin
             </Link>
+          )}
+          {/* Search */}
+          {searchOpen ? (
+            <form onSubmit={handleSearch} className="flex items-center gap-1">
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search books..."
+                className="h-8 w-40"
+                autoFocus
+              />
+              <Button type="submit" size="icon" variant="ghost" className="h-8 w-8">
+                <Search className="h-4 w-4" />
+              </Button>
+              <Button type="button" size="icon" variant="ghost" className="h-8 w-8" onClick={() => setSearchOpen(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </form>
+          ) : (
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSearchOpen(true)} aria-label="Search books">
+              <Search className="h-4 w-4" />
+            </Button>
           )}
           {whatsappLink && (
             <a
@@ -122,6 +157,18 @@ const Header = () => {
             >
               Donate Now
             </Link>
+            {/* Mobile search */}
+            <form onSubmit={handleSearch} className="flex items-center gap-2">
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search books..."
+                className="h-9 flex-1"
+              />
+              <Button type="submit" size="sm" variant="outline">
+                <Search className="h-4 w-4" />
+              </Button>
+            </form>
             {whatsappLink && (
               <a
                 href={whatsappLink}

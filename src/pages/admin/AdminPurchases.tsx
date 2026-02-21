@@ -7,7 +7,7 @@ const AdminPurchases = () => {
   const { data: purchases } = useQuery({
     queryKey: ["admin-purchases"],
     queryFn: async () => {
-      const { data } = await supabase.from("purchases").select("*, books(title)").order("created_at", { ascending: false });
+      const { data } = await supabase.from("purchases").select("id, book_id, user_id, status, razorpay_payment_id, created_at, books(title)").order("created_at", { ascending: false });
       return data ?? [];
     },
   });

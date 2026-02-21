@@ -48,7 +48,7 @@ const Contact = () => {
                 <Mail className="h-6 w-6 text-primary mt-1" />
                 <div>
                   <p className="font-semibold text-foreground">Email</p>
-                  <p className="text-muted-foreground">contact@gyandootnova.com</p>
+                  <p className="text-muted-foreground">contact@gyandootnova.in</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">

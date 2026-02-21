@@ -62,7 +62,7 @@ const Contact = () => {
                 <MapPin className="h-6 w-6 text-primary mt-1" />
                 <div>
                   <p className="font-semibold text-foreground">Address</p>
-                  <p className="text-muted-foreground">New Delhi, India</p>
+                  <p className="text-muted-foreground">Unnao UP, India</p>
                 </div>
               </div>
             </div>

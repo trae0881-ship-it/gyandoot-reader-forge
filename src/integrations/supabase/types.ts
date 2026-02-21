@@ -123,6 +123,7 @@ export type Database = {
           id: string
           is_featured: boolean
           is_free: boolean
+          preview_chapters: number
           price: number
           purchase_count: number
           slug: string
@@ -139,6 +140,7 @@ export type Database = {
           id?: string
           is_featured?: boolean
           is_free?: boolean
+          preview_chapters?: number
           price?: number
           purchase_count?: number
           slug: string
@@ -155,6 +157,7 @@ export type Database = {
           id?: string
           is_featured?: boolean
           is_free?: boolean
+          preview_chapters?: number
           price?: number
           purchase_count?: number
           slug?: string

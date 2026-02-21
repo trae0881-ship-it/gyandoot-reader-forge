@@ -150,6 +150,7 @@ const BookDetail = () => {
   }
 
   const canRead = book.is_free || hasPurchased;
+  const previewChapters = (book as any).preview_chapters ?? 0;
 
   // Find the chapter slug for "continue reading"
   const continueChapter = readingProgress
@@ -295,7 +296,7 @@ const BookDetail = () => {
               <h2 className="font-serif text-2xl font-bold mb-4">Table of Contents</h2>
               <div className="space-y-2">
                 {chapters.map((ch) => {
-                  const accessible = canRead || ch.is_preview;
+                  const accessible = canRead || ch.is_preview || ch.chapter_number <= previewChapters;
                   return (
                     <Card key={ch.id} className={accessible ? "hover:shadow transition-shadow" : "opacity-60"}>
                       <CardContent className="flex items-center justify-between p-4">

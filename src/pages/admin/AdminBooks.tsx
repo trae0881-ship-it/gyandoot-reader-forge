@@ -178,7 +178,7 @@ const AdminBooks = () => {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [selectedBook, setSelectedBook] = useState<any>(null);
-  const [form, setForm] = useState({ title: "", author: "GyandootNova", description: "", price: 0, is_free: true, is_featured: false, cover_url: "", file_url: "", file_type: "" });
+  const [form, setForm] = useState({ title: "", author: "GyandootNova", description: "", price: 0, is_free: true, is_featured: false, cover_url: "", file_url: "", file_type: "", preview_chapters: 0 });
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [bookFile, setBookFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -241,13 +241,13 @@ const AdminBooks = () => {
   });
 
   const resetForm = () => {
-    setForm({ title: "", author: "GyandootNova", description: "", price: 0, is_free: true, is_featured: false, cover_url: "", file_url: "", file_type: "" });
+    setForm({ title: "", author: "GyandootNova", description: "", price: 0, is_free: true, is_featured: false, cover_url: "", file_url: "", file_type: "", preview_chapters: 0 });
     setEditing(null); setCoverFile(null); setBookFile(null);
   };
 
   const openEdit = (book: any) => {
     setEditing(book);
-    setForm({ title: book.title, author: book.author, description: book.description ?? "", price: book.price, is_free: book.is_free, is_featured: book.is_featured, cover_url: book.cover_url ?? "", file_url: book.file_url ?? "", file_type: book.file_type ?? "" });
+    setForm({ title: book.title, author: book.author, description: book.description ?? "", price: book.price, is_free: book.is_free, is_featured: book.is_featured, cover_url: book.cover_url ?? "", file_url: book.file_url ?? "", file_type: book.file_type ?? "", preview_chapters: book.preview_chapters ?? 0 });
     setOpen(true);
   };
 
@@ -314,7 +314,14 @@ const AdminBooks = () => {
                 <div className="flex items-center gap-2"><Switch checked={form.is_featured} onCheckedChange={(v) => setForm({ ...form, is_featured: v })} /><Label>Featured</Label></div>
               </div>
               {!form.is_free && (
-                <div><Label>Price (₹)</Label><Input type="number" min={1} value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} className="mt-1" /></div>
+                <>
+                  <div><Label>Price (₹)</Label><Input type="number" min={1} value={form.price} onChange={(e) => setForm({ ...form, price: Number(e.target.value) })} className="mt-1" /></div>
+                  <div>
+                    <Label>Free Preview Chapters</Label>
+                    <Input type="number" min={0} value={form.preview_chapters} onChange={(e) => setForm({ ...form, preview_chapters: Number(e.target.value) })} className="mt-1" placeholder="e.g. 7" />
+                    <p className="text-xs text-muted-foreground mt-1">पहले कितने chapters free demo में दिखाने हैं (0 = कोई नहीं)</p>
+                  </div>
+                </>
               )}
 
               {uploading && (

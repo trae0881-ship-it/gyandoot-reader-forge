@@ -5,7 +5,8 @@ const openings = [
   {
     title: "Content Writer — Spiritual Publications",
     type: "Full-time / Remote",
-    description: "Create and edit spiritual content, articles, and book summaries. Strong understanding of Indian spiritual traditions required.",
+    description:
+      "Create and edit spiritual content, articles, and book summaries. Strong understanding of Indian spiritual traditions required.",
   },
   {
     title: "Web Developer — React/TypeScript",
@@ -15,7 +16,8 @@ const openings = [
   {
     title: "Digital Marketing Specialist",
     type: "Part-time / Remote",
-    description: "Drive organic growth through SEO, social media, and email campaigns focused on spiritual and educational content.",
+    description:
+      "Drive organic growth through SEO, social media, and email campaigns focused on spiritual and educational content.",
   },
 ];
 
@@ -26,7 +28,8 @@ const Careers = () => {
         <section className="text-center mb-16">
           <h1 className="font-serif text-4xl md:text-5xl font-bold text-primary mb-4">Careers</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Join our mission to spread spiritual wisdom globally. We're looking for passionate individuals who share our vision.
+            Join our mission to spread spiritual wisdom globally. We're looking for passionate individuals who share our
+            vision.
           </p>
         </section>
 
@@ -54,7 +57,7 @@ const Careers = () => {
             href="mailto:careers@gyandootnova.com"
             className="inline-flex items-center gap-2 text-primary font-semibold hover:underline"
           >
-            <Mail className="h-4 w-4" /> careers@gyandootnova.com
+            <Mail className="h-4 w-4" /> careers@gyandootnova.in
           </a>
         </section>
       </main>

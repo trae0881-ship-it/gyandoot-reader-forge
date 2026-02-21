@@ -187,7 +187,7 @@ const BookDetail = () => {
               </span>
 
               {book.description && (
-                <div className="mt-6 text-foreground/80 leading-relaxed whitespace-pre-line">{book.description}</div>
+                <div className="mt-6 text-foreground/80 leading-relaxed prose prose-headings:font-serif prose-headings:text-foreground prose-p:text-foreground/80 prose-img:rounded-lg max-w-none" dangerouslySetInnerHTML={{ __html: book.description }} />
               )}
 
               {!canRead && !book.is_free && (

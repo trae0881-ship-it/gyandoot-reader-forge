@@ -7,7 +7,7 @@ const AdminDonations = () => {
   const { data: donations } = useQuery({
     queryKey: ["admin-donations"],
     queryFn: async () => {
-      const { data } = await supabase.from("donations").select("*").order("created_at", { ascending: false });
+      const { data } = await supabase.from("donations").select("id, donor_name, donor_email, amount, status, created_at").order("created_at", { ascending: false });
       return data ?? [];
     },
   });

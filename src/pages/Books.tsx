@@ -13,7 +13,7 @@ const Books = () => {
   const { data: books, isLoading } = useQuery({
     queryKey: ["books", filter],
     queryFn: async () => {
-      let query = supabase.from("books").select("*").order("created_at", { ascending: false });
+      let query = supabase.from("books").select("id, title, slug, author, cover_url, price, is_free, is_featured, description, preview_chapters, purchase_count, created_at, updated_at, file_type").order("created_at", { ascending: false });
       if (filter === "free") query = query.eq("is_free", true);
       if (filter === "paid") query = query.eq("is_free", false);
       const { data } = await query;

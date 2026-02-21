@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, Upload, Image, FileText, X, ChevronRight, ArrowLeft } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import RichTextEditor from "@/components/RichTextEditor";
+import BulkBookUpload from "@/components/admin/BulkBookUpload";
 
 const slugify = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
@@ -260,10 +261,12 @@ const AdminBooks = () => {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-serif text-2xl font-bold sm:text-3xl">Books</h1>
-        <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
-          <DialogTrigger asChild>
-            <Button size="sm"><Plus className="mr-1 h-4 w-4" /> Add Book</Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <BulkBookUpload />
+          <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
+            <DialogTrigger asChild>
+              <Button size="sm"><Plus className="mr-1 h-4 w-4" /> Add Book</Button>
+            </DialogTrigger>
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="font-serif">{editing ? "Edit Book" : "New Book"}</DialogTitle>
@@ -347,6 +350,7 @@ const AdminBooks = () => {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <Card>

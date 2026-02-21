@@ -179,7 +179,7 @@ const AdminBooks = () => {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [selectedBook, setSelectedBook] = useState<any>(null);
-  const [form, setForm] = useState({ title: "", author: "GyandootNova", description: "", price: 0, is_free: true, is_featured: false, cover_url: "", file_url: "", file_type: "", preview_chapters: 0 });
+  const [form, setForm] = useState({ title: "", author: "GyandootNova", description: "", price: 0, is_free: true, is_featured: false, cover_url: "", file_url: "", file_type: "", preview_chapters: 0, category: "" });
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [bookFile, setBookFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -242,13 +242,13 @@ const AdminBooks = () => {
   });
 
   const resetForm = () => {
-    setForm({ title: "", author: "GyandootNova", description: "", price: 0, is_free: true, is_featured: false, cover_url: "", file_url: "", file_type: "", preview_chapters: 0 });
+    setForm({ title: "", author: "GyandootNova", description: "", price: 0, is_free: true, is_featured: false, cover_url: "", file_url: "", file_type: "", preview_chapters: 0, category: "" });
     setEditing(null); setCoverFile(null); setBookFile(null);
   };
 
   const openEdit = (book: any) => {
     setEditing(book);
-    setForm({ title: book.title, author: book.author, description: book.description ?? "", price: book.price, is_free: book.is_free, is_featured: book.is_featured, cover_url: book.cover_url ?? "", file_url: book.file_url ?? "", file_type: book.file_type ?? "", preview_chapters: book.preview_chapters ?? 0 });
+    setForm({ title: book.title, author: book.author, description: book.description ?? "", price: book.price, is_free: book.is_free, is_featured: book.is_featured, cover_url: book.cover_url ?? "", file_url: book.file_url ?? "", file_type: book.file_type ?? "", preview_chapters: book.preview_chapters ?? 0, category: book.category ?? "" });
     setOpen(true);
   };
 
@@ -274,6 +274,22 @@ const AdminBooks = () => {
             <div className="space-y-4">
               <div><Label>Title *</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="mt-1" placeholder="Book title" /></div>
               <div><Label>Author</Label><Input value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} className="mt-1" /></div>
+              <div>
+                <Label>Category</Label>
+                <select
+                  value={form.category}
+                  onChange={(e) => setForm({ ...form, category: e.target.value })}
+                  className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <option value="">No Category</option>
+                  <option value="devi">देवी</option>
+                  <option value="devta">देवता</option>
+                  <option value="adhyatm">अध्यात्म</option>
+                  <option value="puran">पुराण</option>
+                  <option value="katha">कथा</option>
+                  <option value="other">अन्य</option>
+                </select>
+              </div>
               <div>
                 <Label>Description</Label>
                 <div className="mt-1">

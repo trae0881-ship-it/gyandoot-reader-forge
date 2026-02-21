@@ -55,7 +55,7 @@ const Contact = () => {
                 <Phone className="h-6 w-6 text-primary mt-1" />
                 <div>
                   <p className="font-semibold text-foreground">Phone</p>
-                  <p className="text-muted-foreground">+91 98765 43210</p>
+                  <p className="text-muted-foreground">+91 91615 33353</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
@@ -105,7 +105,13 @@ const Contact = () => {
                 onChange={(e) => setForm({ ...form, message: e.target.value })}
               />
               <Button type="submit" className="w-full" disabled={sending}>
-                {sending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...</> : "Send Message"}
+                {sending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...
+                  </>
+                ) : (
+                  "Send Message"
+                )}
               </Button>
             </form>
           </div>

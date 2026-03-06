@@ -69,7 +69,7 @@ const Articles = () => {
                       <h2 className="mt-1 font-serif text-lg font-semibold group-hover:text-primary transition-colors line-clamp-2">
                         {post.title}
                       </h2>
-                      {post.excerpt && <p className="mt-2 text-sm text-muted-foreground line-clamp-3">{post.excerpt}</p>}
+                      {post.excerpt && <p className="mt-2 text-sm text-muted-foreground line-clamp-3" dangerouslySetInnerHTML={{ __html: post.excerpt }} />}
                       <p className="mt-3 text-xs text-muted-foreground">
                         {new Date(post.created_at).toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" })}
                       </p>

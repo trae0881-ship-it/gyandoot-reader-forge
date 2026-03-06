@@ -38,9 +38,10 @@ const ArticleDetail = () => {
               <img src={post.cover_url} alt={post.title} className="h-full w-full object-cover" />
             </div>
           )}
-          <div className="prose prose-lg mt-8 max-w-none leading-relaxed whitespace-pre-line">
-            {post.content}
-          </div>
+          <div
+            className="prose prose-lg mt-8 max-w-none leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: post.content ?? "" }}
+          />
         </div>
       </article>
     </Layout>

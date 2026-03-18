@@ -25,7 +25,7 @@ const Footer = () => {
 
   const socialLinks = [
     { icon: Facebook, href: settings?.facebook_url || null, label: "Facebook" },
-    { icon: Twitter, href: settings?.twitter_url || null, label: "Twitter" },
+    { icon: Linkedin, href: settings?.linkedin_url || null, label: "LinkedIn" },
     { icon: Instagram, href: settings?.instagram_url || null, label: "Instagram" },
     { icon: Youtube, href: settings?.youtube_url || null, label: "YouTube" },
     { icon: MessageCircle, href: whatsappLink, label: "WhatsApp" },

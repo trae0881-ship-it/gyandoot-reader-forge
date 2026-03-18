@@ -13,7 +13,7 @@ const SOCIAL_KEYS = [
   { key: "facebook_url", label: "Facebook URL", icon: Facebook, placeholder: "https://facebook.com/gyandootnova", hint: "Full Facebook page URL" },
   { key: "instagram_url", label: "Instagram URL", icon: Instagram, placeholder: "https://instagram.com/gyandootnova", hint: "Full Instagram profile URL" },
   { key: "youtube_url", label: "YouTube URL", icon: Youtube, placeholder: "https://youtube.com/@gyandootnova", hint: "Full YouTube channel URL" },
-  { key: "twitter_url", label: "Twitter / X URL", icon: Twitter, placeholder: "https://twitter.com/gyandootnova", hint: "Full Twitter/X profile URL" },
+  { key: "linkedin_url", label: "LinkedIn URL", icon: Linkedin, placeholder: "https://linkedin.com/company/gyandootnova", hint: "Full LinkedIn profile or company URL" },
 ];
 
 const AdminSettings = () => {

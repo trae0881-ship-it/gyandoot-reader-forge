@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { BookOpen, Mail, Facebook, Twitter, Youtube, Instagram, MessageCircle } from "lucide-react";
+import { BookOpen, Mail, Facebook, Linkedin, Youtube, Instagram, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";

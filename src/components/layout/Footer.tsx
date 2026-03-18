@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { BookOpen, Mail, Facebook, Twitter, Youtube, Instagram, MessageCircle } from "lucide-react";
+import { BookOpen, Mail, Facebook, Linkedin, Youtube, Instagram, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -25,7 +25,7 @@ const Footer = () => {
 
   const socialLinks = [
     { icon: Facebook, href: settings?.facebook_url || null, label: "Facebook" },
-    { icon: Twitter, href: settings?.twitter_url || null, label: "Twitter" },
+    { icon: Linkedin, href: settings?.linkedin_url || null, label: "LinkedIn" },
     { icon: Instagram, href: settings?.instagram_url || null, label: "Instagram" },
     { icon: Youtube, href: settings?.youtube_url || null, label: "YouTube" },
     { icon: MessageCircle, href: whatsappLink, label: "WhatsApp" },
@@ -63,7 +63,7 @@ const Footer = () => {
                       <Icon className="h-4 w-4" />
                     </a>
                   ))
-                : [Facebook, Twitter, Instagram, Youtube, MessageCircle].map((Icon, i) => (
+                : [Facebook, Linkedin, Instagram, Youtube, MessageCircle].map((Icon, i) => (
                     <span
                       key={i}
                       className="flex h-9 w-9 items-center justify-center rounded-full bg-background/10 text-background/20"

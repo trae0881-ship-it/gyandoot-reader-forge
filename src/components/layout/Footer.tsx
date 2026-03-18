@@ -63,7 +63,7 @@ const Footer = () => {
                       <Icon className="h-4 w-4" />
                     </a>
                   ))
-                : [Facebook, Twitter, Instagram, Youtube, MessageCircle].map((Icon, i) => (
+                : [Facebook, Linkedin, Instagram, Youtube, MessageCircle].map((Icon, i) => (
                     <span
                       key={i}
                       className="flex h-9 w-9 items-center justify-center rounded-full bg-background/10 text-background/20"

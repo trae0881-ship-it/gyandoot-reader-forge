@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, MessageCircle, Facebook, Instagram, Youtube, Twitter } from "lucide-react";
+import { Settings, MessageCircle, Facebook, Instagram, Youtube, Linkedin } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const SOCIAL_KEYS = [

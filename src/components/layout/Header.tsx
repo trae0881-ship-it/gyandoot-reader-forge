@@ -140,13 +140,6 @@ const Header = () => {
                 {link.label}
               </Link>
             ))}
-            <Link
-              to="/donate"
-              className="text-sm font-semibold text-secondary-foreground bg-secondary rounded-md px-3 py-2 text-center"
-              onClick={() => setMobileOpen(false)}
-            >
-              Donate Now
-            </Link>
             {/* Mobile search */}
             <form onSubmit={handleSearch} className="flex items-center gap-2">
               <Input

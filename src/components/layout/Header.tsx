@@ -44,7 +44,6 @@ const Header = () => {
     { to: "/about", label: "About Us" },
     { to: "/books", label: "Books" },
     { to: "/articles", label: "Articles" },
-    { to: "/services", label: "Services" },
     { to: "/contact", label: "Contact" },
   ];
 
@@ -104,15 +103,6 @@ const Header = () => {
               <MessageCircle className="h-4 w-4" /> WhatsApp
             </a>
           )}
-          <Button
-            size="sm"
-            className="bg-secondary text-secondary-foreground font-semibold hover:bg-secondary/90 shadow-sm"
-            asChild
-          >
-            <Link to="/donate">
-              <Heart className="mr-1.5 h-4 w-4" /> Donate Now
-            </Link>
-          </Button>
           {user ? (
             <div className="flex items-center gap-2">
               <Link to="/profile" className="text-sm text-muted-foreground hover:text-primary transition-colors">
@@ -150,13 +140,6 @@ const Header = () => {
                 {link.label}
               </Link>
             ))}
-            <Link
-              to="/donate"
-              className="text-sm font-semibold text-secondary-foreground bg-secondary rounded-md px-3 py-2 text-center"
-              onClick={() => setMobileOpen(false)}
-            >
-              Donate Now
-            </Link>
             {/* Mobile search */}
             <form onSubmit={handleSearch} className="flex items-center gap-2">
               <Input

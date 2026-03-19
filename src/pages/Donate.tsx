@@ -27,9 +27,17 @@ const Donate = () => {
       toast({ title: "Invalid Amount", description: "Please enter a valid donation amount.", variant: "destructive" });
       return;
     }
+    if (!name.trim()) {
+      toast({ title: "Name Required", description: "Kripya apna naam darj karein.", variant: "destructive" });
+      return;
+    }
+    if (!email.trim()) {
+      toast({ title: "Email Required", description: "Kripya apna email darj karein.", variant: "destructive" });
+      return;
+    }
     setLoading(true);
     await initiatePayment(
-      { amount, type: "donation", gateway, name: name.trim() || undefined, email: email.trim() || undefined },
+      { amount, type: "donation", gateway, name: name.trim(), email: email.trim() },
       () => {
         setDonated(true);
         setLoading(false);

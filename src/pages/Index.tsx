@@ -97,7 +97,7 @@ const Index = () => {
                 <BookOpen className="mr-2 h-5 w-5" /> Explore Books
               </Link>
             </Button>
-            <Button
+            {/* <Button
               size="lg"
               className="bg-secondary text-secondary-foreground font-semibold hover:bg-secondary/90 shadow-lg px-8"
               asChild
@@ -105,7 +105,7 @@ const Index = () => {
               <Link to="/donate">
                 <Heart className="mr-2 h-5 w-5" /> Support Our Mission
               </Link>
-            </Button>
+            </Button> */}
           </div>
         </div>
       </section>
@@ -329,7 +329,7 @@ const Index = () => {
       </section>
 
       {/* ─── 8. DONATION CTA ─── */}
-      <section className="py-20">
+      {/* <section className="py-20">
         <div className="container">
           <div className="rounded-2xl bg-primary p-10 text-center md:p-16 relative overflow-hidden">
             <div
@@ -356,7 +356,7 @@ const Index = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
     </Layout>
   );
 };

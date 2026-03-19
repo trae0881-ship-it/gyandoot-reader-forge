@@ -115,9 +115,6 @@ const Footer = () => {
               <Link to="/support" className="hover:text-secondary transition-colors">
                 Help Center
               </Link>
-              <Link to="/donate" className="hover:text-secondary transition-colors">
-                Donate
-              </Link>
               <Link to="/careers" className="hover:text-secondary transition-colors">
                 Careers
               </Link>

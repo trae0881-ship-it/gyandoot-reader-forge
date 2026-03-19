@@ -329,7 +329,7 @@ const Index = () => {
       </section>
 
       {/* ─── 8. DONATION CTA ─── */}
-      <section className="py-20">
+      {/* <section className="py-20">
         <div className="container">
           <div className="rounded-2xl bg-primary p-10 text-center md:p-16 relative overflow-hidden">
             <div
@@ -356,7 +356,7 @@ const Index = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
     </Layout>
   );
 };

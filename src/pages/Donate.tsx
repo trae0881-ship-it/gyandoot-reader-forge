@@ -27,9 +27,17 @@ const Donate = () => {
       toast({ title: "Invalid Amount", description: "Please enter a valid donation amount.", variant: "destructive" });
       return;
     }
+    if (!name.trim()) {
+      toast({ title: "Name Required", description: "Kripya apna naam darj karein.", variant: "destructive" });
+      return;
+    }
+    if (!email.trim()) {
+      toast({ title: "Email Required", description: "Kripya apna email darj karein.", variant: "destructive" });
+      return;
+    }
     setLoading(true);
     await initiatePayment(
-      { amount, type: "donation", gateway, name: name.trim() || undefined, email: email.trim() || undefined },
+      { amount, type: "donation", gateway, name: name.trim(), email: email.trim() },
       () => {
         setDonated(true);
         setLoading(false);
@@ -116,29 +124,31 @@ const Donate = () => {
 
               {/* Donor details */}
               <div className="space-y-4 pt-1">
-                <p className="text-sm font-medium text-muted-foreground">Aapki Jaankari (Optional)</p>
+                <p className="text-sm font-medium text-muted-foreground">Aapki Jaankari <span className="text-destructive">*</span></p>
                 <div>
                   <Label className="flex items-center gap-1.5">
-                    <User className="h-3.5 w-3.5" /> Naam
+                    <User className="h-3.5 w-3.5" /> Naam <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Aapka naam (optional)"
+                    placeholder="Aapka naam"
                     className="mt-1"
+                    required
                     disabled={!!user}
                   />
                 </div>
                 <div>
                   <Label className="flex items-center gap-1.5">
-                    <Mail className="h-3.5 w-3.5" /> Email
+                    <Mail className="h-3.5 w-3.5" /> Email <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Receipt ke liye email (optional)"
+                    placeholder="Receipt ke liye email"
                     className="mt-1"
+                    required
                     disabled={!!user}
                   />
                 </div>

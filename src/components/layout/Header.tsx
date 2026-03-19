@@ -44,7 +44,6 @@ const Header = () => {
     { to: "/about", label: "About Us" },
     { to: "/books", label: "Books" },
     { to: "/articles", label: "Articles" },
-    { to: "/services", label: "Services" },
     { to: "/contact", label: "Contact" },
   ];
 

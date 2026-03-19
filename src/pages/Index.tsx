@@ -97,7 +97,7 @@ const Index = () => {
                 <BookOpen className="mr-2 h-5 w-5" /> Explore Books
               </Link>
             </Button>
-            <Button
+            {/* <Button
               size="lg"
               className="bg-secondary text-secondary-foreground font-semibold hover:bg-secondary/90 shadow-lg px-8"
               asChild
@@ -105,7 +105,7 @@ const Index = () => {
               <Link to="/donate">
                 <Heart className="mr-2 h-5 w-5" /> Support Our Mission
               </Link>
-            </Button>
+            </Button> */}
           </div>
         </div>
       </section>

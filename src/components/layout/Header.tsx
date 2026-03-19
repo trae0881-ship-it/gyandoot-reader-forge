@@ -103,15 +103,6 @@ const Header = () => {
               <MessageCircle className="h-4 w-4" /> WhatsApp
             </a>
           )}
-          <Button
-            size="sm"
-            className="bg-secondary text-secondary-foreground font-semibold hover:bg-secondary/90 shadow-sm"
-            asChild
-          >
-            <Link to="/donate">
-              <Heart className="mr-1.5 h-4 w-4" /> Donate Now
-            </Link>
-          </Button>
           {user ? (
             <div className="flex items-center gap-2">
               <Link to="/profile" className="text-sm text-muted-foreground hover:text-primary transition-colors">

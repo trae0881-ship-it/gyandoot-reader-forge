@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import useSEO from "@/hooks/useSEO";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -161,6 +162,33 @@ const BookDetail = () => {
   const bookProgressPct = readingProgress && totalChapters > 0
     ? Math.round(((readingProgress.chapter_number - 1) / totalChapters) * 100 + (readingProgress.scroll_percent / totalChapters))
     : 0;
+
+  const bookDescription = book.description?.replace(/<[^>]*>/g, "").slice(0, 155) ?? `Read ${book.title} by ${book.author} online at GyandootNova.`;
+
+  const bookJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Book",
+    "name": book.title,
+    "author": { "@type": "Person", "name": book.author },
+    "description": bookDescription,
+    "url": `https://gyandootnova.in/books/${book.slug}`,
+    ...(book.cover_url && { "image": book.cover_url }),
+    "offers": {
+      "@type": "Offer",
+      "price": book.is_free ? "0" : String(book.price),
+      "priceCurrency": "INR",
+      "availability": "https://schema.org/InStock",
+    },
+  };
+
+  useSEO({
+    title: `${book.title} by ${book.author} — Buy Online`,
+    description: bookDescription,
+    canonical: `/books/${book.slug}`,
+    ogImage: book.cover_url ?? undefined,
+    ogType: "book",
+    jsonLd: bookJsonLd,
+  });
 
   return (
     <Layout>

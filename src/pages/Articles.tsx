@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import useSEO from "@/hooks/useSEO";
 import Layout from "@/components/layout/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,12 @@ import { FileText, Loader2, Search } from "lucide-react";
 
 const Articles = () => {
   const [search, setSearch] = useState("");
+
+  useSEO({
+    title: "Spiritual Articles & Insights — GyandootNova",
+    description: "Read spiritual articles, discourses, and insights on Vishnu Sahasraname, Bhagwat Geeta, meditation & more at GyandootNova.",
+    canonical: "/articles",
+  });
 
   const { data: posts, isLoading } = useQuery({
     queryKey: ["posts"],

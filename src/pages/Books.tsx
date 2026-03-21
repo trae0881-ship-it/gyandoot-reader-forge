@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import useSEO from "@/hooks/useSEO";
 import Layout from "@/components/layout/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,12 @@ const Books = () => {
   const [category, setCategory] = useState("all");
   const [search, setSearch] = useState(initialSearch);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  useSEO({
+    title: "Dharmik Granth & Spiritual Books Online — GyandootNova",
+    description: "Browse and buy spiritual books — Vishnu Sahasraname, Bhagwat Geeta, Ramayana, Hanuman Chalisa & more dharmik granth online.",
+    canonical: "/books",
+  });
 
   const { data: books, isLoading } = useQuery({
     queryKey: ["books"],

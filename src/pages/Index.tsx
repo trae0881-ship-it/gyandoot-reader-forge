@@ -8,6 +8,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
+import useSEO from "@/hooks/useSEO";
 import { useEffect, useRef, useState } from "react";
 
 /* ─── Animated Counter ─── */
@@ -71,6 +72,12 @@ const Index = () => {
         .limit(3);
       return data ?? [];
     },
+  });
+
+  useSEO({
+    title: "Dharmik Granth Online — Vishnu Sahasraname, Bhagwat Geeta, Ramayana | GyandootNova",
+    description: "Buy spiritual books online — Vishnu Sahasraname, Bhagwat Geeta, Ramayana, Hanuman Chalisa & more dharmik granth at GyandootNova.",
+    canonical: "/",
   });
 
   return (

@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import useSEO from "@/hooks/useSEO";
 import Layout from "@/components/layout/Layout";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -52,6 +53,33 @@ const ArticleDetail = () => {
   if (!post) {
     return <Layout><div className="py-32 text-center text-muted-foreground">Article not found.</div></Layout>;
   }
+
+  const articleDesc = post.meta_description || post.excerpt?.replace(/<[^>]*>/g, "").slice(0, 155) || `Read ${post.title} on GyandootNova.`;
+
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": post.title,
+    "description": articleDesc,
+    "url": `https://gyandootnova.in/articles/${post.slug}`,
+    "datePublished": post.created_at,
+    "dateModified": post.updated_at,
+    ...(post.cover_url && { "image": post.cover_url }),
+    "publisher": {
+      "@type": "Organization",
+      "name": "GyandootNova",
+      "url": "https://gyandootnova.in",
+    },
+  };
+
+  useSEO({
+    title: post.meta_title || post.title,
+    description: articleDesc,
+    canonical: `/articles/${post.slug}`,
+    ogImage: post.cover_url ?? undefined,
+    ogType: "article",
+    jsonLd: articleJsonLd,
+  });
 
   return (
     <Layout>

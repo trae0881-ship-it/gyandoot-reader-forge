@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import useSEO from "@/hooks/useSEO";
 import Layout from "@/components/layout/Layout";
 import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 

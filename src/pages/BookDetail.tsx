@@ -175,7 +175,18 @@ const BookDetail = () => {
         <div className="py-32 text-center text-muted-foreground">Book not found.</div>
       </Layout>
     );
-  }
+
+
+  const canRead = book.is_free || hasPurchased;
+  const previewChapters = (book as any).preview_chapters ?? 0;
+  const continueChapter = readingProgress
+    ? chapters?.find((c) => c.id === readingProgress.chapter_id)
+    : null;
+  const continueChapterSlug = continueChapter?.slug ?? chapters?.[0]?.slug;
+  const totalChapters = chapters?.length ?? 0;
+  const bookProgressPct = readingProgress && totalChapters > 0
+    ? Math.round(((readingProgress.chapter_number - 1) / totalChapters) * 100 + (readingProgress.scroll_percent / totalChapters))
+    : 0;
 
   return (
     <Layout>

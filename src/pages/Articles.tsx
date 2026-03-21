@@ -11,6 +11,12 @@ import { FileText, Loader2, Search } from "lucide-react";
 const Articles = () => {
   const [search, setSearch] = useState("");
 
+  useSEO({
+    title: "Spiritual Articles & Insights — GyandootNova",
+    description: "Read spiritual articles, discourses, and insights on Vishnu Sahasraname, Bhagwat Geeta, meditation & more at GyandootNova.",
+    canonical: "/articles",
+  });
+
   const { data: posts, isLoading } = useQuery({
     queryKey: ["posts"],
     queryFn: async () => {

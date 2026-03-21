@@ -30,6 +30,12 @@ const Books = () => {
   const [search, setSearch] = useState(initialSearch);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
+  useSEO({
+    title: "Dharmik Granth & Spiritual Books Online — GyandootNova",
+    description: "Browse and buy spiritual books — Vishnu Sahasraname, Bhagwat Geeta, Ramayana, Hanuman Chalisa & more dharmik granth online.",
+    canonical: "/books",
+  });
+
   const { data: books, isLoading } = useQuery({
     queryKey: ["books"],
     queryFn: async () => {

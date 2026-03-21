@@ -8,6 +8,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
+import useSEO from "@/hooks/useSEO";
 import { useEffect, useRef, useState } from "react";
 
 /* ─── Animated Counter ─── */

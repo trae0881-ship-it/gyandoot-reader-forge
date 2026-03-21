@@ -74,6 +74,12 @@ const Index = () => {
     },
   });
 
+  useSEO({
+    title: "Dharmik Granth Online — Vishnu Sahasraname, Bhagwat Geeta, Ramayana | GyandootNova",
+    description: "Buy spiritual books online — Vishnu Sahasraname, Bhagwat Geeta, Ramayana, Hanuman Chalisa & more dharmik granth at GyandootNova.",
+    canonical: "/",
+  });
+
   return (
     <Layout>
       {/* ─── 1. HERO ─── */}

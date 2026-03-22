@@ -1,5 +1,6 @@
 import Layout from "@/components/layout/Layout";
 import { Link } from "react-router-dom";
+import useSEO from "@/hooks/useSEO";
 
 const sitemapSections = [
   {

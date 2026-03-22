@@ -2,6 +2,7 @@ import Layout from "@/components/layout/Layout";
 import { BookOpen, FileText, Heart, Mic } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import useSEO from "@/hooks/useSEO";
 
 const portfolioItems = [
   {

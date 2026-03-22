@@ -1,5 +1,6 @@
 import Layout from "@/components/layout/Layout";
 import { Link } from "react-router-dom";
+import useSEO from "@/hooks/useSEO";
 
 const sitemapSections = [
   {
@@ -47,6 +48,12 @@ const sitemapSections = [
 ];
 
 const SitemapPage = () => {
+  useSEO({
+    title: "Sitemap — GyandootNova All Pages Overview",
+    description: "Complete sitemap of GyandootNova — browse all pages including dharmik granth, spiritual books, articles, services, FAQ & more.",
+    canonical: "/sitemap",
+  });
+
   return (
     <Layout>
       <main className="container py-16 max-w-3xl mx-auto">

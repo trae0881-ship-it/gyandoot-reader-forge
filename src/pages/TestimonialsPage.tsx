@@ -1,5 +1,6 @@
 import Layout from "@/components/layout/Layout";
 import { Star } from "lucide-react";
+import useSEO from "@/hooks/useSEO";
 
 const testimonials = [
   {
@@ -41,6 +42,12 @@ const testimonials = [
 ];
 
 const TestimonialsPage = () => {
+  useSEO({
+    title: "Reader Testimonials — GyandootNova Spiritual Books Reviews",
+    description: "Read what spiritual seekers say about GyandootNova. Testimonials from readers of Vishnu Sahasraname, Bhagwat Geeta & other dharmik granth.",
+    canonical: "/testimonials",
+  });
+
   return (
     <Layout>
       <main className="container py-16">

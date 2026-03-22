@@ -1,5 +1,6 @@
 import Layout from "@/components/layout/Layout";
 import { Briefcase, Mail } from "lucide-react";
+import useSEO from "@/hooks/useSEO";
 
 const openings = [
   {
@@ -22,6 +23,12 @@ const openings = [
 ];
 
 const Careers = () => {
+  useSEO({
+    title: "Careers at GyandootNova — Join Our Spiritual Publishing Team",
+    description: "Join GyandootNova — work on spiritual book publishing, content writing, web development & digital marketing. Remote positions available.",
+    canonical: "/careers",
+  });
+
   return (
     <Layout>
       <main className="container py-16 max-w-3xl mx-auto">

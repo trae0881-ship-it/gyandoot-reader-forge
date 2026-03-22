@@ -93,10 +93,10 @@ const Index = () => {
         />
         <div className="container relative text-center">
           <h1 className="font-serif text-4xl font-extrabold leading-tight text-primary-foreground md:text-6xl lg:text-7xl">
-            Illuminate Your <span className="text-secondary">Spiritual Path</span>
+            Authentic <span className="text-secondary">Dharmik Granth</span> — Vishnu Sahasraname, Geeta, Ramayana
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-primary-foreground/75 md:text-xl">
-            Discover sacred books, profound articles, and transformative programs crafted to awaken wisdom and deepen your inner journey.
+            Buy and read spiritual books online — Vishnu Sahasraname, Bhagwat Geeta, Ramayana, Hanuman Chalisa & more. India's trusted platform for sacred literature.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <Button size="lg" className="bg-primary-foreground text-primary font-semibold hover:bg-primary-foreground/90 shadow-lg px-8" asChild>
@@ -335,7 +335,49 @@ const Index = () => {
         </div>
       </section>
 
-      {/* ─── 8. SUPPORT US CTA ─── */}
+      {/* ─── 8. SEO CONTENT — KEYWORD-RICH ─── */}
+      <section className="py-20">
+        <div className="container max-w-4xl">
+          <h2 className="font-serif text-3xl font-bold md:text-4xl text-center">
+            Dharmik Granth Online — Buy Spiritual Books at GyandootNova
+          </h2>
+          <div className="mt-3 mx-auto h-1 w-16 rounded-full bg-primary" />
+          <div className="mt-8 space-y-6 text-muted-foreground leading-relaxed">
+            <p>
+              GyandootNova is India's trusted online platform for <strong className="text-foreground">dharmik granth</strong>, sacred spiritual books, and religious literature. Whether you are looking for a <strong className="text-foreground">Vishnu Sahasraname book</strong> with meaning in Hindi and English, the complete <strong className="text-foreground">Bhagwat Geeta in Hindi</strong>, or the timeless <strong className="text-foreground">Ramayana book</strong> — we have an ever-growing library of authentic spiritual texts available to read online instantly.
+            </p>
+            <p>
+              Our collection includes beloved titles such as <strong className="text-foreground">Hanuman Chalisa book</strong>, <strong className="text-foreground">Mahabharat in Hindi</strong>, <strong className="text-foreground">Sundarkand path book</strong>, <strong className="text-foreground">Vishnu Purana</strong>, <strong className="text-foreground">Shrimad Bhagwatam</strong>, and <strong className="text-foreground">Chalisa Sangrah</strong>. Every book is published with care, preserving the sanctity of the original Sanskrit shlokas while providing clear Hindi and English translations for modern readers.
+            </p>
+
+            <h3 className="font-serif text-xl font-semibold text-foreground pt-2">Why Choose GyandootNova for Spiritual Books?</h3>
+            <ul className="list-disc pl-6 space-y-2">
+              <li><strong className="text-foreground">Read Online Instantly</strong> — No downloads required. Our distraction-free reader supports dark mode, font resizing, bookmarks, and reading progress tracking.</li>
+              <li><strong className="text-foreground">Authentic & Verified Content</strong> — Every text is carefully curated from trusted sources, similar to <strong className="text-foreground">Gita Press books online</strong>.</li>
+              <li><strong className="text-foreground">Free & Premium Books</strong> — Many dharmik granth are completely free. Premium books start at just ₹99.</li>
+              <li><strong className="text-foreground">Secure Payments</strong> — Pay safely via Razorpay (India) or PayPal (international). UPI, cards, and net banking accepted.</li>
+              <li><strong className="text-foreground">Available Worldwide</strong> — Readers from India, USA, UK, Canada, Australia, and Japan access our books daily.</li>
+            </ul>
+
+            <h3 className="font-serif text-xl font-semibold text-foreground pt-2">Popular Dharmik Books on GyandootNova</h3>
+            <p>
+              Our most-read books include the <strong className="text-foreground">Vishnu Sahasraname with meaning in English</strong> — a complete guide to the 1000 divine names of Lord Vishnu, the <strong className="text-foreground">Bhagavad Gita simplified</strong> for daily guidance, and the <strong className="text-foreground">Ramayana in Hindi</strong> narrating the divine journey of Shri Ram. We also feature <strong className="text-foreground">stotra sangrah</strong>, <strong className="text-foreground">aarti sangrah</strong>, and mantra collections for daily pooja.
+            </p>
+
+            <h3 className="font-serif text-xl font-semibold text-foreground pt-2">Spiritual Articles & Insights</h3>
+            <p>
+              Beyond books, GyandootNova publishes insightful articles on meditation techniques, the significance of <strong className="text-foreground">Sanskrit shlokas</strong>, guides to performing <strong className="text-foreground">Ramayana path at home</strong>, deep dives into Geeta's 18 chapters, and the spiritual meaning behind Hindu festivals. Our content helps seekers worldwide deepen their understanding of Sanatan Dharma.
+            </p>
+
+            <h3 className="font-serif text-xl font-semibold text-foreground pt-2">How to Buy Hindu Books Online</h3>
+            <p>
+              Buying <strong className="text-foreground">Hindu books online</strong> at GyandootNova is simple: browse our <Link to="/books" className="text-primary hover:underline font-medium">Books Library</Link>, select a title, and start reading — free books open instantly. For premium titles, complete a quick secure payment and the full book unlocks in your account forever. No subscription needed. Have questions? Visit our <Link to="/faq" className="text-primary hover:underline font-medium">FAQ</Link> or <Link to="/contact" className="text-primary hover:underline font-medium">Contact Us</Link>.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── 9. SUPPORT US CTA ─── */}
       <section className="py-20">
         <div className="container">
           <div className="rounded-2xl bg-primary p-10 text-center md:p-16 relative overflow-hidden">
@@ -348,10 +390,10 @@ const Index = () => {
             <div className="relative">
               <Heart className="mx-auto h-12 w-12 text-secondary" />
               <h2 className="mt-5 font-serif text-3xl font-bold text-primary-foreground md:text-4xl">
-                Support Us
+                Support Our Mission
               </h2>
               <p className="mx-auto mt-4 max-w-lg text-primary-foreground/75 leading-relaxed">
-                Your generosity helps us publish and share spiritual knowledge with seekers worldwide. Every contribution makes a difference.
+                Your generosity helps us publish and share spiritual knowledge with seekers worldwide. Every contribution makes a difference in preserving dharmik granth for future generations.
               </p>
               <Button
                 size="lg"

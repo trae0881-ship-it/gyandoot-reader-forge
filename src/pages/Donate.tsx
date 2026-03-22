@@ -9,10 +9,17 @@ import { useAuth } from "@/hooks/useAuth";
 import { initiatePayment, type PaymentGateway } from "@/lib/payment";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
+import useSEO from "@/hooks/useSEO";
 
 const PRESET_AMOUNTS = [100, 500, 1000, 5000];
 
 const Donate = () => {
+  useSEO({
+    title: "Support Us — Donate to GyandootNova Spiritual Books Mission",
+    description: "Support GyandootNova's mission to publish and share dharmik granth, Vishnu Sahasraname, Bhagwat Geeta & spiritual books with seekers worldwide.",
+    canonical: "/donate",
+  });
+
   const { user } = useAuth();
   const { toast } = useToast();
   const [amount, setAmount] = useState<number>(500);

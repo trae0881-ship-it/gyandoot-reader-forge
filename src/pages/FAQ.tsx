@@ -1,5 +1,6 @@
 import Layout from "@/components/layout/Layout";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import useSEO from "@/hooks/useSEO";
 
 const faqs = [
   {
@@ -45,6 +46,12 @@ const faqs = [
 ];
 
 const FAQ = () => {
+  useSEO({
+    title: "FAQ — GyandootNova Spiritual Books & Reading Platform",
+    description: "Find answers about reading books online, purchases, payments, account issues & more at GyandootNova. Dharmik granth FAQ.",
+    canonical: "/faq",
+  });
+
   return (
     <Layout>
       <main className="container py-16 max-w-3xl mx-auto">

@@ -2,6 +2,7 @@ import Layout from "@/components/layout/Layout";
 import { BookOpen, FileText, Heart, Mic } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import useSEO from "@/hooks/useSEO";
 
 const portfolioItems = [
   {
@@ -35,6 +36,12 @@ const portfolioItems = [
 ];
 
 const Portfolio = () => {
+  useSEO({
+    title: "Portfolio — GyandootNova Spiritual Books & Content Collection",
+    description: "Explore GyandootNova's portfolio: 50+ spiritual books, articles on Vishnu Sahasraname, Bhagwat Geeta, meditation programs & community initiatives.",
+    canonical: "/portfolio",
+  });
+
   return (
     <Layout>
       <main className="container py-16">

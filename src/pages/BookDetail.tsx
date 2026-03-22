@@ -36,7 +36,7 @@ const BookDetail = () => {
   const { data: book, isLoading } = useQuery({
     queryKey: ["book", slug],
     queryFn: async () => {
-      const { data } = await supabase.from("books").select("id, title, slug, author, cover_url, price, is_free, is_featured, description, preview_chapters, purchase_count, file_type, created_at, updated_at").eq("slug", slug!).single();
+      const { data } = await supabase.from("books").select("id, title, slug, author, cover_url, price, is_free, is_featured, description, preview_chapters, purchase_count, file_type, category, created_at, updated_at").eq("slug", slug!).single();
       return data;
     },
     enabled: !!slug,

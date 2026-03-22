@@ -1,5 +1,6 @@
 import Layout from "@/components/layout/Layout";
 import { Briefcase, Mail } from "lucide-react";
+import useSEO from "@/hooks/useSEO";
 
 const openings = [
   {

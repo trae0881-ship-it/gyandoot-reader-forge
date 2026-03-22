@@ -42,6 +42,12 @@ const services = [
 ];
 
 const Services = () => {
+  useSEO({
+    title: "Our Services — Online Book Reading, Spiritual Articles & Programs | GyandootNova",
+    description: "Explore GyandootNova services: read dharmik granth online, spiritual articles, meditation programs, digital publication & community engagement.",
+    canonical: "/services",
+  });
+
   return (
     <Layout>
       <main className="container py-16">

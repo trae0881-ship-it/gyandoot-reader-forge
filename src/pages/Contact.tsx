@@ -6,8 +6,14 @@ import { Mail, MapPin, Phone, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import useSEO from "@/hooks/useSEO";
 
 const Contact = () => {
+  useSEO({
+    title: "Contact GyandootNova — Spiritual Books Support & Enquiry",
+    description: "Contact GyandootNova for questions about dharmik granth, book orders, spiritual programs, or collaboration. Email, phone & contact form available.",
+    canonical: "/contact",
+  });
   const { toast } = useToast();
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [sending, setSending] = useState(false);

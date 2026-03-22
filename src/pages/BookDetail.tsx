@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, Eye, Lock, Loader2, PlayCircle, Tag, X, CheckCircle } from "lucide-react";
+import { BookOpen, Eye, Lock, Loader2, PlayCircle, Tag, X, CheckCircle, User, Calendar, Layers, Globe, ShoppingCart, Star, Info } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import { initiatePayment, type PaymentGateway } from "@/lib/payment";
@@ -36,7 +36,7 @@ const BookDetail = () => {
   const { data: book, isLoading } = useQuery({
     queryKey: ["book", slug],
     queryFn: async () => {
-      const { data } = await supabase.from("books").select("id, title, slug, author, cover_url, price, is_free, is_featured, description, preview_chapters, purchase_count, file_type, created_at, updated_at").eq("slug", slug!).single();
+      const { data } = await supabase.from("books").select("id, title, slug, author, cover_url, price, is_free, is_featured, description, preview_chapters, purchase_count, file_type, category, created_at, updated_at").eq("slug", slug!).single();
       return data;
     },
     enabled: !!slug,
@@ -212,9 +212,7 @@ const BookDetail = () => {
                 {book.is_free ? "Free to Read" : `₹${book.price}`}
               </span>
 
-              {book.description && (
-                <div className="mt-6 text-foreground/80 leading-relaxed prose prose-headings:font-serif prose-headings:text-foreground prose-p:text-foreground/80 prose-img:rounded-lg max-w-none" dangerouslySetInnerHTML={{ __html: book.description }} />
-              )}
+              {/* Description moved to "About This Book" section below */}
 
               {!canRead && !book.is_free && (
                 <div className="mt-6 space-y-3">
@@ -283,6 +281,117 @@ const BookDetail = () => {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* ─── Book Specifications ─── */}
+          <div className="mt-12 rounded-xl border border-border bg-card p-6">
+            <h2 className="font-serif text-2xl font-bold mb-6 flex items-center gap-2">
+              <Info className="h-5 w-5 text-primary" /> Book Specifications
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="flex items-start gap-3">
+                <User className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Author</p>
+                  <p className="font-medium text-foreground">{book.author}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Layers className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Chapters</p>
+                  <p className="font-medium text-foreground">{totalChapters} Chapters</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Globe className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Format</p>
+                  <p className="font-medium text-foreground">{book.file_type ? book.file_type.toUpperCase() : "Online Read"}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Calendar className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Published</p>
+                  <p className="font-medium text-foreground">{new Date(book.created_at).toLocaleDateString("en-IN", { year: "numeric", month: "short", day: "numeric" })}</p>
+                </div>
+              </div>
+              {book.category && (
+                <div className="flex items-start gap-3">
+                  <BookOpen className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Category</p>
+                    <p className="font-medium text-foreground">{book.category}</p>
+                  </div>
+                </div>
+              )}
+              <div className="flex items-start gap-3">
+                <ShoppingCart className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Price</p>
+                  <p className="font-medium text-foreground">{book.is_free ? "Free" : `₹${book.price}`}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Star className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Readers</p>
+                  <p className="font-medium text-foreground">{book.purchase_count}+ Readers</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Calendar className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Last Updated</p>
+                  <p className="font-medium text-foreground">{new Date(book.updated_at).toLocaleDateString("en-IN", { year: "numeric", month: "short", day: "numeric" })}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ─── About This Book ─── */}
+          <div className="mt-10">
+            <h2 className="font-serif text-2xl font-bold mb-4">About This Book</h2>
+            {book.description ? (
+              <div className="text-foreground/80 leading-relaxed prose prose-headings:font-serif prose-headings:text-foreground prose-p:text-foreground/80 prose-img:rounded-lg max-w-none" dangerouslySetInnerHTML={{ __html: book.description }} />
+            ) : (
+              <div className="text-muted-foreground leading-relaxed space-y-3">
+                <p>
+                  <strong className="text-foreground">{book.title}</strong> by <strong className="text-foreground">{book.author}</strong> is available to read online at GyandootNova. This book contains {totalChapters} chapters of carefully curated spiritual content.
+                </p>
+                <p>
+                  {book.is_free
+                    ? "This book is completely free to read. Simply open any chapter and start your spiritual journey."
+                    : `Get full access to all ${totalChapters} chapters for just ₹${book.price}. Once purchased, the book is available in your account forever — no subscription needed.`}
+                </p>
+                {previewChapters > 0 && (
+                  <p>
+                    <strong className="text-foreground">Free Preview:</strong> The first {previewChapters} chapter{previewChapters > 1 ? "s are" : " is"} available for free preview before purchase.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* ─── What You Get ─── */}
+          <div className="mt-10 rounded-xl border border-primary/20 bg-primary/5 p-6">
+            <h2 className="font-serif text-2xl font-bold mb-4">What You Get</h2>
+            <ul className="grid md:grid-cols-2 gap-3">
+              {[
+                "Read online instantly — no downloads needed",
+                "Dark mode & font size customization",
+                "Bookmark chapters & track progress",
+                "Highlight text & add personal notes",
+                `${totalChapters} chapters of authentic content`,
+                "Access forever — no subscription",
+              ].map((feature) => (
+                <li key={feature} className="flex items-center gap-2 text-sm text-foreground/80">
+                  <CheckCircle className="h-4 w-4 text-primary shrink-0" />
+                  {feature}
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* Continue Reading / Start Reading Banner */}

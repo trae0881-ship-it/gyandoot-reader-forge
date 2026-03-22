@@ -46,17 +46,9 @@ const ArticleDetail = () => {
     enabled: !!post,
   });
 
-  if (isLoading) {
-    return <Layout><div className="flex justify-center py-32"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div></Layout>;
-  }
+  const articleDesc = post?.meta_description || post?.excerpt?.replace(/<[^>]*>/g, "").slice(0, 155) || (post ? `Read ${post.title} on GyandootNova.` : "Spiritual articles and insights at GyandootNova.");
 
-  if (!post) {
-    return <Layout><div className="py-32 text-center text-muted-foreground">Article not found.</div></Layout>;
-  }
-
-  const articleDesc = post.meta_description || post.excerpt?.replace(/<[^>]*>/g, "").slice(0, 155) || `Read ${post.title} on GyandootNova.`;
-
-  const articleJsonLd = {
+  const articleJsonLd = post ? {
     "@context": "https://schema.org",
     "@type": "Article",
     "headline": post.title,
@@ -70,16 +62,24 @@ const ArticleDetail = () => {
       "name": "GyandootNova",
       "url": "https://gyandootnova.in",
     },
-  };
+  } : undefined;
 
   useSEO({
-    title: post.meta_title || post.title,
+    title: post ? (post.meta_title || post.title) : "Loading Article... | GyandootNova",
     description: articleDesc,
-    canonical: `/articles/${post.slug}`,
-    ogImage: post.cover_url ?? undefined,
+    canonical: post ? `/articles/${post.slug}` : undefined,
+    ogImage: post?.cover_url ?? undefined,
     ogType: "article",
     jsonLd: articleJsonLd,
   });
+
+  if (isLoading) {
+    return <Layout><div className="flex justify-center py-32"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div></Layout>;
+  }
+
+  if (!post) {
+    return <Layout><div className="py-32 text-center text-muted-foreground">Article not found.</div></Layout>;
+  }
 
   return (
     <Layout>

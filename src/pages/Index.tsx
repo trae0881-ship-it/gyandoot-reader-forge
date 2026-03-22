@@ -353,7 +353,7 @@ const Index = () => {
             <h3 className="font-serif text-xl font-semibold text-foreground pt-2">Why Choose GyandootNova for Spiritual Books?</h3>
             <ul className="list-disc pl-6 space-y-2">
               <li><strong className="text-foreground">Read Online Instantly</strong> — No downloads required. Our distraction-free reader supports dark mode, font resizing, bookmarks, and reading progress tracking.</li>
-              <li><strong className="text-foreground">Authentic & Verified Content</strong> — Every text is carefully curated from trusted sources, similar to <strong className="text-foreground">Gita Press books online</strong>.</li>
+              <li><strong className="text-foreground">Authentic & Verified Content</strong> — Every text is carefully curated from trusted spiritual sources and ancient manuscripts.</li>
               <li><strong className="text-foreground">Free & Premium Books</strong> — Many dharmik granth are completely free. Premium books start at just ₹99.</li>
               <li><strong className="text-foreground">Secure Payments</strong> — Pay safely via Razorpay (India) or PayPal (international). UPI, cards, and net banking accepted.</li>
               <li><strong className="text-foreground">Available Worldwide</strong> — Readers from India, USA, UK, Canada, Australia, and Japan access our books daily.</li>

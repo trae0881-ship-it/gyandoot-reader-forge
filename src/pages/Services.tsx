@@ -1,5 +1,6 @@
 import Layout from "@/components/layout/Layout";
 import { BookOpen, FileText, Headphones, Heart, Monitor, Users } from "lucide-react";
+import useSEO from "@/hooks/useSEO";
 
 const services = [
   {

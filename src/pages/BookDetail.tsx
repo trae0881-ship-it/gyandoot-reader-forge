@@ -212,9 +212,7 @@ const BookDetail = () => {
                 {book.is_free ? "Free to Read" : `₹${book.price}`}
               </span>
 
-              {book.description && (
-                <div className="mt-6 text-foreground/80 leading-relaxed prose prose-headings:font-serif prose-headings:text-foreground prose-p:text-foreground/80 prose-img:rounded-lg max-w-none" dangerouslySetInnerHTML={{ __html: book.description }} />
-              )}
+              {/* Description moved to "About This Book" section below */}
 
               {!canRead && !book.is_free && (
                 <div className="mt-6 space-y-3">

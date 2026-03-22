@@ -93,10 +93,10 @@ const Index = () => {
         />
         <div className="container relative text-center">
           <h1 className="font-serif text-4xl font-extrabold leading-tight text-primary-foreground md:text-6xl lg:text-7xl">
-            Illuminate Your <span className="text-secondary">Spiritual Path</span>
+            Authentic <span className="text-secondary">Dharmik Granth</span> — Vishnu Sahasraname, Geeta, Ramayana
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-primary-foreground/75 md:text-xl">
-            Discover sacred books, profound articles, and transformative programs crafted to awaken wisdom and deepen your inner journey.
+            Buy and read spiritual books online — Vishnu Sahasraname, Bhagwat Geeta, Ramayana, Hanuman Chalisa & more. India's trusted platform for sacred literature.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <Button size="lg" className="bg-primary-foreground text-primary font-semibold hover:bg-primary-foreground/90 shadow-lg px-8" asChild>

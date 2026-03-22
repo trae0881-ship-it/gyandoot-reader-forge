@@ -23,6 +23,12 @@ const supportTopics = [
 ];
 
 const Support = () => {
+  useSEO({
+    title: "Help Center — GyandootNova Book Reading & Account Support",
+    description: "Get help with reading books online, account issues, purchases & payments at GyandootNova. Contact our support team for dharmik granth questions.",
+    canonical: "/support",
+  });
+
   return (
     <Layout>
       <main className="container py-16 max-w-4xl mx-auto">

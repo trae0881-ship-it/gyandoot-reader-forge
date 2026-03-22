@@ -1,5 +1,6 @@
 import Layout from "@/components/layout/Layout";
 import { Star } from "lucide-react";
+import useSEO from "@/hooks/useSEO";
 
 const testimonials = [
   {

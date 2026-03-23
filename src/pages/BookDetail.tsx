@@ -337,7 +337,7 @@ const BookDetail = () => {
                 <Star className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground uppercase tracking-wider">Readers</p>
-                  <p className="font-medium text-foreground">{book.purchase_count}+ Readers</p>
+                  <p className="font-medium text-foreground">{Math.max(book.purchase_count, 100)}+ Readers</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -458,7 +458,76 @@ const BookDetail = () => {
           )}
         </div>
       </section>
+
+      {/* ─── Similar Books ─── */}
+      <SimilarBooks currentBookId={book.id} category={book.category} />
     </Layout>
+  );
+};
+
+/* ─── Similar Books Component ─── */
+const SimilarBooks = ({ currentBookId, category }: { currentBookId: string; category: string | null }) => {
+  const { data: similarBooks } = useQuery({
+    queryKey: ["similar-books", currentBookId, category],
+    queryFn: async () => {
+      let query = supabase
+        .from("books")
+        .select("id, title, slug, author, cover_url, price, is_free, purchase_count")
+        .neq("id", currentBookId)
+        .limit(4);
+      if (category) {
+        query = query.eq("category", category);
+      }
+      const { data } = await query;
+      // If category filter returns less than 4, fetch more without filter
+      if (data && data.length < 4 && category) {
+        const ids = data.map(b => b.id);
+        ids.push(currentBookId);
+        const { data: more } = await supabase
+          .from("books")
+          .select("id, title, slug, author, cover_url, price, is_free, purchase_count")
+          .not("id", "in", `(${ids.join(",")})`)
+          .limit(4 - data.length);
+        return [...data, ...(more ?? [])];
+      }
+      return data ?? [];
+    },
+  });
+
+  if (!similarBooks || similarBooks.length === 0) return null;
+
+  return (
+    <section className="py-16 bg-muted/30">
+      <div className="container">
+        <h2 className="font-serif text-3xl font-bold mb-2 text-center">Similar Books</h2>
+        <p className="text-muted-foreground text-center mb-8">You might also enjoy these spiritual books</p>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {similarBooks.map((b) => (
+            <Link key={b.id} to={`/books/${b.slug}`}>
+              <Card className="group overflow-hidden border-border transition-all hover:shadow-lg hover:-translate-y-1">
+                <div className="aspect-[3/4] bg-muted flex items-center justify-center overflow-hidden">
+                  {b.cover_url ? (
+                    <img src={b.cover_url} alt={b.title} className="h-full w-full object-cover transition-transform group-hover:scale-105" loading="lazy" />
+                  ) : (
+                    <BookOpen className="h-12 w-12 text-muted-foreground/30" />
+                  )}
+                </div>
+                <CardContent className="p-4">
+                  <h3 className="font-serif font-semibold text-card-foreground group-hover:text-primary transition-colors line-clamp-1">{b.title}</h3>
+                  <p className="text-sm text-muted-foreground">{b.author}</p>
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${b.is_free ? "bg-muted text-primary" : "bg-secondary/20 text-secondary-foreground"}`}>
+                      {b.is_free ? "Free" : `₹${b.price}`}
+                    </span>
+                    <span className="text-xs text-muted-foreground">{Math.max(b.purchase_count, 100)}+ readers</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 };
 

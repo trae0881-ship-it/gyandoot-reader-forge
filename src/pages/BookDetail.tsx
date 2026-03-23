@@ -337,7 +337,7 @@ const BookDetail = () => {
                 <Star className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground uppercase tracking-wider">Readers</p>
-                  <p className="font-medium text-foreground">{book.purchase_count}+ Readers</p>
+                  <p className="font-medium text-foreground">{Math.max(book.purchase_count, 100)}+ Readers</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">

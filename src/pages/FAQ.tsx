@@ -45,16 +45,44 @@ const faqs = [
   },
 ];
 
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map((faq) => ({
+    "@type": "Question",
+    "name": faq.q,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.a,
+    },
+  })),
+};
+
 const FAQ = () => {
   useSEO({
     title: "FAQ — GyandootNova Spiritual Books & Reading Platform",
     description: "Find answers about reading books online, purchases, payments, account issues & more at GyandootNova. Dharmik granth FAQ.",
     canonical: "/faq",
+    jsonLd: faqJsonLd,
   });
 
   return (
     <Layout>
       <main className="container py-16 max-w-3xl mx-auto">
+        <nav aria-label="Breadcrumb" className="mb-6 text-sm text-muted-foreground">
+          <ol className="flex items-center gap-1.5" itemScope itemType="https://schema.org/BreadcrumbList">
+            <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
+              <a href="/" itemProp="item"><span itemProp="name">Home</span></a>
+              <meta itemProp="position" content="1" />
+            </li>
+            <li className="text-muted-foreground/50">/</li>
+            <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
+              <span itemProp="name" className="text-foreground font-medium">FAQ</span>
+              <meta itemProp="position" content="2" />
+            </li>
+          </ol>
+        </nav>
+
         <section className="text-center mb-12">
           <h1 className="font-serif text-4xl md:text-5xl font-bold text-primary mb-4">
             Frequently Asked Questions

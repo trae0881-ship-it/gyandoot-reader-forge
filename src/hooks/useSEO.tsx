@@ -11,6 +11,17 @@ interface SEOProps {
 
 const BASE_URL = "https://gyandootnova.in";
 
+const getOrCreateMeta = (attr: string, value: string): HTMLMetaElement => {
+  let el = document.querySelector(`meta[${attr}="${value}"]`) as HTMLMetaElement;
+  if (!el) {
+    el = document.createElement("meta");
+    const [key] = attr === "property" ? ["property"] : ["name"];
+    el.setAttribute(key, value);
+    document.head.appendChild(el);
+  }
+  return el;
+};
+
 const useSEO = ({ title, description, canonical, ogImage, ogType, jsonLd }: SEOProps) => {
   useEffect(() => {
     // Title
@@ -18,33 +29,37 @@ const useSEO = ({ title, description, canonical, ogImage, ogType, jsonLd }: SEOP
 
     // Meta description
     if (description) {
-      let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement;
-      if (meta) meta.content = description;
+      getOrCreateMeta("name", "description").content = description;
     }
 
     // OG tags
     const setOG = (property: string, content: string) => {
-      let el = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement;
-      if (el) el.content = content;
+      getOrCreateMeta("property", property).content = content;
     };
-    setOG("og:title", title);
+    setOG("og:title", document.title);
     if (description) setOG("og:description", description);
     if (ogType) setOG("og:type", ogType);
-    if (ogImage) setOG("og:image", ogImage);
+    if (ogImage) setOG("og:image", ogImage.startsWith("http") ? ogImage : `${BASE_URL}${ogImage}`);
     if (canonical) setOG("og:url", `${BASE_URL}${canonical}`);
 
     // Twitter
     const setTwitter = (name: string, content: string) => {
-      let el = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement;
-      if (el) el.content = content;
+      getOrCreateMeta("name", name).content = content;
     };
-    setTwitter("twitter:title", title);
+    setTwitter("twitter:card", "summary_large_image");
+    setTwitter("twitter:title", document.title);
     if (description) setTwitter("twitter:description", description);
+    if (ogImage) setTwitter("twitter:image", ogImage.startsWith("http") ? ogImage : `${BASE_URL}${ogImage}`);
 
     // Canonical
     if (canonical) {
       let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
-      if (link) link.href = `${BASE_URL}${canonical}`;
+      if (!link) {
+        link = document.createElement("link");
+        link.rel = "canonical";
+        document.head.appendChild(link);
+      }
+      link.href = `${BASE_URL}${canonical}`;
     }
 
     // JSON-LD
@@ -54,7 +69,6 @@ const useSEO = ({ title, description, canonical, ogImage, ogType, jsonLd }: SEOP
       scriptEl.type = "application/ld+json";
       scriptEl.id = "dynamic-jsonld";
       scriptEl.textContent = JSON.stringify(jsonLd);
-      // Remove existing dynamic one
       document.getElementById("dynamic-jsonld")?.remove();
       document.head.appendChild(scriptEl);
     }

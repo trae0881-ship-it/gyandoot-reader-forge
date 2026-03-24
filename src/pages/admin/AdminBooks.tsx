@@ -205,14 +205,42 @@ const AdminBooks = () => {
     return data.publicUrl;
   };
 
+  const normalizeFileType = (value?: string | null): string | null => {
+    const normalized = value?.split(".").pop()?.trim().toLowerCase().replace(/[^a-z0-9]/g, "") ?? "";
+    return normalized || null;
+  };
+
+  const allowedFileTypes = new Set(["pdf", "doc", "docx", "text", "jpeg", "jpg", "png", "webp"]);
+
   const saveMutation = useMutation({
     mutationFn: async () => {
       setUploading(true); setUploadProgress(10);
       let cover_url = form.cover_url;
       let file_url = form.file_url;
-      let file_type = form.file_type;
-      if (coverFile) { setUploadProgress(30); cover_url = await uploadFile(coverFile, "covers"); setUploadProgress(55); }
-      if (bookFile) { setUploadProgress(60); file_url = await uploadFile(bookFile, "books"); file_type = bookFile.name.split(".").pop()?.toLowerCase() ?? ""; setUploadProgress(90); }
+      let file_type = normalizeFileType(form.file_type);
+
+      if (coverFile) {
+        setUploadProgress(30);
+        cover_url = await uploadFile(coverFile, "covers");
+        setUploadProgress(55);
+      }
+
+      if (bookFile) {
+        setUploadProgress(60);
+        file_url = await uploadFile(bookFile, "books");
+        file_type = normalizeFileType(bookFile.name);
+
+        if (!file_type || !allowedFileTypes.has(file_type)) {
+          throw new Error("Book file format invalid hai. Sirf PDF, DOC, DOCX, JPG, JPEG, PNG, WEBP allowed hain.");
+        }
+
+        setUploadProgress(90);
+      }
+
+      if (file_type && !allowedFileTypes.has(file_type)) {
+        file_type = null;
+      }
+
       const slug = slugify(form.title);
       const payload = { ...form, slug, cover_url, file_url, file_type, price: form.is_free ? 0 : form.price };
       if (editing) {

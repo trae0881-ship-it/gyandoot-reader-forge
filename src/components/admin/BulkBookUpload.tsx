@@ -152,6 +152,13 @@ const BulkBookUpload = () => {
     return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl;
   };
 
+  const normalizeFileType = (value?: string | null): string | null => {
+    const normalized = value?.split(".").pop()?.trim().toLowerCase().replace(/[^a-z0-9]/g, "") ?? "";
+    return normalized || null;
+  };
+
+  const allowedFileTypes = new Set(["pdf", "doc", "docx", "text", "jpeg", "jpg", "png", "webp"]);
+
   const bulkMutation = useMutation({
     mutationFn: async () => {
       const valid = items.filter((it) => it.title.trim());
@@ -172,7 +179,11 @@ const BulkBookUpload = () => {
         }
         if (item.bookFile) {
           file_url = await uploadToStorage(item.bookFile, "book-files");
-          file_type = item.bookFile.name.split(".").pop()?.toUpperCase() ?? null;
+          file_type = normalizeFileType(item.bookFile.name);
+
+          if (!file_type || !allowedFileTypes.has(file_type)) {
+            throw new Error(`'${item.title}' ka file format invalid hai. Sirf PDF, DOC, DOCX, JPG, JPEG, PNG, WEBP allowed hain.`);
+          }
         }
 
         const slug = slugify(item.title);

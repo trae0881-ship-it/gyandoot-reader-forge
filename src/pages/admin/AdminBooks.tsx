@@ -212,7 +212,7 @@ const AdminBooks = () => {
       let file_url = form.file_url;
       let file_type = form.file_type;
       if (coverFile) { setUploadProgress(30); cover_url = await uploadFile(coverFile, "covers"); setUploadProgress(55); }
-      if (bookFile) { setUploadProgress(60); file_url = await uploadFile(bookFile, "books"); file_type = bookFile.name.split(".").pop()?.toUpperCase() ?? ""; setUploadProgress(90); }
+      if (bookFile) { setUploadProgress(60); file_url = await uploadFile(bookFile, "books"); file_type = bookFile.name.split(".").pop()?.toLowerCase() ?? ""; setUploadProgress(90); }
       const slug = slugify(form.title);
       const payload = { ...form, slug, cover_url, file_url, file_type, price: form.is_free ? 0 : form.price };
       if (editing) {

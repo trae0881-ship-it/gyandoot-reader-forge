@@ -558,6 +558,13 @@ const BookReader = () => {
             ))}
           </div>
           <div className="w-px h-4 bg-border mx-0.5" />
+          <Button size="sm" variant="ghost" className="h-6 w-6 p-0" title="Copy" onClick={copySelectedText}>
+            <Copy className="h-3.5 w-3.5" />
+          </Button>
+          <Button size="sm" variant="ghost" className="h-6 w-6 p-0" title="Search Meaning" onClick={searchMeaning}>
+            <Search className="h-3.5 w-3.5" />
+          </Button>
+          <div className="w-px h-4 bg-border mx-0.5" />
           <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => setShowHighlightBar(false)}>
             <X className="h-3.5 w-3.5" />
           </Button>

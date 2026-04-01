@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2, BookOpen, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import SecurePdfViewer from "@/components/SecurePdfViewer";
 import logoImg from "@/assets/logo.jpeg";
 
@@ -12,15 +12,6 @@ const FileBookReader = () => {
   const { slug } = useParams<{ slug: string }>();
   const { user, loading: authLoading } = useAuth();
   const [darkMode, setDarkMode] = useState(false);
-  const progressKey = book?.id && user?.id ? `book-progress-${book.id}-${user.id}` : null;
-
-  const savedPage = progressKey ? parseInt(localStorage.getItem(progressKey) || "1", 10) : 1;
-
-  const handlePageChange = useCallback((page: number) => {
-    if (progressKey) {
-      localStorage.setItem(progressKey, String(page));
-    }
-  }, [progressKey]);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 

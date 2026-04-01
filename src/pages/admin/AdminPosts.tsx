@@ -9,23 +9,81 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, ArrowLeft } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowLeft, Eye, Globe, CheckCircle, AlertTriangle } from "lucide-react";
 import RichTextEditor from "@/components/RichTextEditor";
 
 const slugify = (t: string) => {
-  // Support Hindi/Unicode: keep letters, numbers, spaces then convert
   const slug = t
     .trim()
     .toLowerCase()
-    .replace(/[\s\-_]+/g, "-") // spaces/dashes to single dash
-    .replace(/[^\p{L}\p{N}\-]/gu, "") // keep Unicode letters, numbers, dashes
+    .replace(/[\s\-_]+/g, "-")
+    .replace(/[^\p{L}\p{N}\-]/gu, "")
     .replace(/(^-|-$)/g, "");
-  // If slug is empty (shouldn't happen with Hindi), use timestamp fallback
   return slug || `post-${Date.now()}`;
 };
 
-const emptyForm = { title: "", content: "", excerpt: "", post_type: "article" as string, is_published: false, meta_title: "", meta_description: "" };
+const emptyForm = {
+  title: "", slug: "", content: "", excerpt: "", post_type: "article" as string,
+  is_published: false, meta_title: "", meta_description: "",
+};
+
+/* ── SEO Score helpers ──────────────────────────────────────── */
+const getSeoScore = (form: typeof emptyForm) => {
+  let score = 0;
+  const checks: { label: string; pass: boolean; tip: string }[] = [];
+
+  const metaTitle = form.meta_title || form.title;
+  const metaDesc = form.meta_description || form.excerpt;
+
+  // Title length
+  const titleLen = metaTitle.length;
+  const titleOk = titleLen >= 15 && titleLen <= 60;
+  checks.push({ label: "Title length (15-60 chars)", pass: titleOk, tip: `${titleLen}/60 characters` });
+  if (titleOk) score += 20;
+
+  // Meta description length
+  const descLen = metaDesc.length;
+  const descOk = descLen >= 50 && descLen <= 160;
+  checks.push({ label: "Description (50-160 chars)", pass: descOk, tip: `${descLen}/160 characters` });
+  if (descOk) score += 20;
+
+  // Slug
+  const slugOk = (form.slug || slugify(form.title)).length > 3;
+  checks.push({ label: "URL slug is set", pass: slugOk, tip: slugOk ? "Good slug" : "Add a meaningful slug" });
+  if (slugOk) score += 15;
+
+  // Excerpt
+  const excerptOk = form.excerpt.length > 20;
+  checks.push({ label: "Excerpt provided", pass: excerptOk, tip: excerptOk ? "Good excerpt" : "Add a summary for listings" });
+  if (excerptOk) score += 15;
+
+  // Content length
+  const contentText = form.content.replace(/<[^>]*>/g, "");
+  const contentOk = contentText.length > 300;
+  checks.push({ label: "Content (300+ chars)", pass: contentOk, tip: `${contentText.length} characters` });
+  if (contentOk) score += 15;
+
+  // Has cover image in content or excerpt
+  const hasImage = form.content.includes("<img");
+  checks.push({ label: "Contains image", pass: hasImage, tip: hasImage ? "Image found" : "Add an image for better engagement" });
+  if (hasImage) score += 15;
+
+  return { score, checks };
+};
+
+const getScoreColor = (score: number) => {
+  if (score >= 80) return "text-green-600";
+  if (score >= 50) return "text-yellow-600";
+  return "text-red-500";
+};
+
+const getProgressColor = (score: number) => {
+  if (score >= 80) return "[&>div]:bg-green-500";
+  if (score >= 50) return "[&>div]:bg-yellow-500";
+  return "[&>div]:bg-red-500";
+};
 
 const AdminPosts = () => {
   const qc = useQueryClient();
@@ -44,12 +102,22 @@ const AdminPosts = () => {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const slug = slugify(form.title);
+      const finalSlug = form.slug.trim() || slugify(form.title);
+      const payload = {
+        title: form.title,
+        slug: finalSlug,
+        content: form.content,
+        excerpt: form.excerpt,
+        post_type: form.post_type,
+        is_published: form.is_published,
+        meta_title: form.meta_title,
+        meta_description: form.meta_description,
+      };
       if (editing) {
-        const { error } = await supabase.from("posts").update({ ...form, slug }).eq("id", editing.id);
+        const { error } = await supabase.from("posts").update(payload).eq("id", editing.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("posts").insert({ ...form, slug });
+        const { error } = await supabase.from("posts").insert(payload);
         if (error) throw error;
       }
     },
@@ -73,9 +141,18 @@ const AdminPosts = () => {
 
   const openEdit = (p: any) => {
     setEditing(p);
-    setForm({ title: p.title, content: p.content ?? "", excerpt: p.excerpt ?? "", post_type: p.post_type, is_published: p.is_published, meta_title: p.meta_title ?? "", meta_description: p.meta_description ?? "" });
+    setForm({
+      title: p.title, slug: p.slug ?? "", content: p.content ?? "", excerpt: p.excerpt ?? "",
+      post_type: p.post_type, is_published: p.is_published,
+      meta_title: p.meta_title ?? "", meta_description: p.meta_description ?? "",
+    });
     setView("form");
   };
+
+  const seo = getSeoScore(form);
+  const previewTitle = form.meta_title || form.title || "Post Title";
+  const previewDesc = form.meta_description || form.excerpt || "Post description will appear here...";
+  const previewSlug = form.slug || (form.title ? slugify(form.title) : "post-url");
 
   /* ─── Form view ────────────────────────────────────────────────── */
   if (view === "form") {
@@ -87,7 +164,7 @@ const AdminPosts = () => {
         </div>
 
         <div className="space-y-5">
-          {/* Title */}
+          {/* Title & Type */}
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2 md:col-span-1">
               <Label>Title *</Label>
@@ -103,6 +180,30 @@ const AdminPosts = () => {
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          {/* Slug */}
+          <div>
+            <Label>URL Slug</Label>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-xs text-muted-foreground shrink-0">/articles/</span>
+              <Input
+                value={form.slug}
+                onChange={(e) => setForm({ ...form, slug: e.target.value })}
+                placeholder={form.title ? slugify(form.title) : "auto-generated-from-title"}
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setForm({ ...form, slug: slugify(form.title) })}
+                disabled={!form.title}
+              >
+                Auto
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">Leave empty to auto-generate from title. Supports Hindi/Unicode.</p>
           </div>
 
           {/* Excerpt */}
@@ -122,18 +223,63 @@ const AdminPosts = () => {
             />
           </div>
 
-          {/* SEO */}
-          <div className="grid grid-cols-2 gap-4 pt-2 border-t border-border">
-            <div className="col-span-2">
-              <p className="text-sm font-medium text-muted-foreground mb-3">SEO Settings</p>
+          {/* SEO Section */}
+          <div className="border-t border-border pt-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium flex items-center gap-2">
+                <Globe className="h-4 w-4" /> SEO Settings
+              </p>
+              <div className="flex items-center gap-2">
+                <span className={`text-sm font-bold ${getScoreColor(seo.score)}`}>{seo.score}%</span>
+                <Progress value={seo.score} className={`w-24 h-2 ${getProgressColor(seo.score)}`} />
+              </div>
             </div>
-            <div>
-              <Label>Meta Title</Label>
-              <Input value={form.meta_title} onChange={(e) => setForm({ ...form, meta_title: e.target.value })} className="mt-1" placeholder="SEO title (max 60 chars)" />
+
+            {/* Google Preview */}
+            <Card className="border-dashed">
+              <CardContent className="p-4">
+                <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
+                  <Eye className="h-3 w-3" /> Google Search Preview
+                </p>
+                <div className="space-y-0.5">
+                  <p className="text-blue-600 text-lg leading-tight hover:underline cursor-default truncate">
+                    {previewTitle.slice(0, 60)}{previewTitle.length > 60 ? "..." : ""}
+                  </p>
+                  <p className="text-green-700 text-sm truncate">
+                    gyandootnova.in › articles › {previewSlug}
+                  </p>
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {previewDesc.replace(/<[^>]*>/g, "").slice(0, 160)}{previewDesc.replace(/<[^>]*>/g, "").length > 160 ? "..." : ""}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* SEO Checklist */}
+            <div className="grid gap-1.5">
+              {seo.checks.map((c, i) => (
+                <div key={i} className="flex items-center gap-2 text-xs">
+                  {c.pass ? (
+                    <CheckCircle className="h-3.5 w-3.5 text-green-500 shrink-0" />
+                  ) : (
+                    <AlertTriangle className="h-3.5 w-3.5 text-yellow-500 shrink-0" />
+                  )}
+                  <span className={c.pass ? "text-foreground" : "text-muted-foreground"}>{c.label}</span>
+                  <span className="text-muted-foreground ml-auto">{c.tip}</span>
+                </div>
+              ))}
             </div>
-            <div>
-              <Label>Meta Description</Label>
-              <Textarea value={form.meta_description} onChange={(e) => setForm({ ...form, meta_description: e.target.value })} className="mt-1" rows={2} placeholder="SEO description (max 160 chars)" />
+
+            {/* Meta fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>Meta Title <span className="text-muted-foreground text-xs">({(form.meta_title || form.title).length}/60)</span></Label>
+                <Input value={form.meta_title} onChange={(e) => setForm({ ...form, meta_title: e.target.value })} className="mt-1" placeholder={form.title || "SEO title"} />
+              </div>
+              <div>
+                <Label>Meta Description <span className="text-muted-foreground text-xs">({(form.meta_description || form.excerpt).length}/160)</span></Label>
+                <Textarea value={form.meta_description} onChange={(e) => setForm({ ...form, meta_description: e.target.value })} className="mt-1" rows={2} placeholder="SEO description" />
+              </div>
             </div>
           </div>
 
@@ -169,6 +315,7 @@ const AdminPosts = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Title</TableHead>
+                <TableHead>Slug</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -177,7 +324,8 @@ const AdminPosts = () => {
             <TableBody>
               {posts?.map((p) => (
                 <TableRow key={p.id}>
-                  <TableCell className="font-medium">{p.title}</TableCell>
+                  <TableCell className="font-medium max-w-[200px] truncate">{p.title}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground max-w-[150px] truncate">{p.slug}</TableCell>
                   <TableCell className="capitalize">{p.post_type}</TableCell>
                   <TableCell>
                     {p.is_published
@@ -191,7 +339,7 @@ const AdminPosts = () => {
                 </TableRow>
               ))}
               {(!posts || posts.length === 0) && (
-                <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">No posts yet.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">No posts yet.</TableCell></TableRow>
               )}
             </TableBody>
           </Table>

@@ -160,6 +160,7 @@ const SecurePdfViewer = ({ url, title, darkMode, initialPage, onPageChange }: Se
   useEffect(() => {
     if (numPages > 0) {
       renderPage(currentPage);
+      onPageChange?.(currentPage);
     }
   }, [currentPage, scale, numPages, renderPage]);
 

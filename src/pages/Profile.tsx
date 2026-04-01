@@ -348,7 +348,7 @@ const Profile = () => {
               <CardContent className="py-10 text-center text-muted-foreground">
                 <Heart className="h-10 w-10 mx-auto mb-3 opacity-30" />
                 <p>No donations yet.</p>
-                <Link to="/donate" className="text-primary text-sm underline mt-1 inline-block">Make a Donation</Link>
+                <Link to="/support-us" className="text-primary text-sm underline mt-1 inline-block">Make a Donation</Link>
               </CardContent>
             </Card>
           ) : (

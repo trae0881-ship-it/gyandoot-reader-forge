@@ -26,7 +26,7 @@ const sitemapSections = [
     links: [
       { to: "/faq", label: "FAQ" },
       { to: "/support", label: "Help Center" },
-      { to: "/donate", label: "Donate" },
+      { to: "/support-us", label: "Support Us" },
       { to: "/careers", label: "Careers" },
     ],
   },

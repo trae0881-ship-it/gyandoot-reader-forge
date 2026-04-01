@@ -17,7 +17,7 @@ const Donate = () => {
   useSEO({
     title: "Support Us — Donate to GyandootNova Spiritual Books Mission",
     description: "Support GyandootNova's mission to publish and share dharmik granth, Vishnu Sahasraname, Bhagwat Geeta & spiritual books with seekers worldwide.",
-    canonical: "/donate",
+    canonical: "/support-us",
   });
 
   const { user } = useAuth();

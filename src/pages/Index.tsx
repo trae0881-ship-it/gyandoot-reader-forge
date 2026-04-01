@@ -110,7 +110,7 @@ const Index = () => {
               className="bg-secondary text-secondary-foreground font-semibold hover:bg-secondary/90 shadow-lg px-8"
               asChild
             >
-              <Link to="/donate">
+              <Link to="/support-us">
                 <Heart className="mr-2 h-5 w-5" /> Support Us
               </Link>
             </Button>
@@ -401,7 +401,7 @@ const Index = () => {
                 className="mt-8 bg-secondary text-secondary-foreground font-semibold hover:bg-secondary/90 shadow-lg px-10"
                 asChild
               >
-                <Link to="/donate">Support Us <Heart className="ml-2 h-4 w-4" /></Link>
+                <Link to="/support-us">Support Us <Heart className="ml-2 h-4 w-4" /></Link>
               </Button>
             </div>
           </div>

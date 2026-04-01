@@ -180,7 +180,7 @@ const Footer = () => {
             </form>
             <div className="mt-4 flex items-start gap-2">
               <Mail className="h-4 w-4 text-secondary mt-0.5" />
-              <p className="text-sm text-background/60">contact@gyandootnova.in</p>
+              <p className="text-sm text-background/70">contact@gyandootnova.in</p>
             </div>
           </div>
         </div>

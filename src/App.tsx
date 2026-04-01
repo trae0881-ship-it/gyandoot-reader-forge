@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Books from "./pages/Books";
 import BookDetail from "./pages/BookDetail";
 import BookReader from "./pages/BookReader";
+import FileBookReader from "./pages/FileBookReader";
 import Articles from "./pages/Articles";
 import ArticleDetail from "./pages/ArticleDetail";
 import Donate from "./pages/Donate";

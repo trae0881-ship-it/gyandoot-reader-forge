@@ -252,7 +252,7 @@ const FileBookReader = () => {
 
         {fileData?.url && isPdf && (
           <div className="relative">
-            <SecurePdfViewer url={fileData.url} title={book.title} darkMode={darkMode} />
+            <SecurePdfViewer url={fileData.url} title={book.title} darkMode={darkMode} initialPage={savedPage} onPageChange={handlePageChange} />
             <WatermarkOverlay />
           </div>
         )}

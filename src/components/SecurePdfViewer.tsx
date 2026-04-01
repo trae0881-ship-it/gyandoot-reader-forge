@@ -29,7 +29,7 @@ interface Highlight {
 
 const HIGHLIGHT_COLORS = ["#FFEB3B", "#4CAF50", "#2196F3", "#FF9800", "#E91E63"];
 
-const SecurePdfViewer = ({ url, title, darkMode }: SecurePdfViewerProps) => {
+const SecurePdfViewer = ({ url, title, darkMode, initialPage, onPageChange }: SecurePdfViewerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const textLayerRef = useRef<HTMLDivElement>(null);

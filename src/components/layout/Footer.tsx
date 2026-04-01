@@ -163,7 +163,7 @@ const Footer = () => {
 
           {/* Newsletter */}
           <div>
-            <h4 className="font-serif font-semibold mb-4 text-secondary">Stay Connected</h4>
+            <h3 className="font-serif font-semibold mb-4 text-secondary">Stay Connected</h3>
             <p className="text-sm text-background/60 mb-3">Subscribe for spiritual wisdom and updates.</p>
             <form onSubmit={handleNewsletter} className="flex gap-2">
               <input

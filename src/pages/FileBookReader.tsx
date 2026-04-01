@@ -12,6 +12,15 @@ const FileBookReader = () => {
   const { slug } = useParams<{ slug: string }>();
   const { user, loading: authLoading } = useAuth();
   const [darkMode, setDarkMode] = useState(false);
+  const progressKey = book?.id && user?.id ? `book-progress-${book.id}-${user.id}` : null;
+
+  const savedPage = progressKey ? parseInt(localStorage.getItem(progressKey) || "1", 10) : 1;
+
+  const handlePageChange = useCallback((page: number) => {
+    if (progressKey) {
+      localStorage.setItem(progressKey, String(page));
+    }
+  }, [progressKey]);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 

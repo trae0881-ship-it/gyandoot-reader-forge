@@ -122,12 +122,7 @@ const FileBookReader = () => {
         )}
 
         {fileData?.url && isPdf && (
-          <iframe
-            src={`${fileData.url}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
-            className="w-full rounded-lg border border-border"
-            style={{ height: "calc(100vh - 100px)" }}
-            title={book.title}
-          />
+          <SecurePdfViewer url={fileData.url} title={book.title} darkMode={darkMode} />
         )}
 
         {fileData?.url && isImage && (

@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2, BookOpen, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import SecurePdfViewer from "@/components/SecurePdfViewer";
+import logoImg from "@/assets/logo.jpeg";
 
 const FileBookReader = () => {
   const { slug } = useParams<{ slug: string }>();

@@ -170,10 +170,9 @@ const Books = () => {
               </div>
 
               {hasMore && (
-                <div className="mt-8 text-center">
-                  <Button variant="outline" size="lg" onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}>
-                    Show More Books
-                  </Button>
+                <div ref={loaderRef} className="mt-8 text-center">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary mx-auto" />
+                  <p className="text-xs text-muted-foreground mt-2">Loading more books...</p>
                 </div>
               )}
             </>

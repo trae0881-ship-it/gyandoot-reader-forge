@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 
 const FileBookReader = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [darkMode, setDarkMode] = useState(false);
 
   const { data: book } = useQuery({
@@ -25,7 +25,7 @@ const FileBookReader = () => {
   });
 
   const { data: fileData, isLoading, error } = useQuery({
-    queryKey: ["book-file-url", book?.id],
+    queryKey: ["book-file-url", book?.id, user?.id],
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("get-book-file-url", {
         body: { book_id: book!.id },
@@ -34,8 +34,9 @@ const FileBookReader = () => {
       if (data?.error) throw new Error(data.error);
       return data as { url: string; file_type: string };
     },
-    enabled: !!book?.id,
+    enabled: !!book?.id && !authLoading,
     staleTime: 30 * 60 * 1000,
+    retry: 1,
   });
 
   // Prevent right-click to discourage downloading
@@ -60,7 +61,7 @@ const FileBookReader = () => {
     return () => document.removeEventListener("keydown", handler);
   }, []);
 
-  if (!book) {
+  if (authLoading || !book) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -110,6 +111,9 @@ const FileBookReader = () => {
           <div className="flex flex-col items-center justify-center py-32 gap-4">
             <AlertTriangle className="h-10 w-10 text-destructive" />
             <p className="text-destructive font-medium">{(error as Error).message}</p>
+            {!user && (
+              <p className="text-sm text-muted-foreground">Please sign in to read this book.</p>
+            )}
             <Button asChild variant="outline">
               <Link to={`/books/${slug}`}>Back to Book</Link>
             </Button>
@@ -122,7 +126,6 @@ const FileBookReader = () => {
             className="w-full rounded-lg border border-border"
             style={{ height: "calc(100vh - 100px)" }}
             title={book.title}
-            sandbox="allow-same-origin allow-scripts"
           />
         )}
 
@@ -141,11 +144,10 @@ const FileBookReader = () => {
 
         {fileData?.url && isDoc && (
           <iframe
-            src={`https://docs.google.com/gview?url=${encodeURIComponent(fileData.url)}&embedded=true`}
+            src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileData.url)}`}
             className="w-full rounded-lg border border-border"
             style={{ height: "calc(100vh - 100px)" }}
             title={book.title}
-            sandbox="allow-same-origin allow-scripts allow-popups"
           />
         )}
 

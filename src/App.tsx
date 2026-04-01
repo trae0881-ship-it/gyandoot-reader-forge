@@ -56,6 +56,7 @@ const App = () => (
             <Route path="/books/:slug/:chapterSlug" element={<BookReader />} />
             <Route path="/articles" element={<Articles />} />
             <Route path="/articles/:slug" element={<ArticleDetail />} />
+            <Route path="/support-us" element={<Donate />} />
             <Route path="/donate" element={<Donate />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/auth" element={<Auth />} />

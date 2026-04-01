@@ -125,7 +125,7 @@ const Header = () => {
         <Button
           variant="ghost"
           size="icon"
-          className="xl:hidden"
+          className="lg:hidden"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
         >

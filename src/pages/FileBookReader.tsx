@@ -115,6 +115,49 @@ const FileBookReader = () => {
   const isPdf = fileType === "pdf";
   const isDoc = ["doc", "docx"].includes(fileType);
 
+  // Watermark text — user email for traceability
+  const watermarkText = user?.email || "GyandootNova";
+
+  const WatermarkOverlay = () => (
+    <div
+      className="absolute inset-0 z-20 pointer-events-none overflow-hidden"
+      aria-hidden="true"
+      style={{ userSelect: "none", WebkitUserSelect: "none" }}
+    >
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage: `repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent 180px,
+            rgba(0,0,0,0.03) 180px,
+            rgba(0,0,0,0.03) 181px
+          )`,
+        }}
+      />
+      {Array.from({ length: 8 }).map((_, row) =>
+        Array.from({ length: 4 }).map((_, col) => (
+          <span
+            key={`${row}-${col}`}
+            className="absolute text-[11px] font-medium whitespace-nowrap"
+            style={{
+              top: `${12 + row * 12}%`,
+              left: `${5 + col * 28}%`,
+              transform: "rotate(-35deg)",
+              opacity: 0.07,
+              color: darkMode ? "#ffffff" : "#000000",
+              letterSpacing: "2px",
+              pointerEvents: "none",
+            }}
+          >
+            {watermarkText}
+          </span>
+        ))
+      )}
+    </div>
+  );
+
   return (
     <div
       className={`min-h-screen select-none ${darkMode ? "bg-gray-900 text-gray-100" : "bg-background text-foreground"}`}

@@ -40,7 +40,12 @@ const FileBookReader = () => {
     enabled: !!slug,
   });
 
-  const { data: fileData, isLoading, error } = useQuery({
+  const progressKey = book?.id && user?.id ? `book-progress-${book.id}-${user.id}` : null;
+  const savedPage = useMemo(() => progressKey ? parseInt(localStorage.getItem(progressKey) || "1", 10) : 1, [progressKey]);
+  const handlePageChange = useCallback((page: number) => {
+    if (progressKey) localStorage.setItem(progressKey, String(page));
+  }, [progressKey]);
+
     queryKey: ["book-file-url", book?.id, user?.id],
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("get-book-file-url", {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
@@ -8,11 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect } from "react";
 import { lovable } from "@/integrations/lovable/index";
 import { Separator } from "@/components/ui/separator";
 import logoImg from "@/assets/logo.jpeg";
-
 
 const ForgotPasswordLink = ({ email }: { email: string }) => {
   const { toast } = useToast();
@@ -50,11 +48,13 @@ const Auth = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    if (user) navigate("/profile");
-  }, [user, navigate]);
+    if (!authLoading && user) {
+      navigate("/profile", { replace: true });
+    }
+  }, [user, authLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +63,6 @@ const Auth = () => {
     if (isLogin) {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
-        // Show user-friendly message for banned accounts
         const isBanned = error.message.toLowerCase().includes("ban") || error.message.toLowerCase().includes("user not allowed");
         toast({
           title: isBanned ? "Account Disabled" : "Login Failed",
@@ -72,8 +71,6 @@ const Auth = () => {
             : error.message,
           variant: "destructive",
         });
-      } else {
-        navigate("/profile");
       }
     } else {
       const { data: signUpData, error } = await supabase.auth.signUp({
@@ -88,31 +85,35 @@ const Auth = () => {
         toast({ title: "Error", description: error.message, variant: "destructive" });
       } else {
         toast({ title: "Check your email", description: "We've sent you a verification link." });
-        // Send welcome email in background (don't block UI)
         if (signUpData?.user?.email) {
-          fetch(
-            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-welcome-email`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ email: signUpData.user.email, display_name: displayName }),
-            }
-          ).catch(console.error);
+          fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-welcome-email`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: signUpData.user.email, display_name: displayName }),
+          }).catch(console.error);
         }
       }
     }
+
     setLoading(false);
   };
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
-    const { error } = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/profile`,
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: `${window.location.origin}/auth`,
     });
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+
+    if (result.error) {
+      toast({ title: "Error", description: result.error.message, variant: "destructive" });
       setGoogleLoading(false);
+      return;
     }
+
+    if (result.redirected) return;
+
+    setGoogleLoading(false);
+    navigate("/profile", { replace: true });
   };
 
   return (

@@ -21,6 +21,7 @@ const BookDetail = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [purchasing, setPurchasing] = useState(false);
+  const [claimingFree, setClaimingFree] = useState(false);
   const [gateway, setGateway] = useState<PaymentGateway>("razorpay");
   const [couponCode, setCouponCode] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
@@ -55,13 +56,13 @@ const BookDetail = () => {
     enabled: !!book?.id,
   });
 
-  const { data: hasPurchased } = useQuery({
+  const { data: hasPurchased, isLoading: purchaseStatusLoading } = useQuery({
     queryKey: ["purchase", book?.id, user?.id],
     queryFn: async () => {
       const { data } = await supabase.rpc("has_purchased_book", { _user_id: user!.id, _book_id: book!.id });
       return !!data;
     },
-    enabled: !!book?.id && !!user?.id && !book?.is_free,
+    enabled: !!book?.id && !!user?.id,
   });
 
   const { data: readingProgress } = useQuery({
@@ -102,6 +103,51 @@ const BookDetail = () => {
   const removeCoupon = () => {
     setAppliedCoupon(null);
     setCouponCode("");
+  };
+
+  const handleClaimFreeBook = async () => {
+    if (!book) return;
+
+    if (!user) {
+      toast({
+        title: "कृपया पहले लॉगिन करें",
+        description: "Free book को dashboard में add करने के लिए login ज़रूरी है।",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    setClaimingFree(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("claim-free-book", {
+        body: { book_id: book.id },
+      });
+
+      if (error || data?.error) {
+        toast({
+          title: "Could not add book",
+          description: data?.error || error?.message || "Something went wrong",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["purchase", book.id, user.id] }),
+        queryClient.invalidateQueries({ queryKey: ["user-purchases", user.id] }),
+      ]);
+
+      toast({
+        title: data?.alreadyClaimed ? "Already in your dashboard" : "Book added to dashboard",
+        description: data?.alreadyClaimed
+          ? "Ye free book pehle se aapke My Books mein available hai."
+          : "100% free offer automatically apply ho gaya aur book aapke dashboard mein add ho gayi.",
+      });
+    } finally {
+      setClaimingFree(false);
+    }
   };
 
   const handlePurchase = async () => {
@@ -177,7 +223,8 @@ const BookDetail = () => {
     );
   }
 
-  const canRead = book.is_free || hasPurchased;
+  const hasLibraryAccess = !!hasPurchased;
+  const canRead = book.is_free || hasLibraryAccess;
   const previewChapters = (book as any).preview_chapters ?? 0;
   const continueChapter = readingProgress
     ? chapters?.find((c) => c.id === readingProgress.chapter_id)
@@ -187,13 +234,14 @@ const BookDetail = () => {
   const bookProgressPct = readingProgress && totalChapters > 0
     ? Math.round(((readingProgress.chapter_number - 1) / totalChapters) * 100 + (readingProgress.scroll_percent / totalChapters))
     : 0;
+  const showFreeBuyCard = book.is_free && !purchaseStatusLoading && !hasLibraryAccess;
+  const showClaimedNotice = book.is_free && !purchaseStatusLoading && hasLibraryAccess;
 
   return (
     <Layout>
       <section className="py-12">
         <div className="container">
           <div className="grid gap-8 md:grid-cols-3">
-            {/* Cover */}
             <div className="md:col-span-1">
               <div className="aspect-[3/4] overflow-hidden rounded-lg bg-muted flex items-center justify-center">
                 {book.cover_url ? (
@@ -204,7 +252,6 @@ const BookDetail = () => {
               </div>
             </div>
 
-            {/* Details */}
             <div className="md:col-span-2">
               <h1 className="font-serif text-3xl font-bold md:text-4xl">{book.title}</h1>
               <p className="mt-1 text-lg text-muted-foreground">by {book.author}</p>
@@ -212,7 +259,40 @@ const BookDetail = () => {
                 {book.is_free ? "Free to Read" : `₹${book.price}`}
               </span>
 
-              {/* Description moved to "About This Book" section below */}
+              {showFreeBuyCard && (
+                <div className="mt-6 space-y-3 rounded-xl border border-primary/20 bg-primary/5 p-5">
+                  <div className="flex flex-wrap items-center gap-3 rounded-lg border border-primary/20 bg-background px-4 py-3">
+                    <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                      <CheckCircle className="h-4 w-4 text-primary" />
+                      <span>
+                        <span className="font-mono text-primary">AUTO-FREE</span>
+                        {" — "}
+                        100% coupon auto-applied
+                      </span>
+                    </div>
+                    <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">₹0 checkout</span>
+                  </div>
+
+                  <Button size="lg" onClick={handleClaimFreeBook} disabled={claimingFree}>
+                    {claimingFree ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</>
+                    ) : (
+                      <><ShoppingCart className="mr-2 h-4 w-4" /> Buy Now — ₹0</>
+                    )}
+                  </Button>
+
+                  <p className="text-xs text-muted-foreground">
+                    Buy Now दबाने पर ye free book automatically aapke dashboard / My Books में add ho jayegi.
+                  </p>
+                </div>
+              )}
+
+              {showClaimedNotice && (
+                <div className="mt-6 flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-foreground">
+                  <CheckCircle className="h-4 w-4 text-primary" />
+                  This free book is already added to your dashboard.
+                </div>
+              )}
 
               {!canRead && !book.is_free && (
                 <div className="mt-6 space-y-3">
@@ -221,7 +301,6 @@ const BookDetail = () => {
                     <Button type="button" variant={gateway === "paypal" ? "default" : "outline"} size="sm" onClick={() => setGateway("paypal")}>PayPal</Button>
                   </div>
 
-                  {/* Coupon Section */}
                   {!appliedCoupon ? (
                     <div className="flex gap-2">
                       <div className="relative flex-1">
@@ -256,7 +335,6 @@ const BookDetail = () => {
                     </div>
                   )}
 
-                  {/* Price display */}
                   <div className="flex items-center gap-3">
                     {appliedCoupon && (
                       <span className="text-muted-foreground line-through text-sm">₹{book.price}</span>
@@ -283,7 +361,6 @@ const BookDetail = () => {
             </div>
           </div>
 
-          {/* ─── Book Specifications ─── */}
           <div className="mt-12 rounded-xl border border-border bg-card p-6">
             <h2 className="font-serif text-2xl font-bold mb-6 flex items-center gap-2">
               <Info className="h-5 w-5 text-primary" /> Book Specifications
@@ -350,7 +427,6 @@ const BookDetail = () => {
             </div>
           </div>
 
-          {/* ─── About This Book ─── */}
           <div className="mt-10">
             <h2 className="font-serif text-2xl font-bold mb-4">About This Book</h2>
             {book.description ? (
@@ -374,7 +450,6 @@ const BookDetail = () => {
             )}
           </div>
 
-          {/* ─── What You Get ─── */}
           <div className="mt-10 rounded-xl border border-primary/20 bg-primary/5 p-6">
             <h2 className="font-serif text-2xl font-bold mb-4">What You Get</h2>
             <ul className="grid md:grid-cols-2 gap-3">
@@ -394,7 +469,6 @@ const BookDetail = () => {
             </ul>
           </div>
 
-          {/* Continue Reading / Start Reading Banner */}
           {canRead && continueChapterSlug && (
             <div className="mt-8 rounded-xl border border-primary/20 bg-primary/5 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex-1 min-w-0">
@@ -424,7 +498,6 @@ const BookDetail = () => {
             </div>
           )}
 
-          {/* File-based book read button */}
           {canRead && book.file_type && (
             <div className="mt-8 rounded-xl border border-primary/20 bg-primary/5 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex-1 min-w-0">
@@ -439,8 +512,6 @@ const BookDetail = () => {
               </Button>
             </div>
           )}
-
-          {/* Table of Contents */}
 
           {chapters && chapters.length > 0 && (
             <div className="mt-12">
@@ -475,13 +546,11 @@ const BookDetail = () => {
         </div>
       </section>
 
-      {/* ─── Similar Books ─── */}
       <SimilarBooks currentBookId={book.id} category={book.category} />
     </Layout>
   );
 };
 
-/* ─── Similar Books Component ─── */
 const SimilarBooks = ({ currentBookId, category }: { currentBookId: string; category: string | null }) => {
   const { data: similarBooks } = useQuery({
     queryKey: ["similar-books", currentBookId, category],
@@ -495,9 +564,8 @@ const SimilarBooks = ({ currentBookId, category }: { currentBookId: string; cate
         query = query.eq("category", category);
       }
       const { data } = await query;
-      // If category filter returns less than 4, fetch more without filter
       if (data && data.length < 4 && category) {
-        const ids = data.map(b => b.id);
+        const ids = data.map((b) => b.id);
         ids.push(currentBookId);
         const { data: more } = await supabase
           .from("books")

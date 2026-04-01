@@ -73,7 +73,7 @@ const Auth = () => {
           variant: "destructive",
         });
       } else {
-        navigate("/");
+        navigate("/profile");
       }
     } else {
       const { data: signUpData, error } = await supabase.auth.signUp({

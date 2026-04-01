@@ -64,6 +64,9 @@ const Header = () => {
             <img
               src={logoImg}
               alt="GyandootNova logo"
+              width={40}
+              height={40}
+              fetchPriority="high"
               className="h-10 w-10 rounded-full object-cover shadow-lg ring-2 ring-primary/30"
               style={{
                 transform: 'rotateY(-12deg) rotateX(5deg)',

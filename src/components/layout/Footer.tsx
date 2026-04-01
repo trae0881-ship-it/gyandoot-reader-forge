@@ -46,7 +46,7 @@ const Footer = () => {
               <BookOpen className="h-6 w-6 text-secondary" />
               <span className="font-serif text-lg font-bold text-secondary">GyandootNova</span>
             </Link>
-            <p className="text-sm text-background/60 leading-relaxed">
+            <p className="text-sm text-background/70 leading-relaxed">
               Illuminating spiritual seekers with sacred books, articles, and transformative programs.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
@@ -76,8 +76,8 @@ const Footer = () => {
 
           {/* Explore */}
           <div>
-            <h4 className="font-serif font-semibold mb-4 text-secondary">Explore</h4>
-            <nav aria-label="Footer explore links" className="flex flex-col gap-2.5 text-sm text-background/60">
+            <h3 className="font-serif font-semibold mb-4 text-secondary">Explore</h3>
+            <nav aria-label="Footer explore links" className="flex flex-col gap-2.5 text-sm text-background/70">
               <Link to="/" className="hover:text-secondary transition-colors">
                 Home
               </Link>
@@ -104,8 +104,8 @@ const Footer = () => {
 
           {/* Support */}
           <div>
-            <h4 className="font-serif font-semibold mb-4 text-secondary">Support</h4>
-            <nav aria-label="Footer support links" className="flex flex-col gap-2.5 text-sm text-background/60">
+            <h3 className="font-serif font-semibold mb-4 text-secondary">Support</h3>
+            <nav aria-label="Footer support links" className="flex flex-col gap-2.5 text-sm text-background/70">
               <Link to="/contact" className="hover:text-secondary transition-colors">
                 Contact
               </Link>
@@ -144,8 +144,8 @@ const Footer = () => {
 
           {/* Legal */}
           <div>
-            <h4 className="font-serif font-semibold mb-4 text-secondary">Legal</h4>
-            <nav aria-label="Footer legal links" className="flex flex-col gap-2.5 text-sm text-background/60">
+            <h3 className="font-serif font-semibold mb-4 text-secondary">Legal</h3>
+            <nav aria-label="Footer legal links" className="flex flex-col gap-2.5 text-sm text-background/70">
               <Link to="/privacy-policy" className="hover:text-secondary transition-colors">
                 Privacy Policy
               </Link>
@@ -163,8 +163,8 @@ const Footer = () => {
 
           {/* Newsletter */}
           <div>
-            <h4 className="font-serif font-semibold mb-4 text-secondary">Stay Connected</h4>
-            <p className="text-sm text-background/60 mb-3">Subscribe for spiritual wisdom and updates.</p>
+            <h3 className="font-serif font-semibold mb-4 text-secondary">Stay Connected</h3>
+            <p className="text-sm text-background/70 mb-3">Subscribe for spiritual wisdom and updates.</p>
             <form onSubmit={handleNewsletter} className="flex gap-2">
               <input
                 type="email"
@@ -180,7 +180,7 @@ const Footer = () => {
             </form>
             <div className="mt-4 flex items-start gap-2">
               <Mail className="h-4 w-4 text-secondary mt-0.5" />
-              <p className="text-sm text-background/60">contact@gyandootnova.in</p>
+              <p className="text-sm text-background/70">contact@gyandootnova.in</p>
             </div>
           </div>
         </div>

@@ -96,7 +96,7 @@ const Index = () => {
           <h1 className="font-serif text-4xl font-extrabold leading-tight text-primary-foreground md:text-6xl lg:text-7xl">
             Authentic <span className="text-secondary">Dharmik Granth</span> — Vishnu Sahasraname, Geeta, Ramayana
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-primary-foreground/75 md:text-xl">
+          <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-primary-foreground/90 md:text-xl">
             Buy and read spiritual books online — Vishnu Sahasraname, Bhagwat Geeta, Ramayana, Hanuman Chalisa & more. India's trusted platform for sacred literature.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
@@ -303,7 +303,7 @@ const Index = () => {
             ].map((stat) => (
               <div key={stat.label}>
                 <AnimatedCounter target={stat.target} suffix={stat.suffix} />
-                <p className="mt-2 text-sm font-medium text-primary-foreground/70">{stat.label}</p>
+                <p className="mt-2 text-sm font-medium text-primary-foreground/90">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -393,7 +393,7 @@ const Index = () => {
               <h2 className="mt-5 font-serif text-3xl font-bold text-primary-foreground md:text-4xl">
                 Support Our Mission
               </h2>
-              <p className="mx-auto mt-4 max-w-lg text-primary-foreground/75 leading-relaxed">
+              <p className="mx-auto mt-4 max-w-lg text-primary-foreground/90 leading-relaxed">
                 Your generosity helps us publish and share spiritual knowledge with seekers worldwide. Every contribution makes a difference in preserving dharmik granth for future generations.
               </p>
               <Button

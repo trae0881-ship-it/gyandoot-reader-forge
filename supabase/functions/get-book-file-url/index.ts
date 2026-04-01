@@ -93,10 +93,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Generate signed URL (valid for 1 hour)
+    // Generate signed URL (valid for 5 minutes only - short-lived for security)
     const { data: signedData, error: signErr } = await supabase.storage
       .from("book-files")
-      .createSignedUrl(storagePath, 3600);
+      .createSignedUrl(storagePath, 300);
 
     if (signErr || !signedData?.signedUrl) {
       return new Response(JSON.stringify({ error: "Could not generate URL" }), {

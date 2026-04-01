@@ -1,5 +1,5 @@
-import { useParams, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2, BookOpen, AlertTriangle } from "lucide-react";
@@ -11,6 +11,20 @@ const FileBookReader = () => {
   const { slug } = useParams<{ slug: string }>();
   const { user, loading: authLoading } = useAuth();
   const [darkMode, setDarkMode] = useState(false);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  // On sign out → immediately revoke access & redirect
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        // Clear all cached file URLs
+        queryClient.removeQueries({ queryKey: ["book-file-url"] });
+        navigate(`/books/${slug}`, { replace: true });
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [queryClient, navigate, slug]);
 
   const { data: book } = useQuery({
     queryKey: ["book", slug],
@@ -36,11 +50,15 @@ const FileBookReader = () => {
       return data as { url: string; file_type: string };
     },
     enabled: !!book?.id && !authLoading,
-    staleTime: 30 * 60 * 1000,
+    // Short stale time - URL expires in 5 min
+    staleTime: 4 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
     retry: 1,
+    // Refetch when window regains focus to keep URL fresh
+    refetchOnWindowFocus: true,
   });
 
-  // Prevent right-click to discourage downloading
+  // Prevent right-click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       e.preventDefault();
@@ -50,16 +68,38 @@ const FileBookReader = () => {
     return () => document.removeEventListener("contextmenu", handler);
   }, []);
 
-  // Prevent keyboard shortcuts for saving/printing
+  // Prevent keyboard shortcuts for saving/printing/developer tools
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      // Block Ctrl+S, Ctrl+P, Ctrl+Shift+I, F12
       if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "p" || e.key === "S" || e.key === "P")) {
+        e.preventDefault();
+        return false;
+      }
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "I" || e.key === "i" || e.key === "J" || e.key === "j")) {
+        e.preventDefault();
+        return false;
+      }
+      if (e.key === "F12") {
         e.preventDefault();
         return false;
       }
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
+  }, []);
+
+  // Block drag & drop events globally
+  useEffect(() => {
+    const handler = (e: DragEvent) => {
+      e.preventDefault();
+    };
+    document.addEventListener("dragstart", handler);
+    document.addEventListener("drop", handler);
+    return () => {
+      document.removeEventListener("dragstart", handler);
+      document.removeEventListener("drop", handler);
+    };
   }, []);
 
   if (authLoading || !book) {
@@ -144,6 +184,7 @@ const FileBookReader = () => {
             className="w-full rounded-lg border border-border"
             style={{ height: "calc(100vh - 100px)" }}
             title={book.title}
+            sandbox="allow-scripts allow-same-origin"
           />
         )}
 

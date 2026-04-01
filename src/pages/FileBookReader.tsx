@@ -179,18 +179,12 @@ const FileBookReader = () => {
         )}
 
         {fileData?.url && isDoc && (
-          <div className="relative">
+          <div className="relative" onContextMenu={(e) => e.preventDefault()}>
             <iframe
               src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileData.url)}`}
               className="w-full rounded-lg border border-border"
               style={{ height: "calc(100vh - 100px)" }}
               title={book.title}
-            />
-            {/* Transparent overlay to block right-click on iframe */}
-            <div
-              className="absolute inset-0 z-10"
-              style={{ pointerEvents: "auto", background: "transparent" }}
-              onContextMenu={(e) => e.preventDefault()}
             />
           </div>
         )}

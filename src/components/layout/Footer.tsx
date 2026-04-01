@@ -144,7 +144,7 @@ const Footer = () => {
 
           {/* Legal */}
           <div>
-            <h4 className="font-serif font-semibold mb-4 text-secondary">Legal</h4>
+            <h3 className="font-serif font-semibold mb-4 text-secondary">Legal</h3>
             <nav aria-label="Footer legal links" className="flex flex-col gap-2.5 text-sm text-background/60">
               <Link to="/privacy-policy" className="hover:text-secondary transition-colors">
                 Privacy Policy

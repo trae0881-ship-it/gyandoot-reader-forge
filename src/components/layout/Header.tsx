@@ -135,7 +135,7 @@ const Header = () => {
 
       {/* Mobile nav */}
       {mobileOpen && (
-        <div className="border-t border-border bg-background p-4 xl:hidden">
+        <div className="border-t border-border bg-background p-4 lg:hidden">
           <nav aria-label="Mobile navigation" className="flex flex-col gap-3">
             {navLinks.map((link) => (
               <Link key={link.to} to={link.to} className="text-sm font-medium" onClick={() => setMobileOpen(false)}>

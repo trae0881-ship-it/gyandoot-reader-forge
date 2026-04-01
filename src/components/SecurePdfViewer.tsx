@@ -17,6 +17,8 @@ interface SecurePdfViewerProps {
   url: string;
   title: string;
   darkMode: boolean;
+  initialPage?: number;
+  onPageChange?: (page: number) => void;
 }
 
 interface Highlight {

@@ -60,7 +60,26 @@ const Header = () => {
       <div className="w-full max-w-screen-2xl mx-auto flex h-14 items-center justify-between px-3 md:px-6">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 shrink-0" aria-label="Go to homepage">
-          <img src={logoImg} alt="GyandootNova logo" className="h-8 w-8 rounded-full object-cover" />
+          <div className="relative h-10 w-10 shrink-0" style={{ perspective: '200px' }}>
+            <img
+              src={logoImg}
+              alt="GyandootNova logo"
+              className="h-10 w-10 rounded-full object-cover shadow-lg ring-2 ring-primary/30"
+              style={{
+                transform: 'rotateY(-12deg) rotateX(5deg)',
+                boxShadow: '4px 4px 12px rgba(0,0,0,0.3), -1px -1px 4px rgba(255,255,255,0.1), inset 0 -2px 6px rgba(0,0,0,0.2)',
+                transition: 'transform 0.3s ease',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = 'rotateY(12deg) rotateX(-5deg) scale(1.1)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = 'rotateY(-12deg) rotateX(5deg)'; }}
+            />
+            <div
+              className="absolute inset-0 rounded-full pointer-events-none"
+              style={{
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.35) 0%, transparent 50%, rgba(0,0,0,0.15) 100%)',
+              }}
+            />
+          </div>
           <span className="font-serif text-lg font-bold text-primary hidden sm:inline">GyandootNova</span>
         </Link>
 

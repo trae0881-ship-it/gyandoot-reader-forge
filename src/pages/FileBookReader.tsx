@@ -179,13 +179,14 @@ const FileBookReader = () => {
         )}
 
         {fileData?.url && isDoc && (
-          <iframe
-            src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileData.url)}`}
-            className="w-full rounded-lg border border-border"
-            style={{ height: "calc(100vh - 100px)" }}
-            title={book.title}
-            sandbox="allow-scripts allow-same-origin"
-          />
+          <div className="relative" onContextMenu={(e) => e.preventDefault()}>
+            <iframe
+              src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileData.url)}`}
+              className="w-full rounded-lg border border-border"
+              style={{ height: "calc(100vh - 100px)" }}
+              title={book.title}
+            />
+          </div>
         )}
 
         {fileData?.url && !isPdf && !isImage && !isDoc && (

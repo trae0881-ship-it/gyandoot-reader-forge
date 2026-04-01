@@ -46,6 +46,7 @@ const FileBookReader = () => {
     if (progressKey) localStorage.setItem(progressKey, String(page));
   }, [progressKey]);
 
+  const { data: fileData, isLoading, error } = useQuery({
     queryKey: ["book-file-url", book?.id, user?.id],
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("get-book-file-url", {

@@ -25,10 +25,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      // If token is invalid or user is banned, force sign out
-      if (event === "TOKEN_REFRESHED" && !session) {
-        await supabase.auth.signOut();
+    let isMounted = true;
+
+    const getAdminStatus = async (userId: string) => {
+      try {
+        const { data } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
+        return !!data;
+      } catch {
+        return false;
+      }
+    };
+
+    const syncAuthState = async (nextSession: Session | null) => {
+      if (!isMounted) return;
+      setLoading(true);
+
+      const nextUser = nextSession?.user ?? null;
+
+      if (!nextSession || !nextUser) {
+        if (!isMounted) return;
         setSession(null);
         setUser(null);
         setIsAdmin(false);
@@ -36,56 +51,41 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        // Check if user is banned (banned_until in the future)
-        const bannedUntil = (session.user as any).banned_until;
-        if (bannedUntil && new Date(bannedUntil) > new Date()) {
-          await supabase.auth.signOut();
-          setSession(null);
-          setUser(null);
-          setIsAdmin(false);
-          setLoading(false);
-          return;
-        }
-        setTimeout(() => checkAdmin(session.user.id), 0);
-      } else {
-        setIsAdmin(false);
-      }
-      setLoading(false);
-    });
-
-    supabase.auth.getSession().then(async ({ data: { session }, error }) => {
-      if (error || !session) {
-        setSession(null);
-        setUser(null);
-        setIsAdmin(false);
-        setLoading(false);
-        return;
-      }
-      // Check banned status on load
-      const bannedUntil = (session.user as any).banned_until;
+      const bannedUntil = (nextUser as any).banned_until;
       if (bannedUntil && new Date(bannedUntil) > new Date()) {
         await supabase.auth.signOut();
+        if (!isMounted) return;
         setSession(null);
         setUser(null);
+        setIsAdmin(false);
         setLoading(false);
         return;
       }
-      setSession(session);
-      setUser(session.user);
-      checkAdmin(session.user.id);
+
+      const admin = await getAdminStatus(nextUser.id);
+      if (!isMounted) return;
+
+      setSession(nextSession);
+      setUser(nextUser);
+      setIsAdmin(admin);
       setLoading(false);
+    };
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      void syncAuthState(nextSession);
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      void syncAuthState(error ? null : session);
+    });
 
-  const checkAdmin = async (userId: string) => {
-    const { data } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
-    setIsAdmin(!!data);
-  };
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const signOut = async () => {
     await supabase.auth.signOut();

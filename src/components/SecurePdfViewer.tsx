@@ -17,6 +17,8 @@ interface SecurePdfViewerProps {
   url: string;
   title: string;
   darkMode: boolean;
+  initialPage?: number;
+  onPageChange?: (page: number) => void;
 }
 
 interface Highlight {
@@ -27,7 +29,7 @@ interface Highlight {
 
 const HIGHLIGHT_COLORS = ["#FFEB3B", "#4CAF50", "#2196F3", "#FF9800", "#E91E63"];
 
-const SecurePdfViewer = ({ url, title, darkMode }: SecurePdfViewerProps) => {
+const SecurePdfViewer = ({ url, title, darkMode, initialPage, onPageChange }: SecurePdfViewerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const textLayerRef = useRef<HTMLDivElement>(null);
@@ -58,7 +60,8 @@ const SecurePdfViewer = ({ url, title, darkMode }: SecurePdfViewerProps) => {
         if (cancelled) return;
         pdfDocRef.current = pdf;
         setNumPages(pdf.numPages);
-        setCurrentPage(1);
+        const startPage = initialPage && initialPage >= 1 && initialPage <= pdf.numPages ? initialPage : 1;
+        setCurrentPage(startPage);
         setLoading(false);
       } catch (err) {
         console.error("PDF load error:", err);
@@ -157,6 +160,7 @@ const SecurePdfViewer = ({ url, title, darkMode }: SecurePdfViewerProps) => {
   useEffect(() => {
     if (numPages > 0) {
       renderPage(currentPage);
+      onPageChange?.(currentPage);
     }
   }, [currentPage, scale, numPages, renderPage]);
 

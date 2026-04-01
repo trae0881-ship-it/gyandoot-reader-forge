@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2, BookOpen, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import SecurePdfViewer from "@/components/SecurePdfViewer";
 import logoImg from "@/assets/logo.jpeg";
 
@@ -39,6 +39,12 @@ const FileBookReader = () => {
     },
     enabled: !!slug,
   });
+
+  const progressKey = book?.id && user?.id ? `book-progress-${book.id}-${user.id}` : null;
+  const savedPage = useMemo(() => progressKey ? parseInt(localStorage.getItem(progressKey) || "1", 10) : 1, [progressKey]);
+  const handlePageChange = useCallback((page: number) => {
+    if (progressKey) localStorage.setItem(progressKey, String(page));
+  }, [progressKey]);
 
   const { data: fileData, isLoading, error } = useQuery({
     queryKey: ["book-file-url", book?.id, user?.id],
@@ -243,7 +249,7 @@ const FileBookReader = () => {
 
         {fileData?.url && isPdf && (
           <div className="relative">
-            <SecurePdfViewer url={fileData.url} title={book.title} darkMode={darkMode} />
+            <SecurePdfViewer url={fileData.url} title={book.title} darkMode={darkMode} initialPage={savedPage} onPageChange={handlePageChange} />
             <WatermarkOverlay />
           </div>
         )}

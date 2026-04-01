@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2, BookOpen, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const FileBookReader = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -35,8 +35,30 @@ const FileBookReader = () => {
       return data as { url: string; file_type: string };
     },
     enabled: !!book?.id,
-    staleTime: 30 * 60 * 1000, // 30 min
+    staleTime: 30 * 60 * 1000,
   });
+
+  // Prevent right-click to discourage downloading
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      e.preventDefault();
+      return false;
+    };
+    document.addEventListener("contextmenu", handler);
+    return () => document.removeEventListener("contextmenu", handler);
+  }, []);
+
+  // Prevent keyboard shortcuts for saving/printing
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "p" || e.key === "S" || e.key === "P")) {
+        e.preventDefault();
+        return false;
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
 
   if (!book) {
     return (
@@ -52,7 +74,10 @@ const FileBookReader = () => {
   const isDoc = ["doc", "docx"].includes(fileType);
 
   return (
-    <div className={`min-h-screen ${darkMode ? "bg-gray-900 text-gray-100" : "bg-background text-foreground"}`}>
+    <div
+      className={`min-h-screen select-none ${darkMode ? "bg-gray-900 text-gray-100" : "bg-background text-foreground"}`}
+      style={{ WebkitUserSelect: "none", userSelect: "none" }}
+    >
       {/* Toolbar */}
       <div className={`sticky top-0 z-40 border-b px-4 py-2 ${darkMode ? "border-gray-700 bg-gray-900/95" : "bg-background/95 backdrop-blur"}`}>
         <div className="mx-auto flex max-w-5xl items-center justify-between">
@@ -93,10 +118,11 @@ const FileBookReader = () => {
 
         {fileData?.url && isPdf && (
           <iframe
-            src={`${fileData.url}#toolbar=0&navpanes=0`}
+            src={`${fileData.url}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
             className="w-full rounded-lg border border-border"
             style={{ height: "calc(100vh - 100px)" }}
             title={book.title}
+            sandbox="allow-same-origin allow-scripts"
           />
         )}
 
@@ -105,8 +131,10 @@ const FileBookReader = () => {
             <img
               src={fileData.url}
               alt={book.title}
-              className="max-w-full rounded-lg shadow-lg"
+              className="max-w-full rounded-lg shadow-lg pointer-events-none"
               style={{ maxHeight: "calc(100vh - 100px)" }}
+              draggable={false}
+              onDragStart={(e) => e.preventDefault()}
             />
           </div>
         )}
@@ -117,6 +145,7 @@ const FileBookReader = () => {
             className="w-full rounded-lg border border-border"
             style={{ height: "calc(100vh - 100px)" }}
             title={book.title}
+            sandbox="allow-same-origin allow-scripts allow-popups"
           />
         )}
 

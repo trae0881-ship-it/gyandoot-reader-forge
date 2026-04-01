@@ -84,7 +84,7 @@ const Index = () => {
   return (
     <Layout>
       {/* ─── 1. HERO ─── */}
-      <section className="relative overflow-hidden bg-primary py-24 md:py-36">
+      <section className="relative overflow-hidden bg-primary py-14 md:py-20">
         <div
           className="absolute inset-0 opacity-[0.07]"
           style={{

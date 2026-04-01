@@ -247,8 +247,10 @@ const FileBookReader = () => {
               className="w-full rounded-lg border border-border"
               style={{ height: "calc(100vh - 100px)" }}
               title={book.title}
+              sandbox="allow-scripts allow-same-origin"
             />
-            <WatermarkOverlay />
+            {/* Blocking overlay — prevents interaction with Office Online menus */}
+            <WatermarkOverlay blocking />
           </div>
         )}
 

@@ -393,7 +393,7 @@ const Index = () => {
               <h2 className="mt-5 font-serif text-3xl font-bold text-primary-foreground md:text-4xl">
                 Support Our Mission
               </h2>
-              <p className="mx-auto mt-4 max-w-lg text-primary-foreground/75 leading-relaxed">
+              <p className="mx-auto mt-4 max-w-lg text-primary-foreground/90 leading-relaxed">
                 Your generosity helps us publish and share spiritual knowledge with seekers worldwide. Every contribution makes a difference in preserving dharmik granth for future generations.
               </p>
               <Button

@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Books from "./pages/Books";
 import BookDetail from "./pages/BookDetail";
 import BookReader from "./pages/BookReader";
+import FileBookReader from "./pages/FileBookReader";
 import Articles from "./pages/Articles";
 import ArticleDetail from "./pages/ArticleDetail";
 import Donate from "./pages/Donate";
@@ -51,6 +52,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/books" element={<Books />} />
             <Route path="/books/:slug" element={<BookDetail />} />
+            <Route path="/books/:slug/read-file" element={<FileBookReader />} />
             <Route path="/books/:slug/:chapterSlug" element={<BookReader />} />
             <Route path="/articles" element={<Articles />} />
             <Route path="/articles/:slug" element={<ArticleDetail />} />

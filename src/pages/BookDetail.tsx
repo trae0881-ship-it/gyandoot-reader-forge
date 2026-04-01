@@ -424,6 +424,22 @@ const BookDetail = () => {
             </div>
           )}
 
+          {/* File-based book read button (no chapters) */}
+          {canRead && totalChapters === 0 && book.file_type && (
+            <div className="mt-8 rounded-xl border border-primary/20 bg-primary/5 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-muted-foreground mb-1">This book is available as a {book.file_type.toUpperCase()} file</p>
+                <p className="font-semibold text-foreground">{book.title}</p>
+              </div>
+              <Button asChild className="shrink-0">
+                <Link to={`/books/${slug}/read-file`}>
+                  <PlayCircle className="mr-2 h-4 w-4" />
+                  Read Now
+                </Link>
+              </Button>
+            </div>
+          )}
+
           {/* Table of Contents */}
 
           {chapters && chapters.length > 0 && (

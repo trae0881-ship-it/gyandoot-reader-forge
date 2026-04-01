@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2, BookOpen, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import SecurePdfViewer from "@/components/SecurePdfViewer";
+import logoImg from "@/assets/logo.jpeg";
 
 const FileBookReader = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -118,9 +119,9 @@ const FileBookReader = () => {
   // Watermark text — user email for traceability
   const watermarkText = user?.email || "GyandootNova";
 
-  const WatermarkOverlay = () => (
+  const WatermarkOverlay = ({ blocking = false }: { blocking?: boolean }) => (
     <div
-      className="absolute inset-0 z-20 pointer-events-none overflow-hidden"
+      className={`absolute inset-0 z-20 overflow-hidden ${blocking ? "" : "pointer-events-none"}`}
       aria-hidden="true"
       style={{ userSelect: "none", WebkitUserSelect: "none" }}
     >
@@ -136,23 +137,37 @@ const FileBookReader = () => {
           )`,
         }}
       />
-      {Array.from({ length: 8 }).map((_, row) =>
-        Array.from({ length: 4 }).map((_, col) => (
-          <span
-            key={`${row}-${col}`}
-            className="absolute text-[11px] font-medium whitespace-nowrap"
+      {/* Logo watermarks */}
+      {Array.from({ length: 6 }).map((_, row) =>
+        Array.from({ length: 3 }).map((_, col) => (
+          <div
+            key={`logo-${row}-${col}`}
+            className="absolute flex flex-col items-center gap-1"
             style={{
-              top: `${12 + row * 12}%`,
-              left: `${5 + col * 28}%`,
+              top: `${8 + row * 16}%`,
+              left: `${10 + col * 35}%`,
               transform: "rotate(-35deg)",
-              opacity: 0.07,
-              color: darkMode ? "#ffffff" : "#000000",
-              letterSpacing: "2px",
+              opacity: 0.06,
               pointerEvents: "none",
             }}
           >
-            {watermarkText}
-          </span>
+            <img
+              src={logoImg}
+              alt=""
+              className="h-10 w-10 rounded-full"
+              draggable={false}
+              style={{ filter: darkMode ? "invert(1)" : "none" }}
+            />
+            <span
+              className="text-[10px] font-semibold whitespace-nowrap"
+              style={{
+                color: darkMode ? "#ffffff" : "#000000",
+                letterSpacing: "2px",
+              }}
+            >
+              {watermarkText}
+            </span>
+          </div>
         ))
       )}
     </div>
@@ -232,8 +247,10 @@ const FileBookReader = () => {
               className="w-full rounded-lg border border-border"
               style={{ height: "calc(100vh - 100px)" }}
               title={book.title}
+              sandbox="allow-scripts allow-same-origin"
             />
-            <WatermarkOverlay />
+            {/* Blocking overlay — prevents interaction with Office Online menus */}
+            <WatermarkOverlay blocking />
           </div>
         )}
 

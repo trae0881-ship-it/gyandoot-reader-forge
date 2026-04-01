@@ -81,10 +81,17 @@ Deno.serve(async (req) => {
     }
 
     // Extract storage path from file_url
-    const urlObj = new URL(book.file_url);
-    const pathMatch = urlObj.pathname.match(/\/storage\/v1\/object\/(?:public|sign)\/book-files\/(.+)/);
-    // Also handle direct path storage
-    const storagePath = pathMatch?.[1] ?? book.file_url.split("/book-files/").pop();
+    let storagePath: string | undefined;
+    try {
+      const urlObj = new URL(book.file_url);
+      const pathMatch = urlObj.pathname.match(/\/storage\/v1\/object\/(?:public|sign)\/book-files\/(.+)/);
+      storagePath = pathMatch?.[1] ?? book.file_url.split("/book-files/").pop();
+    } catch {
+      // file_url is a relative path like "book-files/filename.pdf"
+      storagePath = book.file_url.startsWith("book-files/")
+        ? book.file_url.slice("book-files/".length)
+        : book.file_url;
+    }
 
     if (!storagePath) {
       return new Response(JSON.stringify({ error: "Invalid file path" }), {

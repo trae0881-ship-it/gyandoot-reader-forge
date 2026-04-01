@@ -68,6 +68,23 @@ const Books = () => {
   const visible = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
 
+  // Infinite scroll
+  const loaderRef = useRef<HTMLDivElement>(null);
+  const loadMore = useCallback(() => {
+    if (hasMore) setVisibleCount((prev) => prev + PAGE_SIZE);
+  }, [hasMore]);
+
+  useEffect(() => {
+    const el = loaderRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) loadMore(); },
+      { rootMargin: "200px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [loadMore]);
+
   return (
     <Layout>
       <section className="py-12">

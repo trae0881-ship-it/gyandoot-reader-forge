@@ -103,7 +103,29 @@ const FileBookReader = () => {
     };
   }, []);
 
-  if (authLoading || !book) {
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Not logged in → redirect to auth
+  if (!user) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4">
+        <AlertTriangle className="h-10 w-10 text-destructive" />
+        <p className="text-lg font-semibold">Login Required</p>
+        <p className="text-sm text-muted-foreground text-center">You must be logged in to read this book.</p>
+        <Button asChild>
+          <Link to={`/auth?redirect=/books/${slug}/read-file`}>Login / Sign Up</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  if (!book) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

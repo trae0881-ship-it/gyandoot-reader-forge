@@ -46,7 +46,7 @@ const Footer = () => {
               <BookOpen className="h-6 w-6 text-secondary" />
               <span className="font-serif text-lg font-bold text-secondary">GyandootNova</span>
             </Link>
-            <p className="text-sm text-background/60 leading-relaxed">
+            <p className="text-sm text-background/70 leading-relaxed">
               Illuminating spiritual seekers with sacred books, articles, and transformative programs.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">

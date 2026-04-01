@@ -105,7 +105,7 @@ const Footer = () => {
           {/* Support */}
           <div>
             <h3 className="font-serif font-semibold mb-4 text-secondary">Support</h3>
-            <nav aria-label="Footer support links" className="flex flex-col gap-2.5 text-sm text-background/60">
+            <nav aria-label="Footer support links" className="flex flex-col gap-2.5 text-sm text-background/70">
               <Link to="/contact" className="hover:text-secondary transition-colors">
                 Contact
               </Link>

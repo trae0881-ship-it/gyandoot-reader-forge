@@ -60,7 +60,8 @@ const SecurePdfViewer = ({ url, title, darkMode, initialPage, onPageChange }: Se
         if (cancelled) return;
         pdfDocRef.current = pdf;
         setNumPages(pdf.numPages);
-        setCurrentPage(1);
+        const startPage = initialPage && initialPage >= 1 && initialPage <= pdf.numPages ? initialPage : 1;
+        setCurrentPage(startPage);
         setLoading(false);
       } catch (err) {
         console.error("PDF load error:", err);

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -67,6 +67,23 @@ const Books = () => {
 
   const visible = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
+
+  // Infinite scroll
+  const loaderRef = useRef<HTMLDivElement>(null);
+  const loadMore = useCallback(() => {
+    if (hasMore) setVisibleCount((prev) => prev + PAGE_SIZE);
+  }, [hasMore]);
+
+  useEffect(() => {
+    const el = loaderRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) loadMore(); },
+      { rootMargin: "200px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [loadMore]);
 
   return (
     <Layout>
@@ -153,10 +170,9 @@ const Books = () => {
               </div>
 
               {hasMore && (
-                <div className="mt-8 text-center">
-                  <Button variant="outline" size="lg" onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}>
-                    Show More Books
-                  </Button>
+                <div ref={loaderRef} className="mt-8 text-center">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary mx-auto" />
+                  <p className="text-xs text-muted-foreground mt-2">Loading more books...</p>
                 </div>
               )}
             </>

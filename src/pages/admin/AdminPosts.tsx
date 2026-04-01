@@ -13,7 +13,17 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, ArrowLeft } from "lucide-react";
 import RichTextEditor from "@/components/RichTextEditor";
 
-const slugify = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+const slugify = (t: string) => {
+  // Support Hindi/Unicode: keep letters, numbers, spaces then convert
+  const slug = t
+    .trim()
+    .toLowerCase()
+    .replace(/[\s\-_]+/g, "-") // spaces/dashes to single dash
+    .replace(/[^\p{L}\p{N}\-]/gu, "") // keep Unicode letters, numbers, dashes
+    .replace(/(^-|-$)/g, "");
+  // If slug is empty (shouldn't happen with Hindi), use timestamp fallback
+  return slug || `post-${Date.now()}`;
+};
 
 const emptyForm = { title: "", content: "", excerpt: "", post_type: "article" as string, is_published: false, meta_title: "", meta_description: "" };
 

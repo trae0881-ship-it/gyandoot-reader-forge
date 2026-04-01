@@ -205,11 +205,14 @@ const FileBookReader = () => {
         )}
 
         {fileData?.url && isPdf && (
-          <SecurePdfViewer url={fileData.url} title={book.title} darkMode={darkMode} />
+          <div className="relative">
+            <SecurePdfViewer url={fileData.url} title={book.title} darkMode={darkMode} />
+            <WatermarkOverlay />
+          </div>
         )}
 
         {fileData?.url && isImage && (
-          <div className="flex justify-center">
+          <div className="relative flex justify-center">
             <img
               src={fileData.url}
               alt={book.title}
@@ -218,6 +221,7 @@ const FileBookReader = () => {
               draggable={false}
               onDragStart={(e) => e.preventDefault()}
             />
+            <WatermarkOverlay />
           </div>
         )}
 
@@ -229,6 +233,7 @@ const FileBookReader = () => {
               style={{ height: "calc(100vh - 100px)" }}
               title={book.title}
             />
+            <WatermarkOverlay />
           </div>
         )}
 

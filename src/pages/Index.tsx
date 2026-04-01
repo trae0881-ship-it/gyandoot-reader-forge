@@ -303,7 +303,7 @@ const Index = () => {
             ].map((stat) => (
               <div key={stat.label}>
                 <AnimatedCounter target={stat.target} suffix={stat.suffix} />
-                <p className="mt-2 text-sm font-medium text-primary-foreground/70">{stat.label}</p>
+                <p className="mt-2 text-sm font-medium text-primary-foreground/90">{stat.label}</p>
               </div>
             ))}
           </div>

@@ -76,7 +76,7 @@ const Footer = () => {
 
           {/* Explore */}
           <div>
-            <h4 className="font-serif font-semibold mb-4 text-secondary">Explore</h4>
+            <h3 className="font-serif font-semibold mb-4 text-secondary">Explore</h3>
             <nav aria-label="Footer explore links" className="flex flex-col gap-2.5 text-sm text-background/60">
               <Link to="/" className="hover:text-secondary transition-colors">
                 Home

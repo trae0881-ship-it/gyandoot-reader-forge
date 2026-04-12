@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { amount, type, book_id, name, email, gateway = "razorpay", coupon_id } = await req.json();
+    const { amount, type, book_id, name, email, gateway = "razorpay", coupon_id, referrer_id } = await req.json();
 
     // For purchases, auth is required. For donations, auth is optional.
     let user: any = null;
@@ -111,9 +111,9 @@ Deno.serve(async (req) => {
     }
 
     if (gateway === "razorpay") {
-      return await handleRazorpay(supabase, user, verifiedAmount, type, book_id, name, email, coupon_id);
+      return await handleRazorpay(supabase, user, verifiedAmount, type, book_id, name, email, coupon_id, referrer_id);
     } else if (gateway === "paypal") {
-      return await handlePaypal(supabase, user, verifiedAmount, type, book_id, name, email, coupon_id);
+      return await handlePaypal(supabase, user, verifiedAmount, type, book_id, name, email, coupon_id, referrer_id);
     } else {
       return new Response(JSON.stringify({ error: "Unsupported gateway" }), {
         status: 400,
@@ -131,7 +131,7 @@ Deno.serve(async (req) => {
 
 async function handleRazorpay(
   supabase: any, user: any, amount: number, type: string,
-  book_id?: string, name?: string, email?: string, coupon_id?: string
+  book_id?: string, name?: string, email?: string, coupon_id?: string, referrer_id?: string
 ) {
   const keyId = Deno.env.get("RAZORPAY_KEY_ID");
   const keySecret = Deno.env.get("RAZORPAY_KEY_SECRET");
@@ -168,12 +168,17 @@ async function handleRazorpay(
 
   // Store pending record
   if (type === "purchase") {
-    await supabase.from("purchases").insert({
+    const purchaseData: any = {
       user_id: user.id,
       book_id,
       razorpay_order_id: order.id,
       status: "pending",
-    });
+    };
+    // Store referrer_id if present and not self-referral
+    if (referrer_id && referrer_id !== user.id) {
+      purchaseData.referrer_id = referrer_id;
+    }
+    await supabase.from("purchases").insert(purchaseData);
     // Increment coupon usage if applied
     if (coupon_id) {
       await supabase.rpc("increment_coupon_usage", { _coupon_id: coupon_id });
@@ -197,7 +202,7 @@ async function handleRazorpay(
 
 async function handlePaypal(
   supabase: any, user: any, amount: number, type: string,
-  book_id?: string, name?: string, email?: string, coupon_id?: string
+  book_id?: string, name?: string, email?: string, coupon_id?: string, referrer_id?: string
 ) {
   const clientId = Deno.env.get("PAYPAL_CLIENT_ID");
   const clientSecret = Deno.env.get("PAYPAL_CLIENT_SECRET");
@@ -260,12 +265,16 @@ async function handlePaypal(
 
   // Store pending record
   if (type === "purchase") {
-    await supabase.from("purchases").insert({
+    const purchaseData: any = {
       user_id: user.id,
       book_id,
       razorpay_order_id: ppOrder.id,
       status: "pending",
-    });
+    };
+    if (referrer_id && referrer_id !== user.id) {
+      purchaseData.referrer_id = referrer_id;
+    }
+    await supabase.from("purchases").insert(purchaseData);
   } else {
     await supabase.from("donations").insert({
       user_id: user?.id ?? null,

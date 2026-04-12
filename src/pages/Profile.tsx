@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import {
   BookOpen, Heart, User, Calendar, IndianRupee, PlayCircle,
-  Bookmark, StickyNote, Highlighter, Download, FileText
+  Bookmark, StickyNote, Highlighter, Download, FileText, Share2, Copy
 } from "lucide-react";
 
 const Profile = () => {
@@ -112,6 +112,25 @@ const Profile = () => {
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false });
       return data ?? [];
+    },
+  });
+
+  const { data: referrals } = useQuery({
+    queryKey: ["user-referrals", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("referrals")
+        .select("id, commission_amount, commission_percent, status, created_at, book_id")
+        .eq("referrer_user_id", user!.id)
+        .order("created_at", { ascending: false });
+      if (!data?.length) return [];
+      const bookIds = [...new Set(data.map((r: any) => r.book_id))];
+      const { data: books } = await supabase.from("books").select("id, title").in("id", bookIds);
+      return data.map((r: any) => ({
+        ...r,
+        book_title: books?.find((b) => b.id === r.book_id)?.title ?? "—",
+      }));
     },
   });
 
@@ -337,6 +356,64 @@ const Profile = () => {
             <Separator className="my-8" />
           </>
         )}
+
+        {/* Referral Earnings */}
+        <section className="mb-10">
+          <h2 className="font-serif text-xl font-bold mb-4 flex items-center gap-2">
+            <Share2 className="h-5 w-5 text-primary" /> Referral Earnings
+          </h2>
+          {(!referrals || referrals.length === 0) ? (
+            <Card>
+              <CardContent className="py-8 text-center text-muted-foreground">
+                <Share2 className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                <p className="text-sm">No referral earnings yet. Share book links to earn commission!</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <>
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                <Card className="text-center p-3">
+                  <p className="text-lg font-bold text-primary">
+                    ₹{referrals.filter((r: any) => r.status === "approved").reduce((s: number, r: any) => s + Number(r.commission_amount), 0)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Approved</p>
+                </Card>
+                <Card className="text-center p-3">
+                  <p className="text-lg font-bold text-yellow-600">
+                    ₹{referrals.filter((r: any) => r.status === "pending").reduce((s: number, r: any) => s + Number(r.commission_amount), 0)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Pending</p>
+                </Card>
+                <Card className="text-center p-3">
+                  <p className="text-lg font-bold">{referrals.length}</p>
+                  <p className="text-xs text-muted-foreground">Total Referrals</p>
+                </Card>
+              </div>
+              <div className="space-y-2">
+                {referrals.map((r: any) => (
+                  <Card key={r.id}>
+                    <CardContent className="flex items-center justify-between py-3 px-4">
+                      <div>
+                        <p className="font-medium text-sm">{r.book_title}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {r.commission_percent}% commission · {new Date(r.created_at).toLocaleDateString("en-IN")}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-sm">₹{r.commission_amount}</p>
+                        <Badge variant={r.status === "approved" ? "default" : r.status === "rejected" ? "destructive" : "secondary"} className="text-xs">
+                          {r.status}
+                        </Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </>
+          )}
+        </section>
+
+        <Separator className="my-8" />
 
         {/* Donation History */}
         <section>

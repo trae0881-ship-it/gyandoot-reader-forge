@@ -227,7 +227,7 @@ const AdminBooks = () => {
   const [form, setForm] = useState({
     title: "", slug: "", author: "GyandootNova", description: "", price: 0,
     is_free: true, is_featured: false, cover_url: "", file_url: "", file_type: "",
-    preview_chapters: 0, category: "",
+    preview_chapters: 0, category: "", referral_commission_percent: 0,
   });
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [bookFile, setBookFile] = useState<File | null>(null);
@@ -295,6 +295,7 @@ const AdminBooks = () => {
         title: form.title, slug: finalSlug, author: form.author, description: form.description,
         price: form.is_free ? 0 : form.price, is_free: form.is_free, is_featured: form.is_featured,
         cover_url, file_url, file_type, preview_chapters: form.preview_chapters, category: form.category,
+        referral_commission_percent: form.referral_commission_percent,
       };
       if (editing) {
         const { error } = await supabase.from("books").update(payload).eq("id", editing.id);
@@ -326,7 +327,7 @@ const AdminBooks = () => {
     setForm({
       title: "", slug: "", author: "GyandootNova", description: "", price: 0,
       is_free: true, is_featured: false, cover_url: "", file_url: "", file_type: "",
-      preview_chapters: 0, category: "",
+      preview_chapters: 0, category: "", referral_commission_percent: 0,
     });
     setEditing(null); setCoverFile(null); setBookFile(null);
   };
@@ -339,6 +340,7 @@ const AdminBooks = () => {
       is_featured: book.is_featured, cover_url: book.cover_url ?? "",
       file_url: book.file_url ?? "", file_type: book.file_type ?? "",
       preview_chapters: book.preview_chapters ?? 0, category: book.category ?? "",
+      referral_commission_percent: (book as any).referral_commission_percent ?? 0,
     });
     setOpen(true);
   };
@@ -462,6 +464,11 @@ const AdminBooks = () => {
                     <Label>Free Preview Chapters</Label>
                     <Input type="number" min={0} value={form.preview_chapters} onChange={(e) => setForm({ ...form, preview_chapters: Number(e.target.value) })} className="mt-1" placeholder="e.g. 7" />
                     <p className="text-xs text-muted-foreground mt-1">पहले कितने chapters free demo में दिखाने हैं (0 = कोई नहीं)</p>
+                  </div>
+                  <div>
+                    <Label>Referral Commission (%)</Label>
+                    <Input type="number" min={0} max={100} value={form.referral_commission_percent} onChange={(e) => setForm({ ...form, referral_commission_percent: Number(e.target.value) })} className="mt-1" placeholder="e.g. 10" />
+                    <p className="text-xs text-muted-foreground mt-1">Referrer को हर sale पर कितने % commission मिलेगा (0 = disabled)</p>
                   </div>
                 </>
               )}

@@ -250,17 +250,43 @@ async function verifyRazorpay(
     });
   }
 
-  // Increment purchase count for books
+  // Increment purchase count and create referral for books
   if (type === "purchase") {
     const { data: purchase } = await supabase
       .from("purchases")
-      .select("book_id")
+      .select("book_id, user_id, referrer_id")
       .eq("razorpay_order_id", orderId)
       .single();
     if (purchase?.book_id) {
       await supabase.rpc("increment_purchase_count", { _book_id: purchase.book_id }).catch(() => {
         console.warn("Could not increment purchase count");
       });
+
+      // Create referral record if referrer exists
+      if (purchase.referrer_id) {
+        try {
+          const { data: book } = await supabase
+            .from("books")
+            .select("price, referral_commission_percent")
+            .eq("id", purchase.book_id)
+            .single();
+          
+          if (book && book.referral_commission_percent > 0) {
+            const commissionAmount = Math.round((book.price * book.referral_commission_percent / 100) * 100) / 100;
+            await supabase.from("referrals").insert({
+              referrer_user_id: purchase.referrer_id,
+              buyer_user_id: purchase.user_id,
+              book_id: purchase.book_id,
+              purchase_id: orderId,
+              commission_percent: book.referral_commission_percent,
+              commission_amount: commissionAmount,
+              status: "pending",
+            });
+          }
+        } catch (e) {
+          console.error("Referral creation error:", e);
+        }
+      }
     }
   }
 

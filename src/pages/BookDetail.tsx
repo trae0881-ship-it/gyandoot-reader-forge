@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import useSEO from "@/hooks/useSEO";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,15 +7,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, Eye, Lock, Loader2, PlayCircle, Tag, X, CheckCircle, User, Calendar, Layers, Globe, ShoppingCart, Star, Info } from "lucide-react";
+import { BookOpen, Eye, Lock, Loader2, PlayCircle, Tag, X, CheckCircle, User, Calendar, Layers, Globe, ShoppingCart, Star, Info, Share2, Copy } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { initiatePayment, type PaymentGateway } from "@/lib/payment";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
 const BookDetail = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams] = useSearchParams();
+  const referrerId = useMemo(() => searchParams.get("ref"), [searchParams]);
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -165,6 +167,7 @@ const BookDetail = () => {
         gateway,
         book_id: book!.id,
         coupon_id: appliedCoupon?.coupon_id,
+        referrer_id: referrerId || undefined,
       } as any,
       () => {
         toast({ title: "Purchase Successful!", description: "You can now read the full book." });
@@ -356,6 +359,34 @@ const BookDetail = () => {
                       <><Lock className="mr-2 h-4 w-4" /> Purchase to Read — ₹{appliedCoupon ? appliedCoupon.final_amount : book.price}</>
                     )}
                   </Button>
+                </div>
+              )}
+              {/* Referral Link Section */}
+              {user && hasLibraryAccess && (
+                <div className="mt-6 rounded-lg border border-border bg-muted/30 p-4">
+                  <h3 className="text-sm font-semibold flex items-center gap-2 mb-2">
+                    <Share2 className="h-4 w-4 text-primary" /> Refer & Earn
+                  </h3>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    इस link को share करें। इस link से जो भी book खरीदेगा, आपको commission मिलेगा।
+                  </p>
+                  <div className="flex gap-2">
+                    <Input
+                      readOnly
+                      value={`${window.location.origin}/books/${book.slug}?ref=${user.id}`}
+                      className="text-xs font-mono"
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${window.location.origin}/books/${book.slug}?ref=${user.id}`);
+                        toast({ title: "Link copied!", description: "Referral link clipboard mein copy ho gaya." });
+                      }}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>

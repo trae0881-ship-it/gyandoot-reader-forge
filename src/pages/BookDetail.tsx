@@ -361,6 +361,34 @@ const BookDetail = () => {
                   </Button>
                 </div>
               )}
+              {/* Referral Link Section */}
+              {user && hasLibraryAccess && (
+                <div className="mt-6 rounded-lg border border-border bg-muted/30 p-4">
+                  <h3 className="text-sm font-semibold flex items-center gap-2 mb-2">
+                    <Share2 className="h-4 w-4 text-primary" /> Refer & Earn
+                  </h3>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    इस link को share करें। इस link से जो भी book खरीदेगा, आपको commission मिलेगा।
+                  </p>
+                  <div className="flex gap-2">
+                    <Input
+                      readOnly
+                      value={`${window.location.origin}/books/${book.slug}?ref=${user.id}`}
+                      className="text-xs font-mono"
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${window.location.origin}/books/${book.slug}?ref=${user.id}`);
+                        toast({ title: "Link copied!", description: "Referral link clipboard mein copy ho gaya." });
+                      }}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

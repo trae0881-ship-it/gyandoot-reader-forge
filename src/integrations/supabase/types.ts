@@ -127,6 +127,7 @@ export type Database = {
           preview_chapters: number
           price: number
           purchase_count: number
+          referral_commission_percent: number
           slug: string
           title: string
           updated_at: string
@@ -145,6 +146,7 @@ export type Database = {
           preview_chapters?: number
           price?: number
           purchase_count?: number
+          referral_commission_percent?: number
           slug: string
           title: string
           updated_at?: string
@@ -163,6 +165,7 @@ export type Database = {
           preview_chapters?: number
           price?: number
           purchase_count?: number
+          referral_commission_percent?: number
           slug?: string
           title?: string
           updated_at?: string
@@ -488,6 +491,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      referrals: {
+        Row: {
+          admin_notes: string | null
+          book_id: string
+          buyer_user_id: string | null
+          commission_amount: number
+          commission_percent: number
+          created_at: string
+          id: string
+          purchase_id: string | null
+          referrer_user_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          book_id: string
+          buyer_user_id?: string | null
+          commission_amount?: number
+          commission_percent?: number
+          created_at?: string
+          id?: string
+          purchase_id?: string | null
+          referrer_user_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          book_id?: string
+          buyer_user_id?: string | null
+          commission_amount?: number
+          commission_percent?: number
+          created_at?: string
+          id?: string
+          purchase_id?: string | null
+          referrer_user_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       settings: {
         Row: {

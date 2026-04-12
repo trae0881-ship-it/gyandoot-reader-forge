@@ -167,6 +167,7 @@ const BookDetail = () => {
         gateway,
         book_id: book!.id,
         coupon_id: appliedCoupon?.coupon_id,
+        referrer_id: referrerId || undefined,
       } as any,
       () => {
         toast({ title: "Purchase Successful!", description: "You can now read the full book." });

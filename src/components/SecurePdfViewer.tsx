@@ -86,19 +86,34 @@ const SecurePdfViewer = ({ url, title, darkMode, initialPage, onPageChange }: Se
       const page = await pdf.getPage(pageNum);
       const viewport = page.getViewport({ scale });
 
+      // Use device pixel ratio for crisp rendering
+      const dpr = window.devicePixelRatio || 1;
+      const outputScale = Math.max(dpr, 2); // At least 2x for clarity
+
       // Setup main canvas
       const ctx = canvas.getContext("2d")!;
-      canvas.height = viewport.height;
-      canvas.width = viewport.width;
+      canvas.width = Math.floor(viewport.width * outputScale);
+      canvas.height = Math.floor(viewport.height * outputScale);
+      canvas.style.width = `${viewport.width}px`;
+      canvas.style.height = `${viewport.height}px`;
+
+      // Enable text smoothing
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
 
       // Setup highlight canvas
-      highlightCanvas.height = viewport.height;
-      highlightCanvas.width = viewport.width;
+      highlightCanvas.width = Math.floor(viewport.width * outputScale);
+      highlightCanvas.height = Math.floor(viewport.height * outputScale);
+      highlightCanvas.style.width = `${viewport.width}px`;
+      highlightCanvas.style.height = `${viewport.height}px`;
 
       // Clear text layer
       textLayerDiv.innerHTML = "";
       textLayerDiv.style.width = `${viewport.width}px`;
       textLayerDiv.style.height = `${viewport.height}px`;
+
+      // Scale canvas context for high-DPI rendering
+      ctx.setTransform(outputScale, 0, 0, outputScale, 0, 0);
 
       // Render PDF page to canvas
       await page.render({

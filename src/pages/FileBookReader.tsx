@@ -75,6 +75,30 @@ const FileBookReader = () => {
     return () => document.removeEventListener("contextmenu", handler);
   }, []);
 
+  // Anti-screenshot: blur content when page not visible or window loses focus
+  useEffect(() => {
+    const root = document.getElementById("reader-secure-root");
+    if (!root) return;
+
+    const blurContent = () => { root.style.filter = "blur(20px)"; };
+    const unblurContent = () => { root.style.filter = "none"; };
+
+    const handleVisibility = () => {
+      if (document.hidden) blurContent(); else unblurContent();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("blur", blurContent);
+    window.addEventListener("focus", unblurContent);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("blur", blurContent);
+      window.removeEventListener("focus", unblurContent);
+      root.style.filter = "none";
+    };
+  }, []);
+
   // Prevent keyboard shortcuts for saving/printing/developer tools
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -203,7 +227,8 @@ const FileBookReader = () => {
 
   return (
     <div
-      className={`min-h-screen select-none ${darkMode ? "bg-gray-900 text-gray-100" : "bg-background text-foreground"}`}
+      id="reader-secure-root"
+      className={`min-h-screen select-none reader-secure ${darkMode ? "bg-gray-900 text-gray-100" : "bg-background text-foreground"}`}
       style={{ WebkitUserSelect: "none", userSelect: "none" }}
     >
       {/* Toolbar */}

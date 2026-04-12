@@ -102,3 +102,19 @@
     font-family: 'Playfair Display', serif;
   }
 }
+
+/* Anti-screenshot: hide content on print/screen capture */
+@media print {
+  .reader-secure {
+    display: none !important;
+  }
+  body::after {
+    content: "Printing is not allowed.";
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    font-size: 2rem;
+    color: #c00;
+  }
+}

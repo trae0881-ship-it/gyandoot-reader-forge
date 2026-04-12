@@ -232,26 +232,26 @@ const FileBookReader = () => {
       style={{ WebkitUserSelect: "none", userSelect: "none" }}
     >
       {/* Toolbar */}
-      <div className={`sticky top-0 z-40 border-b px-4 py-2 ${darkMode ? "border-gray-700 bg-gray-900/95" : "bg-background/95 backdrop-blur"}`}>
-        <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <Button variant="ghost" size="sm" asChild>
+      <div className={`sticky top-0 z-40 border-b px-2 sm:px-4 py-1.5 sm:py-2 ${darkMode ? "border-gray-700 bg-gray-900/95" : "bg-background/95 backdrop-blur"}`}>
+        <div className="mx-auto flex max-w-6xl items-center justify-between">
+          <Button variant="ghost" size="sm" className="h-8 px-2 sm:px-3" asChild>
             <Link to={`/books/${slug}`}>
               <ArrowLeft className="mr-1 h-4 w-4" />
-              <span className="hidden sm:inline">{book.title}</span>
-              <span className="sm:hidden">Back</span>
+              <span className="hidden sm:inline text-sm truncate max-w-[200px]">{book.title}</span>
+              <span className="sm:hidden text-xs">Back</span>
             </Link>
           </Button>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground uppercase">{fileType}</span>
-            <Button variant="ghost" size="sm" onClick={() => setDarkMode(!darkMode)}>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] sm:text-xs text-muted-foreground uppercase">{fileType}</span>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setDarkMode(!darkMode)}>
               {darkMode ? "☀️" : "🌙"}
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="mx-auto max-w-5xl px-4 py-6">
+      {/* Content - minimal padding on mobile for max reading area */}
+      <div className="mx-auto max-w-6xl px-1 sm:px-3 md:px-4 py-2 sm:py-4">
         {isLoading && (
           <div className="flex flex-col items-center justify-center py-32 gap-3">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />

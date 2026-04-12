@@ -414,6 +414,7 @@ export type Database = {
           razorpay_order_id: string | null
           razorpay_payment_id: string | null
           razorpay_signature: string | null
+          referrer_id: string | null
           status: string
           user_id: string
         }
@@ -424,6 +425,7 @@ export type Database = {
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
           razorpay_signature?: string | null
+          referrer_id?: string | null
           status?: string
           user_id: string
         }
@@ -434,6 +436,7 @@ export type Database = {
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
           razorpay_signature?: string | null
+          referrer_id?: string | null
           status?: string
           user_id?: string
         }

@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { amount, type, book_id, name, email, gateway = "razorpay", coupon_id } = await req.json();
+    const { amount, type, book_id, name, email, gateway = "razorpay", coupon_id, referrer_id } = await req.json();
 
     // For purchases, auth is required. For donations, auth is optional.
     let user: any = null;
@@ -111,9 +111,9 @@ Deno.serve(async (req) => {
     }
 
     if (gateway === "razorpay") {
-      return await handleRazorpay(supabase, user, verifiedAmount, type, book_id, name, email, coupon_id);
+      return await handleRazorpay(supabase, user, verifiedAmount, type, book_id, name, email, coupon_id, referrer_id);
     } else if (gateway === "paypal") {
-      return await handlePaypal(supabase, user, verifiedAmount, type, book_id, name, email, coupon_id);
+      return await handlePaypal(supabase, user, verifiedAmount, type, book_id, name, email, coupon_id, referrer_id);
     } else {
       return new Response(JSON.stringify({ error: "Unsupported gateway" }), {
         status: 400,
@@ -131,7 +131,7 @@ Deno.serve(async (req) => {
 
 async function handleRazorpay(
   supabase: any, user: any, amount: number, type: string,
-  book_id?: string, name?: string, email?: string, coupon_id?: string
+  book_id?: string, name?: string, email?: string, coupon_id?: string, referrer_id?: string
 ) {
   const keyId = Deno.env.get("RAZORPAY_KEY_ID");
   const keySecret = Deno.env.get("RAZORPAY_KEY_SECRET");
@@ -197,7 +197,7 @@ async function handleRazorpay(
 
 async function handlePaypal(
   supabase: any, user: any, amount: number, type: string,
-  book_id?: string, name?: string, email?: string, coupon_id?: string
+  book_id?: string, name?: string, email?: string, coupon_id?: string, referrer_id?: string
 ) {
   const clientId = Deno.env.get("PAYPAL_CLIENT_ID");
   const clientSecret = Deno.env.get("PAYPAL_CLIENT_SECRET");

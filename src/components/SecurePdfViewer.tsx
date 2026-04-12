@@ -158,7 +158,10 @@ const SecurePdfViewer = ({ url, title, darkMode, initialPage, onPageChange }: Se
     const highlightCanvas = highlightCanvasRef.current;
     if (!highlightCanvas) return;
     const ctx = highlightCanvas.getContext("2d")!;
-    ctx.clearRect(0, 0, highlightCanvas.width, highlightCanvas.height);
+    const dpr = window.devicePixelRatio || 1;
+    const outputScale = Math.max(dpr, 2);
+    ctx.setTransform(outputScale, 0, 0, outputScale, 0, 0);
+    ctx.clearRect(0, 0, highlightCanvas.width / outputScale, highlightCanvas.height / outputScale);
 
     const pageHighlights = highlights.filter((h) => h.page === pageNum);
     pageHighlights.forEach((h) => {

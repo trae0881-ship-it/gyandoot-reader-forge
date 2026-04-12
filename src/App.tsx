@@ -4,41 +4,53 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { lazy, Suspense } from "react";
+
+// Only eagerly load the homepage
 import Index from "./pages/Index";
-import Books from "./pages/Books";
-import BookDetail from "./pages/BookDetail";
-import BookReader from "./pages/BookReader";
-import FileBookReader from "./pages/FileBookReader";
-import Articles from "./pages/Articles";
-import ArticleDetail from "./pages/ArticleDetail";
-import Donate from "./pages/Donate";
-import Auth from "./pages/Auth";
-import Profile from "./pages/Profile";
-import About from "./pages/About";
-import Services from "./pages/Services";
-import Contact from "./pages/Contact";
-import FAQ from "./pages/FAQ";
-import TestimonialsPage from "./pages/TestimonialsPage";
-import Portfolio from "./pages/Portfolio";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsConditions from "./pages/TermsConditions";
-import Careers from "./pages/Careers";
-import Support from "./pages/Support";
-import RefundPolicy from "./pages/RefundPolicy";
-import ShippingPolicy from "./pages/ShippingPolicy";
-import SitemapPage from "./pages/Sitemap";
-import AdminLayout from "./pages/admin/AdminLayout";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminBooks from "./pages/admin/AdminBooks";
-import AdminPosts from "./pages/admin/AdminPosts";
-import AdminDonations from "./pages/admin/AdminDonations";
-import AdminPurchases from "./pages/admin/AdminPurchases";
-import AdminSettings from "./pages/admin/AdminSettings";
-import AdminUsers from "./pages/admin/AdminUsers";
-import AdminCoupons from "./pages/admin/AdminCoupons";
-import AdminReferrals from "./pages/admin/AdminReferrals";
-import ResetPassword from "./pages/ResetPassword";
-import NotFound from "./pages/NotFound";
+
+// Lazy load all other pages for faster initial load
+const Books = lazy(() => import("./pages/Books"));
+const BookDetail = lazy(() => import("./pages/BookDetail"));
+const BookReader = lazy(() => import("./pages/BookReader"));
+const FileBookReader = lazy(() => import("./pages/FileBookReader"));
+const Articles = lazy(() => import("./pages/Articles"));
+const ArticleDetail = lazy(() => import("./pages/ArticleDetail"));
+const Donate = lazy(() => import("./pages/Donate"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Profile = lazy(() => import("./pages/Profile"));
+const About = lazy(() => import("./pages/About"));
+const Services = lazy(() => import("./pages/Services"));
+const Contact = lazy(() => import("./pages/Contact"));
+const FAQ = lazy(() => import("./pages/FAQ"));
+const TestimonialsPage = lazy(() => import("./pages/TestimonialsPage"));
+const Portfolio = lazy(() => import("./pages/Portfolio"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsConditions = lazy(() => import("./pages/TermsConditions"));
+const Careers = lazy(() => import("./pages/Careers"));
+const Support = lazy(() => import("./pages/Support"));
+const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
+const ShippingPolicy = lazy(() => import("./pages/ShippingPolicy"));
+const SitemapPage = lazy(() => import("./pages/Sitemap"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminBooks = lazy(() => import("./pages/admin/AdminBooks"));
+const AdminPosts = lazy(() => import("./pages/admin/AdminPosts"));
+const AdminDonations = lazy(() => import("./pages/admin/AdminDonations"));
+const AdminPurchases = lazy(() => import("./pages/admin/AdminPurchases"));
+const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
+const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
+const AdminCoupons = lazy(() => import("./pages/admin/AdminCoupons"));
+const AdminReferrals = lazy(() => import("./pages/admin/AdminReferrals"));
+
+// Minimal loading spinner
+const PageLoader = () => (
+  <div className="flex min-h-screen items-center justify-center bg-background">
+    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+  </div>
+);
 
 const queryClient = new QueryClient();
 
@@ -49,45 +61,47 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/books" element={<Books />} />
-            <Route path="/books/:slug" element={<BookDetail />} />
-            <Route path="/books/:slug/read-file" element={<FileBookReader />} />
-            <Route path="/books/:slug/:chapterSlug" element={<BookReader />} />
-            <Route path="/articles" element={<Articles />} />
-            <Route path="/articles/:slug" element={<ArticleDetail />} />
-            <Route path="/support-us" element={<Donate />} />
-            <Route path="/donate" element={<Donate />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/testimonials" element={<TestimonialsPage />} />
-            <Route path="/portfolio" element={<Portfolio />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/terms-conditions" element={<TermsConditions />} />
-            <Route path="/careers" element={<Careers />} />
-            <Route path="/support" element={<Support />} />
-            <Route path="/refund-policy" element={<RefundPolicy />} />
-            <Route path="/shipping-policy" element={<ShippingPolicy />} />
-            <Route path="/sitemap" element={<SitemapPage />} />
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminDashboard />} />
-              <Route path="users" element={<AdminUsers />} />
-              <Route path="books" element={<AdminBooks />} />
-              <Route path="posts" element={<AdminPosts />} />
-              <Route path="coupons" element={<AdminCoupons />} />
-              <Route path="donations" element={<AdminDonations />} />
-              <Route path="purchases" element={<AdminPurchases />} />
-              <Route path="referrals" element={<AdminReferrals />} />
-              <Route path="settings" element={<AdminSettings />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/books" element={<Books />} />
+              <Route path="/books/:slug" element={<BookDetail />} />
+              <Route path="/books/:slug/read-file" element={<FileBookReader />} />
+              <Route path="/books/:slug/:chapterSlug" element={<BookReader />} />
+              <Route path="/articles" element={<Articles />} />
+              <Route path="/articles/:slug" element={<ArticleDetail />} />
+              <Route path="/support-us" element={<Donate />} />
+              <Route path="/donate" element={<Donate />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/services" element={<Services />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/testimonials" element={<TestimonialsPage />} />
+              <Route path="/portfolio" element={<Portfolio />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-conditions" element={<TermsConditions />} />
+              <Route path="/careers" element={<Careers />} />
+              <Route path="/support" element={<Support />} />
+              <Route path="/refund-policy" element={<RefundPolicy />} />
+              <Route path="/shipping-policy" element={<ShippingPolicy />} />
+              <Route path="/sitemap" element={<SitemapPage />} />
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="books" element={<AdminBooks />} />
+                <Route path="posts" element={<AdminPosts />} />
+                <Route path="coupons" element={<AdminCoupons />} />
+                <Route path="donations" element={<AdminDonations />} />
+                <Route path="purchases" element={<AdminPurchases />} />
+                <Route path="referrals" element={<AdminReferrals />} />
+                <Route path="settings" element={<AdminSettings />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </BrowserRouter>
       </AuthProvider>
     </TooltipProvider>

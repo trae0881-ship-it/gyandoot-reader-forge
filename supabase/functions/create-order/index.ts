@@ -168,12 +168,17 @@ async function handleRazorpay(
 
   // Store pending record
   if (type === "purchase") {
-    await supabase.from("purchases").insert({
+    const purchaseData: any = {
       user_id: user.id,
       book_id,
       razorpay_order_id: order.id,
       status: "pending",
-    });
+    };
+    // Store referrer_id if present and not self-referral
+    if (referrer_id && referrer_id !== user.id) {
+      purchaseData.referrer_id = referrer_id;
+    }
+    await supabase.from("purchases").insert(purchaseData);
     // Increment coupon usage if applied
     if (coupon_id) {
       await supabase.rpc("increment_coupon_usage", { _coupon_id: coupon_id });
@@ -260,12 +265,16 @@ async function handlePaypal(
 
   // Store pending record
   if (type === "purchase") {
-    await supabase.from("purchases").insert({
+    const purchaseData: any = {
       user_id: user.id,
       book_id,
       razorpay_order_id: ppOrder.id,
       status: "pending",
-    });
+    };
+    if (referrer_id && referrer_id !== user.id) {
+      purchaseData.referrer_id = referrer_id;
+    }
+    await supabase.from("purchases").insert(purchaseData);
   } else {
     await supabase.from("donations").insert({
       user_id: user?.id ?? null,

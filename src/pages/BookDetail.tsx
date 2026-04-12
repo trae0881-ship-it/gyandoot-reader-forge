@@ -362,7 +362,7 @@ const BookDetail = () => {
                 </div>
               )}
               {/* Referral Link Section */}
-              {user && hasLibraryAccess && (
+              {user && (
                 <div className="mt-6 rounded-lg border border-border bg-muted/30 p-4">
                   <h3 className="text-sm font-semibold flex items-center gap-2 mb-2">
                     <Share2 className="h-4 w-4 text-primary" /> Refer & Earn

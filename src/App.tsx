@@ -36,6 +36,7 @@ import AdminPurchases from "./pages/admin/AdminPurchases";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminCoupons from "./pages/admin/AdminCoupons";
+import AdminReferrals from "./pages/admin/AdminReferrals";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
@@ -82,6 +83,7 @@ const App = () => (
               <Route path="coupons" element={<AdminCoupons />} />
               <Route path="donations" element={<AdminDonations />} />
               <Route path="purchases" element={<AdminPurchases />} />
+              <Route path="referrals" element={<AdminReferrals />} />
               <Route path="settings" element={<AdminSettings />} />
             </Route>
             <Route path="*" element={<NotFound />} />

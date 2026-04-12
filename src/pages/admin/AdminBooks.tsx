@@ -465,6 +465,11 @@ const AdminBooks = () => {
                     <Input type="number" min={0} value={form.preview_chapters} onChange={(e) => setForm({ ...form, preview_chapters: Number(e.target.value) })} className="mt-1" placeholder="e.g. 7" />
                     <p className="text-xs text-muted-foreground mt-1">पहले कितने chapters free demo में दिखाने हैं (0 = कोई नहीं)</p>
                   </div>
+                  <div>
+                    <Label>Referral Commission (%)</Label>
+                    <Input type="number" min={0} max={100} value={form.referral_commission_percent} onChange={(e) => setForm({ ...form, referral_commission_percent: Number(e.target.value) })} className="mt-1" placeholder="e.g. 10" />
+                    <p className="text-xs text-muted-foreground mt-1">Referrer को हर sale पर कितने % commission मिलेगा (0 = disabled)</p>
+                  </div>
                 </>
               )}
 

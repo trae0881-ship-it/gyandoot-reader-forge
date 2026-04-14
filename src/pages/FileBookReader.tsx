@@ -1,4 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
+import AskScripture from "@/components/AskScripture";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -314,6 +315,7 @@ const FileBookReader = () => {
           </div>
         )}
       </div>
+      {book && <AskScripture bookId={book.id} bookTitle={book.title} />}
     </div>
   );
 };

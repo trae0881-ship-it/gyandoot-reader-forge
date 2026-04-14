@@ -13,6 +13,7 @@ import { useState, useMemo } from "react";
 import { initiatePayment, type PaymentGateway } from "@/lib/payment";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import AskScripture from "@/components/AskScripture";
 
 const BookDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -578,6 +579,7 @@ const BookDetail = () => {
       </section>
 
       <SimilarBooks currentBookId={book.id} category={book.category} />
+      {book && <AskScripture bookId={book.id} bookTitle={book.title} />}
     </Layout>
   );
 };

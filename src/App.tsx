@@ -44,6 +44,7 @@ const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 const AdminCoupons = lazy(() => import("./pages/admin/AdminCoupons"));
 const AdminReferrals = lazy(() => import("./pages/admin/AdminReferrals"));
+const AdminAI = lazy(() => import("./pages/admin/AdminAI"));
 
 // Minimal loading spinner
 const PageLoader = () => (
@@ -97,6 +98,7 @@ const App = () => (
                 <Route path="donations" element={<AdminDonations />} />
                 <Route path="purchases" element={<AdminPurchases />} />
                 <Route path="referrals" element={<AdminReferrals />} />
+                <Route path="ai" element={<AdminAI />} />
                 <Route path="settings" element={<AdminSettings />} />
               </Route>
               <Route path="*" element={<NotFound />} />

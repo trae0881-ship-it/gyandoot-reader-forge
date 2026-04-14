@@ -315,6 +315,7 @@ const FileBookReader = () => {
           </div>
         )}
       </div>
+      {book && <AskScripture bookId={book.id} bookTitle={book.title} />}
     </div>
   );
 };

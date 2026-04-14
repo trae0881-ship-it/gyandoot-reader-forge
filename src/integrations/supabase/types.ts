@@ -14,6 +14,118 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_cache: {
+        Row: {
+          book_id: string
+          created_at: string
+          id: string
+          question: string
+          question_hash: string
+          response: string
+        }
+        Insert: {
+          book_id: string
+          created_at?: string
+          id?: string
+          question: string
+          question_hash: string
+          response: string
+        }
+        Update: {
+          book_id?: string
+          created_at?: string
+          id?: string
+          question?: string
+          question_hash?: string
+          response?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_cache_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_logs: {
+        Row: {
+          ai_response: string
+          book_id: string | null
+          book_title: string | null
+          cached: boolean
+          created_at: string
+          id: string
+          provider_name: string | null
+          status: string
+          user_id: string | null
+          user_question: string
+        }
+        Insert: {
+          ai_response: string
+          book_id?: string | null
+          book_title?: string | null
+          cached?: boolean
+          created_at?: string
+          id?: string
+          provider_name?: string | null
+          status?: string
+          user_id?: string | null
+          user_question: string
+        }
+        Update: {
+          ai_response?: string
+          book_id?: string | null
+          book_title?: string | null
+          cached?: boolean
+          created_at?: string
+          id?: string
+          provider_name?: string | null
+          status?: string
+          user_id?: string | null
+          user_question?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_logs_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_settings: {
+        Row: {
+          api_key_encrypted: string
+          created_at: string
+          id: string
+          is_active: boolean
+          model_name: string
+          provider_name: string
+          updated_at: string
+        }
+        Insert: {
+          api_key_encrypted: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          model_name: string
+          provider_name: string
+          updated_at?: string
+        }
+        Update: {
+          api_key_encrypted?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          model_name?: string
+          provider_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       book_chapters: {
         Row: {
           book_id: string

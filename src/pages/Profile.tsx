@@ -357,6 +357,36 @@ const Profile = () => {
           </>
         )}
 
+        {/* Universal Referral Link */}
+        <section className="mb-6">
+          <h2 className="font-serif text-xl font-bold mb-4 flex items-center gap-2">
+            <Share2 className="h-5 w-5 text-primary" /> Your Referral Link
+          </h2>
+          <Card>
+            <CardContent className="py-4 px-4">
+              <p className="text-sm text-muted-foreground mb-3">
+                यह आपका universal referral link है। इसे share करें — कोई भी इस link से कोई भी book खरीदेगा तो आपको commission मिलेगा! (7 दिन तक valid)
+              </p>
+              <div className="flex gap-2">
+                <input
+                  readOnly
+                  value={`${window.location.origin}/?ref=${user.id}`}
+                  className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-xs font-mono"
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/?ref=${user.id}`);
+                  }}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
         {/* Referral Earnings */}
         <section className="mb-10">
           <h2 className="font-serif text-xl font-bold mb-4 flex items-center gap-2">
@@ -366,7 +396,7 @@ const Profile = () => {
             <Card>
               <CardContent className="py-8 text-center text-muted-foreground">
                 <Share2 className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                <p className="text-sm">No referral earnings yet. Share book links to earn commission!</p>
+                <p className="text-sm">No referral earnings yet. Share your universal link to earn commission!</p>
               </CardContent>
             </Card>
           ) : (

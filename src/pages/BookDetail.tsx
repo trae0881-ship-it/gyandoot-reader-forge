@@ -1,4 +1,4 @@
-import { useParams, Link, useSearchParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import useSEO from "@/hooks/useSEO";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,11 +14,11 @@ import { initiatePayment, type PaymentGateway } from "@/lib/payment";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import AskScripture from "@/components/AskScripture";
+import { getReferrerId } from "@/hooks/useReferral";
 
 const BookDetail = () => {
   const { slug } = useParams<{ slug: string }>();
-  const [searchParams] = useSearchParams();
-  const referrerId = useMemo(() => searchParams.get("ref"), [searchParams]);
+  const referrerId = useMemo(() => getReferrerId(), []);
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -369,20 +369,20 @@ const BookDetail = () => {
                     <Share2 className="h-4 w-4 text-primary" /> Refer & Earn
                   </h3>
                   <p className="text-xs text-muted-foreground mb-3">
-                    इस link को share करें। इस link से जो भी book खरीदेगा, आपको commission मिलेगा।
+                    यह एक universal link है — इसे share करें। कोई भी इस link से कोई भी book खरीदेगा तो आपको commission मिलेगा!
                   </p>
                   <div className="flex gap-2">
                     <Input
                       readOnly
-                      value={`${window.location.origin}/books/${book.slug}?ref=${user.id}`}
+                      value={`${window.location.origin}/?ref=${user.id}`}
                       className="text-xs font-mono"
                     />
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => {
-                        navigator.clipboard.writeText(`${window.location.origin}/books/${book.slug}?ref=${user.id}`);
-                        toast({ title: "Link copied!", description: "Referral link clipboard mein copy ho gaya." });
+                        navigator.clipboard.writeText(`${window.location.origin}/?ref=${user.id}`);
+                        toast({ title: "Link copied!", description: "Universal referral link copy ho gaya! Sabhi books par commission milega." });
                       }}
                     >
                       <Copy className="h-4 w-4" />

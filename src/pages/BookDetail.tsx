@@ -579,6 +579,7 @@ const BookDetail = () => {
       </section>
 
       <SimilarBooks currentBookId={book.id} category={book.category} />
+      {book && <AskScripture bookId={book.id} bookTitle={book.title} />}
     </Layout>
   );
 };

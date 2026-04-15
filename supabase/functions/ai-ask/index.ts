@@ -115,10 +115,9 @@ async function getAuthenticatedUser(req: Request, supabaseUrl: string, anonKey: 
   const userClient = createClient(supabaseUrl, anonKey, {
     global: { headers: { Authorization: authHeader } },
   });
-  const token = authHeader.replace("Bearer ", "");
-  const { data, error } = await userClient.auth.getClaims(token);
-  if (error || !data?.claims) return null;
-  return { id: data.claims.sub as string, client: userClient };
+  const { data: { user }, error } = await userClient.auth.getUser();
+  if (error || !user) return null;
+  return { id: user.id, client: userClient };
 }
 
 // Helper: check if user is admin

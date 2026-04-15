@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
-import { MessageCircle, X, Send, Loader2, BookOpen, Sparkles } from "lucide-react";
+import { X, Send, Loader2, BookOpen, Sparkles } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 interface Message {
   id: string;
@@ -13,8 +14,8 @@ interface Message {
 }
 
 interface AskScriptureProps {
-  bookId: string;
-  bookTitle: string;
+  bookId?: string;
+  bookTitle?: string;
 }
 
 const AskScripture = ({ bookId, bookTitle }: AskScriptureProps) => {
@@ -24,6 +25,10 @@ const AskScripture = ({ bookId, bookTitle }: AskScriptureProps) => {
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const isGeneral = !bookId;
+  const displayTitle = bookTitle || "सनातन धर्म";
+  const subtitle = isGeneral ? "हिंदू धर्म से जुड़ा कोई भी प्रश्न पूछें" : bookTitle;
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -48,7 +53,11 @@ const AskScripture = ({ bookId, bookTitle }: AskScriptureProps) => {
 
     try {
       const { data, error } = await supabase.functions.invoke("ai-ask", {
-        body: { action: "ask", question: q, book_id: bookId },
+        body: {
+          action: "ask",
+          question: q,
+          book_id: bookId || "general",
+        },
       });
 
       if (error) throw error;
@@ -56,7 +65,7 @@ const AskScripture = ({ bookId, bookTitle }: AskScriptureProps) => {
       const aiMsg: Message = {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: data.answer || "यह जानकारी इस पुस्तक में उपलब्ध नहीं है",
+        content: data.answer || "यह जानकारी उपलब्ध नहीं है",
         cached: data.cached,
       };
       setMessages(prev => [...prev, aiMsg]);
@@ -84,10 +93,12 @@ const AskScripture = ({ bookId, bookTitle }: AskScriptureProps) => {
       <button
         onClick={() => setOpen(true)}
         className="fixed bottom-20 right-4 z-50 flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-primary-foreground shadow-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95"
-        aria-label="Ask Scripture AI"
+        aria-label="Ask Gyandootnova AI"
       >
         <Sparkles className="h-5 w-5" />
-        <span className="hidden sm:inline text-sm font-medium">पुस्तक से पूछें</span>
+        <span className="hidden sm:inline text-sm font-medium">
+          {isGeneral ? "धर्म से पूछें" : "पुस्तक से पूछें"}
+        </span>
       </button>
     );
   }
@@ -97,10 +108,16 @@ const AskScripture = ({ bookId, bookTitle }: AskScriptureProps) => {
       style={{ height: "min(520px, calc(100vh - 2rem))" }}>
       {/* Header */}
       <div className="flex items-center gap-2 border-b bg-primary px-4 py-3 text-primary-foreground">
-        <BookOpen className="h-5 w-5 shrink-0" />
+        {isGeneral ? (
+          <Sparkles className="h-5 w-5 shrink-0" />
+        ) : (
+          <BookOpen className="h-5 w-5 shrink-0" />
+        )}
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold truncate">पुस्तक से पूछें</p>
-          <p className="text-xs opacity-80 truncate">{bookTitle}</p>
+          <p className="text-sm font-semibold truncate">
+            {isGeneral ? "Gyandootnova AI" : "पुस्तक से पूछें"}
+          </p>
+          <p className="text-xs opacity-80 truncate">{subtitle}</p>
         </div>
         <button onClick={() => setOpen(false)} className="rounded-full p-1 hover:bg-primary-foreground/20 transition-colors">
           <X className="h-4 w-4" />
@@ -113,7 +130,11 @@ const AskScripture = ({ bookId, bookTitle }: AskScriptureProps) => {
           <div className="flex flex-col items-center justify-center h-full py-8 text-center text-muted-foreground">
             <Sparkles className="h-10 w-10 mb-3 text-primary/40" />
             <p className="text-sm font-medium">Gyandootnova AI</p>
-            <p className="text-xs mt-1 max-w-[200px]">इस पुस्तक के बारे में कोई भी प्रश्न पूछें</p>
+            <p className="text-xs mt-1 max-w-[220px]">
+              {isGeneral
+                ? "सनातन धर्म, वेद, गीता, रामायण या किसी भी हिंदू ग्रंथ के बारे में पूछें"
+                : `"${displayTitle}" के बारे में कोई भी प्रश्न पूछें`}
+            </p>
           </div>
         )}
         <div className="space-y-3">
@@ -124,7 +145,13 @@ const AskScripture = ({ bookId, bookTitle }: AskScriptureProps) => {
                   ? "bg-primary text-primary-foreground rounded-br-md"
                   : "bg-muted text-foreground rounded-bl-md"
               }`}>
-                {msg.content}
+                {msg.role === "assistant" ? (
+                  <div className="prose prose-sm dark:prose-invert max-w-none [&>p]:m-0 [&>ul]:my-1 [&>ol]:my-1">
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  </div>
+                ) : (
+                  msg.content
+                )}
                 {msg.cached && (
                   <span className="block text-[10px] opacity-60 mt-1">⚡ cached</span>
                 )}
@@ -135,7 +162,7 @@ const AskScripture = ({ bookId, bookTitle }: AskScriptureProps) => {
             <div className="flex justify-start">
               <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3 text-sm text-muted-foreground flex items-center gap-2">
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                <span>⚡ शास्त्रों में खोज रहा हूँ...</span>
+                <span>{isGeneral ? "⚡ शास्त्रों में खोज रहा हूँ..." : "⚡ पुस्तक में खोज रहा हूँ..."}</span>
               </div>
             </div>
           )}
@@ -150,7 +177,7 @@ const AskScripture = ({ bookId, bookTitle }: AskScriptureProps) => {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="अपना प्रश्न यहाँ लिखें..."
+            placeholder={isGeneral ? "धर्म से जुड़ा प्रश्न पूछें..." : "अपना प्रश्न यहाँ लिखें..."}
             disabled={loading}
             className="flex-1 rounded-full text-sm"
           />

@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { BookOpen, Eye, Lock, Loader2, PlayCircle, Tag, X, CheckCircle, User, Calendar, Layers, Globe, ShoppingCart, Star, Info, Share2, Copy } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useMemo, useEffect } from "react";
-import { useAskScriptureSuppress } from "@/components/layout/Layout";
+
 import { initiatePayment, type PaymentGateway } from "@/lib/payment";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";

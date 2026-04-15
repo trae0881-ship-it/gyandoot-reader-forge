@@ -1,6 +1,7 @@
 import Header from "./Header";
 import Footer from "./Footer";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
+import AskScripture from "@/components/AskScripture";
 import { useReferralCapture } from "@/hooks/useReferral";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
@@ -11,6 +12,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       <main className="flex flex-col flex-1">{children}</main>
       <Footer />
       <FloatingWhatsApp />
+      <AskScripture />
     </div>
   );
 };

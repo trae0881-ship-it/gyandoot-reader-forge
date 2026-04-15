@@ -59,7 +59,15 @@ const AskScripture = ({ bookId, bookTitle }: AskScriptureProps) => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        // Check if it's an auth error
+        const errorBody = typeof error === 'object' && 'context' in error ? error : null;
+        throw error;
+      }
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
 
       const aiMsg: Message = {
         id: crypto.randomUUID(),
@@ -68,12 +76,15 @@ const AskScripture = ({ bookId, bookTitle }: AskScriptureProps) => {
         cached: data.cached,
       };
       setMessages(prev => [...prev, aiMsg]);
-    } catch (err) {
+    } catch (err: any) {
       console.error("AI Ask error:", err);
+      const errorMessage = err?.message?.includes("login") || err?.message?.includes("Unauthorized")
+        ? "कृपया पहले लॉगिन करें। AI assistant का उपयोग करने के लिए लॉगिन आवश्यक है।"
+        : "कुछ त्रुटि हुई। कृपया पुनः प्रयास करें।";
       setMessages(prev => [...prev, {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: "कुछ त्रुटि हुई। कृपया पुनः प्रयास करें।",
+        content: errorMessage,
       }]);
     } finally {
       setLoading(false);

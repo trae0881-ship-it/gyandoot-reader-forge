@@ -5,7 +5,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Simple MD5-like hash using Web Crypto
 async function hashQuestion(question: string, bookId: string): Promise<string> {
   const data = new TextEncoder().encode(`${question.toLowerCase().trim()}::${bookId}`);
   const hashBuffer = await crypto.subtle.digest("SHA-256", data);
@@ -17,7 +16,6 @@ function normalizeQuestion(q: string): string {
   return q.trim().replace(/\s+/g, " ").toLowerCase();
 }
 
-// Simple XOR encryption/decryption for API keys
 function decryptKey(encrypted: string): string {
   const secret = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "fallback";
   try {
@@ -41,14 +39,10 @@ function encryptKey(plain: string): string {
   return btoa(result);
 }
 
-// Chunk book content - get relevant portions
 function getRelevantChunks(content: string, question: string, maxChars = 6000): string {
   if (!content || content.length <= maxChars) return content || "";
-  
   const paragraphs = content.split(/\n\n+/);
   const questionWords = question.toLowerCase().split(/\s+/).filter(w => w.length > 2);
-  
-  // Score each paragraph by keyword relevance
   const scored = paragraphs.map((p, i) => {
     const lower = p.toLowerCase();
     let score = 0;
@@ -57,20 +51,15 @@ function getRelevantChunks(content: string, question: string, maxChars = 6000): 
     }
     return { text: p, score, index: i };
   });
-  
-  // Sort by score descending, take top chunks
   scored.sort((a, b) => b.score - a.score);
-  
   let result = "";
   for (const chunk of scored) {
     if (result.length + chunk.text.length > maxChars) break;
     result += chunk.text + "\n\n";
   }
-  
   return result || content.substring(0, maxChars);
 }
 
-// Call AI provider dynamically
 async function callAI(provider: string, apiKey: string, model: string, systemPrompt: string, userMessage: string): Promise<string> {
   let url = "";
   let headers: Record<string, string> = {};
@@ -95,7 +84,6 @@ async function callAI(provider: string, apiKey: string, model: string, systemPro
     headers = { "x-api-key": apiKey, "anthropic-version": "2023-06-01", "Content-Type": "application/json" };
     body = { model, system: systemPrompt, messages: [{ role: "user", content: userMessage }], max_tokens: 1000, temperature: 0.3 };
   } else if (provider === "lovable") {
-    // Use Lovable AI Gateway
     const lovableKey = Deno.env.get("LOVABLE_API_KEY");
     url = "https://ai.gateway.lovable.dev/v1/chat/completions";
     headers = { "Authorization": `Bearer ${lovableKey}`, "Content-Type": "application/json" };
@@ -111,8 +99,6 @@ async function callAI(provider: string, apiKey: string, model: string, systemPro
   }
 
   const data = await res.json();
-
-  // Parse response based on provider
   if (provider === "gemini") {
     return data.candidates?.[0]?.content?.parts?.[0]?.text || "No response";
   } else if (provider === "claude") {
@@ -120,6 +106,25 @@ async function callAI(provider: string, apiKey: string, model: string, systemPro
   } else {
     return data.choices?.[0]?.message?.content || "No response";
   }
+}
+
+// Helper: extract and verify user from Authorization header
+async function getAuthenticatedUser(req: Request, supabaseUrl: string, anonKey: string) {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) return null;
+  const userClient = createClient(supabaseUrl, anonKey, {
+    global: { headers: { Authorization: authHeader } },
+  });
+  const token = authHeader.replace("Bearer ", "");
+  const { data, error } = await userClient.auth.getClaims(token);
+  if (error || !data?.claims) return null;
+  return { id: data.claims.sub as string, client: userClient };
+}
+
+// Helper: check if user is admin
+async function isAdmin(supabase: any, userId: string): Promise<boolean> {
+  const { data } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
+  return !!data;
 }
 
 Deno.serve(async (req) => {
@@ -130,68 +135,120 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
     const { action, question, book_id, provider_name, api_key, model_name } = await req.json();
 
     // ── Admin: Verify & Save API Key ──
     if (action === "verify-key") {
+      const user = await getAuthenticatedUser(req, supabaseUrl, anonKey);
+      if (!user) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (!(await isAdmin(supabase, user.id))) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       try {
-        // Test the key with a simple call
-        const testResponse = await callAI(
-          provider_name, api_key, model_name,
-          "You are a test assistant.", "Say 'OK' in one word."
-        );
+        const testResponse = await callAI(provider_name, api_key, model_name, "You are a test assistant.", "Say 'OK' in one word.");
         if (!testResponse) throw new Error("Empty response from AI");
-
         const encrypted = encryptKey(api_key);
-
-        // Deactivate other providers, then upsert
         await supabase.from("ai_settings").update({ is_active: false }).neq("id", "00000000-0000-0000-0000-000000000000");
-
         const { error } = await supabase.from("ai_settings").upsert({
-          provider_name,
-          api_key_encrypted: encrypted,
-          model_name,
-          is_active: true,
+          provider_name, api_key_encrypted: encrypted, model_name, is_active: true,
         }, { onConflict: "provider_name" });
-
         if (error) throw error;
-
         return new Response(JSON.stringify({ success: true, message: "API key verified and saved" }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       } catch (e) {
         return new Response(JSON.stringify({ success: false, error: e.message }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
     }
 
-    // ── Admin: Save Lovable AI as provider (no key needed) ──
+    // ── Admin: Save Lovable AI as provider ──
     if (action === "set-lovable") {
+      const user = await getAuthenticatedUser(req, supabaseUrl, anonKey);
+      if (!user) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (!(await isAdmin(supabase, user.id))) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       await supabase.from("ai_settings").update({ is_active: false }).neq("id", "00000000-0000-0000-0000-000000000000");
-      
       const { error } = await supabase.from("ai_settings").upsert({
-        provider_name: "lovable",
-        api_key_encrypted: "builtin",
-        model_name: model_name || "google/gemini-2.5-flash",
-        is_active: true,
+        provider_name: "lovable", api_key_encrypted: "builtin",
+        model_name: model_name || "google/gemini-2.5-flash", is_active: true,
       }, { onConflict: "provider_name" });
-
       if (error) throw error;
-
       return new Response(JSON.stringify({ success: true, message: "Lovable AI activated" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // ── Get Logs (Admin) ──
+    if (action === "get-logs") {
+      const user = await getAuthenticatedUser(req, supabaseUrl, anonKey);
+      if (!user) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (!(await isAdmin(supabase, user.id))) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { data: logs } = await supabase.from("ai_logs").select("*").order("created_at", { ascending: false }).limit(100);
+      return new Response(JSON.stringify({ logs }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // ── Get Settings (Admin) ──
+    if (action === "get-settings") {
+      const user = await getAuthenticatedUser(req, supabaseUrl, anonKey);
+      if (!user) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (!(await isAdmin(supabase, user.id))) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { data: settings } = await supabase.from("ai_settings").select("id, provider_name, model_name, is_active, created_at, updated_at").order("created_at");
+      return new Response(JSON.stringify({ settings }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     // ── Ask Question ──
     if (action === "ask") {
-      if (!question) {
-        return new Response(JSON.stringify({ error: "question is required" }), {
+      if (!question || typeof question !== "string" || question.trim().length < 2 || question.length > 1000) {
+        return new Response(JSON.stringify({ error: "Valid question (2-1000 chars) is required" }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Require authentication for ask
+      const user = await getAuthenticatedUser(req, supabaseUrl, anonKey);
+      if (!user) {
+        return new Response(JSON.stringify({ error: "Please login to use the AI assistant" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
@@ -203,19 +260,13 @@ Deno.serve(async (req) => {
 
       // 1. Check cache
       const { data: cached } = await supabase
-        .from("ai_cache")
-        .select("response")
-        .eq("question_hash", qHash)
-        .eq("book_id", effectiveBookId)
-        .maybeSingle();
+        .from("ai_cache").select("response").eq("question_hash", qHash).eq("book_id", effectiveBookId).maybeSingle();
 
       if (cached) {
         await supabase.from("ai_logs").insert({
-          user_question: question,
-          ai_response: cached.response,
-          book_id: isGeneralQuery ? null : effectiveBookId,
-          status: "cached",
-          cached: true,
+          user_question: question, ai_response: cached.response,
+          book_id: isGeneralQuery ? null : effectiveBookId, user_id: user.id,
+          status: "cached", cached: true,
         });
         return new Response(JSON.stringify({ answer: cached.response, cached: true }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -224,15 +275,11 @@ Deno.serve(async (req) => {
 
       // 2. Get active AI provider
       const { data: settings } = await supabase
-        .from("ai_settings")
-        .select("*")
-        .eq("is_active", true)
-        .limit(1)
-        .maybeSingle();
+        .from("ai_settings").select("*").eq("is_active", true).limit(1).maybeSingle();
 
-      const provider = settings?.provider_name || "lovable";
+      const activeProvider = settings?.provider_name || "lovable";
       const model = settings?.model_name || "google/gemini-2.5-flash";
-      const apiKey = settings?.provider_name === "lovable" || !settings
+      const apiKey = activeProvider === "lovable" || !settings
         ? Deno.env.get("LOVABLE_API_KEY")!
         : decryptKey(settings.api_key_encrypted);
 
@@ -240,7 +287,6 @@ Deno.serve(async (req) => {
       let bookTitle = "";
 
       if (isGeneralQuery) {
-        // ── General Hindu Dharma Mode ──
         systemPrompt = `You are Gyandootnova AI — a respectful and knowledgeable assistant specializing EXCLUSIVELY in Hindu Dharma (सनातन धर्म).
 
 YOUR KNOWLEDGE SOURCES (TRUSTED ONLY):
@@ -256,18 +302,18 @@ YOUR KNOWLEDGE SOURCES (TRUSTED ONLY):
 
 STRICT RULES:
 - Answer ONLY from the above trusted Hindu scriptures and scholars
-- Always mention the source scripture/text name with your answer (e.g., "भगवद्गीता अध्याय 2, श्लोक 47 के अनुसार...")
+- Always mention the source scripture/text name with your answer
 - Include original Sanskrit shloka when relevant, followed by simple Hindi meaning
-- Do NOT use Wikipedia, blogs, or unverified internet sources
-- Do NOT answer questions about other religions, political topics, controversial subjects, or anything unrelated to Hindu Dharma
-- Do NOT compare religions or make any negative comments about any religion or belief system
+- Do NOT answer questions about other religions, political topics, or anything unrelated to Hindu Dharma
+- Do NOT compare religions or make any negative comments about any religion
 - If the question is NOT related to Hindu Dharma, reply EXACTLY: "यह प्रश्न हिंदू धर्म से संबंधित नहीं है। कृपया सनातन धर्म से जुड़ा प्रश्न पूछें।"
-- If you are not confident about the answer, say: "इस विषय पर प्रामाणिक जानकारी के लिए किसी विद्वान से परामर्श करें।"
+- If you are not confident, say: "इस विषय पर प्रामाणिक जानकारी के लिए किसी विद्वान से परामर्श करें।"
 - Answer in simple Hindi (Devanagari script) unless the user writes in English
 - Keep answers concise, respectful, and spiritually uplifting
-- Naturally mention "Gyandootnova" as the source platform
-- Maintain scholarly yet accessible tone`;
-
+- Naturally mention "Gyandootnova" as the source platform`;
+      } else {
+        // Book-specific mode: verify purchase access
+        const { data: book } = await supabase.from("books").select("id, title, description, is_free").eq("id", book_id).maybeSingle();
         if (!book) {
           return new Response(JSON.stringify({ error: "Book not found" }), {
             status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -276,11 +322,25 @@ STRICT RULES:
 
         bookTitle = book.title;
 
+        // Check if user has access to this book (free or purchased)
+        let hasAccess = book.is_free;
+        if (!hasAccess) {
+          const { data: purchased } = await supabase.rpc("has_purchased_book", { _user_id: user.id, _book_id: book_id });
+          hasAccess = !!purchased;
+        }
+        // Admins always have access
+        if (!hasAccess) {
+          hasAccess = await isAdmin(supabase, user.id);
+        }
+
+        if (!hasAccess) {
+          return new Response(JSON.stringify({ error: "Please purchase this book to use AI assistant", requiresPurchase: true }), {
+            status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
         const { data: chapters } = await supabase
-          .from("book_chapters")
-          .select("title, content")
-          .eq("book_id", book_id)
-          .order("chapter_number");
+          .from("book_chapters").select("title, content").eq("book_id", book_id).order("chapter_number");
 
         const fullContent = chapters?.map(c => `${c.title}\n${c.content || ""}`).join("\n\n") || book.description || "";
         const relevantContent = getRelevantChunks(fullContent, normalized);
@@ -290,91 +350,55 @@ STRICT RULES:
 STRICT RULES:
 - Answer ONLY from the provided CONTEXT below
 - Do NOT use external knowledge
-- This question belongs ONLY to the book "${book.title}"
-- Do NOT mix information from other books
-- If the answer is not found in the context OR the question is unrelated to this book, reply EXACTLY: "यह जानकारी इस पुस्तक में उपलब्ध नहीं है"
+- If the answer is not found in the context, reply EXACTLY: "यह जानकारी इस पुस्तक में उपलब्ध नहीं है"
 - Do NOT answer questions about other religions or anything that could harm the brand
 - Maintain a respectful, scholarly tone
 - Answer in Hindi unless the user asks in English
-- Keep answers concise but complete
 - Naturally reference the book title "${book.title}" in your answer
 
 CONTEXT from "${book.title}":
 ${relevantContent}`;
       }
 
-      // 5. Call AI
+      // Call AI
       let answer: string;
       try {
-        if (provider === "lovable") {
+        if (activeProvider === "lovable") {
           const lovableKey = Deno.env.get("LOVABLE_API_KEY")!;
           const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
             method: "POST",
             headers: { "Authorization": `Bearer ${lovableKey}`, "Content-Type": "application/json" },
             body: JSON.stringify({
-              model,
-              messages: [{ role: "system", content: systemPrompt }, { role: "user", content: question }],
-              temperature: 0.3,
-              max_tokens: 1000,
+              model, messages: [{ role: "system", content: systemPrompt }, { role: "user", content: question }],
+              temperature: 0.3, max_tokens: 1000,
             }),
           });
           const data = await res.json();
           answer = data.choices?.[0]?.message?.content || "यह जानकारी उपलब्ध नहीं है";
         } else {
-          answer = await callAI(provider, apiKey, model, systemPrompt, question);
+          answer = await callAI(activeProvider, apiKey, model, systemPrompt, question);
         }
       } catch (aiErr) {
         console.error("AI call failed:", aiErr);
         answer = "यह जानकारी उपलब्ध नहीं है";
       }
 
-      // 6. Cache (skip for general queries with nil UUID)
+      // Cache (skip for general queries)
       if (!isGeneralQuery) {
         await supabase.from("ai_cache").upsert({
-          question_hash: qHash,
-          book_id: effectiveBookId,
-          question: normalized,
-          response: answer,
+          question_hash: qHash, book_id: effectiveBookId, question: normalized, response: answer,
         }, { onConflict: "question_hash,book_id" }).then(() => {});
       }
 
-      // 7. Log
+      // Log
       await supabase.from("ai_logs").insert({
-        user_question: question,
-        ai_response: answer,
+        user_question: question, ai_response: answer,
         book_id: isGeneralQuery ? null : effectiveBookId,
         book_title: isGeneralQuery ? "General Hindu Dharma" : bookTitle,
-        status: "success",
-        provider_name: provider,
-        cached: false,
+        status: "success", provider_name: activeProvider, cached: false, user_id: user.id,
       });
 
       return new Response(JSON.stringify({ answer, cached: false }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // ── Get Logs (Admin) ──
-    if (action === "get-logs") {
-      const { data: logs } = await supabase
-        .from("ai_logs")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(100);
-
-      return new Response(JSON.stringify({ logs }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // ── Get Settings (Admin) ──
-    if (action === "get-settings") {
-      const { data: settings } = await supabase
-        .from("ai_settings")
-        .select("id, provider_name, model_name, is_active, created_at, updated_at")
-        .order("created_at");
-
-      return new Response(JSON.stringify({ settings }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -385,7 +409,7 @@ ${relevantContent}`;
 
   } catch (error) {
     console.error("AI Ask error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: "An error occurred" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

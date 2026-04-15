@@ -364,6 +364,7 @@ ${relevantContent}`;
       try {
         if (activeProvider === "lovable") {
           const lovableKey = Deno.env.get("LOVABLE_API_KEY")!;
+          console.log("Calling Lovable AI with model:", model);
           const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
             method: "POST",
             headers: { "Authorization": `Bearer ${lovableKey}`, "Content-Type": "application/json" },
@@ -372,6 +373,11 @@ ${relevantContent}`;
               temperature: 0.3, max_tokens: 1000,
             }),
           });
+          if (!res.ok) {
+            const errText = await res.text();
+            console.error("Lovable AI error:", res.status, errText);
+            throw new Error(`AI error ${res.status}: ${errText}`);
+          }
           const data = await res.json();
           answer = data.choices?.[0]?.message?.content || "यह जानकारी उपलब्ध नहीं है";
         } else {
@@ -379,7 +385,7 @@ ${relevantContent}`;
         }
       } catch (aiErr) {
         console.error("AI call failed:", aiErr);
-        answer = "यह जानकारी उपलब्ध नहीं है";
+        answer = "क्षमा करें, AI सेवा में त्रुटि हुई। कृपया पुनः प्रयास करें।";
       }
 
       // Cache (skip for general queries)

@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { X, Send, Loader2, BookOpen, Sparkles } from "lucide-react";
-import ReactMarkdown from "react-markdown";
 
 interface Message {
   id: string;
@@ -88,6 +87,30 @@ const AskScripture = ({ bookId, bookTitle }: AskScriptureProps) => {
     }
   };
 
+  // Simple markdown-like formatting for AI responses
+  const formatResponse = (text: string) => {
+    return text.split("\n").map((line, i) => {
+      // Bold text
+      const formatted = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      // Italic
+      const formatted2 = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+      
+      if (line.startsWith("### ")) {
+        return <h4 key={i} className="font-bold text-sm mt-2 mb-1">{line.slice(4)}</h4>;
+      }
+      if (line.startsWith("## ")) {
+        return <h3 key={i} className="font-bold text-base mt-2 mb-1">{line.slice(3)}</h3>;
+      }
+      if (line.startsWith("- ") || line.startsWith("• ")) {
+        return <li key={i} className="ml-3 list-disc" dangerouslySetInnerHTML={{ __html: formatted2.slice(2) }} />;
+      }
+      if (line.trim() === "") {
+        return <br key={i} />;
+      }
+      return <p key={i} className="mb-1" dangerouslySetInnerHTML={{ __html: formatted2 }} />;
+    });
+  };
+
   if (!open) {
     return (
       <button
@@ -132,7 +155,7 @@ const AskScripture = ({ bookId, bookTitle }: AskScriptureProps) => {
             <p className="text-sm font-medium">Gyandootnova AI</p>
             <p className="text-xs mt-1 max-w-[220px]">
               {isGeneral
-                ? "सनातन धर्म, वेद, गीता, रामायण या किसी भी हिंदू ग्रंथ के बारे में पूछें"
+                ? "वेद, गीता, रामायण, उपनिषद या किसी भी हिंदू ग्रंथ के बारे में प्रामाणिक जानकारी पाएं"
                 : `"${displayTitle}" के बारे में कोई भी प्रश्न पूछें`}
             </p>
           </div>
@@ -146,9 +169,7 @@ const AskScripture = ({ bookId, bookTitle }: AskScriptureProps) => {
                   : "bg-muted text-foreground rounded-bl-md"
               }`}>
                 {msg.role === "assistant" ? (
-                  <div className="prose prose-sm dark:prose-invert max-w-none [&>p]:m-0 [&>ul]:my-1 [&>ol]:my-1">
-                    <ReactMarkdown>{msg.content}</ReactMarkdown>
-                  </div>
+                  <div className="space-y-0">{formatResponse(msg.content)}</div>
                 ) : (
                   msg.content
                 )}

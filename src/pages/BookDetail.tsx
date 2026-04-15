@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { BookOpen, Eye, Lock, Loader2, PlayCircle, Tag, X, CheckCircle, User, Calendar, Layers, Globe, ShoppingCart, Star, Info, Share2, Copy } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useMemo, useEffect } from "react";
-import { useAskScriptureSuppress } from "@/components/layout/Layout";
+
 import { initiatePayment, type PaymentGateway } from "@/lib/payment";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -19,8 +19,6 @@ import { getReferrerId } from "@/hooks/useReferral";
 
 const BookDetail = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { setSuppress } = useAskScriptureSuppress();
-  useEffect(() => { setSuppress(true); return () => setSuppress(false); }, [setSuppress]);
   const referrerId = useMemo(() => getReferrerId(), []);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -582,7 +580,7 @@ const BookDetail = () => {
       </section>
 
       <SimilarBooks currentBookId={book.id} category={book.category} />
-      {book && <AskScripture bookId={book.id} bookTitle={book.title} />}
+      {book && canRead && <AskScripture bookId={book.id} bookTitle={book.title} />}
     </Layout>
   );
 };

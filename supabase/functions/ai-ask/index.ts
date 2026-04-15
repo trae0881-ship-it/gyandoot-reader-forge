@@ -189,29 +189,31 @@ Deno.serve(async (req) => {
 
     // ── Ask Question ──
     if (action === "ask") {
-      if (!question || !book_id) {
-        return new Response(JSON.stringify({ error: "question and book_id required" }), {
+      if (!question) {
+        return new Response(JSON.stringify({ error: "question is required" }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
+      const isGeneralQuery = !book_id || book_id === "general";
+      const effectiveBookId = isGeneralQuery ? "00000000-0000-0000-0000-000000000000" : book_id;
+
       const normalized = normalizeQuestion(question);
-      const qHash = await hashQuestion(normalized, book_id);
+      const qHash = await hashQuestion(normalized, effectiveBookId);
 
       // 1. Check cache
       const { data: cached } = await supabase
         .from("ai_cache")
         .select("response")
         .eq("question_hash", qHash)
-        .eq("book_id", book_id)
+        .eq("book_id", effectiveBookId)
         .maybeSingle();
 
       if (cached) {
-        // Log as cached hit
         await supabase.from("ai_logs").insert({
           user_question: question,
           ai_response: cached.response,
-          book_id,
+          book_id: isGeneralQuery ? null : effectiveBookId,
           status: "cached",
           cached: true,
         });
@@ -228,38 +230,56 @@ Deno.serve(async (req) => {
         .limit(1)
         .maybeSingle();
 
-      // Default to Lovable AI if no provider configured
       const provider = settings?.provider_name || "lovable";
       const model = settings?.model_name || "google/gemini-2.5-flash";
       const apiKey = settings?.provider_name === "lovable" || !settings
         ? Deno.env.get("LOVABLE_API_KEY")!
         : decryptKey(settings.api_key_encrypted);
 
-      // 3. Get book content
-      const { data: book } = await supabase
-        .from("books")
-        .select("id, title, description")
-        .eq("id", book_id)
-        .single();
+      let systemPrompt: string;
+      let bookTitle = "";
 
-      if (!book) {
-        return new Response(JSON.stringify({ error: "Book not found" }), {
-          status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+      if (isGeneralQuery) {
+        // ── General Hindu Dharma Mode ──
+        systemPrompt = `You are Gyandootnova AI — a respectful and knowledgeable assistant specializing EXCLUSIVELY in Hindu Dharma (सनातन धर्म).
 
-      // Get chapters content
-      const { data: chapters } = await supabase
-        .from("book_chapters")
-        .select("title, content")
-        .eq("book_id", book_id)
-        .order("chapter_number");
+STRICT RULES:
+- Answer ONLY questions related to Hindu religion, scriptures, philosophy, rituals, festivals, deities, mantras, shlokas, and spiritual practices
+- You may reference Vedas, Upanishads, Bhagavad Gita, Ramayana, Mahabharata, Puranas, and other Hindu texts
+- Do NOT answer questions about other religions, political topics, controversial subjects, or anything unrelated to Hindu Dharma
+- Do NOT compare religions or make any negative comments about any religion or belief system
+- If the question is NOT related to Hindu Dharma, reply EXACTLY: "यह प्रश्न हिंदू धर्म से संबंधित नहीं है। कृपया सनातन धर्म से जुड़ा प्रश्न पूछें।"
+- Answer in simple Hindi (use Devanagari script) unless the user writes in English
+- Keep answers concise, respectful, and spiritually uplifting
+- Naturally mention "Gyandootnova" as the source platform when appropriate
+- Include relevant shloka or reference when possible
+- Maintain scholarly yet accessible tone`;
+      } else {
+        // ── Book-specific Mode ──
+        const { data: book } = await supabase
+          .from("books")
+          .select("id, title, description")
+          .eq("id", book_id)
+          .single();
 
-      const fullContent = chapters?.map(c => `${c.title}\n${c.content || ""}`).join("\n\n") || book.description || "";
-      const relevantContent = getRelevantChunks(fullContent, normalized);
+        if (!book) {
+          return new Response(JSON.stringify({ error: "Book not found" }), {
+            status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
 
-      // 4. Build system prompt
-      const systemPrompt = `You are Gyandootnova AI — a scripture assistant for the book "${book.title}".
+        bookTitle = book.title;
+
+        const { data: chapters } = await supabase
+          .from("book_chapters")
+          .select("title, content")
+          .eq("book_id", book_id)
+          .order("chapter_number");
+
+        const fullContent = chapters?.map(c => `${c.title}\n${c.content || ""}`).join("\n\n") || book.description || "";
+        const relevantContent = getRelevantChunks(fullContent, normalized);
+
+        systemPrompt = `You are Gyandootnova AI — a scripture assistant for the book "${book.title}".
 
 STRICT RULES:
 - Answer ONLY from the provided CONTEXT below
@@ -267,6 +287,7 @@ STRICT RULES:
 - This question belongs ONLY to the book "${book.title}"
 - Do NOT mix information from other books
 - If the answer is not found in the context OR the question is unrelated to this book, reply EXACTLY: "यह जानकारी इस पुस्तक में उपलब्ध नहीं है"
+- Do NOT answer questions about other religions or anything that could harm the brand
 - Maintain a respectful, scholarly tone
 - Answer in Hindi unless the user asks in English
 - Keep answers concise but complete
@@ -274,6 +295,7 @@ STRICT RULES:
 
 CONTEXT from "${book.title}":
 ${relevantContent}`;
+      }
 
       // 5. Call AI
       let answer: string;
@@ -291,29 +313,31 @@ ${relevantContent}`;
             }),
           });
           const data = await res.json();
-          answer = data.choices?.[0]?.message?.content || "यह जानकारी इस पुस्तक में उपलब्ध नहीं है";
+          answer = data.choices?.[0]?.message?.content || "यह जानकारी उपलब्ध नहीं है";
         } else {
           answer = await callAI(provider, apiKey, model, systemPrompt, question);
         }
       } catch (aiErr) {
         console.error("AI call failed:", aiErr);
-        answer = "यह जानकारी इस पुस्तक में उपलब्ध नहीं है";
+        answer = "यह जानकारी उपलब्ध नहीं है";
       }
 
-      // 6. Cache the response
-      await supabase.from("ai_cache").upsert({
-        question_hash: qHash,
-        book_id,
-        question: normalized,
-        response: answer,
-      }, { onConflict: "question_hash,book_id" }).then(() => {});
+      // 6. Cache (skip for general queries with nil UUID)
+      if (!isGeneralQuery) {
+        await supabase.from("ai_cache").upsert({
+          question_hash: qHash,
+          book_id: effectiveBookId,
+          question: normalized,
+          response: answer,
+        }, { onConflict: "question_hash,book_id" }).then(() => {});
+      }
 
       // 7. Log
       await supabase.from("ai_logs").insert({
         user_question: question,
         ai_response: answer,
-        book_id,
-        book_title: book.title,
+        book_id: isGeneralQuery ? null : effectiveBookId,
+        book_title: isGeneralQuery ? "General Hindu Dharma" : bookTitle,
         status: "success",
         provider_name: provider,
         cached: false,

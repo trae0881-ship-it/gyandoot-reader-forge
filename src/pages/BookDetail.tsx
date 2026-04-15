@@ -19,8 +19,6 @@ import { getReferrerId } from "@/hooks/useReferral";
 
 const BookDetail = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { setSuppress } = useAskScriptureSuppress();
-  useEffect(() => { setSuppress(true); return () => setSuppress(false); }, [setSuppress]);
   const referrerId = useMemo(() => getReferrerId(), []);
   const { user } = useAuth();
   const { toast } = useToast();

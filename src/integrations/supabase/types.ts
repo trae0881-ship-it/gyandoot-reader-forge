@@ -407,6 +407,39 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_scripts: {
+        Row: {
+          content: string
+          created_at: string
+          enabled: boolean
+          id: string
+          name: string
+          placement: string
+          position: number
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          name: string
+          placement: string
+          position?: number
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          name?: string
+          placement?: string
+          position?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       donations: {
         Row: {
           amount: number

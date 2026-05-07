@@ -1,0 +1,77 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+async function sha256(text: string) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  try {
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+    const admin = createClient(SUPABASE_URL, SERVICE_KEY);
+    const userClient = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY")!, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: { user }, error: userErr } = await userClient.auth.getUser();
+    if (userErr || !user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+    // Check admin
+    const { data: isAdmin } = await admin.rpc("has_role", { _user_id: user.id, _role: "admin" });
+    if (!isAdmin) return new Response(JSON.stringify({ error: "Not an admin" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+    // Generate 6-digit OTP
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const code_hash = await sha256(code);
+    const expires_at = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+
+    // Invalidate previous unused OTPs
+    await admin.from("admin_otps").update({ used: true }).eq("user_id", user.id).eq("used", false);
+
+    const { error: insErr } = await admin.from("admin_otps").insert({
+      user_id: user.id, code_hash, expires_at,
+    });
+    if (insErr) throw insErr;
+
+    const html = `
+      <div style="font-family:Georgia,serif;max-width:560px;margin:0 auto;background:#fafaf8;border-radius:12px;overflow:hidden">
+        <div style="background:#B71C1C;padding:24px 32px"><h1 style="color:#fff;margin:0;font-size:20px">Admin Login Verification</h1></div>
+        <div style="padding:32px;text-align:center">
+          <p style="color:#333;font-size:15px">Aapka admin login OTP code:</p>
+          <div style="font-size:36px;letter-spacing:10px;font-weight:700;color:#B71C1C;margin:24px 0;background:#fff;padding:18px;border-radius:8px;border:1px dashed #B71C1C">${code}</div>
+          <p style="color:#666;font-size:13px">Yeh code 10 minutes ke liye valid hai. Agar aapne login attempt nahi kiya to is email ko ignore karein.</p>
+          <p style="color:#aaa;font-size:11px;margin-top:24px">GyandootNova Admin Security</p>
+        </div>
+      </div>`;
+
+    const r = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${RESEND_API_KEY}` },
+      body: JSON.stringify({
+        from: "GyandootNova Security <onboarding@resend.dev>",
+        to: [user.email!],
+        subject: `Your admin OTP: ${code}`,
+        html,
+      }),
+    });
+    if (!r.ok) throw new Error(await r.text());
+
+    return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: (e as Error).message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
+});

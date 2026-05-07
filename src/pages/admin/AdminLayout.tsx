@@ -2,7 +2,8 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { BookOpen, FileText, Heart, ShoppingCart, LayoutDashboard, LogOut, ArrowLeft, Settings, Users, Tag, Share2, Sparkles, Code } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import AdminOtpGate, { isAdminOtpValid } from "@/components/admin/AdminOtpGate";
 
 const navItems = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -22,6 +23,7 @@ const AdminLayout = () => {
   const { user, isAdmin, loading, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const [otpVerified, setOtpVerified] = useState<boolean>(() => isAdminOtpValid());
 
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
@@ -34,6 +36,10 @@ const AdminLayout = () => {
   }
 
   if (!user || !isAdmin) return null;
+
+  if (!otpVerified) {
+    return <AdminOtpGate userEmail={user.email ?? undefined} onVerified={() => setOtpVerified(true)} />;
+  }
 
   return (
     <div className="flex min-h-screen">

@@ -134,6 +134,89 @@ const FileBookReader = () => {
     };
   }, []);
 
+  // Anti-screenshot: detect screenshot keys and blur content + show warning
+  useEffect(() => {
+    const root = document.getElementById("reader-secure-root");
+    if (!root) return;
+
+    const blurWithWarning = () => {
+      root.style.filter = "blur(40px)";
+      const warn = document.getElementById("screenshot-warning");
+      if (warn) warn.style.display = "flex";
+      // Try to overwrite clipboard so any captured content is replaced
+      try { navigator.clipboard?.writeText("⚠ Screenshot blocked — GyandootNova copyrighted content"); } catch {}
+      setTimeout(() => {
+        root.style.filter = "none";
+        if (warn) warn.style.display = "none";
+      }, 3000);
+    };
+
+    const keyHandler = (e: KeyboardEvent) => {
+      // PrintScreen, Win+Shift+S, Cmd+Shift+3/4/5, Ctrl+Shift+S
+      if (
+        e.key === "PrintScreen" ||
+        (e.shiftKey && (e.metaKey || e.ctrlKey) && ["s", "S", "3", "4", "5"].includes(e.key))
+      ) {
+        e.preventDefault();
+        blurWithWarning();
+      }
+    };
+
+    // Detect PrintScreen on keyup too (some OS trap keydown)
+    const upHandler = (e: KeyboardEvent) => {
+      if (e.key === "PrintScreen") blurWithWarning();
+    };
+
+    document.addEventListener("keydown", keyHandler);
+    document.addEventListener("keyup", upHandler);
+    return () => {
+      document.removeEventListener("keydown", keyHandler);
+      document.removeEventListener("keyup", upHandler);
+    };
+  }, []);
+
+  // Inject @media print CSS — hide content when printing
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.id = "secure-reader-print-block";
+    style.innerHTML = `
+      @media print {
+        body * { visibility: hidden !important; }
+        body::after {
+          content: "⚠ Printing is disabled for copyrighted content.";
+          visibility: visible !important;
+          position: fixed; top: 50%; left: 50%;
+          transform: translate(-50%, -50%);
+          font-size: 24px; font-weight: bold; color: #B71C1C;
+        }
+      }
+      #reader-secure-root canvas, #reader-secure-root img {
+        -webkit-user-drag: none !important;
+        user-drag: none !important;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => { document.getElementById("secure-reader-print-block")?.remove(); };
+  }, []);
+
+  // DevTools detection — blur if devtools opens
+  useEffect(() => {
+    const root = document.getElementById("reader-secure-root");
+    if (!root) return;
+    const threshold = 160;
+    const check = () => {
+      const widthDiff = window.outerWidth - window.innerWidth > threshold;
+      const heightDiff = window.outerHeight - window.innerHeight > threshold;
+      if (widthDiff || heightDiff) {
+        root.style.filter = "blur(30px)";
+      } else {
+        if (root.style.filter.includes("blur(30")) root.style.filter = "none";
+      }
+    };
+    const id = setInterval(check, 1000);
+    return () => clearInterval(id);
+  }, []);
+
   if (authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">

@@ -320,6 +320,17 @@ const FileBookReader = () => {
       className={`min-h-screen select-none reader-secure ${darkMode ? "bg-gray-900 text-gray-100" : "bg-background text-foreground"}`}
       style={{ WebkitUserSelect: "none", userSelect: "none" }}
     >
+      {/* Screenshot warning overlay */}
+      <div
+        id="screenshot-warning"
+        style={{ display: "none" }}
+        className="fixed inset-0 z-[100] items-center justify-center bg-destructive/95 text-destructive-foreground flex-col gap-3 p-6 text-center"
+      >
+        <AlertTriangle className="h-12 w-12" />
+        <p className="text-xl font-bold">⚠ Screenshot Blocked</p>
+        <p className="text-sm">This content is copyrighted by GyandootNova.<br/>Captured by: <strong>{user?.email}</strong></p>
+      </div>
+
       {/* Toolbar */}
       <div className={`sticky top-0 z-40 border-b px-2 sm:px-4 py-1.5 sm:py-2 ${darkMode ? "border-gray-700 bg-gray-900/95" : "bg-background/95 backdrop-blur"}`}>
         <div className="mx-auto flex max-w-6xl items-center justify-between">

@@ -81,7 +81,7 @@ const FileBookReader = () => {
     const root = document.getElementById("reader-secure-root");
     if (!root) return;
 
-    const blurContent = () => { root.style.filter = "blur(20px)"; };
+    const blurContent = () => { root.style.filter = "blur(40px)"; };
     const unblurContent = () => { root.style.filter = "none"; };
 
     const handleVisibility = () => {
@@ -91,11 +91,16 @@ const FileBookReader = () => {
     document.addEventListener("visibilitychange", handleVisibility);
     window.addEventListener("blur", blurContent);
     window.addEventListener("focus", unblurContent);
+    // Mouse leaving the window (often happens during snipping tools)
+    document.addEventListener("mouseleave", blurContent);
+    document.addEventListener("mouseenter", unblurContent);
 
     return () => {
       document.removeEventListener("visibilitychange", handleVisibility);
       window.removeEventListener("blur", blurContent);
       window.removeEventListener("focus", unblurContent);
+      document.removeEventListener("mouseleave", blurContent);
+      document.removeEventListener("mouseenter", unblurContent);
       root.style.filter = "none";
     };
   }, []);

@@ -81,7 +81,7 @@ const FileBookReader = () => {
     const root = document.getElementById("reader-secure-root");
     if (!root) return;
 
-    const blurContent = () => { root.style.filter = "blur(20px)"; };
+    const blurContent = () => { root.style.filter = "blur(40px)"; };
     const unblurContent = () => { root.style.filter = "none"; };
 
     const handleVisibility = () => {
@@ -91,11 +91,16 @@ const FileBookReader = () => {
     document.addEventListener("visibilitychange", handleVisibility);
     window.addEventListener("blur", blurContent);
     window.addEventListener("focus", unblurContent);
+    // Mouse leaving the window (often happens during snipping tools)
+    document.addEventListener("mouseleave", blurContent);
+    document.addEventListener("mouseenter", unblurContent);
 
     return () => {
       document.removeEventListener("visibilitychange", handleVisibility);
       window.removeEventListener("blur", blurContent);
       window.removeEventListener("focus", unblurContent);
+      document.removeEventListener("mouseleave", blurContent);
+      document.removeEventListener("mouseenter", unblurContent);
       root.style.filter = "none";
     };
   }, []);
@@ -132,6 +137,89 @@ const FileBookReader = () => {
       document.removeEventListener("dragstart", handler);
       document.removeEventListener("drop", handler);
     };
+  }, []);
+
+  // Anti-screenshot: detect screenshot keys and blur content + show warning
+  useEffect(() => {
+    const root = document.getElementById("reader-secure-root");
+    if (!root) return;
+
+    const blurWithWarning = () => {
+      root.style.filter = "blur(40px)";
+      const warn = document.getElementById("screenshot-warning");
+      if (warn) warn.style.display = "flex";
+      // Try to overwrite clipboard so any captured content is replaced
+      try { navigator.clipboard?.writeText("⚠ Screenshot blocked — GyandootNova copyrighted content"); } catch {}
+      setTimeout(() => {
+        root.style.filter = "none";
+        if (warn) warn.style.display = "none";
+      }, 3000);
+    };
+
+    const keyHandler = (e: KeyboardEvent) => {
+      // PrintScreen, Win+Shift+S, Cmd+Shift+3/4/5, Ctrl+Shift+S
+      if (
+        e.key === "PrintScreen" ||
+        (e.shiftKey && (e.metaKey || e.ctrlKey) && ["s", "S", "3", "4", "5"].includes(e.key))
+      ) {
+        e.preventDefault();
+        blurWithWarning();
+      }
+    };
+
+    // Detect PrintScreen on keyup too (some OS trap keydown)
+    const upHandler = (e: KeyboardEvent) => {
+      if (e.key === "PrintScreen") blurWithWarning();
+    };
+
+    document.addEventListener("keydown", keyHandler);
+    document.addEventListener("keyup", upHandler);
+    return () => {
+      document.removeEventListener("keydown", keyHandler);
+      document.removeEventListener("keyup", upHandler);
+    };
+  }, []);
+
+  // Inject @media print CSS — hide content when printing
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.id = "secure-reader-print-block";
+    style.innerHTML = `
+      @media print {
+        body * { visibility: hidden !important; }
+        body::after {
+          content: "⚠ Printing is disabled for copyrighted content.";
+          visibility: visible !important;
+          position: fixed; top: 50%; left: 50%;
+          transform: translate(-50%, -50%);
+          font-size: 24px; font-weight: bold; color: #B71C1C;
+        }
+      }
+      #reader-secure-root canvas, #reader-secure-root img {
+        -webkit-user-drag: none !important;
+        user-drag: none !important;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => { document.getElementById("secure-reader-print-block")?.remove(); };
+  }, []);
+
+  // DevTools detection — blur if devtools opens
+  useEffect(() => {
+    const root = document.getElementById("reader-secure-root");
+    if (!root) return;
+    const threshold = 160;
+    const check = () => {
+      const widthDiff = window.outerWidth - window.innerWidth > threshold;
+      const heightDiff = window.outerHeight - window.innerHeight > threshold;
+      if (widthDiff || heightDiff) {
+        root.style.filter = "blur(30px)";
+      } else {
+        if (root.style.filter.includes("blur(30")) root.style.filter = "none";
+      }
+    };
+    const id = setInterval(check, 1000);
+    return () => clearInterval(id);
   }, []);
 
   if (authLoading) {
@@ -232,6 +320,17 @@ const FileBookReader = () => {
       className={`min-h-screen select-none reader-secure ${darkMode ? "bg-gray-900 text-gray-100" : "bg-background text-foreground"}`}
       style={{ WebkitUserSelect: "none", userSelect: "none" }}
     >
+      {/* Screenshot warning overlay */}
+      <div
+        id="screenshot-warning"
+        style={{ display: "none" }}
+        className="fixed inset-0 z-[100] items-center justify-center bg-destructive/95 text-destructive-foreground flex-col gap-3 p-6 text-center"
+      >
+        <AlertTriangle className="h-12 w-12" />
+        <p className="text-xl font-bold">⚠ Screenshot Blocked</p>
+        <p className="text-sm">This content is copyrighted by GyandootNova.<br/>Captured by: <strong>{user?.email}</strong></p>
+      </div>
+
       {/* Toolbar */}
       <div className={`sticky top-0 z-40 border-b px-2 sm:px-4 py-1.5 sm:py-2 ${darkMode ? "border-gray-700 bg-gray-900/95" : "bg-background/95 backdrop-blur"}`}>
         <div className="mx-auto flex max-w-6xl items-center justify-between">

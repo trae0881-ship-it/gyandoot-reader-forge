@@ -58,6 +58,11 @@ serve(async (req) => {
         </div>
       </div>`;
 
+    if (!RESEND_API_KEY) {
+      console.error("RESEND_API_KEY not set");
+      return new Response(JSON.stringify({ error: "Email service not configured (RESEND_API_KEY missing)" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     const r = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${RESEND_API_KEY}` },
@@ -68,10 +73,20 @@ serve(async (req) => {
         html,
       }),
     });
-    if (!r.ok) throw new Error(await r.text());
+    const respText = await r.text();
+    if (!r.ok) {
+      console.error("Resend error:", r.status, respText);
+      let parsed: any = {};
+      try { parsed = JSON.parse(respText); } catch {}
+      const msg = parsed?.message || respText || "Resend send failed";
+      // Common case: free Resend account can only send to the account-owner email
+      // Surface helpful message + return the OTP code in dev fallback ONLY if explicitly enabled
+      return new Response(JSON.stringify({ error: `Email failed: ${msg}` }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
 
     return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
+    console.error("admin-otp-send fatal:", e);
     return new Response(JSON.stringify({ error: (e as Error).message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });

@@ -67,7 +67,7 @@ serve(async (req) => {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${RESEND_API_KEY}` },
       body: JSON.stringify({
-        from: "GyandootNova Security <onboarding@resend.dev>",
+        from: "GyandootNova Security <info@gyandootnova.in>",
         to: [user.email!],
         subject: `Your admin OTP: ${code}`,
         html,

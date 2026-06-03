@@ -456,7 +456,10 @@ const BookReader = () => {
     );
   }
 
-  const paragraphs = chapter.content?.split("\n") ?? [];
+  const rawContent = chapter.content ?? "";
+  // Detect if content is HTML (from RichTextEditor) — render via dangerouslySetInnerHTML
+  const isHtmlContent = /<\/?(p|div|span|strong|em|br|h[1-6]|ul|ol|li|blockquote|img|a)\b/i.test(rawContent);
+  const paragraphs = isHtmlContent ? [] : rawContent.split("\n");
 
   return (
     <div
@@ -761,10 +764,14 @@ const BookReader = () => {
         )}
         <div
           ref={contentRef}
-          className="prose prose-lg max-w-none leading-relaxed"
+          className="prose prose-lg max-w-none leading-relaxed prose-headings:font-serif prose-p:my-3 prose-strong:font-bold"
           style={{ fontSize: `${fontSize}px` }}
         >
-          {paragraphs.map((p, i) => renderParagraph(p, i))}
+          {isHtmlContent ? (
+            <div dangerouslySetInnerHTML={{ __html: rawContent }} />
+          ) : (
+            paragraphs.map((p, i) => renderParagraph(p, i))
+          )}
         </div>
       </article>
 

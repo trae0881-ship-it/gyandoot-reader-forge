@@ -509,6 +509,69 @@ export type Database = {
         }
         Relationships: []
       }
+      otp_providers: {
+        Row: {
+          channel: string
+          config_json: Json
+          created_at: string
+          id: string
+          is_active: boolean
+          provider_name: string
+          updated_at: string
+        }
+        Insert: {
+          channel: string
+          config_json?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          provider_name: string
+          updated_at?: string
+        }
+        Update: {
+          channel?: string
+          config_json?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          provider_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      phone_otps: {
+        Row: {
+          attempts: number
+          channel: string
+          code_hash: string
+          created_at: string
+          expires_at: string
+          id: string
+          phone: string
+          used: boolean
+        }
+        Insert: {
+          attempts?: number
+          channel: string
+          code_hash: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          phone: string
+          used?: boolean
+        }
+        Update: {
+          attempts?: number
+          channel?: string
+          code_hash?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          phone?: string
+          used?: boolean
+        }
+        Relationships: []
+      }
       posts: {
         Row: {
           content: string | null
@@ -560,6 +623,7 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          phone: string | null
           updated_at: string
           user_id: string
         }
@@ -568,6 +632,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          phone?: string | null
           updated_at?: string
           user_id: string
         }
@@ -576,6 +641,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          phone?: string | null
           updated_at?: string
           user_id?: string
         }

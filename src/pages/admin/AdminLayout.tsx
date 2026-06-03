@@ -1,7 +1,7 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { BookOpen, FileText, Heart, ShoppingCart, LayoutDashboard, LogOut, ArrowLeft, Settings, Users, Tag, Share2, Sparkles, Code } from "lucide-react";
+import { BookOpen, FileText, Heart, ShoppingCart, LayoutDashboard, LogOut, ArrowLeft, Settings, Users, Tag, Share2, Sparkles, Code, KeyRound } from "lucide-react";
 import { useEffect, useState } from "react";
 import AdminOtpGate, { isAdminOtpValid } from "@/components/admin/AdminOtpGate";
 
@@ -16,6 +16,7 @@ const navItems = [
   { to: "/admin/referrals", label: "Referrals", icon: Share2 },
   { to: "/admin/ai", label: "AI Assistant", icon: Sparkles },
   { to: "/admin/scripts", label: "Custom Scripts", icon: Code },
+  { to: "/admin/auth-providers", label: "Auth Providers", icon: KeyRound },
   { to: "/admin/settings", label: "Settings", icon: Settings },
 ];
 

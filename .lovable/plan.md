@@ -1,101 +1,76 @@
+# Multi-Channel OTP Authentication
 
-
-# GyandootNova — Spiritual Publication & Knowledge Platform
-
-## Brand & Design System
-- **Colors**: Deep Red (#B71C1C) primary, Golden Yellow (#FBC02D) accents, White background, Dark Charcoal (#222222) text
-- **Typography**: Serif headings (Google Fonts - Playfair Display), sans-serif body (Inter)
-- **Feel**: Premium spiritual editorial with generous whitespace and clean layout
+User ke liye 3 channels se OTP login: **SMS**, **WhatsApp**, **Email**. Admin har channel ke liye apna provider (MSG91 / Twilio / Fast2SMS / Gupshup / WhatsApp Cloud API) admin panel se add kar sakega.
 
 ---
 
-## Pages & Features
+## 1. Database (new tables)
 
-### 1. Public Site
+**`otp_providers`** (admin-managed)
+- `channel`: `'sms' | 'whatsapp' | 'email'`
+- `provider_name`: `'twilio' | 'msg91' | 'fast2sms' | 'gupshup' | 'whatsapp_cloud' | 'resend'`
+- `config_json` (jsonb) — API key, sender ID, template ID, from-number etc.
+- `is_active` (only one active per channel)
 
-**Homepage**
-- Hero banner with brand tagline and call-to-action
-- Featured books carousel
-- Latest articles/programs section
-- Donation call-to-action banner
+**`phone_otps`** (replace/extend `admin_otps` pattern)
+- `phone` (E.164), `code_hash`, `channel`, `expires_at`, `attempts`, `used`
 
-**Books Library** (`/books`)
-- Grid of book cards with WebP thumbnails, title, author, price/free badge
-- Filter by free/paid
+**`profiles`** add `phone` column (unique, nullable).
 
-**Book Detail** (`/books/:slug`)
-- Book cover, description, table of contents
-- "Read Free Preview" or "Purchase to Read" button
-- Razorpay checkout for paid books
-
-**Online Book Reader** (`/books/:slug/:chapter-slug`)
-- Clean branded reading layout
-- Font size toggle, dark/light mode
-- Reading progress bar
-- Next/Previous chapter navigation
-- PDF viewer (PDF.js) for uploaded PDFs
-- Session-based access control — purchase validation before unlocking paid chapters
-
-**Articles & Programs** (`/articles`, `/articles/:slug`)
-- Blog-style listing with cards
-- Full article view with rich content
-
-**Donations** (`/donate`)
-- Custom amount donation form
-- Razorpay checkout integration
-- Thank you confirmation
-
-### 2. Admin Panel (`/admin`)
-
-- **Secure login** with email/password (Supabase Auth)
-- **Dashboard**: Quick stats — total books, posts, revenue, donations
-- **Books Management**: CRUD books, upload PDF/DOC files to Supabase Storage, add/manage chapters, toggle free/preview, auto-generate slugs, WebP thumbnail upload
-- **Posts Management**: CRUD articles and programs
-- **Donations & Purchases**: View lists with basic analytics
-- **Settings**: Site logo, brand name configuration
-
-### 3. Authentication & Roles
-- Supabase Auth for user registration and login
-- User roles table (admin, user) with secure role checking
-- Admin routes protected by role validation
+RLS: only admins read/write `otp_providers`; `phone_otps` only via service-role from edge functions.
 
 ---
 
-## Database Schema (Supabase)
+## 2. Edge Functions
 
-1. **profiles** — user display info (linked to auth.users)
-2. **user_roles** — role-based access (admin/user)
-3. **books** — title, slug, description, cover_url, price, is_free, file_url, file_type
-4. **book_chapters** — book_id, title, slug, chapter_number, content, is_preview
-5. **posts** — title, slug, content, type (article/program), meta fields
-6. **donations** — user_id, amount, razorpay_payment_id, status
-7. **purchases** — user_id, book_id, razorpay_payment_id, status
-8. **settings** — key/value site configuration
+| Function | Purpose |
+|---|---|
+| `phone-otp-send` | Input: `{phone, channel}` → picks active provider → sends OTP via SMS/WhatsApp → stores hash |
+| `phone-otp-verify` | Input: `{phone, code}` → verifies → creates/links Supabase user (using admin API + `signInWithOtp` magic link OR custom token) → returns session |
 
-Indexes on slug, book_id, chapter_number. RLS policies on all tables.
+Provider adapters inside one function file (`providers/twilio.ts`, `msg91.ts`, etc.) — switch by `provider_name`.
+
+**Auth integration:** Use Supabase Admin API: `admin.createUser({phone, phone_confirm: true})` if not exists, then `admin.generateLink({type: 'magiclink'})` → frontend uses returned token to set session. (Custom flow because Supabase native phone auth requires Twilio configured in dashboard, which we are replacing with our own multi-provider system.)
 
 ---
 
-## Razorpay Integration
-- Edge function to create Razorpay orders
-- Edge function webhook to verify payment signatures
-- Client-side Razorpay Checkout SDK for books and donations
-- Purchase records stored with payment IDs
-- Access unlocked after verified payment
+## 3. Admin UI — `/admin/auth-providers`
+
+New page in admin sidebar:
+- Channel selector (SMS / WhatsApp / Email)
+- Provider dropdown per channel
+- Dynamic form fields per provider (Twilio → SID/Token/From; MSG91 → AuthKey/TemplateID/Sender; etc.)
+- Test button (sends OTP to admin's own number)
+- Toggle active
+
+Secrets stored encrypted in `config_json` (server-side only, never exposed to client — admin UI shows masked values).
 
 ---
 
-## SEO & Performance
-- Dynamic meta titles, descriptions, Open Graph & Twitter card tags per page
-- Structured data (JSON-LD) for Organization, Book, Article
-- Clean slug-based URLs with React Router
-- Lazy loading images, WebP format
-- Minimal bundle — no heavy libraries
+## 4. User UI — `/auth` redesign
+
+Tabs: **Email/Password** | **Phone OTP** | **WhatsApp OTP** | **Google**
+- Phone tab: country code + number → "Send OTP" → 6-digit input → verify → redirect `/profile`
+- Same flow for WhatsApp tab (different channel param)
+- Email tab unchanged
 
 ---
 
-## File Storage
-- Supabase Storage buckets for book files (PDF/DOC) and cover images
-- Secure bucket with RLS — only purchased users or preview access
-- Files served through authenticated URLs, no direct public downloads
+## 5. Implementation order
 
+1. Migration: `otp_providers`, `phone_otps`, profile.phone
+2. Edge function: `phone-otp-send` + `phone-otp-verify` with Twilio + MSG91 + WhatsApp Cloud adapters
+3. Admin page `/admin/auth-providers` + sidebar link
+4. User `/auth` page — add Phone/WhatsApp tabs
+5. Test end-to-end
+
+---
+
+## Technical notes
+
+- Providers ke API keys **`otp_providers.config_json`** me store honge (not in Supabase secrets) — kyunki admin runtime pe add karega, har provider ke alag fields hain.
+- WhatsApp Cloud API (Meta) free hai for low volume; Twilio WhatsApp paid hai but easier setup. Admin choose karega.
+- Rate limit: max 3 OTP requests per phone per 10 min (in edge function).
+- "Chapter not found" issue ke liye — alag se book slug bhejiye, baad me fix karenge.
+
+**Approve karein to implementation start karta hu.**

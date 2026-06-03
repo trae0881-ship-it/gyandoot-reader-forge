@@ -456,7 +456,10 @@ const BookReader = () => {
     );
   }
 
-  const paragraphs = chapter.content?.split("\n") ?? [];
+  const rawContent = chapter.content ?? "";
+  // Detect if content is HTML (from RichTextEditor) — render via dangerouslySetInnerHTML
+  const isHtmlContent = /<\/?(p|div|span|strong|em|br|h[1-6]|ul|ol|li|blockquote|img|a)\b/i.test(rawContent);
+  const paragraphs = isHtmlContent ? [] : rawContent.split("\n");
 
   return (
     <div

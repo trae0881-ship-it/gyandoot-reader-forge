@@ -13,6 +13,19 @@ import { Loader2, Send, Save, Trash2 } from "lucide-react";
 
 type Channel = "sms" | "whatsapp" | "email";
 
+// Sanitize pasted API keys: strip whitespace, zero-width chars, BOM, and surrounding quotes
+// so it doesn't matter where the user copied from (email, PDF, docs, etc.)
+const sanitizeKey = (raw: string): string => {
+  if (!raw) return "";
+  let s = raw
+    .replace(/[\u200B-\u200D\uFEFF]/g, "") // zero-width + BOM
+    .replace(/\s+/g, "") // all whitespace incl. newlines
+    .trim();
+  // strip surrounding quotes/backticks
+  if (/^["'`].*["'`]$/.test(s)) s = s.slice(1, -1);
+  return s;
+};
+
 interface FieldDef { key: string; label: string; type?: string; placeholder?: string }
 const PROVIDERS: Record<Channel, { id: string; name: string; fields: FieldDef[] }[]> = {
   sms: [

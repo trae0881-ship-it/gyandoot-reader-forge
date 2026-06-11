@@ -31,6 +31,15 @@ const MODELS: Record<string, string[]> = {
   kimi: ["moonshot-v1-8k", "moonshot-v1-32k"],
 };
 
+// Sanitize pasted API keys regardless of source — removes whitespace,
+// zero-width chars, BOM, and wrapping quotes so any paste "just works".
+const sanitizeKey = (raw: string): string => {
+  if (!raw) return "";
+  let s = raw.replace(/[\u200B-\u200D\uFEFF]/g, "").replace(/\s+/g, "").trim();
+  if (/^["'`].*["'`]$/.test(s)) s = s.slice(1, -1);
+  return s;
+};
+
 const AdminAI = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();

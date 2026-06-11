@@ -60,12 +60,18 @@ function getRelevantChunks(content: string, question: string, maxChars = 6000): 
   return result || content.substring(0, maxChars);
 }
 
-async function callAI(provider: string, apiKey: string, model: string, systemPrompt: string, userMessage: string): Promise<string> {
+async function callAI(provider: string, apiKey: string, model: string, systemPrompt: string, userMessage: string, baseUrl?: string): Promise<string> {
   let url = "";
   let headers: Record<string, string> = {};
   let body: unknown;
 
-  if (provider === "openai" || provider === "deepseek" || provider === "perplexity" || provider === "kimi") {
+  if (provider === "custom") {
+    if (!baseUrl) throw new Error("Custom provider requires base_url");
+    // Auto-append /chat/completions if user gave only the base
+    url = baseUrl.endsWith("/chat/completions") ? baseUrl : baseUrl.replace(/\/+$/, "") + "/chat/completions";
+    headers = { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" };
+    body = { model, messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userMessage }], temperature: 0.3, max_tokens: 1000 };
+  } else if (provider === "openai" || provider === "deepseek" || provider === "perplexity" || provider === "kimi") {
     const baseUrls: Record<string, string> = {
       openai: "https://api.openai.com/v1/chat/completions",
       deepseek: "https://api.deepseek.com/v1/chat/completions",

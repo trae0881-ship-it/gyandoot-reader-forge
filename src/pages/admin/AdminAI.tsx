@@ -172,10 +172,16 @@ const AdminAI = () => {
                   <Input
                     type="password"
                     value={apiKey}
-                    onChange={e => setApiKey(e.target.value)}
-                    placeholder="Enter API key..."
+                    onChange={e => setApiKey(sanitizeKey(e.target.value))}
+                    onPaste={e => {
+                      e.preventDefault();
+                      setApiKey(sanitizeKey(e.clipboardData.getData("text")));
+                    }}
+                    autoComplete="off"
+                    spellCheck={false}
+                    placeholder="Paste API key from anywhere — extra spaces/quotes auto-removed"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">Key will be encrypted before storage</p>
+                  <p className="text-xs text-muted-foreground mt-1">Key will be encrypted before storage. Source nahi matter karta — bus key paste karo.</p>
                 </div>
               )}
 

@@ -153,7 +153,14 @@ const ChannelPanel = ({ channel }: { channel: Channel }) => {
                 type={f.type || "text"}
                 placeholder={f.placeholder}
                 value={cfg[f.key] || ""}
-                onChange={(e) => setCfg({ ...cfg, [f.key]: e.target.value })}
+                onChange={(e) => setCfg({ ...cfg, [f.key]: sanitizeKey(e.target.value) })}
+                onPaste={(e) => {
+                  e.preventDefault();
+                  const pasted = e.clipboardData.getData("text");
+                  setCfg({ ...cfg, [f.key]: sanitizeKey(pasted) });
+                }}
+                autoComplete="off"
+                spellCheck={false}
               />
             </div>
           ))}

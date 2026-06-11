@@ -387,7 +387,7 @@ ${relevantContent}`;
           const data = await res.json();
           answer = data.choices?.[0]?.message?.content || "यह जानकारी उपलब्ध नहीं है";
         } else {
-          answer = await callAI(activeProvider, apiKey, model, systemPrompt, question);
+          answer = await callAI(activeProvider, apiKey, model, systemPrompt, question, settings?.base_url);
         }
       } catch (aiErr) {
         console.error("AI call failed:", aiErr);

@@ -12,13 +12,14 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Shield, Sparkles, Search, CheckCircle, XCircle } from "lucide-react";
 
 const PROVIDERS = [
-  { value: "lovable", label: "Lovable AI (Built-in)", needsKey: false },
-  { value: "openai", label: "OpenAI", needsKey: true },
-  { value: "gemini", label: "Google Gemini", needsKey: true },
-  { value: "claude", label: "Anthropic Claude", needsKey: true },
-  { value: "deepseek", label: "DeepSeek", needsKey: true },
-  { value: "perplexity", label: "Perplexity", needsKey: true },
-  { value: "kimi", label: "Kimi (Moonshot)", needsKey: true },
+  { value: "lovable", label: "Lovable AI (Built-in)", needsKey: false, needsUrl: false },
+  { value: "openai", label: "OpenAI / ChatGPT", needsKey: true, needsUrl: false },
+  { value: "gemini", label: "Google Gemini", needsKey: true, needsUrl: false },
+  { value: "claude", label: "Anthropic Claude", needsKey: true, needsUrl: false },
+  { value: "deepseek", label: "DeepSeek", needsKey: true, needsUrl: false },
+  { value: "perplexity", label: "Perplexity", needsKey: true, needsUrl: false },
+  { value: "kimi", label: "Kimi (Moonshot)", needsKey: true, needsUrl: false },
+  { value: "custom", label: "Custom / Any Provider (OpenAI-compatible)", needsKey: true, needsUrl: true },
 ];
 
 const MODELS: Record<string, string[]> = {
@@ -29,6 +30,7 @@ const MODELS: Record<string, string[]> = {
   deepseek: ["deepseek-chat", "deepseek-reasoner"],
   perplexity: ["llama-3.1-sonar-small-128k-online", "llama-3.1-sonar-large-128k-online"],
   kimi: ["moonshot-v1-8k", "moonshot-v1-32k"],
+  custom: [],
 };
 
 // Sanitize pasted API keys regardless of source — removes whitespace,

@@ -143,7 +143,7 @@ Deno.serve(async (req) => {
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    const { action, question, book_id, provider_name, api_key, model_name } = await req.json();
+    const { action, question, book_id, provider_name, api_key, model_name, base_url } = await req.json();
 
     // ── Admin: Verify & Save API Key ──
     if (action === "verify-key") {
@@ -160,12 +160,12 @@ Deno.serve(async (req) => {
       }
 
       try {
-        const testResponse = await callAI(provider_name, api_key, model_name, "You are a test assistant.", "Say 'OK' in one word.");
+        const testResponse = await callAI(provider_name, api_key, model_name, "You are a test assistant.", "Say 'OK' in one word.", base_url);
         if (!testResponse) throw new Error("Empty response from AI");
         const encrypted = encryptKey(api_key);
         await supabase.from("ai_settings").update({ is_active: false }).neq("id", "00000000-0000-0000-0000-000000000000");
         const { error } = await supabase.from("ai_settings").upsert({
-          provider_name, api_key_encrypted: encrypted, model_name, is_active: true,
+          provider_name, api_key_encrypted: encrypted, model_name, base_url: base_url || null, is_active: true,
         }, { onConflict: "provider_name" });
         if (error) throw error;
         return new Response(JSON.stringify({ success: true, message: "API key verified and saved" }), {

@@ -31,6 +31,15 @@ const MODELS: Record<string, string[]> = {
   kimi: ["moonshot-v1-8k", "moonshot-v1-32k"],
 };
 
+// Sanitize pasted API keys regardless of source — removes whitespace,
+// zero-width chars, BOM, and wrapping quotes so any paste "just works".
+const sanitizeKey = (raw: string): string => {
+  if (!raw) return "";
+  let s = raw.replace(/[\u200B-\u200D\uFEFF]/g, "").replace(/\s+/g, "").trim();
+  if (/^["'`].*["'`]$/.test(s)) s = s.slice(1, -1);
+  return s;
+};
+
 const AdminAI = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -172,10 +181,16 @@ const AdminAI = () => {
                   <Input
                     type="password"
                     value={apiKey}
-                    onChange={e => setApiKey(e.target.value)}
-                    placeholder="Enter API key..."
+                    onChange={e => setApiKey(sanitizeKey(e.target.value))}
+                    onPaste={e => {
+                      e.preventDefault();
+                      setApiKey(sanitizeKey(e.clipboardData.getData("text")));
+                    }}
+                    autoComplete="off"
+                    spellCheck={false}
+                    placeholder="Paste API key from anywhere — extra spaces/quotes auto-removed"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">Key will be encrypted before storage</p>
+                  <p className="text-xs text-muted-foreground mt-1">Key will be encrypted before storage. Source nahi matter karta — bus key paste karo.</p>
                 </div>
               )}
 

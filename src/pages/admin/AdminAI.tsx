@@ -48,6 +48,7 @@ const AdminAI = () => {
   const [provider, setProvider] = useState("lovable");
   const [model, setModel] = useState("google/gemini-2.5-flash");
   const [apiKey, setApiKey] = useState("");
+  const [baseUrl, setBaseUrl] = useState("");
   const [verifying, setVerifying] = useState(false);
 
   const selectedProvider = PROVIDERS.find(p => p.value === provider);

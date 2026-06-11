@@ -172,16 +172,38 @@ const AdminAI = () => {
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-1.5 block">Model</label>
-                  <Select value={model} onValueChange={setModel}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {(MODELS[provider] || []).map(m => (
-                        <SelectItem key={m} value={m}>{m}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {provider === "custom" ? (
+                    <Input
+                      value={model}
+                      onChange={e => setModel(e.target.value.trim())}
+                      placeholder="e.g. gpt-4o-mini, llama-3.1-70b, my-internal-model"
+                    />
+                  ) : (
+                    <Select value={model} onValueChange={setModel}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {(MODELS[provider] || []).map(m => (
+                          <SelectItem key={m} value={m}>{m}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
               </div>
+
+              {selectedProvider?.needsUrl && (
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">Base URL (OpenAI-compatible endpoint)</label>
+                  <Input
+                    value={baseUrl}
+                    onChange={e => setBaseUrl(e.target.value.trim())}
+                    placeholder="https://api.your-provider.com/v1/chat/completions"
+                    autoComplete="off"
+                    spellCheck={false}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Koi bhi OpenAI-compatible endpoint chalega — ChatGPT, internal platform, OpenRouter, Groq, Together, etc.</p>
+                </div>
+              )}
 
               {selectedProvider?.needsKey && (
                 <div>

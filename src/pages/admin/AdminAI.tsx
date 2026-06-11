@@ -87,8 +87,12 @@ const AdminAI = () => {
           toast({ title: "API key required", variant: "destructive" });
           return;
         }
+        if (provider === "custom" && (!baseUrl || !model)) {
+          toast({ title: "Base URL and model name required", variant: "destructive" });
+          return;
+        }
         const { data, error } = await supabase.functions.invoke("ai-ask", {
-          body: { action: "verify-key", provider_name: provider, api_key: apiKey, model_name: model },
+          body: { action: "verify-key", provider_name: provider, api_key: apiKey, model_name: model, base_url: baseUrl || undefined },
         });
         if (error) throw error;
         if (!data.success) throw new Error(data.error);
@@ -96,6 +100,7 @@ const AdminAI = () => {
       }
       queryClient.invalidateQueries({ queryKey: ["ai-settings"] });
       setApiKey("");
+      setBaseUrl("");
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally {

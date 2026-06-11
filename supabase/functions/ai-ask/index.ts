@@ -235,7 +235,7 @@ Deno.serve(async (req) => {
           status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const { data: settings } = await supabase.from("ai_settings").select("id, provider_name, model_name, is_active, created_at, updated_at").order("created_at");
+      const { data: settings } = await supabase.from("ai_settings").select("id, provider_name, model_name, base_url, is_active, created_at, updated_at").order("created_at");
       return new Response(JSON.stringify({ settings }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

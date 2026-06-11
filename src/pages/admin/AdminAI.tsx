@@ -12,13 +12,14 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Shield, Sparkles, Search, CheckCircle, XCircle } from "lucide-react";
 
 const PROVIDERS = [
-  { value: "lovable", label: "Lovable AI (Built-in)", needsKey: false },
-  { value: "openai", label: "OpenAI", needsKey: true },
-  { value: "gemini", label: "Google Gemini", needsKey: true },
-  { value: "claude", label: "Anthropic Claude", needsKey: true },
-  { value: "deepseek", label: "DeepSeek", needsKey: true },
-  { value: "perplexity", label: "Perplexity", needsKey: true },
-  { value: "kimi", label: "Kimi (Moonshot)", needsKey: true },
+  { value: "lovable", label: "Lovable AI (Built-in)", needsKey: false, needsUrl: false },
+  { value: "openai", label: "OpenAI / ChatGPT", needsKey: true, needsUrl: false },
+  { value: "gemini", label: "Google Gemini", needsKey: true, needsUrl: false },
+  { value: "claude", label: "Anthropic Claude", needsKey: true, needsUrl: false },
+  { value: "deepseek", label: "DeepSeek", needsKey: true, needsUrl: false },
+  { value: "perplexity", label: "Perplexity", needsKey: true, needsUrl: false },
+  { value: "kimi", label: "Kimi (Moonshot)", needsKey: true, needsUrl: false },
+  { value: "custom", label: "Custom / Any Provider (OpenAI-compatible)", needsKey: true, needsUrl: true },
 ];
 
 const MODELS: Record<string, string[]> = {
@@ -29,6 +30,7 @@ const MODELS: Record<string, string[]> = {
   deepseek: ["deepseek-chat", "deepseek-reasoner"],
   perplexity: ["llama-3.1-sonar-small-128k-online", "llama-3.1-sonar-large-128k-online"],
   kimi: ["moonshot-v1-8k", "moonshot-v1-32k"],
+  custom: [],
 };
 
 // Sanitize pasted API keys regardless of source — removes whitespace,
@@ -46,6 +48,7 @@ const AdminAI = () => {
   const [provider, setProvider] = useState("lovable");
   const [model, setModel] = useState("google/gemini-2.5-flash");
   const [apiKey, setApiKey] = useState("");
+  const [baseUrl, setBaseUrl] = useState("");
   const [verifying, setVerifying] = useState(false);
 
   const selectedProvider = PROVIDERS.find(p => p.value === provider);
@@ -84,8 +87,12 @@ const AdminAI = () => {
           toast({ title: "API key required", variant: "destructive" });
           return;
         }
+        if (provider === "custom" && (!baseUrl || !model)) {
+          toast({ title: "Base URL and model name required", variant: "destructive" });
+          return;
+        }
         const { data, error } = await supabase.functions.invoke("ai-ask", {
-          body: { action: "verify-key", provider_name: provider, api_key: apiKey, model_name: model },
+          body: { action: "verify-key", provider_name: provider, api_key: apiKey, model_name: model, base_url: baseUrl || undefined },
         });
         if (error) throw error;
         if (!data.success) throw new Error(data.error);
@@ -93,6 +100,7 @@ const AdminAI = () => {
       }
       queryClient.invalidateQueries({ queryKey: ["ai-settings"] });
       setApiKey("");
+      setBaseUrl("");
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally {
@@ -164,16 +172,38 @@ const AdminAI = () => {
                 </div>
                 <div>
                   <label className="text-sm font-medium mb-1.5 block">Model</label>
-                  <Select value={model} onValueChange={setModel}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {(MODELS[provider] || []).map(m => (
-                        <SelectItem key={m} value={m}>{m}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {provider === "custom" ? (
+                    <Input
+                      value={model}
+                      onChange={e => setModel(e.target.value.trim())}
+                      placeholder="e.g. gpt-4o-mini, llama-3.1-70b, my-internal-model"
+                    />
+                  ) : (
+                    <Select value={model} onValueChange={setModel}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {(MODELS[provider] || []).map(m => (
+                          <SelectItem key={m} value={m}>{m}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
               </div>
+
+              {selectedProvider?.needsUrl && (
+                <div>
+                  <label className="text-sm font-medium mb-1.5 block">Base URL (OpenAI-compatible endpoint)</label>
+                  <Input
+                    value={baseUrl}
+                    onChange={e => setBaseUrl(e.target.value.trim())}
+                    placeholder="https://api.your-provider.com/v1/chat/completions"
+                    autoComplete="off"
+                    spellCheck={false}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Koi bhi OpenAI-compatible endpoint chalega — ChatGPT, internal platform, OpenRouter, Groq, Together, etc.</p>
+                </div>
+              )}
 
               {selectedProvider?.needsKey && (
                 <div>

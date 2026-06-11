@@ -60,12 +60,18 @@ function getRelevantChunks(content: string, question: string, maxChars = 6000): 
   return result || content.substring(0, maxChars);
 }
 
-async function callAI(provider: string, apiKey: string, model: string, systemPrompt: string, userMessage: string): Promise<string> {
+async function callAI(provider: string, apiKey: string, model: string, systemPrompt: string, userMessage: string, baseUrl?: string): Promise<string> {
   let url = "";
   let headers: Record<string, string> = {};
   let body: unknown;
 
-  if (provider === "openai" || provider === "deepseek" || provider === "perplexity" || provider === "kimi") {
+  if (provider === "custom") {
+    if (!baseUrl) throw new Error("Custom provider requires base_url");
+    // Auto-append /chat/completions if user gave only the base
+    url = baseUrl.endsWith("/chat/completions") ? baseUrl : baseUrl.replace(/\/+$/, "") + "/chat/completions";
+    headers = { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" };
+    body = { model, messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userMessage }], temperature: 0.3, max_tokens: 1000 };
+  } else if (provider === "openai" || provider === "deepseek" || provider === "perplexity" || provider === "kimi") {
     const baseUrls: Record<string, string> = {
       openai: "https://api.openai.com/v1/chat/completions",
       deepseek: "https://api.deepseek.com/v1/chat/completions",
@@ -137,7 +143,7 @@ Deno.serve(async (req) => {
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    const { action, question, book_id, provider_name, api_key, model_name } = await req.json();
+    const { action, question, book_id, provider_name, api_key, model_name, base_url } = await req.json();
 
     // ── Admin: Verify & Save API Key ──
     if (action === "verify-key") {
@@ -154,12 +160,12 @@ Deno.serve(async (req) => {
       }
 
       try {
-        const testResponse = await callAI(provider_name, api_key, model_name, "You are a test assistant.", "Say 'OK' in one word.");
+        const testResponse = await callAI(provider_name, api_key, model_name, "You are a test assistant.", "Say 'OK' in one word.", base_url);
         if (!testResponse) throw new Error("Empty response from AI");
         const encrypted = encryptKey(api_key);
         await supabase.from("ai_settings").update({ is_active: false }).neq("id", "00000000-0000-0000-0000-000000000000");
         const { error } = await supabase.from("ai_settings").upsert({
-          provider_name, api_key_encrypted: encrypted, model_name, is_active: true,
+          provider_name, api_key_encrypted: encrypted, model_name, base_url: base_url || null, is_active: true,
         }, { onConflict: "provider_name" });
         if (error) throw error;
         return new Response(JSON.stringify({ success: true, message: "API key verified and saved" }), {
@@ -229,7 +235,7 @@ Deno.serve(async (req) => {
           status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const { data: settings } = await supabase.from("ai_settings").select("id, provider_name, model_name, is_active, created_at, updated_at").order("created_at");
+      const { data: settings } = await supabase.from("ai_settings").select("id, provider_name, model_name, base_url, is_active, created_at, updated_at").order("created_at");
       return new Response(JSON.stringify({ settings }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -381,7 +387,7 @@ ${relevantContent}`;
           const data = await res.json();
           answer = data.choices?.[0]?.message?.content || "यह जानकारी उपलब्ध नहीं है";
         } else {
-          answer = await callAI(activeProvider, apiKey, model, systemPrompt, question);
+          answer = await callAI(activeProvider, apiKey, model, systemPrompt, question, settings?.base_url);
         }
       } catch (aiErr) {
         console.error("AI call failed:", aiErr);

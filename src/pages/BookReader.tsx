@@ -130,6 +130,20 @@ const BookReader = () => {
   });
 
   const chapter = chapters?.find((c) => c.slug === chapterSlug);
+
+  // Securely fetch chapter content via RPC (enforces access server-side)
+  const { data: chapterContent, isLoading: contentLoading, error: contentError } = useQuery({
+    queryKey: ["chapter-content", chapter?.id, user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_chapter_content", { _chapter_id: chapter!.id });
+      if (error) throw error;
+      // RPC returns TABLE(content text) → array with one row
+      const row = Array.isArray(data) ? data[0] : data;
+      return (row?.content ?? "") as string;
+    },
+    enabled: !!chapter?.id,
+    retry: false,
+  });
   const currentIndex = chapters?.findIndex((c) => c.slug === chapterSlug) ?? -1;
   const prevChapter = currentIndex > 0 ? chapters?.[currentIndex - 1] : null;
   const nextChapter = chapters && currentIndex < chapters.length - 1 ? chapters[currentIndex + 1] : null;

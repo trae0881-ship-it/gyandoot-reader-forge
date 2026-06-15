@@ -96,16 +96,17 @@ const BookReader = () => {
   const contentRef = useRef<HTMLDivElement>(null);
 
   /* ─── Queries ──────────────────────────────────────────────────────── */
-  const { data: book } = useQuery({
+  const { data: book, isLoading: bookLoading } = useQuery({
     queryKey: ["book", slug],
     queryFn: async () => {
-      const { data } = await supabase.from("books").select("id, title, slug, author, cover_url, price, is_free, is_featured, description, preview_chapters, purchase_count, file_type, created_at, updated_at").eq("slug", slug!).single();
+      const { data, error } = await supabase.from("books").select("id, title, slug, author, cover_url, price, is_free, is_featured, description, preview_chapters, purchase_count, file_type, created_at, updated_at").eq("slug", slug!).maybeSingle();
+      if (error) throw error;
       return data;
     },
     enabled: !!slug,
   });
 
-  const { data: chapters } = useQuery({
+  const { data: chapters, isLoading: chaptersLoading } = useQuery({
     queryKey: ["all-chapters", book?.id],
     queryFn: async () => {
       const { data } = await supabase

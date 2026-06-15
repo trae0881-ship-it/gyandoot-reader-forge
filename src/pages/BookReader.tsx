@@ -438,13 +438,43 @@ const BookReader = () => {
   /* ─── Access check ─────────────────────────────────────────────────── */
   const canRead = book?.is_free || chapter?.is_preview || hasPurchased;
 
-  if (!chapter || !book) {
+  // Loading state — while book/chapters are being fetched
+  if (bookLoading || (book && chaptersLoading)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted-foreground">Chapter not found.</p>
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
   }
+
+  // Book truly doesn't exist
+  if (!book) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center">
+        <BookOpen className="h-12 w-12 text-muted-foreground" />
+        <h2 className="font-serif text-2xl font-bold">Book not found</h2>
+        <p className="text-muted-foreground text-sm">यह book उपलब्ध नहीं है या हटा दी गई है।</p>
+        <Button asChild><Link to="/books">Browse Books</Link></Button>
+      </div>
+    );
+  }
+
+  // Chapter slug doesn't match — admin likely updated chapter slugs.
+  // Auto-redirect to the first available chapter so user is not stuck on a 404.
+  if (!chapter) {
+    if (chapters && chapters.length > 0) {
+      return <Navigate to={`/books/${slug}/${chapters[0].slug}`} replace />;
+    }
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center">
+        <BookOpen className="h-12 w-12 text-muted-foreground" />
+        <h2 className="font-serif text-2xl font-bold">कोई chapter उपलब्ध नहीं है</h2>
+        <p className="text-muted-foreground text-sm">इस book में अभी कोई chapter add नहीं किया गया है।</p>
+        <Button asChild><Link to={`/books/${slug}`}>Back to Book</Link></Button>
+      </div>
+    );
+  }
+
 
   if (!canRead) {
     return (

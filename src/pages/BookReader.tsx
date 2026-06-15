@@ -788,14 +788,14 @@ const BookReader = () => {
         )}
         <div
           ref={contentRef}
-          className="prose prose-lg max-w-none leading-relaxed prose-headings:font-serif prose-p:my-3 prose-strong:font-bold"
-          style={{ fontSize: `${fontSize}px` }}
+          className="max-w-none"
         >
-          {isHtmlContent ? (
-            <div dangerouslySetInnerHTML={{ __html: rawContent }} />
-          ) : (
-            paragraphs.map((p, i) => renderParagraph(p, i))
-          )}
+          <SecureTextCanvasReader
+            content={rawContent}
+            fontSize={fontSize}
+            darkMode={darkMode}
+            watermarkText={watermarkText}
+          />
         </div>
       </article>
 

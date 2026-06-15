@@ -119,12 +119,6 @@ const BookReader = () => {
     enabled: !!book?.id,
   });
 
-  // Fetch chapter content via secure RPC (enforces access server-side)
-  const { data: chapterContent, isLoading: contentLoading } = useQuery({
-    queryKey: ["chapter-content", chapter_id_placeholder()],
-    queryFn: async () => "",
-    enabled: false,
-  });
 
   const { data: hasPurchased } = useQuery({
     queryKey: ["purchase-check", book?.id, user?.id],

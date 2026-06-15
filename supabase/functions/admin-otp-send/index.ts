@@ -71,7 +71,7 @@ serve(async (req) => {
         <div style="padding:32px;text-align:center">
           <p style="color:#333;font-size:15px">Aapka admin login OTP code:</p>
           <div style="font-size:36px;letter-spacing:10px;font-weight:700;color:#B71C1C;margin:24px 0;background:#fff;padding:18px;border-radius:8px;border:1px dashed #B71C1C">${code}</div>
-          <p style="color:#666;font-size:13px">Yeh code 10 minutes ke liye valid hai. Agar aapne login attempt nahi kiya to is email ko ignore karein.</p>
+          <p style="color:#666;font-size:13px">Yeh code 5 minutes ke liye valid hai. Agar aapne login attempt nahi kiya to is email ko ignore karein.</p>
           <p style="color:#aaa;font-size:11px;margin-top:24px">GyandootNova Admin Security</p>
         </div>
       </div>`;

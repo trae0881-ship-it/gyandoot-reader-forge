@@ -670,12 +670,7 @@ const BookReader = () => {
                   {highlights.length} Highlight{highlights.length !== 1 ? "s" : ""} — {chapter.title}
                 </p>
               </div>
-              <div className="flex items-center gap-1">
-                <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={downloadHighlightsSummary}>
-                  <Download className="h-3 w-3" /> Download Summary
-                </Button>
-                <Button size="sm" variant="ghost" onClick={() => setShowHighlightsPanel(false)}><X className="h-4 w-4" /></Button>
-              </div>
+              <Button size="sm" variant="ghost" onClick={() => setShowHighlightsPanel(false)}><X className="h-4 w-4" /></Button>
             </div>
             {/* Color filter buttons */}
             <div className="flex items-center gap-1.5 mb-3 flex-wrap">

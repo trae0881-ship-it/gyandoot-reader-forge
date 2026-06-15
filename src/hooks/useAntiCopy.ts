@@ -53,6 +53,7 @@ export function useAntiCopy() {
     const blurOn = () => document.documentElement.classList.add("anti-copy-obscured");
     const blurOff = () => document.documentElement.classList.remove("anti-copy-obscured");
     const onVisibility = () => document.hidden ? blurOn() : blurOff();
+    const clearSelection = () => window.getSelection()?.removeAllRanges();
 
     document.addEventListener("contextmenu", block, true);
     document.addEventListener("selectstart", block, true);
@@ -65,7 +66,7 @@ export function useAntiCopy() {
     document.addEventListener("touchstart", touchStart, { capture: true, passive: true });
     document.addEventListener("touchend", clearLongPress, true);
     document.addEventListener("touchcancel", clearLongPress, true);
-    document.addEventListener("selectionchange", () => window.getSelection()?.removeAllRanges(), true);
+    document.addEventListener("selectionchange", clearSelection, true);
     document.addEventListener("visibilitychange", onVisibility, true);
     window.addEventListener("blur", blurOn, true);
     window.addEventListener("focus", blurOff, true);
@@ -149,6 +150,7 @@ export function useAntiCopy() {
       document.removeEventListener("touchstart", touchStart, true);
       document.removeEventListener("touchend", clearLongPress, true);
       document.removeEventListener("touchcancel", clearLongPress, true);
+      document.removeEventListener("selectionchange", clearSelection, true);
       document.removeEventListener("visibilitychange", onVisibility, true);
       clearLongPress();
       window.removeEventListener("blur", blurOn, true);

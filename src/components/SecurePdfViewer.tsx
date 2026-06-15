@@ -5,9 +5,7 @@ import {
   ChevronRight,
   ZoomIn,
   ZoomOut,
-  Highlighter,
   Loader2,
-  Maximize,
 } from "lucide-react";
 import * as pdfjsLib from "pdfjs-dist";
 
@@ -27,8 +25,6 @@ interface Highlight {
   color: string;
 }
 
-const HIGHLIGHT_COLORS = ["#FFEB3B", "#4CAF50", "#2196F3", "#FF9800", "#E91E63"];
-
 const SecurePdfViewer = ({ url, title, darkMode, initialPage, onPageChange }: SecurePdfViewerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -43,8 +39,6 @@ const SecurePdfViewer = ({ url, title, darkMode, initialPage, onPageChange }: Se
   const [scale, setScale] = useState(1);
   const [fitScale, setFitScale] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [highlightMode, setHighlightMode] = useState(false);
-  const [highlightColor, setHighlightColor] = useState(HIGHLIGHT_COLORS[0]);
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [pageRendering, setPageRendering] = useState(false);
   const [isFitWidth, setIsFitWidth] = useState(true);
@@ -193,13 +187,12 @@ const SecurePdfViewer = ({ url, title, darkMode, initialPage, onPageChange }: Se
 
   // Touch swipe for page navigation
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (highlightMode) return;
     const touch = e.touches[0];
     touchStartRef.current = { x: touch.clientX, y: touch.clientY, time: Date.now() };
-  }, [highlightMode]);
+  }, []);
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (!touchStartRef.current || highlightMode) return;
+    if (!touchStartRef.current) return;
     const touch = e.changedTouches[0];
     const dx = touch.clientX - touchStartRef.current.x;
     const dy = touch.clientY - touchStartRef.current.y;
@@ -214,7 +207,7 @@ const SecurePdfViewer = ({ url, title, darkMode, initialPage, onPageChange }: Se
         setCurrentPage((p) => p - 1);
       }
     }
-  }, [currentPage, numPages, highlightMode]);
+  }, [currentPage, numPages]);
 
   // Fit to width toggle
   const toggleFitWidth = useCallback(() => {
@@ -332,17 +325,7 @@ const SecurePdfViewer = ({ url, title, darkMode, initialPage, onPageChange }: Se
           </Button>
         </div>
 
-        {/* Right: Highlight + Fit */}
-        <div className="flex items-center gap-0.5">
-          <Button
-            variant={highlightMode ? "default" : "ghost"}
-            size="icon"
-            className="h-7 w-7 sm:h-8 sm:w-8"
-            onClick={() => setHighlightMode(!highlightMode)}
-          >
-            <Highlighter className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          </Button>
-        </div>
+        <div className="w-7 sm:w-8" aria-hidden="true" />
       </div>
 
       {/* PDF Canvas area with touch support */}
@@ -371,7 +354,7 @@ const SecurePdfViewer = ({ url, title, darkMode, initialPage, onPageChange }: Se
             ref={textLayerRef}
             className="absolute top-0 left-0"
             style={{
-              cursor: highlightMode ? "text" : "default",
+              cursor: "default",
               pointerEvents: "none",
               userSelect: "none",
               WebkitUserSelect: "none",

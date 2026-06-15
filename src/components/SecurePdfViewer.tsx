@@ -5,9 +5,7 @@ import {
   ChevronRight,
   ZoomIn,
   ZoomOut,
-  Highlighter,
   Loader2,
-  Maximize,
 } from "lucide-react";
 import * as pdfjsLib from "pdfjs-dist";
 
@@ -27,8 +25,6 @@ interface Highlight {
   color: string;
 }
 
-const HIGHLIGHT_COLORS = ["#FFEB3B", "#4CAF50", "#2196F3", "#FF9800", "#E91E63"];
-
 const SecurePdfViewer = ({ url, title, darkMode, initialPage, onPageChange }: SecurePdfViewerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -43,8 +39,6 @@ const SecurePdfViewer = ({ url, title, darkMode, initialPage, onPageChange }: Se
   const [scale, setScale] = useState(1);
   const [fitScale, setFitScale] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [highlightMode, setHighlightMode] = useState(false);
-  const [highlightColor, setHighlightColor] = useState(HIGHLIGHT_COLORS[0]);
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [pageRendering, setPageRendering] = useState(false);
   const [isFitWidth, setIsFitWidth] = useState(true);
@@ -149,22 +143,7 @@ const SecurePdfViewer = ({ url, title, darkMode, initialPage, onPageChange }: Se
 
       await page.render({ canvasContext: ctx, viewport }).promise;
 
-      const textContent = await page.getTextContent();
-      (textContent.items as any[]).forEach((item) => {
-        if (!item.str) return;
-        const tx = pdfjsLib.Util.transform(viewport.transform, item.transform);
-        const span = document.createElement("span");
-        span.textContent = item.str;
-        span.style.position = "absolute";
-        span.style.left = `${tx[4]}px`;
-        span.style.top = `${tx[5] - item.height * scale}px`;
-        span.style.fontSize = `${item.height * scale}px`;
-        span.style.fontFamily = item.fontName || "sans-serif";
-        span.style.color = "transparent";
-        span.style.whiteSpace = "pre";
-        span.style.transformOrigin = "0% 0%";
-        textLayerDiv.appendChild(span);
-      });
+      textLayerDiv.textContent = "";
 
       drawHighlights(pageNum);
     } catch (err) {
@@ -204,42 +183,16 @@ const SecurePdfViewer = ({ url, title, darkMode, initialPage, onPageChange }: Se
     drawHighlights(currentPage);
   }, [highlights, currentPage, drawHighlights]);
 
-  // Highlight on text selection
-  const handleMouseUp = useCallback(() => {
-    if (!highlightMode) return;
-    const selection = window.getSelection();
-    if (!selection || selection.isCollapsed) return;
-    const range = selection.getRangeAt(0);
-    const rects = range.getClientRects();
-    const textLayerDiv = textLayerRef.current;
-    if (!textLayerDiv || rects.length === 0) return;
-
-    const containerRect = textLayerDiv.getBoundingClientRect();
-    const highlightRects: Highlight["rects"] = [];
-    for (let i = 0; i < rects.length; i++) {
-      const r = rects[i];
-      highlightRects.push({
-        x: r.left - containerRect.left,
-        y: r.top - containerRect.top,
-        w: r.width,
-        h: r.height,
-      });
-    }
-    if (highlightRects.length > 0) {
-      setHighlights((prev) => [...prev, { page: currentPage, rects: highlightRects, color: highlightColor }]);
-    }
-    selection.removeAllRanges();
-  }, [highlightMode, highlightColor, currentPage]);
+  // PDF is rendered canvas-only; no text layer is exposed for copy/select.
 
   // Touch swipe for page navigation
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (highlightMode) return;
     const touch = e.touches[0];
     touchStartRef.current = { x: touch.clientX, y: touch.clientY, time: Date.now() };
-  }, [highlightMode]);
+  }, []);
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (!touchStartRef.current || highlightMode) return;
+    if (!touchStartRef.current) return;
     const touch = e.changedTouches[0];
     const dx = touch.clientX - touchStartRef.current.x;
     const dy = touch.clientY - touchStartRef.current.y;
@@ -254,7 +207,7 @@ const SecurePdfViewer = ({ url, title, darkMode, initialPage, onPageChange }: Se
         setCurrentPage((p) => p - 1);
       }
     }
-  }, [currentPage, numPages, highlightMode]);
+  }, [currentPage, numPages]);
 
   // Fit to width toggle
   const toggleFitWidth = useCallback(() => {
@@ -372,44 +325,14 @@ const SecurePdfViewer = ({ url, title, darkMode, initialPage, onPageChange }: Se
           </Button>
         </div>
 
-        {/* Right: Highlight + Fit */}
-        <div className="flex items-center gap-0.5">
-          <Button
-            variant={highlightMode ? "default" : "ghost"}
-            size="icon"
-            className="h-7 w-7 sm:h-8 sm:w-8"
-            onClick={() => setHighlightMode(!highlightMode)}
-          >
-            <Highlighter className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          </Button>
-        </div>
+        <div className="w-7 sm:w-8" aria-hidden="true" />
       </div>
-
-      {/* Highlight color picker - shown below toolbar when active */}
-      {highlightMode && (
-        <div className={`w-full flex items-center justify-center gap-2 py-1.5 rounded-b-lg border-x border-b ${
-          darkMode ? "border-gray-700 bg-gray-800/90" : "border-border bg-muted/90"
-        }`}>
-          <span className="text-[10px] text-muted-foreground mr-1">Color:</span>
-          {HIGHLIGHT_COLORS.map((color) => (
-            <button
-              key={color}
-              className={`h-6 w-6 rounded-full border-2 transition-all ${
-                highlightColor === color ? "border-foreground scale-125 shadow-md" : "border-transparent"
-              }`}
-              style={{ backgroundColor: color }}
-              onClick={() => setHighlightColor(color)}
-            />
-          ))}
-        </div>
-      )}
 
       {/* PDF Canvas area with touch support */}
       <div
         ref={scrollContainerRef}
         className="relative overflow-auto w-full flex justify-center mt-2"
         style={{ maxHeight: "calc(100vh - 110px)" }}
-        onMouseUp={handleMouseUp}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
@@ -431,9 +354,10 @@ const SecurePdfViewer = ({ url, title, darkMode, initialPage, onPageChange }: Se
             ref={textLayerRef}
             className="absolute top-0 left-0"
             style={{
-              cursor: highlightMode ? "text" : "default",
-              userSelect: highlightMode ? "text" : "none",
-              WebkitUserSelect: highlightMode ? "text" : "none",
+              cursor: "default",
+              pointerEvents: "none",
+              userSelect: "none",
+              WebkitUserSelect: "none",
             }}
           />
         </div>

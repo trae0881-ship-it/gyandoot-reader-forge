@@ -13,6 +13,7 @@ import {
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import SecureTextCanvasReader from "@/components/SecureTextCanvasReader";
 
 /* ─── Types ─────────────────────────────────────────────────────────── */
 interface Highlight {
@@ -514,14 +515,11 @@ const BookReader = () => {
   }
 
   const rawContent = (chapterContent ?? "") as string;
-  // Detect if content is HTML (from RichTextEditor) — render via dangerouslySetInnerHTML
-  const isHtmlContent = /<\/?(p|div|span|strong|em|br|h[1-6]|ul|ol|li|blockquote|img|a)\b/i.test(rawContent);
-  const paragraphs = isHtmlContent ? [] : rawContent.split("\n");
+  const watermarkText = user?.email ? `GyandootNova • ${user.email}` : "GyandootNova • Protected";
 
   return (
     <div
       className={`min-h-screen transition-colors ${darkMode ? "bg-gray-900 text-gray-100" : "bg-background text-foreground"}`}
-      onMouseUp={handleMouseUp}
     >
       {/* Scroll progress bar */}
       <div className="fixed top-0 left-0 right-0 z-50">
@@ -599,37 +597,6 @@ const BookReader = () => {
             </div>
           </aside>
         </>
-      )}
-
-      {/* Floating highlight color toolbar */}
-      {showHighlightBar && selectionInfo && (
-        <div
-          className="fixed z-[60] flex items-center gap-1.5 rounded-xl border bg-popover shadow-xl px-2.5 py-2 -translate-x-1/2"
-          style={{ left: highlightBarPos.x, top: highlightBarPos.y }}
-        >
-          <Highlighter className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-          <div className="flex items-center gap-1">
-            {HIGHLIGHT_COLORS.map((c) => (
-              <button
-                key={c.id}
-                title={c.label}
-                onClick={() => saveHighlight(c.id)}
-                className={`h-5 w-5 rounded-full ${c.swatch} border-2 transition-all hover:scale-110 ${selectedColor === c.id ? "border-foreground scale-110" : "border-transparent"}`}
-              />
-            ))}
-          </div>
-          <div className="w-px h-4 bg-border mx-0.5" />
-          <Button size="sm" variant="ghost" className="h-6 w-6 p-0" title="Copy" onClick={copySelectedText}>
-            <Copy className="h-3.5 w-3.5" />
-          </Button>
-          <Button size="sm" variant="ghost" className="h-6 w-6 p-0" title="Search Meaning" onClick={searchMeaning}>
-            <Search className="h-3.5 w-3.5" />
-          </Button>
-          <div className="w-px h-4 bg-border mx-0.5" />
-          <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => setShowHighlightBar(false)}>
-            <X className="h-3.5 w-3.5" />
-          </Button>
-        </div>
       )}
 
       {/* Toolbar */}

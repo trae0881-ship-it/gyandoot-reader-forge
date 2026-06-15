@@ -1,135 +1,52 @@
 import { useEffect } from "react";
 
+/**
+ * Anti-copy protection. NOTE: JavaScript cannot prevent OS-level or hardware
+ * screenshots (mobile Power+Volume, Win+PrtScr, macOS Cmd+Shift+3/4, screen
+ * recording apps). It can only deter casual copying in-browser.
+ */
 export function useAntiCopy() {
-  // Prevent right-click
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      e.preventDefault();
-      return false;
-    };
-    document.addEventListener("contextmenu", handler);
-    return () => document.removeEventListener("contextmenu", handler);
-  }, []);
-
-  // Prevent text selection
-  useEffect(() => {
-    const handler = (e: Event) => {
-      e.preventDefault();
-    };
-    document.addEventListener("selectstart", handler);
-    return () => document.removeEventListener("selectstart", handler);
-  }, []);
-
-  // Prevent keyboard shortcuts for saving/printing/copying/developer tools
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      // Block Ctrl+S, Ctrl+P, Ctrl+C, Ctrl+Shift+I, F12, PrintScreen
-      if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "S" || e.key === "p" || e.key === "P" || e.key === "c" || e.key === "C")) {
+    // Right-click
+    const ctx = (e: MouseEvent) => e.preventDefault();
+    // Keyboard shortcuts
+    const key = (e: KeyboardEvent) => {
+      const k = e.key.toLowerCase();
+      if ((e.ctrlKey || e.metaKey) && ["s", "p", "c", "x", "u"].includes(k)) {
         e.preventDefault();
-        return false;
       }
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "I" || e.key === "i" || e.key === "J" || e.key === "j" || e.key === "S" || e.key === "s")) {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && ["i", "j", "c", "s"].includes(k)) {
         e.preventDefault();
-        return false;
       }
-      if (e.key === "F12" || e.key === "PrintScreen") {
+      if (k === "f12" || k === "printscreen") {
         e.preventDefault();
-        return false;
+        try { navigator.clipboard?.writeText("⚠ Copying is disabled — GyandootNova copyrighted content."); } catch {}
       }
     };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, []);
-
-  // Detect PrintScreen on keyup
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "PrintScreen") {
-        e.preventDefault();
-        // Clear clipboard
-        try {
-          navigator.clipboard?.writeText("⚠ Screenshot blocked — GyandootNova copyrighted content");
-        } catch {}
-      }
-    };
-    document.addEventListener("keyup", handler);
-    return () => document.removeEventListener("keyup", handler);
-  }, []);
-
-  // Blur content when page not visible or window loses focus (prevents snipping tools)
-  useEffect(() => {
-    const blurContent = () => {
-      document.body.style.filter = "blur(40px)";
-      document.body.style.pointerEvents = "none";
-    };
-    const unblurContent = () => {
-      document.body.style.filter = "none";
-      document.body.style.pointerEvents = "auto";
-    };
-
-    const handleVisibility = () => {
-      if (document.hidden) blurContent(); else unblurContent();
-    };
-
-    document.addEventListener("visibilitychange", handleVisibility);
-    window.addEventListener("blur", blurContent);
-    window.addEventListener("focus", unblurContent);
-    document.addEventListener("mouseleave", blurContent);
-    document.addEventListener("mouseenter", unblurContent);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibility);
-      window.removeEventListener("blur", blurContent);
-      window.removeEventListener("focus", unblurContent);
-      document.removeEventListener("mouseleave", blurContent);
-      document.removeEventListener("mouseenter", unblurContent);
-      unblurContent();
-    };
-  }, []);
-
-  // Prevent clipboard copy
-  useEffect(() => {
-    const handler = (e: ClipboardEvent) => {
+    // Block clipboard copy/cut
+    const copy = (e: ClipboardEvent) => {
       e.preventDefault();
-      if (e.clipboardData) {
-        e.clipboardData.setData("text/plain", "⚠ Copying is disabled for copyrighted content.");
-      }
+      e.clipboardData?.setData("text/plain", "⚠ Copying is disabled — GyandootNova copyrighted content.");
     };
-    document.addEventListener("copy", handler);
-    return () => document.removeEventListener("copy", handler);
-  }, []);
+    const cut = (e: ClipboardEvent) => e.preventDefault();
+    // Block drag
+    const drag = (e: DragEvent) => e.preventDefault();
 
-  // Prevent clipboard cut
-  useEffect(() => {
-    const handler = (e: ClipboardEvent) => {
-      e.preventDefault();
-    };
-    document.addEventListener("cut", handler);
-    return () => document.removeEventListener("cut", handler);
-  }, []);
+    document.addEventListener("contextmenu", ctx);
+    document.addEventListener("keydown", key);
+    document.addEventListener("copy", copy);
+    document.addEventListener("cut", cut);
+    document.addEventListener("dragstart", drag);
+    document.addEventListener("drop", drag);
 
-  // Block drag & drop events
-  useEffect(() => {
-    const handler = (e: DragEvent) => {
-      e.preventDefault();
-    };
-    document.addEventListener("dragstart", handler);
-    document.addEventListener("drop", handler);
-    return () => {
-      document.removeEventListener("dragstart", handler);
-      document.removeEventListener("drop", handler);
-    };
-  }, []);
-
-  // Inject @media print CSS — hide content when printing
-  useEffect(() => {
+    // Print blocking via CSS
     const style = document.createElement("style");
     style.id = "anti-copy-print-block";
     style.innerHTML = `
       @media print {
         body * { visibility: hidden !important; }
         body::after {
-          content: "⚠ Printing is disabled for copyrighted content.";
+          content: "⚠ Printing is disabled — GyandootNova copyrighted content.";
           visibility: visible !important;
           position: fixed; top: 50%; left: 50%;
           transform: translate(-50%, -50%);
@@ -137,32 +54,18 @@ export function useAntiCopy() {
           white-space: nowrap;
         }
       }
-      body {
-        -webkit-user-select: none !important;
-        -moz-user-select: none !important;
-        -ms-user-select: none !important;
-        user-select: none !important;
-      }
+      img, video { -webkit-user-drag: none; user-drag: none; }
     `;
     document.head.appendChild(style);
-    return () => { document.getElementById("anti-copy-print-block")?.remove(); };
-  }, []);
 
-  // DevTools detection — blur if devtools opens
-  useEffect(() => {
-    const threshold = 160;
-    const check = () => {
-      const widthDiff = window.outerWidth - window.innerWidth > threshold;
-      const heightDiff = window.outerHeight - window.innerHeight > threshold;
-      if (widthDiff || heightDiff) {
-        document.body.style.filter = "blur(30px)";
-      } else {
-        if (document.body.style.filter.includes("blur(30")) {
-          document.body.style.filter = "none";
-        }
-      }
+    return () => {
+      document.removeEventListener("contextmenu", ctx);
+      document.removeEventListener("keydown", key);
+      document.removeEventListener("copy", copy);
+      document.removeEventListener("cut", cut);
+      document.removeEventListener("dragstart", drag);
+      document.removeEventListener("drop", drag);
+      style.remove();
     };
-    const id = setInterval(check, 1000);
-    return () => clearInterval(id);
   }, []);
 }

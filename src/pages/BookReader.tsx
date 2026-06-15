@@ -110,11 +110,15 @@ const BookReader = () => {
     queryKey: ["all-chapters", book?.id],
     queryFn: async () => {
       const { data } = await supabase
-        .from("book_chapters").select("*").eq("book_id", book!.id).order("chapter_number");
+        .from("book_chapters")
+        .select("id, book_id, title, slug, chapter_number, is_preview, created_at, updated_at")
+        .eq("book_id", book!.id)
+        .order("chapter_number");
       return data ?? [];
     },
     enabled: !!book?.id,
   });
+
 
   const { data: hasPurchased } = useQuery({
     queryKey: ["purchase-check", book?.id, user?.id],
@@ -126,6 +130,20 @@ const BookReader = () => {
   });
 
   const chapter = chapters?.find((c) => c.slug === chapterSlug);
+
+  // Securely fetch chapter content via RPC (enforces access server-side)
+  const { data: chapterContent, isLoading: contentLoading, error: contentError } = useQuery({
+    queryKey: ["chapter-content", chapter?.id, user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_chapter_content", { _chapter_id: chapter!.id });
+      if (error) throw error;
+      // RPC returns TABLE(content text) → array with one row
+      const row = Array.isArray(data) ? data[0] : data;
+      return (row?.content ?? "") as string;
+    },
+    enabled: !!chapter?.id,
+    retry: false,
+  });
   const currentIndex = chapters?.findIndex((c) => c.slug === chapterSlug) ?? -1;
   const prevChapter = currentIndex > 0 ? chapters?.[currentIndex - 1] : null;
   const nextChapter = chapters && currentIndex < chapters.length - 1 ? chapters[currentIndex + 1] : null;
@@ -487,7 +505,15 @@ const BookReader = () => {
     );
   }
 
-  const rawContent = chapter.content ?? "";
+  if (contentLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  const rawContent = (chapterContent ?? "") as string;
   // Detect if content is HTML (from RichTextEditor) — render via dangerouslySetInnerHTML
   const isHtmlContent = /<\/?(p|div|span|strong|em|br|h[1-6]|ul|ol|li|blockquote|img|a)\b/i.test(rawContent);
   const paragraphs = isHtmlContent ? [] : rawContent.split("\n");

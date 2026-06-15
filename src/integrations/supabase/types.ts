@@ -885,6 +885,12 @@ export type Database = {
             Args: { _book_id?: string; _code: string; _order_amount: number }
             Returns: Json
           }
+      get_chapter_content: {
+        Args: { _chapter_id: string }
+        Returns: {
+          content: string
+        }[]
+      }
       get_user_donations: {
         Args: { _user_id: string }
         Returns: {

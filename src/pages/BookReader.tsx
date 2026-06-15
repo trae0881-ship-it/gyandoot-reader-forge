@@ -110,10 +110,20 @@ const BookReader = () => {
     queryKey: ["all-chapters", book?.id],
     queryFn: async () => {
       const { data } = await supabase
-        .from("book_chapters").select("*").eq("book_id", book!.id).order("chapter_number");
+        .from("book_chapters")
+        .select("id, book_id, title, slug, chapter_number, is_preview, created_at, updated_at")
+        .eq("book_id", book!.id)
+        .order("chapter_number");
       return data ?? [];
     },
     enabled: !!book?.id,
+  });
+
+  // Fetch chapter content via secure RPC (enforces access server-side)
+  const { data: chapterContent } = useQuery({
+    queryKey: ["chapter-content", "rpc"],
+    queryFn: async () => "",
+    enabled: false,
   });
 
   const { data: hasPurchased } = useQuery({

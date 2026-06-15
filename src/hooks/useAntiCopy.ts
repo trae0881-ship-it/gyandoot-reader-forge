@@ -12,6 +12,11 @@ export function useAntiCopy() {
     };
 
     const block = (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    const blockIfNotEditing = (e: Event) => {
       if (isEditable(e.target)) return;
       e.preventDefault();
       e.stopPropagation();
@@ -19,10 +24,11 @@ export function useAntiCopy() {
 
     const key = (e: KeyboardEvent) => {
       const k = e.key.toLowerCase();
-      const blockedCombo = (e.ctrlKey || e.metaKey) && ["a", "c", "x", "s", "p", "u"].includes(k);
+      const blockedAlways = (e.ctrlKey || e.metaKey) && ["c", "x", "s", "p", "u"].includes(k);
+      const blockedSelectAll = !isEditable(e.target) && (e.ctrlKey || e.metaKey) && k === "a";
       const blockedDevTools = (e.ctrlKey || e.metaKey) && e.shiftKey && ["c", "i", "j", "s"].includes(k);
 
-      if (!isEditable(e.target) && (blockedCombo || blockedDevTools || k === "f12" || k === "printscreen")) {
+      if (blockedAlways || blockedSelectAll || blockedDevTools || k === "f12" || k === "printscreen") {
         e.preventDefault();
         e.stopPropagation();
         if (k === "printscreen") {
@@ -56,7 +62,7 @@ export function useAntiCopy() {
     const clearSelection = () => window.getSelection()?.removeAllRanges();
 
     document.addEventListener("contextmenu", block, true);
-    document.addEventListener("selectstart", block, true);
+    document.addEventListener("selectstart", blockIfNotEditing, true);
     document.addEventListener("dragstart", block, true);
     document.addEventListener("drop", block, true);
     document.addEventListener("keydown", key, true);
@@ -70,6 +76,12 @@ export function useAntiCopy() {
     document.addEventListener("visibilitychange", onVisibility, true);
     window.addEventListener("blur", blurOn, true);
     window.addEventListener("focus", blurOff, true);
+
+    const watermark = document.createElement("div");
+    watermark.id = "gyandoot-secure-watermark-grid";
+    watermark.setAttribute("aria-hidden", "true");
+    watermark.innerHTML = Array.from({ length: 90 }, () => "<span>GyandootNova • Protected</span>").join("");
+    document.body.appendChild(watermark);
 
     const style = document.createElement("style");
     style.id = "gyandoot-anti-copy-protection";
@@ -88,6 +100,25 @@ export function useAntiCopy() {
         -webkit-touch-callout: default !important;
       }
       img, video, canvas, svg { -webkit-user-drag: none !important; user-drag: none !important; }
+      #gyandoot-secure-watermark-grid {
+        position: fixed;
+        inset: -18vh -18vw;
+        z-index: 2147483647;
+        pointer-events: none;
+        display: grid;
+        grid-template-columns: repeat(6, minmax(180px, 1fr));
+        gap: 3rem 4rem;
+        transform: rotate(-24deg);
+        opacity: 0.22;
+        mix-blend-mode: multiply;
+      }
+      #gyandoot-secure-watermark-grid span {
+        color: hsl(var(--primary) / 0.65);
+        font: 800 clamp(0.78rem, 2.4vw, 1.45rem) Inter, system-ui, sans-serif;
+        letter-spacing: 0;
+        white-space: nowrap;
+        text-shadow: 0 0 1px hsl(var(--background) / 0.9);
+      }
       body::before {
         content: "";
         position: fixed;
@@ -124,6 +155,7 @@ export function useAntiCopy() {
         text-shadow: 0 0 1px hsl(var(--background) / 0.55);
       }
       html.anti-copy-obscured body > * { filter: blur(28px) !important; }
+      html.anti-copy-obscured #gyandoot-secure-watermark-grid { filter: none !important; opacity: 0.58; }
       @media print {
         body * { visibility: hidden !important; }
         body::after {
@@ -140,7 +172,7 @@ export function useAntiCopy() {
 
     return () => {
       document.removeEventListener("contextmenu", block, true);
-      document.removeEventListener("selectstart", block, true);
+      document.removeEventListener("selectstart", blockIfNotEditing, true);
       document.removeEventListener("dragstart", block, true);
       document.removeEventListener("drop", block, true);
       document.removeEventListener("keydown", key, true);
@@ -156,6 +188,7 @@ export function useAntiCopy() {
       window.removeEventListener("blur", blurOn, true);
       window.removeEventListener("focus", blurOff, true);
       document.documentElement.classList.remove("anti-copy-obscured");
+      watermark.remove();
       style.remove();
     };
   }, []);

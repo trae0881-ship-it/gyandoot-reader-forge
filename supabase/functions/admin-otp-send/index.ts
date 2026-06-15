@@ -34,12 +34,30 @@ serve(async (req) => {
     const { data: isAdmin } = await admin.rpc("has_role", { _user_id: user.id, _role: "admin" });
     if (!isAdmin) return new Response(JSON.stringify({ error: "Not an admin" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-    // Generate 6-digit OTP
+    // If a still-valid OTP exists, reuse it (don't send a new email)
+    const { data: existing } = await admin
+      .from("admin_otps")
+      .select("id, expires_at")
+      .eq("user_id", user.id)
+      .eq("used", false)
+      .gt("expires_at", new Date().toISOString())
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (existing) {
+      return new Response(
+        JSON.stringify({ success: true, reused: true, expires_at: existing.expires_at }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // Generate 6-digit OTP (valid 5 minutes)
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const code_hash = await sha256(code);
-    const expires_at = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+    const expires_at = new Date(Date.now() + 5 * 60 * 1000).toISOString();
 
-    // Invalidate previous unused OTPs
+    // Invalidate any older unused OTPs
     await admin.from("admin_otps").update({ used: true }).eq("user_id", user.id).eq("used", false);
 
     const { error: insErr } = await admin.from("admin_otps").insert({
@@ -53,7 +71,7 @@ serve(async (req) => {
         <div style="padding:32px;text-align:center">
           <p style="color:#333;font-size:15px">Aapka admin login OTP code:</p>
           <div style="font-size:36px;letter-spacing:10px;font-weight:700;color:#B71C1C;margin:24px 0;background:#fff;padding:18px;border-radius:8px;border:1px dashed #B71C1C">${code}</div>
-          <p style="color:#666;font-size:13px">Yeh code 10 minutes ke liye valid hai. Agar aapne login attempt nahi kiya to is email ko ignore karein.</p>
+          <p style="color:#666;font-size:13px">Yeh code 5 minutes ke liye valid hai. Agar aapne login attempt nahi kiya to is email ko ignore karein.</p>
           <p style="color:#aaa;font-size:11px;margin-top:24px">GyandootNova Admin Security</p>
         </div>
       </div>`;

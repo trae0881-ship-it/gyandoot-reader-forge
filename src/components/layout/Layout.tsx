@@ -3,12 +3,10 @@ import Footer from "./Footer";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import { useReferralCapture } from "@/hooks/useReferral";
 import { useCustomScripts } from "@/hooks/useCustomScripts";
-import { useAntiCopy } from "@/hooks/useAntiCopy";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   useReferralCapture();
   useCustomScripts();
-  useAntiCopy();
   
   return (
     <div className="flex min-h-screen flex-col">

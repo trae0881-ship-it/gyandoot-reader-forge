@@ -1,70 +1,125 @@
 import { useEffect } from "react";
 
 /**
- * Anti-copy protection. NOTE: JavaScript cannot prevent OS-level or hardware
- * screenshots (mobile Power+Volume, Win+PrtScr, macOS Cmd+Shift+3/4, screen
- * recording apps). It can only deter casual copying in-browser.
+ * Anti-copy protection. Browsers cannot fully block OS-level screenshots,
+ * but this prevents in-browser copy/print/save/select and adds a watermark.
  */
 export function useAntiCopy() {
   useEffect(() => {
-    // Right-click
-    const ctx = (e: MouseEvent) => e.preventDefault();
-    // Keyboard shortcuts
+    const isEditable = (target: EventTarget | null) => {
+      const el = target as HTMLElement | null;
+      return !!el?.closest?.("input, textarea, [contenteditable='true'], [data-allow-copy='true']");
+    };
+
+    const block = (e: Event) => {
+      if (isEditable(e.target)) return;
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
     const key = (e: KeyboardEvent) => {
       const k = e.key.toLowerCase();
-      if ((e.ctrlKey || e.metaKey) && ["s", "p", "c", "x", "u"].includes(k)) {
+      const blockedCombo = (e.ctrlKey || e.metaKey) && ["a", "c", "x", "s", "p", "u"].includes(k);
+      const blockedDevTools = (e.ctrlKey || e.metaKey) && e.shiftKey && ["c", "i", "j", "s"].includes(k);
+
+      if (!isEditable(e.target) && (blockedCombo || blockedDevTools || k === "f12" || k === "printscreen")) {
         e.preventDefault();
-      }
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && ["i", "j", "c", "s"].includes(k)) {
-        e.preventDefault();
-      }
-      if (k === "f12" || k === "printscreen") {
-        e.preventDefault();
-        try { navigator.clipboard?.writeText("⚠ Copying is disabled — GyandootNova copyrighted content."); } catch {}
+        e.stopPropagation();
+        if (k === "printscreen") {
+          try { navigator.clipboard?.writeText("Copying is disabled — GyandootNova copyrighted content."); } catch {}
+        }
       }
     };
-    // Block clipboard copy/cut
+
     const copy = (e: ClipboardEvent) => {
       e.preventDefault();
-      e.clipboardData?.setData("text/plain", "⚠ Copying is disabled — GyandootNova copyrighted content.");
+      e.stopPropagation();
+      e.clipboardData?.setData("text/plain", "Copying is disabled — GyandootNova copyrighted content.");
     };
-    const cut = (e: ClipboardEvent) => e.preventDefault();
-    // Block drag
-    const drag = (e: DragEvent) => e.preventDefault();
 
-    document.addEventListener("contextmenu", ctx);
-    document.addEventListener("keydown", key);
-    document.addEventListener("copy", copy);
-    document.addEventListener("cut", cut);
-    document.addEventListener("dragstart", drag);
-    document.addEventListener("drop", drag);
+    const blurOn = () => document.documentElement.classList.add("anti-copy-obscured");
+    const blurOff = () => document.documentElement.classList.remove("anti-copy-obscured");
+    const onVisibility = () => document.hidden ? blurOn() : blurOff();
 
-    // Print blocking via CSS
+    document.addEventListener("contextmenu", block, true);
+    document.addEventListener("selectstart", block, true);
+    document.addEventListener("dragstart", block, true);
+    document.addEventListener("drop", block, true);
+    document.addEventListener("keydown", key, true);
+    document.addEventListener("copy", copy, true);
+    document.addEventListener("cut", copy, true);
+    document.addEventListener("visibilitychange", onVisibility, true);
+    window.addEventListener("blur", blurOn, true);
+    window.addEventListener("focus", blurOff, true);
+
     const style = document.createElement("style");
-    style.id = "anti-copy-print-block";
+    style.id = "gyandoot-anti-copy-protection";
     style.innerHTML = `
+      html, body, #root { -webkit-user-select: none !important; user-select: none !important; }
+      input, textarea, [contenteditable='true'], [data-allow-copy='true'] { -webkit-user-select: text !important; user-select: text !important; }
+      img, video, canvas, svg { -webkit-user-drag: none !important; user-drag: none !important; }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 2147483646;
+        pointer-events: none;
+        background-image: repeating-linear-gradient(
+          -24deg,
+          transparent 0 44px,
+          hsl(var(--primary) / 0.16) 45px 46px,
+          transparent 47px 96px
+        );
+        opacity: 0.95;
+        mix-blend-mode: multiply;
+      }
+      body::after {
+        content: "GyandootNova • Protected";
+        position: fixed;
+        left: -20vw;
+        top: 0;
+        z-index: 2147483647;
+        pointer-events: none;
+        width: 140vw;
+        height: 100vh;
+        color: hsl(var(--foreground) / 0.16);
+        font-size: clamp(1rem, 4.5vw, 3rem);
+        font-weight: 800;
+        line-height: 4.2;
+        letter-spacing: 0;
+        white-space: pre-wrap;
+        transform: rotate(-24deg);
+        text-align: center;
+        word-spacing: 3rem;
+        text-shadow: 0 0 1px hsl(var(--background) / 0.55);
+      }
+      html.anti-copy-obscured body > * { filter: blur(28px) !important; }
       @media print {
         body * { visibility: hidden !important; }
         body::after {
-          content: "⚠ Printing is disabled — GyandootNova copyrighted content.";
+          content: "Printing is disabled — GyandootNova copyrighted content.";
           visibility: visible !important;
           position: fixed; top: 50%; left: 50%;
           transform: translate(-50%, -50%);
-          font-size: 24px; font-weight: bold; color: #B71C1C;
-          white-space: nowrap;
+          font-size: 24px; font-weight: bold; color: hsl(var(--primary));
+          white-space: normal; text-align: center; width: min(90vw, 720px);
         }
       }
-      img, video { -webkit-user-drag: none; user-drag: none; }
     `;
     document.head.appendChild(style);
 
     return () => {
-      document.removeEventListener("contextmenu", ctx);
-      document.removeEventListener("keydown", key);
-      document.removeEventListener("copy", copy);
-      document.removeEventListener("cut", cut);
-      document.removeEventListener("dragstart", drag);
-      document.removeEventListener("drop", drag);
+      document.removeEventListener("contextmenu", block, true);
+      document.removeEventListener("selectstart", block, true);
+      document.removeEventListener("dragstart", block, true);
+      document.removeEventListener("drop", block, true);
+      document.removeEventListener("keydown", key, true);
+      document.removeEventListener("copy", copy, true);
+      document.removeEventListener("cut", copy, true);
+      document.removeEventListener("visibilitychange", onVisibility, true);
+      window.removeEventListener("blur", blurOn, true);
+      window.removeEventListener("focus", blurOff, true);
+      document.documentElement.classList.remove("anti-copy-obscured");
       style.remove();
     };
   }, []);

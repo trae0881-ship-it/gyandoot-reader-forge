@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { useAntiCopy } from "@/hooks/useAntiCopy";
 import { lazy, Suspense } from "react";
 
 // Only eagerly load the homepage
@@ -57,61 +58,67 @@ const PageLoader = () => (
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AuthProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/books" element={<Books />} />
-              <Route path="/books/:slug" element={<BookDetail />} />
-              <Route path="/books/:slug/read-file" element={<FileBookReader />} />
-              <Route path="/books/:slug/:chapterSlug" element={<BookReader />} />
-              <Route path="/articles" element={<Articles />} />
-              <Route path="/articles/:slug" element={<ArticleDetail />} />
-              <Route path="/support-us" element={<Donate />} />
-              <Route path="/donate" element={<Donate />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/services" element={<Services />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/faq" element={<FAQ />} />
-              <Route path="/testimonials" element={<TestimonialsPage />} />
-              <Route path="/portfolio" element={<Portfolio />} />
-              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-              <Route path="/terms-conditions" element={<TermsConditions />} />
-              <Route path="/careers" element={<Careers />} />
-              <Route path="/support" element={<Support />} />
-              <Route path="/refund-policy" element={<RefundPolicy />} />
-              <Route path="/shipping-policy" element={<ShippingPolicy />} />
-              <Route path="/sitemap" element={<SitemapPage />} />
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route index element={<AdminDashboard />} />
-                <Route path="users" element={<AdminUsers />} />
-                <Route path="books" element={<AdminBooks />} />
-                <Route path="posts" element={<AdminPosts />} />
-                <Route path="coupons" element={<AdminCoupons />} />
-                <Route path="donations" element={<AdminDonations />} />
-                <Route path="purchases" element={<AdminPurchases />} />
-                <Route path="referrals" element={<AdminReferrals />} />
-                <Route path="ai" element={<AdminAI />} />
-                <Route path="scripts" element={<AdminScripts />} />
-                <Route path="auth-providers" element={<AdminAuthProviders />} />
-                <Route path="settings" element={<AdminSettings />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </BrowserRouter>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const AppContent = () => {
+  useAntiCopy();
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AuthProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/books" element={<Books />} />
+                <Route path="/books/:slug" element={<BookDetail />} />
+                <Route path="/books/:slug/read-file" element={<FileBookReader />} />
+                <Route path="/books/:slug/:chapterSlug" element={<BookReader />} />
+                <Route path="/articles" element={<Articles />} />
+                <Route path="/articles/:slug" element={<ArticleDetail />} />
+                <Route path="/support-us" element={<Donate />} />
+                <Route path="/donate" element={<Donate />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/services" element={<Services />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/faq" element={<FAQ />} />
+                <Route path="/testimonials" element={<TestimonialsPage />} />
+                <Route path="/portfolio" element={<Portfolio />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/terms-conditions" element={<TermsConditions />} />
+                <Route path="/careers" element={<Careers />} />
+                <Route path="/support" element={<Support />} />
+                <Route path="/refund-policy" element={<RefundPolicy />} />
+                <Route path="/shipping-policy" element={<ShippingPolicy />} />
+                <Route path="/sitemap" element={<SitemapPage />} />
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="users" element={<AdminUsers />} />
+                  <Route path="books" element={<AdminBooks />} />
+                  <Route path="posts" element={<AdminPosts />} />
+                  <Route path="coupons" element={<AdminCoupons />} />
+                  <Route path="donations" element={<AdminDonations />} />
+                  <Route path="purchases" element={<AdminPurchases />} />
+                  <Route path="referrals" element={<AdminReferrals />} />
+                  <Route path="ai" element={<AdminAI />} />
+                  <Route path="scripts" element={<AdminScripts />} />
+                  <Route path="auth-providers" element={<AdminAuthProviders />} />
+                  <Route path="settings" element={<AdminSettings />} />
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
+
+const App = () => <AppContent />;
 
 export default App;

@@ -37,9 +37,23 @@ export function useAntiCopy() {
       e.clipboardData?.setData("text/plain", "Copying is disabled — GyandootNova copyrighted content.");
     };
 
+    let longPressTimer: ReturnType<typeof setTimeout> | null = null;
+    const clearLongPress = () => {
+      if (longPressTimer) window.clearTimeout(longPressTimer);
+      longPressTimer = null;
+    };
+    const touchStart = (e: TouchEvent) => {
+      if (isEditable(e.target)) return;
+      clearLongPress();
+      longPressTimer = setTimeout(() => {
+        window.getSelection()?.removeAllRanges();
+      }, 180);
+    };
+
     const blurOn = () => document.documentElement.classList.add("anti-copy-obscured");
     const blurOff = () => document.documentElement.classList.remove("anti-copy-obscured");
     const onVisibility = () => document.hidden ? blurOn() : blurOff();
+    const clearSelection = () => window.getSelection()?.removeAllRanges();
 
     document.addEventListener("contextmenu", block, true);
     document.addEventListener("selectstart", block, true);
@@ -48,6 +62,11 @@ export function useAntiCopy() {
     document.addEventListener("keydown", key, true);
     document.addEventListener("copy", copy, true);
     document.addEventListener("cut", copy, true);
+    document.addEventListener("paste", block, true);
+    document.addEventListener("touchstart", touchStart, { capture: true, passive: true });
+    document.addEventListener("touchend", clearLongPress, true);
+    document.addEventListener("touchcancel", clearLongPress, true);
+    document.addEventListener("selectionchange", clearSelection, true);
     document.addEventListener("visibilitychange", onVisibility, true);
     window.addEventListener("blur", blurOn, true);
     window.addEventListener("focus", blurOff, true);
@@ -55,8 +74,19 @@ export function useAntiCopy() {
     const style = document.createElement("style");
     style.id = "gyandoot-anti-copy-protection";
     style.innerHTML = `
-      html, body, #root { -webkit-user-select: none !important; user-select: none !important; }
-      input, textarea, [contenteditable='true'], [data-allow-copy='true'] { -webkit-user-select: text !important; user-select: text !important; }
+      *, *::before, *::after {
+        -webkit-user-select: none !important;
+        -moz-user-select: none !important;
+        user-select: none !important;
+        -webkit-touch-callout: none !important;
+      }
+      *::selection { background: transparent !important; color: inherit !important; }
+      input, textarea, [contenteditable='true'], [data-allow-copy='true'] {
+        -webkit-user-select: text !important;
+        -moz-user-select: text !important;
+        user-select: text !important;
+        -webkit-touch-callout: default !important;
+      }
       img, video, canvas, svg { -webkit-user-drag: none !important; user-drag: none !important; }
       body::before {
         content: "";
@@ -116,7 +146,13 @@ export function useAntiCopy() {
       document.removeEventListener("keydown", key, true);
       document.removeEventListener("copy", copy, true);
       document.removeEventListener("cut", copy, true);
+      document.removeEventListener("paste", block, true);
+      document.removeEventListener("touchstart", touchStart, true);
+      document.removeEventListener("touchend", clearLongPress, true);
+      document.removeEventListener("touchcancel", clearLongPress, true);
+      document.removeEventListener("selectionchange", clearSelection, true);
       document.removeEventListener("visibilitychange", onVisibility, true);
+      clearLongPress();
       window.removeEventListener("blur", blurOn, true);
       window.removeEventListener("focus", blurOff, true);
       document.documentElement.classList.remove("anti-copy-obscured");

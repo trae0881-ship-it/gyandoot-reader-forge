@@ -505,7 +505,15 @@ const BookReader = () => {
     );
   }
 
-  const rawContent = chapter.content ?? "";
+  if (contentLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  const rawContent = (chapterContent ?? "") as string;
   // Detect if content is HTML (from RichTextEditor) — render via dangerouslySetInnerHTML
   const isHtmlContent = /<\/?(p|div|span|strong|em|br|h[1-6]|ul|ol|li|blockquote|img|a)\b/i.test(rawContent);
   const paragraphs = isHtmlContent ? [] : rawContent.split("\n");

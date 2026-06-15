@@ -34,12 +34,30 @@ serve(async (req) => {
     const { data: isAdmin } = await admin.rpc("has_role", { _user_id: user.id, _role: "admin" });
     if (!isAdmin) return new Response(JSON.stringify({ error: "Not an admin" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
-    // Generate 6-digit OTP
+    // If a still-valid OTP exists, reuse it (don't send a new email)
+    const { data: existing } = await admin
+      .from("admin_otps")
+      .select("id, expires_at")
+      .eq("user_id", user.id)
+      .eq("used", false)
+      .gt("expires_at", new Date().toISOString())
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (existing) {
+      return new Response(
+        JSON.stringify({ success: true, reused: true, expires_at: existing.expires_at }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // Generate 6-digit OTP (valid 5 minutes)
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const code_hash = await sha256(code);
-    const expires_at = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+    const expires_at = new Date(Date.now() + 5 * 60 * 1000).toISOString();
 
-    // Invalidate previous unused OTPs
+    // Invalidate any older unused OTPs
     await admin.from("admin_otps").update({ used: true }).eq("user_id", user.id).eq("used", false);
 
     const { error: insErr } = await admin.from("admin_otps").insert({

@@ -59,18 +59,39 @@ export function useAntiCopy() {
       input, textarea, [contenteditable='true'], [data-allow-copy='true'] { -webkit-user-select: text !important; user-select: text !important; }
       img, video, canvas, svg { -webkit-user-drag: none !important; user-drag: none !important; }
       body::before {
-        content: "GyandootNova • Protected";
+        content: "";
         position: fixed;
         inset: 0;
         z-index: 2147483646;
         pointer-events: none;
-        display: grid;
-        place-items: center;
-        color: hsl(var(--primary) / 0.12);
-        font-size: clamp(1.5rem, 6vw, 4.5rem);
+        background-image: repeating-linear-gradient(
+          -24deg,
+          transparent 0 44px,
+          hsl(var(--primary) / 0.16) 45px 46px,
+          transparent 47px 96px
+        );
+        opacity: 0.95;
+        mix-blend-mode: multiply;
+      }
+      body::after {
+        content: "GyandootNova • Protected";
+        position: fixed;
+        left: -20vw;
+        top: 0;
+        z-index: 2147483647;
+        pointer-events: none;
+        width: 140vw;
+        height: 100vh;
+        color: hsl(var(--foreground) / 0.16);
+        font-size: clamp(1rem, 4.5vw, 3rem);
         font-weight: 800;
-        transform: rotate(-22deg);
+        line-height: 4.2;
+        letter-spacing: 0;
+        white-space: pre-wrap;
+        transform: rotate(-24deg);
         text-align: center;
+        word-spacing: 3rem;
+        text-shadow: 0 0 1px hsl(var(--background) / 0.55);
       }
       html.anti-copy-obscured body > * { filter: blur(28px) !important; }
       @media print {

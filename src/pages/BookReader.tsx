@@ -363,23 +363,6 @@ const BookReader = () => {
     setSelectionInfo(null);
   };
 
-  const copySelectedText = () => {
-    if (!selectionInfo) return;
-    navigator.clipboard.writeText(selectionInfo.text);
-    toast({ title: "Copied!", description: "Text copied to clipboard." });
-    window.getSelection()?.removeAllRanges();
-    setShowHighlightBar(false);
-    setSelectionInfo(null);
-  };
-
-  const searchMeaning = () => {
-    if (!selectionInfo) return;
-    const query = encodeURIComponent(selectionInfo.text.slice(0, 100) + " meaning in Hindi");
-    window.open(`https://www.google.com/search?q=${query}`, "_blank");
-    setShowHighlightBar(false);
-    setSelectionInfo(null);
-  };
-
   /* ─── Render paragraph with highlights ────────────────────────────── */
   const renderParagraph = (text: string, idx: number) => {
     const paraHighlights = highlights.filter((h) => h.paragraph_index === idx);

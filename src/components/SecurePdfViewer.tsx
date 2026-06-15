@@ -149,22 +149,7 @@ const SecurePdfViewer = ({ url, title, darkMode, initialPage, onPageChange }: Se
 
       await page.render({ canvasContext: ctx, viewport }).promise;
 
-      const textContent = await page.getTextContent();
-      (textContent.items as any[]).forEach((item) => {
-        if (!item.str) return;
-        const tx = pdfjsLib.Util.transform(viewport.transform, item.transform);
-        const span = document.createElement("span");
-        span.textContent = item.str;
-        span.style.position = "absolute";
-        span.style.left = `${tx[4]}px`;
-        span.style.top = `${tx[5] - item.height * scale}px`;
-        span.style.fontSize = `${item.height * scale}px`;
-        span.style.fontFamily = item.fontName || "sans-serif";
-        span.style.color = "transparent";
-        span.style.whiteSpace = "pre";
-        span.style.transformOrigin = "0% 0%";
-        textLayerDiv.appendChild(span);
-      });
+      textLayerDiv.textContent = "";
 
       drawHighlights(pageNum);
     } catch (err) {
@@ -204,32 +189,7 @@ const SecurePdfViewer = ({ url, title, darkMode, initialPage, onPageChange }: Se
     drawHighlights(currentPage);
   }, [highlights, currentPage, drawHighlights]);
 
-  // Highlight on text selection
-  const handleMouseUp = useCallback(() => {
-    if (!highlightMode) return;
-    const selection = window.getSelection();
-    if (!selection || selection.isCollapsed) return;
-    const range = selection.getRangeAt(0);
-    const rects = range.getClientRects();
-    const textLayerDiv = textLayerRef.current;
-    if (!textLayerDiv || rects.length === 0) return;
-
-    const containerRect = textLayerDiv.getBoundingClientRect();
-    const highlightRects: Highlight["rects"] = [];
-    for (let i = 0; i < rects.length; i++) {
-      const r = rects[i];
-      highlightRects.push({
-        x: r.left - containerRect.left,
-        y: r.top - containerRect.top,
-        w: r.width,
-        h: r.height,
-      });
-    }
-    if (highlightRects.length > 0) {
-      setHighlights((prev) => [...prev, { page: currentPage, rects: highlightRects, color: highlightColor }]);
-    }
-    selection.removeAllRanges();
-  }, [highlightMode, highlightColor, currentPage]);
+  // PDF is rendered canvas-only; no text layer is exposed for copy/select.
 
   // Touch swipe for page navigation
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -385,31 +345,11 @@ const SecurePdfViewer = ({ url, title, darkMode, initialPage, onPageChange }: Se
         </div>
       </div>
 
-      {/* Highlight color picker - shown below toolbar when active */}
-      {highlightMode && (
-        <div className={`w-full flex items-center justify-center gap-2 py-1.5 rounded-b-lg border-x border-b ${
-          darkMode ? "border-gray-700 bg-gray-800/90" : "border-border bg-muted/90"
-        }`}>
-          <span className="text-[10px] text-muted-foreground mr-1">Color:</span>
-          {HIGHLIGHT_COLORS.map((color) => (
-            <button
-              key={color}
-              className={`h-6 w-6 rounded-full border-2 transition-all ${
-                highlightColor === color ? "border-foreground scale-125 shadow-md" : "border-transparent"
-              }`}
-              style={{ backgroundColor: color }}
-              onClick={() => setHighlightColor(color)}
-            />
-          ))}
-        </div>
-      )}
-
       {/* PDF Canvas area with touch support */}
       <div
         ref={scrollContainerRef}
         className="relative overflow-auto w-full flex justify-center mt-2"
         style={{ maxHeight: "calc(100vh - 110px)" }}
-        onMouseUp={handleMouseUp}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
@@ -432,8 +372,9 @@ const SecurePdfViewer = ({ url, title, darkMode, initialPage, onPageChange }: Se
             className="absolute top-0 left-0"
             style={{
               cursor: highlightMode ? "text" : "default",
-              userSelect: highlightMode ? "text" : "none",
-              WebkitUserSelect: highlightMode ? "text" : "none",
+              pointerEvents: "none",
+              userSelect: "none",
+              WebkitUserSelect: "none",
             }}
           />
         </div>

@@ -58,11 +58,15 @@ serve(async (req) => {
 
     await admin.from("admin_otps").update({ used: true }).eq("id", otp.id);
 
-    // Issue a short-lived token (signed) tied to user id
-    const token = crypto.randomUUID();
-    // Store verification in a simple way: reuse admin_otps row marker? Use a separate signal via JWT-less approach
-    // For simplicity: return a token + expiry; client stores in sessionStorage and re-verifies via has_role on backend each admin action (existing).
-    return new Response(JSON.stringify({ success: true, token, expires_at: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString() }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    // Record a server-side verified admin session so edge functions can
+    // enforce the 2FA gate, not just the browser UI.
+    const expires_at = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString();
+    await admin.from("admin_otp_sessions")
+      .delete().lt("expires_at", new Date().toISOString());
+    await admin.from("admin_otp_sessions")
+      .insert({ user_id: user.id, expires_at });
+
+    return new Response(JSON.stringify({ success: true, expires_at }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
     return new Response(JSON.stringify({ error: (e as Error).message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }

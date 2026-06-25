@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_otp_sessions: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       admin_otps: {
         Row: {
           attempts: number
@@ -784,18 +805,21 @@ export type Database = {
       settings: {
         Row: {
           id: string
+          is_public: boolean
           key: string
           updated_at: string
           value: string | null
         }
         Insert: {
           id?: string
+          is_public?: boolean
           key: string
           updated_at?: string
           value?: string | null
         }
         Update: {
           id?: string
+          is_public?: boolean
           key?: string
           updated_at?: string
           value?: string | null
@@ -930,6 +954,7 @@ export type Database = {
         Args: { _book_id: string }
         Returns: undefined
       }
+      is_admin_otp_verified: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user"

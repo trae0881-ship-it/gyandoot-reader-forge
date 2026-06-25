@@ -31,6 +31,15 @@ Deno.serve(async (req) => {
   const { data: isAdmin } = await supabaseAdmin.rpc("has_role", { _user_id: user.id, _role: "admin" });
   if (!isAdmin) return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: corsHeaders });
 
+  // Require a server-recorded admin OTP session (2FA).
+  const { data: otpOk } = await supabaseAdmin.rpc("is_admin_otp_verified", { _user_id: user.id });
+  if (!otpOk) {
+    return new Response(JSON.stringify({ error: "Admin 2FA verification required" }), {
+      status: 403,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const { emails, coupon_code, discount_label, description, message } = await req.json();
 

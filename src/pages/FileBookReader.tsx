@@ -7,6 +7,7 @@ import { ArrowLeft, Loader2, BookOpen, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import SecurePdfViewer from "@/components/SecurePdfViewer";
+import { useAntiCopy } from "@/hooks/useAntiCopy";
 import logoImg from "@/assets/logo.jpeg";
 
 const FileBookReader = () => {

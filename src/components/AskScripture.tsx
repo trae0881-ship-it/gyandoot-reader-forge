@@ -1,9 +1,17 @@
 import { useState, useRef, useEffect } from "react";
+import DOMPurify from "dompurify";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { X, Send, Loader2, BookOpen, Sparkles } from "lucide-react";
+
+// Strict sanitizer: allow only safe inline formatting, no scripts/styles/links.
+const sanitize = (html: string) =>
+  DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ["strong", "em", "b", "i", "br"],
+    ALLOWED_ATTR: [],
+  });
 
 interface Message {
   id: string;
@@ -98,14 +106,21 @@ const AskScripture = ({ bookId, bookTitle }: AskScriptureProps) => {
     }
   };
 
-  // Simple markdown-like formatting for AI responses
+  // Escape any raw HTML in the AI response, then apply our markdown-like
+  // formatting, then sanitize the result with DOMPurify before rendering.
+  const escapeHtml = (s: string) =>
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+
+  const formatLine = (line: string) => {
+    const escaped = escapeHtml(line);
+    const bolded = escaped.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+    const italicized = bolded.replace(/\*(.*?)\*/g, "<em>$1</em>");
+    return sanitize(italicized);
+  };
+
   const formatResponse = (text: string) => {
     return text.split("\n").map((line, i) => {
-      // Bold text
-      const formatted = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      // Italic
-      const formatted2 = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
-      
       if (line.startsWith("### ")) {
         return <h4 key={i} className="font-bold text-sm mt-2 mb-1">{line.slice(4)}</h4>;
       }
@@ -113,12 +128,12 @@ const AskScripture = ({ bookId, bookTitle }: AskScriptureProps) => {
         return <h3 key={i} className="font-bold text-base mt-2 mb-1">{line.slice(3)}</h3>;
       }
       if (line.startsWith("- ") || line.startsWith("• ")) {
-        return <li key={i} className="ml-3 list-disc" dangerouslySetInnerHTML={{ __html: formatted2.slice(2) }} />;
+        return <li key={i} className="ml-3 list-disc" dangerouslySetInnerHTML={{ __html: formatLine(line.slice(2)) }} />;
       }
       if (line.trim() === "") {
         return <br key={i} />;
       }
-      return <p key={i} className="mb-1" dangerouslySetInnerHTML={{ __html: formatted2 }} />;
+      return <p key={i} className="mb-1" dangerouslySetInnerHTML={{ __html: formatLine(line) }} />;
     });
   };
 

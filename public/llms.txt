@@ -1,0 +1,30 @@
+# GyandootNova
+
+> सनातन धर्म, वेद, उपनिषद, गीता, रामायण, महाभारत और हिंदू शास्त्रों का प्रामाणिक डिजिटल पुस्तकालय एवं AI-संचालित ज्ञान मंच।
+
+GyandootNova (gyandootnova.in) एक आध्यात्मिक प्रकाशन और डिजिटल रीडर प्लेटफ़ॉर्म है जो हिंदी और संस्कृत में प्रामाणिक हिंदू ग्रंथ, लेख, और AI सहायक प्रदान करता है। उपयोगकर्ता ऑनलाइन सुरक्षित रीडर में पुस्तकें पढ़ सकते हैं, धर्म-संबंधी प्रश्न पूछ सकते हैं, और आध्यात्मिक लेख देख सकते हैं।
+
+Key topics: Sanatan Dharma, Vedas, Upanishads, Bhagavad Gita, Ramayana, Mahabharata, Hindu philosophy, spirituality, dharma, yoga, meditation, Sanskrit scriptures, हिंदू धर्म ग्रंथ.
+
+## Pages
+- [Home](/): GyandootNova introduction and featured scriptures
+- [Books Library](/books): All available Hindu scriptures and spiritual books
+- [Articles](/articles): Spiritual articles on dharma, philosophy, and Hindu culture
+- [About Us](/about): Mission and vision of GyandootNova
+- [Testimonials](/testimonials): Reader experiences and reviews
+- [Contact](/contact): Get in touch with the GyandootNova team
+- [FAQ](/faq): Frequently asked questions
+- [Support](/support): Help and customer support
+- [Donate](/donate): Support the mission of preserving Sanatan Dharma
+- [Careers](/careers): Join the GyandootNova team
+- [Services](/services): Publishing and digital reading services
+- [Portfolio](/portfolio): Our published works
+
+## Policies
+- [Privacy Policy](/privacy-policy): How we handle user data
+- [Terms & Conditions](/terms-conditions): Usage terms
+- [Refund Policy](/refund-policy): Refund and cancellation terms
+- [Shipping Policy](/shipping-policy): Delivery information
+
+## Optional
+- [Sitemap](/sitemap): Full site navigation

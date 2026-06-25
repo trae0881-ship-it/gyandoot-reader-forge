@@ -11,6 +11,7 @@ import { useAntiCopy } from "@/hooks/useAntiCopy";
 import logoImg from "@/assets/logo.jpeg";
 
 const FileBookReader = () => {
+  useAntiCopy();
   const { slug } = useParams<{ slug: string }>();
   const { user, loading: authLoading } = useAuth();
   const [darkMode, setDarkMode] = useState(false);

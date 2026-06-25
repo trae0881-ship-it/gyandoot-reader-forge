@@ -13,6 +13,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import SecureTextCanvasReader from "@/components/SecureTextCanvasReader";
+import { useAntiCopy } from "@/hooks/useAntiCopy";
 
 /* ─── Types ─────────────────────────────────────────────────────────── */
 interface Highlight {
@@ -65,6 +66,7 @@ const getColorConfig = (color: string) =>
 
 /* ─── Main Component ─────────────────────────────────────────────────── */
 const BookReader = () => {
+  useAntiCopy();
   const { slug, chapterSlug } = useParams<{ slug: string; chapterSlug: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();

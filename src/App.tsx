@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
-import { useAntiCopy } from "@/hooks/useAntiCopy";
+
 import { lazy, Suspense } from "react";
 
 // Only eagerly load the homepage
@@ -59,7 +59,7 @@ const PageLoader = () => (
 const queryClient = new QueryClient();
 
 const AppContent = () => {
-  useAntiCopy();
+
 
   return (
     <QueryClientProvider client={queryClient}>

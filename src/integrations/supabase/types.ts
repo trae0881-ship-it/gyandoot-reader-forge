@@ -916,6 +916,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_get_book_file_url: { Args: { _book_id: string }; Returns: string }
       apply_coupon:
         | { Args: { _code: string; _order_amount: number }; Returns: Json }
         | {

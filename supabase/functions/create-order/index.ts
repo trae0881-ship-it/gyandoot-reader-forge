@@ -174,15 +174,14 @@ async function handleRazorpay(
       razorpay_order_id: order.id,
       status: "pending",
     };
-    // Store referrer_id if present and not self-referral
     if (referrer_id && referrer_id !== user.id) {
       purchaseData.referrer_id = referrer_id;
     }
+    // Persist the coupon so verify-payment can redeem it atomically AFTER success.
+    if (coupon_id) purchaseData.coupon_id = coupon_id;
     await supabase.from("purchases").insert(purchaseData);
-    // Increment coupon usage if applied
-    if (coupon_id) {
-      await supabase.rpc("increment_coupon_usage", { _coupon_id: coupon_id });
-    }
+    // NOTE: coupon usage is incremented ONLY after successful payment verification
+    // (see verify-payment) to prevent coupon exhaustion via abandoned orders.
   } else {
     await supabase.from("donations").insert({
       user_id: user?.id ?? null,

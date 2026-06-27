@@ -1,4 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { encryptApiKey, decryptApiKey } from "../_shared/crypto.ts";
+import { assertSafePublicHttpsUrl } from "../_shared/url-guard.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,28 +18,7 @@ function normalizeQuestion(q: string): string {
   return q.trim().replace(/\s+/g, " ").toLowerCase();
 }
 
-function decryptKey(encrypted: string): string {
-  const secret = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "fallback";
-  try {
-    const data = atob(encrypted);
-    let result = "";
-    for (let i = 0; i < data.length; i++) {
-      result += String.fromCharCode(data.charCodeAt(i) ^ secret.charCodeAt(i % secret.length));
-    }
-    return result;
-  } catch {
-    return encrypted;
-  }
-}
-
-function encryptKey(plain: string): string {
-  const secret = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "fallback";
-  let result = "";
-  for (let i = 0; i < plain.length; i++) {
-    result += String.fromCharCode(plain.charCodeAt(i) ^ secret.charCodeAt(i % secret.length));
-  }
-  return btoa(result);
-}
+// Legacy helpers replaced by AES-GCM in ../_shared/crypto.ts
 
 function getRelevantChunks(content: string, question: string, maxChars = 6000): string {
   if (!content || content.length <= maxChars) return content || "";

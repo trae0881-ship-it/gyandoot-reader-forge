@@ -142,19 +142,26 @@ Deno.serve(async (req) => {
       }
 
       try {
-        const testResponse = await callAI(provider_name, api_key, model_name, "You are a test assistant.", "Say 'OK' in one word.", base_url);
+        // For custom providers, validate base_url before any outbound fetch (SSRF guard)
+        let safeBaseUrl: string | null = null;
+        if (provider_name === "custom") {
+          if (!base_url) throw new Error("base_url is required for custom provider");
+          safeBaseUrl = assertSafePublicHttpsUrl(base_url).toString();
+        }
+        const testResponse = await callAI(provider_name, api_key, model_name, "You are a test assistant.", "Say 'OK' in one word.", safeBaseUrl ?? base_url);
         if (!testResponse) throw new Error("Empty response from AI");
-        const encrypted = encryptKey(api_key);
+        const encrypted = await encryptApiKey(api_key);
         await supabase.from("ai_settings").update({ is_active: false }).neq("id", "00000000-0000-0000-0000-000000000000");
         const { error } = await supabase.from("ai_settings").upsert({
-          provider_name, api_key_encrypted: encrypted, model_name, base_url: base_url || null, is_active: true,
+          provider_name, api_key_encrypted: encrypted, model_name, base_url: safeBaseUrl, is_active: true,
         }, { onConflict: "provider_name" });
         if (error) throw error;
         return new Response(JSON.stringify({ success: true, message: "API key verified and saved" }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       } catch (e) {
-        return new Response(JSON.stringify({ success: false, error: e.message }), {
+        console.error("verify-key error:", e);
+        return new Response(JSON.stringify({ success: false, error: "Could not verify API key. Check provider, model, base URL, and key." }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }

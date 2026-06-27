@@ -1,3 +1,4 @@
+import DOMPurify from "dompurify";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -97,7 +98,7 @@ const ArticleDetail = () => {
           )}
           <div
             className="prose prose-lg mt-8 max-w-none leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: post.content ?? "" }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content ?? "") }}
           />
 
           {/* Prev / Next Navigation */}

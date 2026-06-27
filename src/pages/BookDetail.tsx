@@ -1,3 +1,4 @@
+import DOMPurify from "dompurify";
 import { useParams, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import useSEO from "@/hooks/useSEO";
@@ -463,7 +464,7 @@ const BookDetail = () => {
           <div className="mt-10">
             <h2 className="font-serif text-2xl font-bold mb-4">About This Book</h2>
             {book.description ? (
-              <div className="text-foreground/80 leading-relaxed prose prose-headings:font-serif prose-headings:text-foreground prose-p:text-foreground/80 prose-img:rounded-lg max-w-none" dangerouslySetInnerHTML={{ __html: book.description }} />
+              <div className="text-foreground/80 leading-relaxed prose prose-headings:font-serif prose-headings:text-foreground prose-p:text-foreground/80 prose-img:rounded-lg max-w-none" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(book.description) }} />
             ) : (
               <div className="text-muted-foreground leading-relaxed space-y-3">
                 <p>

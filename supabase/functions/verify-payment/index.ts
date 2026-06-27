@@ -250,17 +250,33 @@ async function verifyRazorpay(
     });
   }
 
-  // Increment purchase count and create referral for books
+  // Increment purchase count, redeem coupon, and create referral for books
   if (type === "purchase") {
     const { data: purchase } = await supabase
       .from("purchases")
-      .select("book_id, user_id, referrer_id")
+      .select("id, book_id, user_id, referrer_id, coupon_id, coupon_redeemed_at")
       .eq("razorpay_order_id", orderId)
-      .single();
+      .maybeSingle();
+
     if (purchase?.book_id) {
       await supabase.rpc("increment_purchase_count", { _book_id: purchase.book_id }).catch(() => {
         console.warn("Could not increment purchase count");
       });
+
+      // Atomic, idempotent coupon redemption: only increment if not already redeemed.
+      if (purchase.coupon_id && !purchase.coupon_redeemed_at) {
+        const { data: claimed } = await supabase
+          .from("purchases")
+          .update({ coupon_redeemed_at: new Date().toISOString() })
+          .eq("id", purchase.id)
+          .is("coupon_redeemed_at", null)
+          .select("id")
+          .maybeSingle();
+        if (claimed) {
+          await supabase.rpc("increment_coupon_usage", { _coupon_id: purchase.coupon_id })
+            .catch((e) => console.warn("Coupon increment failed:", e));
+        }
+      }
 
       // Create referral record if referrer exists
       if (purchase.referrer_id) {
@@ -270,7 +286,7 @@ async function verifyRazorpay(
             .select("price, referral_commission_percent")
             .eq("id", purchase.book_id)
             .single();
-          
+
           if (book && book.referral_commission_percent > 0) {
             const commissionAmount = Math.round((book.price * book.referral_commission_percent / 100) * 100) / 100;
             await supabase.from("referrals").insert({

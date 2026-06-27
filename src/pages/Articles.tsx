@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import DOMPurify from "dompurify";
 import { supabase } from "@/integrations/supabase/client";
 import useSEO from "@/hooks/useSEO";
 import Layout from "@/components/layout/Layout";
@@ -76,7 +77,7 @@ const Articles = () => {
                       <h2 className="mt-1 font-serif text-lg font-semibold group-hover:text-primary transition-colors line-clamp-2">
                         {post.title}
                       </h2>
-                      {post.excerpt && <p className="mt-2 text-sm text-muted-foreground line-clamp-3" dangerouslySetInnerHTML={{ __html: post.excerpt }} />}
+                      {post.excerpt && <p className="mt-2 text-sm text-muted-foreground line-clamp-3" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.excerpt) }} />}
                       <p className="mt-3 text-xs text-muted-foreground">
                         {new Date(post.created_at).toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" })}
                       </p>

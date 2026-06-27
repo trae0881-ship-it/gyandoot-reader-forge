@@ -674,6 +674,8 @@ export type Database = {
       purchases: {
         Row: {
           book_id: string
+          coupon_id: string | null
+          coupon_redeemed_at: string | null
           created_at: string
           id: string
           razorpay_order_id: string | null
@@ -685,6 +687,8 @@ export type Database = {
         }
         Insert: {
           book_id: string
+          coupon_id?: string | null
+          coupon_redeemed_at?: string | null
           created_at?: string
           id?: string
           razorpay_order_id?: string | null
@@ -696,6 +700,8 @@ export type Database = {
         }
         Update: {
           book_id?: string
+          coupon_id?: string | null
+          coupon_redeemed_at?: string | null
           created_at?: string
           id?: string
           razorpay_order_id?: string | null
@@ -711,6 +717,13 @@ export type Database = {
             columns: ["book_id"]
             isOneToOne: false
             referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchases_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "coupons"
             referencedColumns: ["id"]
           },
         ]

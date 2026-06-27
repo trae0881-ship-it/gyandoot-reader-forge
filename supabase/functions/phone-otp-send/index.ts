@@ -21,6 +21,13 @@ function normPhone(p: string) {
 }
 
 // ---------------- Provider adapters ----------------
+async function providerError(name: string, r: Response): Promise<never> {
+  let detail = "";
+  try { detail = (await r.text()).slice(0, 500); } catch { /* ignore */ }
+  console.error(`${name} provider error (${r.status}):`, detail);
+  throw new Error(`Provider ${name} returned an error. Check provider configuration.`);
+}
+
 async function sendTwilioSMS(cfg: any, to: string, body: string) {
   const sid = cfg.account_sid, token = cfg.auth_token, from = cfg.from_number;
   if (!sid || !token || !from) throw new Error("Twilio config incomplete");
@@ -29,7 +36,7 @@ async function sendTwilioSMS(cfg: any, to: string, body: string) {
     headers: { Authorization: "Basic " + btoa(`${sid}:${token}`), "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({ To: to, From: from, Body: body }),
   });
-  if (!r.ok) throw new Error(`Twilio: ${await r.text()}`);
+  if (!r.ok) await providerError("twilio", r);
 }
 
 async function sendTwilioWhatsApp(cfg: any, to: string, body: string) {
@@ -40,11 +47,10 @@ async function sendTwilioWhatsApp(cfg: any, to: string, body: string) {
     headers: { Authorization: "Basic " + btoa(`${sid}:${token}`), "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({ To: `whatsapp:${to}`, From: `whatsapp:${from}`, Body: body }),
   });
-  if (!r.ok) throw new Error(`Twilio WA: ${await r.text()}`);
+  if (!r.ok) await providerError("twilio-wa", r);
 }
 
 async function sendMsg91(cfg: any, to: string, code: string) {
-  // MSG91 Flow API
   const authkey = cfg.auth_key, template_id = cfg.template_id, sender = cfg.sender_id;
   if (!authkey || !template_id) throw new Error("MSG91 config incomplete");
   const mobile = to.replace(/^\+/, "");
@@ -53,10 +59,10 @@ async function sendMsg91(cfg: any, to: string, code: string) {
     headers: { authkey, "Content-Type": "application/json" },
     body: JSON.stringify({ template_id, sender, short_url: "0", mobiles: mobile, OTP: code, otp: code, var1: code }),
   });
-  if (!r.ok) throw new Error(`MSG91: ${await r.text()}`);
+  if (!r.ok) await providerError("msg91", r);
 }
 
-async function sendFast2SMS(cfg: any, to: string, body: string, code: string) {
+async function sendFast2SMS(cfg: any, to: string, _body: string, code: string) {
   const key = cfg.api_key;
   if (!key) throw new Error("Fast2SMS config incomplete");
   const mobile = to.replace(/^\+91/, "").replace(/^\+/, "");
@@ -69,11 +75,10 @@ async function sendFast2SMS(cfg: any, to: string, body: string, code: string) {
         : { route: "otp", variables_values: code, numbers: mobile }
     ),
   });
-  if (!r.ok) throw new Error(`Fast2SMS: ${await r.text()}`);
+  if (!r.ok) await providerError("fast2sms", r);
 }
 
 async function sendWhatsAppCloud(cfg: any, to: string, code: string) {
-  // Meta WhatsApp Cloud API
   const token = cfg.access_token, phone_id = cfg.phone_number_id, template = cfg.template_name || "otp_verification";
   if (!token || !phone_id) throw new Error("WhatsApp Cloud config incomplete");
   const r = await fetch(`https://graph.facebook.com/v20.0/${phone_id}/messages`, {
@@ -93,7 +98,7 @@ async function sendWhatsAppCloud(cfg: any, to: string, code: string) {
       },
     }),
   });
-  if (!r.ok) throw new Error(`WhatsApp Cloud: ${await r.text()}`);
+  if (!r.ok) await providerError("whatsapp-cloud", r);
 }
 
 async function sendGupshupWA(cfg: any, to: string, code: string) {
@@ -108,18 +113,18 @@ async function sendGupshupWA(cfg: any, to: string, code: string) {
       "src.name": cfg.app_name || "",
     }),
   });
-  if (!r.ok) throw new Error(`Gupshup: ${await r.text()}`);
+  if (!r.ok) await providerError("gupshup", r);
 }
 
 async function sendResendEmail(_cfg: any, to: string, code: string) {
-  if (!RESEND_API_KEY) throw new Error("RESEND_API_KEY not set");
+  if (!RESEND_API_KEY) throw new Error("Email provider is not configured");
   const html = `<div style="font-family:Georgia,serif;max-width:520px;margin:0 auto"><div style="background:#B71C1C;padding:20px;color:#fff"><h1 style="margin:0;font-size:20px">Login OTP</h1></div><div style="padding:28px;text-align:center;background:#fafaf8"><p style="color:#333">Aapka OTP code:</p><div style="font-size:34px;letter-spacing:8px;color:#B71C1C;font-weight:700;padding:14px;background:#fff;border:1px dashed #B71C1C;border-radius:8px">${code}</div><p style="color:#666;font-size:12px;margin-top:18px">Yeh code 10 minutes ke liye valid hai.</p></div></div>`;
   const r = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${RESEND_API_KEY}` },
     body: JSON.stringify({ from: "GyandootNova <info@gyandootnova.in>", to: [to], subject: `Your OTP: ${code}`, html }),
   });
-  if (!r.ok) throw new Error(`Resend: ${await r.text()}`);
+  if (!r.ok) await providerError("resend", r);
 }
 
 async function dispatch(provider: string, channel: string, cfg: any, recipient: string, code: string) {
@@ -179,6 +184,6 @@ serve(async (req) => {
     return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
     console.error("phone-otp-send:", e);
-    return new Response(JSON.stringify({ error: (e as Error).message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ error: "Could not send OTP. Please try again." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });

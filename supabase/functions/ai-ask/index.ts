@@ -1,4 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { encryptApiKey, decryptApiKey } from "../_shared/crypto.ts";
+import { assertSafePublicHttpsUrl } from "../_shared/url-guard.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,28 +18,7 @@ function normalizeQuestion(q: string): string {
   return q.trim().replace(/\s+/g, " ").toLowerCase();
 }
 
-function decryptKey(encrypted: string): string {
-  const secret = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "fallback";
-  try {
-    const data = atob(encrypted);
-    let result = "";
-    for (let i = 0; i < data.length; i++) {
-      result += String.fromCharCode(data.charCodeAt(i) ^ secret.charCodeAt(i % secret.length));
-    }
-    return result;
-  } catch {
-    return encrypted;
-  }
-}
-
-function encryptKey(plain: string): string {
-  const secret = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "fallback";
-  let result = "";
-  for (let i = 0; i < plain.length; i++) {
-    result += String.fromCharCode(plain.charCodeAt(i) ^ secret.charCodeAt(i % secret.length));
-  }
-  return btoa(result);
-}
+// Legacy helpers replaced by AES-GCM in ../_shared/crypto.ts
 
 function getRelevantChunks(content: string, question: string, maxChars = 6000): string {
   if (!content || content.length <= maxChars) return content || "";
@@ -67,8 +48,9 @@ async function callAI(provider: string, apiKey: string, model: string, systemPro
 
   if (provider === "custom") {
     if (!baseUrl) throw new Error("Custom provider requires base_url");
-    // Auto-append /chat/completions if user gave only the base
-    url = baseUrl.endsWith("/chat/completions") ? baseUrl : baseUrl.replace(/\/+$/, "") + "/chat/completions";
+    const safe = assertSafePublicHttpsUrl(baseUrl);
+    const base = safe.toString();
+    url = base.endsWith("/chat/completions") ? base : base.replace(/\/+$/, "") + "/chat/completions";
     headers = { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" };
     body = { model, messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userMessage }], temperature: 0.3, max_tokens: 1000 };
   } else if (provider === "openai" || provider === "deepseek" || provider === "perplexity" || provider === "kimi") {
@@ -160,19 +142,26 @@ Deno.serve(async (req) => {
       }
 
       try {
-        const testResponse = await callAI(provider_name, api_key, model_name, "You are a test assistant.", "Say 'OK' in one word.", base_url);
+        // For custom providers, validate base_url before any outbound fetch (SSRF guard)
+        let safeBaseUrl: string | null = null;
+        if (provider_name === "custom") {
+          if (!base_url) throw new Error("base_url is required for custom provider");
+          safeBaseUrl = assertSafePublicHttpsUrl(base_url).toString();
+        }
+        const testResponse = await callAI(provider_name, api_key, model_name, "You are a test assistant.", "Say 'OK' in one word.", safeBaseUrl ?? base_url);
         if (!testResponse) throw new Error("Empty response from AI");
-        const encrypted = encryptKey(api_key);
+        const encrypted = await encryptApiKey(api_key);
         await supabase.from("ai_settings").update({ is_active: false }).neq("id", "00000000-0000-0000-0000-000000000000");
         const { error } = await supabase.from("ai_settings").upsert({
-          provider_name, api_key_encrypted: encrypted, model_name, base_url: base_url || null, is_active: true,
+          provider_name, api_key_encrypted: encrypted, model_name, base_url: safeBaseUrl, is_active: true,
         }, { onConflict: "provider_name" });
         if (error) throw error;
         return new Response(JSON.stringify({ success: true, message: "API key verified and saved" }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       } catch (e) {
-        return new Response(JSON.stringify({ success: false, error: e.message }), {
+        console.error("verify-key error:", e);
+        return new Response(JSON.stringify({ success: false, error: "Could not verify API key. Check provider, model, base URL, and key." }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -286,7 +275,7 @@ Deno.serve(async (req) => {
       const model = settings?.model_name || "google/gemini-2.5-flash";
       const apiKey = activeProvider === "lovable" || !settings
         ? Deno.env.get("LOVABLE_API_KEY")!
-        : decryptKey(settings.api_key_encrypted);
+        : await decryptApiKey(settings.api_key_encrypted);
 
       let systemPrompt: string;
       let bookTitle = "";

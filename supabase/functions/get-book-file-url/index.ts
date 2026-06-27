@@ -117,7 +117,8 @@ Deno.serve(async (req) => {
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
-    return new Response(JSON.stringify({ error: e.message }), {
+    console.error("get-book-file-url error:", e);
+    return new Response(JSON.stringify({ error: "Could not generate file URL" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

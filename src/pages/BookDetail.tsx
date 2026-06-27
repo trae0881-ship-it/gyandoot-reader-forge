@@ -1,3 +1,4 @@
+import DOMPurify from "dompurify";
 import { useParams, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import useSEO from "@/hooks/useSEO";

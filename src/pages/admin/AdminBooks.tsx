@@ -332,13 +332,20 @@ const AdminBooks = () => {
     setEditing(null); setCoverFile(null); setBookFile(null);
   };
 
-  const openEdit = (book: any) => {
+  const openEdit = async (book: any) => {
     setEditing(book);
+    let fileUrl = book.file_url ?? "";
+    try {
+      const { data } = await supabase.rpc("admin_get_book_file_url" as any, { _book_id: book.id });
+      if (typeof data === "string") fileUrl = data;
+    } catch {
+      // fallback
+    }
     setForm({
       title: book.title, slug: book.slug ?? "", author: book.author,
       description: book.description ?? "", price: book.price, is_free: book.is_free,
       is_featured: book.is_featured, cover_url: book.cover_url ?? "",
-      file_url: book.file_url ?? "", file_type: book.file_type ?? "",
+      file_url: fileUrl, file_type: book.file_type ?? "",
       preview_chapters: book.preview_chapters ?? 0, category: book.category ?? "",
       referral_commission_percent: (book as any).referral_commission_percent ?? 0,
     });

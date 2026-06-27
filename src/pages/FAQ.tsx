@@ -75,7 +75,7 @@ const FAQ = () => {
               <a href="/" itemProp="item"><span itemProp="name">Home</span></a>
               <meta itemProp="position" content="1" />
             </li>
-            <li className="text-muted-foreground/50">/</li>
+            <li className="text-muted-foreground" aria-hidden="true">/</li>
             <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
               <span itemProp="name" className="text-foreground font-medium">FAQ</span>
               <meta itemProp="position" content="2" />

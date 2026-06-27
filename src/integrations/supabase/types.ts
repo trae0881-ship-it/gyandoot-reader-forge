@@ -675,6 +675,7 @@ export type Database = {
         Row: {
           book_id: string
           coupon_id: string | null
+          coupon_redeemed_at: string | null
           created_at: string
           id: string
           razorpay_order_id: string | null
@@ -687,6 +688,7 @@ export type Database = {
         Insert: {
           book_id: string
           coupon_id?: string | null
+          coupon_redeemed_at?: string | null
           created_at?: string
           id?: string
           razorpay_order_id?: string | null
@@ -699,6 +701,7 @@ export type Database = {
         Update: {
           book_id?: string
           coupon_id?: string | null
+          coupon_redeemed_at?: string | null
           created_at?: string
           id?: string
           razorpay_order_id?: string | null

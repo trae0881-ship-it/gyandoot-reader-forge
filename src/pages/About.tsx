@@ -5,7 +5,7 @@ import useSEO from "@/hooks/useSEO";
 const About = () => {
   useSEO({
     title: "About GyandootNova — Dharmik Granth & Spiritual Books Publisher",
-    description: "Learn about GyandootNova — India's trusted platform for dharmik granth, spiritual books like Vishnu Sahasraname, Bhagwat Geeta & Ramayana. Our mission, vision & story.",
+    description: "GyandootNova — India's trusted platform for dharmik granth & spiritual books like Bhagwat Geeta, Ramayana. Our mission, vision & story.",
     canonical: "/about",
   });
 

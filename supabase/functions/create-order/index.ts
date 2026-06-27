@@ -273,6 +273,7 @@ async function handlePaypal(
     if (referrer_id && referrer_id !== user.id) {
       purchaseData.referrer_id = referrer_id;
     }
+    if (coupon_id) purchaseData.coupon_id = coupon_id;
     await supabase.from("purchases").insert(purchaseData);
   } else {
     await supabase.from("donations").insert({

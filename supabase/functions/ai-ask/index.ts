@@ -48,8 +48,9 @@ async function callAI(provider: string, apiKey: string, model: string, systemPro
 
   if (provider === "custom") {
     if (!baseUrl) throw new Error("Custom provider requires base_url");
-    // Auto-append /chat/completions if user gave only the base
-    url = baseUrl.endsWith("/chat/completions") ? baseUrl : baseUrl.replace(/\/+$/, "") + "/chat/completions";
+    const safe = assertSafePublicHttpsUrl(baseUrl);
+    const base = safe.toString();
+    url = base.endsWith("/chat/completions") ? base : base.replace(/\/+$/, "") + "/chat/completions";
     headers = { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" };
     body = { model, messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userMessage }], temperature: 0.3, max_tokens: 1000 };
   } else if (provider === "openai" || provider === "deepseek" || provider === "perplexity" || provider === "kimi") {

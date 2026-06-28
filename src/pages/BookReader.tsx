@@ -12,7 +12,7 @@ import {
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import SecureTextCanvasReader from "@/components/SecureTextCanvasReader";
+import SecureRichReader from "@/components/SecureRichReader";
 import { useAntiCopy } from "@/hooks/useAntiCopy";
 
 /* ─── Types ─────────────────────────────────────────────────────────── */
@@ -736,7 +736,7 @@ const BookReader = () => {
           ref={contentRef}
           className="max-w-none"
         >
-          <SecureTextCanvasReader
+          <SecureRichReader
             content={rawContent}
             fontSize={fontSize}
             darkMode={darkMode}

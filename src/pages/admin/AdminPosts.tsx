@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, ArrowLeft, Eye, Globe, CheckCircle, AlertTriangle } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowLeft, Eye, Globe, CheckCircle, AlertTriangle, Upload, X, Loader2 } from "lucide-react";
 import RichTextEditor from "@/components/RichTextEditor";
 
 const slugify = (t: string) => {
@@ -26,7 +26,7 @@ const slugify = (t: string) => {
 
 const emptyForm = {
   title: "", slug: "", content: "", excerpt: "", post_type: "article" as string,
-  is_published: false, meta_title: "", meta_description: "",
+  is_published: false, meta_title: "", meta_description: "", cover_url: "",
 };
 
 /* ── SEO Score helpers ──────────────────────────────────────── */
@@ -65,9 +65,9 @@ const getSeoScore = (form: typeof emptyForm) => {
   checks.push({ label: "Content (300+ chars)", pass: contentOk, tip: `${contentText.length} characters` });
   if (contentOk) score += 15;
 
-  // Has cover image in content or excerpt
-  const hasImage = form.content.includes("<img");
-  checks.push({ label: "Contains image", pass: hasImage, tip: hasImage ? "Image found" : "Add an image for better engagement" });
+  // Has cover image
+  const hasImage = !!form.cover_url || form.content.includes("<img");
+  checks.push({ label: "Has cover image", pass: hasImage, tip: hasImage ? "Image set" : "Add a cover image" });
   if (hasImage) score += 15;
 
   return { score, checks };
@@ -91,6 +91,7 @@ const AdminPosts = () => {
   const [view, setView] = useState<"list" | "form">("list");
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState({ ...emptyForm });
+  const [uploading, setUploading] = useState(false);
 
   const { data: posts } = useQuery({
     queryKey: ["admin-posts"],
@@ -112,6 +113,7 @@ const AdminPosts = () => {
         is_published: form.is_published,
         meta_title: form.meta_title,
         meta_description: form.meta_description,
+        cover_url: form.cover_url || null,
       };
       if (editing) {
         const { error } = await supabase.from("posts").update(payload).eq("id", editing.id);
@@ -145,6 +147,7 @@ const AdminPosts = () => {
       title: p.title, slug: p.slug ?? "", content: p.content ?? "", excerpt: p.excerpt ?? "",
       post_type: p.post_type, is_published: p.is_published,
       meta_title: p.meta_title ?? "", meta_description: p.meta_description ?? "",
+      cover_url: p.cover_url ?? "",
     });
     setView("form");
   };
@@ -211,6 +214,65 @@ const AdminPosts = () => {
             <Label>Excerpt <span className="text-muted-foreground text-xs">(short summary shown in listing)</span></Label>
             <Textarea value={form.excerpt} onChange={(e) => setForm({ ...form, excerpt: e.target.value })} className="mt-1" rows={2} placeholder="Brief description…" />
           </div>
+
+          {/* Cover Image */}
+          <div>
+            <Label>Cover Image</Label>
+            {form.cover_url ? (
+              <div className="mt-1 relative inline-block">
+                <img src={form.cover_url} alt="Cover" className="h-40 w-auto rounded-lg border border-border object-cover" />
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="absolute -top-2 -right-2 h-6 w-6"
+                  onClick={() => setForm({ ...form, cover_url: "" })}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            ) : (
+              <div className="mt-1 flex items-center gap-2">
+                <label className="flex items-center gap-2 px-3 py-2 border border-dashed border-border rounded-md cursor-pointer hover:bg-muted text-sm">
+                  {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                  <span>{uploading ? "Uploading…" : "Upload image"}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={uploading}
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      try {
+                        setUploading(true);
+                        const ext = file.name.split(".").pop() || "jpg";
+                        const path = `posts/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+                        const { error } = await supabase.storage.from("post-images").upload(path, file, { cacheControl: "3600", upsert: false });
+                        if (error) throw error;
+                        const { data } = supabase.storage.from("post-images").getPublicUrl(path);
+                        setForm((f) => ({ ...f, cover_url: data.publicUrl }));
+                        toast({ title: "Image uploaded" });
+                      } catch (err: any) {
+                        toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+                      } finally {
+                        setUploading(false);
+                        e.target.value = "";
+                      }
+                    }}
+                  />
+                </label>
+                <Input
+                  value={form.cover_url}
+                  onChange={(e) => setForm({ ...form, cover_url: e.target.value })}
+                  placeholder="…or paste image URL"
+                  className="flex-1"
+                />
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground mt-1">Shown at the top of the article and in listing cards.</p>
+          </div>
+
 
           {/* Rich Content Editor */}
           <div>

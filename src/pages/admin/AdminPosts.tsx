@@ -146,6 +146,7 @@ const AdminPosts = () => {
       title: p.title, slug: p.slug ?? "", content: p.content ?? "", excerpt: p.excerpt ?? "",
       post_type: p.post_type, is_published: p.is_published,
       meta_title: p.meta_title ?? "", meta_description: p.meta_description ?? "",
+      cover_url: p.cover_url ?? "",
     });
     setView("form");
   };

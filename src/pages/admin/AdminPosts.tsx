@@ -26,7 +26,7 @@ const slugify = (t: string) => {
 
 const emptyForm = {
   title: "", slug: "", content: "", excerpt: "", post_type: "article" as string,
-  is_published: false, meta_title: "", meta_description: "",
+  is_published: false, meta_title: "", meta_description: "", cover_url: "",
 };
 
 /* ── SEO Score helpers ──────────────────────────────────────── */

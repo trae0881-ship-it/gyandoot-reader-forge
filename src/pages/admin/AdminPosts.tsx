@@ -112,6 +112,7 @@ const AdminPosts = () => {
         is_published: form.is_published,
         meta_title: form.meta_title,
         meta_description: form.meta_description,
+        cover_url: form.cover_url || null,
       };
       if (editing) {
         const { error } = await supabase.from("posts").update(payload).eq("id", editing.id);

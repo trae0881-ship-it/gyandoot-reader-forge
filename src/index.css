@@ -110,6 +110,80 @@
     color: inherit !important;
   }
 
+  /* Rich chapter content — Kindle-like typography */
+  .secure-rich-reader { word-wrap: break-word; position: relative; z-index: 0; }
+  .secure-rich-reader p { margin: 0 0 1.1em; text-align: justify; hyphens: auto; }
+  .secure-rich-reader h1,
+  .secure-rich-reader h2,
+  .secure-rich-reader h3,
+  .secure-rich-reader h4 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    line-height: 1.3;
+    margin: 1.6em 0 0.6em;
+  }
+  .secure-rich-reader h1 { font-size: 1.7em; }
+  .secure-rich-reader h2 { font-size: 1.45em; }
+  .secure-rich-reader h3 { font-size: 1.25em; }
+  .secure-rich-reader ul,
+  .secure-rich-reader ol { margin: 0 0 1.1em 1.4em; padding-left: 0.6em; }
+  .secure-rich-reader ul { list-style: disc; }
+  .secure-rich-reader ol { list-style: decimal; }
+  .secure-rich-reader li { margin-bottom: 0.4em; }
+  .secure-rich-reader blockquote {
+    margin: 1.2em 0;
+    padding: 0.6em 1.1em;
+    border-left: 4px solid hsl(var(--primary));
+    background: hsl(var(--muted) / 0.4);
+    font-style: italic;
+    border-radius: 0 6px 6px 0;
+  }
+  .secure-rich-reader img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 1.2em auto;
+    border-radius: 8px;
+    -webkit-user-drag: none;
+    user-drag: none;
+    pointer-events: none;
+  }
+  .secure-rich-reader figure { margin: 1.2em 0; text-align: center; }
+  .secure-rich-reader figcaption { font-size: 0.85em; color: hsl(var(--muted-foreground)); margin-top: 0.4em; }
+  .secure-rich-reader table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.2em 0;
+    font-size: 0.95em;
+  }
+  .secure-rich-reader th,
+  .secure-rich-reader td {
+    border: 1px solid hsl(var(--border));
+    padding: 0.55em 0.8em;
+    text-align: left;
+  }
+  .secure-rich-reader th { background: hsl(var(--muted)); font-weight: 600; }
+  .secure-rich-reader pre {
+    background: hsl(var(--muted));
+    padding: 1em;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-size: 0.9em;
+  }
+  .secure-rich-reader code {
+    background: hsl(var(--muted));
+    padding: 0.1em 0.35em;
+    border-radius: 3px;
+    font-size: 0.92em;
+  }
+  .secure-rich-reader a { color: hsl(var(--primary)); text-decoration: underline; }
+  .secure-rich-reader.is-dark blockquote { background: rgba(255,255,255,0.05); }
+  .secure-rich-reader.is-dark th { background: rgba(255,255,255,0.08); }
+  .secure-rich-reader.is-dark code,
+  .secure-rich-reader.is-dark pre { background: rgba(255,255,255,0.06); }
+
+
+
 
   html, body {
     overflow-x: hidden;

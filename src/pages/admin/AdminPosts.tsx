@@ -65,9 +65,9 @@ const getSeoScore = (form: typeof emptyForm) => {
   checks.push({ label: "Content (300+ chars)", pass: contentOk, tip: `${contentText.length} characters` });
   if (contentOk) score += 15;
 
-  // Has cover image in content or excerpt
-  const hasImage = form.content.includes("<img");
-  checks.push({ label: "Contains image", pass: hasImage, tip: hasImage ? "Image found" : "Add an image for better engagement" });
+  // Has cover image
+  const hasImage = !!form.cover_url || form.content.includes("<img");
+  checks.push({ label: "Has cover image", pass: hasImage, tip: hasImage ? "Image set" : "Add a cover image" });
   if (hasImage) score += 15;
 
   return { score, checks };

@@ -41,40 +41,34 @@ const SecureRichReader = ({ content, fontSize, darkMode, watermarkText }: Secure
         className={`secure-rich-reader ${darkMode ? "is-dark" : ""}`}
         style={{
           fontSize: `${fontSize}px`,
-          lineHeight: 1.85,
-          fontFamily: '"Inter", system-ui, -apple-system, "Noto Sans Devanagari", "Noto Serif Devanagari", sans-serif',
-          color: darkMode ? "#f3f4f6" : "inherit",
+          lineHeight: 1.95,
           userSelect: "text",
           WebkitUserSelect: "text",
+          position: "relative",
+          zIndex: 2,
         }}
         dangerouslySetInnerHTML={{ __html: safeHtml }}
       />
-      {/* Watermark overlay — purely visual, never blocks content */}
+      {/* Watermark overlay — subtle so text remains crisp */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 overflow-hidden"
-        style={{
-          backgroundImage: `repeating-linear-gradient(-30deg, transparent 0 140px, ${
-            darkMode ? "rgba(255,255,255,0.05)" : "rgba(183,28,28,0.06)"
-          } 140px 141px)`,
-          mixBlendMode: darkMode ? "screen" : "multiply",
-          zIndex: 1,
-        }}
+        style={{ zIndex: 1 }}
       >
         <div
-          className="absolute inset-0 flex flex-wrap content-start gap-x-16 gap-y-20 p-8"
+          className="absolute inset-0 flex flex-wrap content-start gap-x-16 gap-y-24 p-8"
           style={{
             transform: "rotate(-22deg)",
             transformOrigin: "center",
-            opacity: darkMode ? 0.07 : 0.09,
-            fontSize: 14,
+            opacity: darkMode ? 0.035 : 0.05,
+            fontSize: 13,
             fontWeight: 600,
             color: darkMode ? "#ffffff" : "#B71C1C",
             letterSpacing: "0.12em",
             whiteSpace: "nowrap",
           }}
         >
-          {Array.from({ length: 80 }).map((_, i) => (
+          {Array.from({ length: 60 }).map((_, i) => (
             <span key={i}>{watermarkText} • Protected</span>
           ))}
         </div>

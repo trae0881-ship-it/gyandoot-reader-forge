@@ -736,7 +736,7 @@ const BookReader = () => {
           ref={contentRef}
           className="max-w-none"
         >
-          <SecureTextCanvasReader
+          <SecureRichReader
             content={rawContent}
             fontSize={fontSize}
             darkMode={darkMode}

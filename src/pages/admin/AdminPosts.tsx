@@ -91,6 +91,7 @@ const AdminPosts = () => {
   const [view, setView] = useState<"list" | "form">("list");
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState({ ...emptyForm });
+  const [uploading, setUploading] = useState(false);
 
   const { data: posts } = useQuery({
     queryKey: ["admin-posts"],

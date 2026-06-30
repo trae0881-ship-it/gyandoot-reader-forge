@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, MessageCircle, Facebook, Instagram, Youtube, Linkedin } from "lucide-react";
+import { Settings, MessageCircle, Facebook, Instagram, Youtube, Linkedin, Flame } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const SOCIAL_KEYS = [
@@ -14,6 +14,14 @@ const SOCIAL_KEYS = [
   { key: "instagram_url", label: "Instagram URL", icon: Instagram, placeholder: "https://instagram.com/gyandootnova", hint: "Full Instagram profile URL" },
   { key: "youtube_url", label: "YouTube URL", icon: Youtube, placeholder: "https://youtube.com/@gyandootnova", hint: "Full YouTube channel URL" },
   { key: "linkedin_url", label: "LinkedIn URL", icon: Linkedin, placeholder: "https://linkedin.com/company/gyandootnova", hint: "Full LinkedIn profile or company URL" },
+];
+
+const URGENCY_KEYS = [
+  { key: "urgency_enabled", label: "Banner Enabled", placeholder: "true", hint: "true या false — banner on/off" },
+  { key: "urgency_coupon", label: "Coupon Code", placeholder: "BHAKTI20", hint: "Banner में दिखेगा (coupon table में भी active होना चाहिए)" },
+  { key: "urgency_discount_label", label: "Discount Label", placeholder: "20% off", hint: "जैसे: 20% off / ₹100 off" },
+  { key: "urgency_ends_at", label: "Ends At (ISO)", placeholder: "2026-07-05T23:59:59+05:30", hint: "खाली छोड़ें = आज रात 11:59 तक auto" },
+  { key: "urgency_link", label: "Link", placeholder: "/books", hint: "Coupon पर click करने पर कहाँ ले जाए" },
 ];
 
 const AdminSettings = () => {

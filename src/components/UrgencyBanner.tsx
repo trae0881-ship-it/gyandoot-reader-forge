@@ -1,9 +1,17 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Flame, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
-/* End-of-day countdown — resets daily, creates honest urgency */
-function getEndOfDay(): number {
+type Cfg = {
+  enabled: boolean;
+  coupon: string;
+  discount: string;
+  endsAt: number | null; // ms timestamp; null = end of today
+  link: string;
+};
+
+function endOfToday() {
   const d = new Date();
   d.setHours(23, 59, 59, 999);
   return d.getTime();
@@ -19,15 +27,36 @@ function format(ms: number) {
 
 export default function UrgencyBanner() {
   const [closed, setClosed] = useState(false);
-  const [remaining, setRemaining] = useState(() => getEndOfDay() - Date.now());
+  const [cfg, setCfg] = useState<Cfg | null>(null);
+  const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
     if (sessionStorage.getItem("gn_urgency_closed")) setClosed(true);
-    const id = window.setInterval(() => setRemaining(getEndOfDay() - Date.now()), 1000);
+    (async () => {
+      const { data } = await supabase
+        .from("settings")
+        .select("key, value")
+        .in("key", ["urgency_enabled", "urgency_coupon", "urgency_discount_label", "urgency_ends_at", "urgency_link"]);
+      const map: Record<string, string> = {};
+      (data ?? []).forEach((r: any) => { map[r.key] = r.value ?? ""; });
+      const endsRaw = (map.urgency_ends_at ?? "").trim();
+      const endsAt = endsRaw ? new Date(endsRaw).getTime() : null;
+      setCfg({
+        enabled: (map.urgency_enabled ?? "true").toLowerCase() !== "false",
+        coupon: map.urgency_coupon || "BHAKTI20",
+        discount: map.urgency_discount_label || "20% off",
+        endsAt: Number.isFinite(endsAt as number) ? (endsAt as number) : null,
+        link: map.urgency_link || "/books",
+      });
+    })();
+    const id = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(id);
   }, []);
 
-  if (closed) return null;
+  if (closed || !cfg || !cfg.enabled) return null;
+  const target = cfg.endsAt ?? endOfToday();
+  const remaining = target - now;
+  if (remaining <= 0) return null;
 
   return (
     <div className="bg-gradient-to-r from-secondary via-secondary/95 to-secondary text-secondary-foreground">
@@ -36,10 +65,10 @@ export default function UrgencyBanner() {
           <Flame className="h-3.5 w-3.5 shrink-0 animate-pulse" />
           <p className="truncate font-semibold">
             आज की डील — कोड{" "}
-            <Link to="/books" className="underline underline-offset-2 font-extrabold">
-              BHAKTI20
+            <Link to={cfg.link} className="underline underline-offset-2 font-extrabold">
+              {cfg.coupon}
             </Link>{" "}
-            से 20% off • खत्म होने में{" "}
+            से {cfg.discount} • खत्म होने में{" "}
             <span className="font-mono font-bold tabular-nums">{format(remaining)}</span>
           </p>
         </div>

@@ -15,6 +15,7 @@ import { downloadTableAsCsv } from "@/lib/exportCsv";
 import { Progress } from "@/components/ui/progress";
 import RichTextEditor from "@/components/RichTextEditor";
 import BulkBookUpload from "@/components/admin/BulkBookUpload";
+import UploadCsvButton from "@/components/admin/UploadCsvButton";
 
 const slugify = (t: string) => {
   const slug = t
@@ -385,7 +386,7 @@ const AdminBooks = () => {
           <Button size="sm" variant="outline" onClick={() => downloadTableAsCsv({ table: "books", filenamePrefix: "books", orderBy: { column: "created_at", ascending: false } })}>
             <Download className="mr-1 h-4 w-4" /> Download All
           </Button>
-          <UploadCsvButton table="books" label="Upload CSV" onDone={loadBooks} />
+          <UploadCsvButton table="books" label="Upload CSV" onDone={() => queryClient.invalidateQueries({ queryKey: ["admin-books"] })} />
           <BulkBookUpload />
           <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
             <DialogTrigger asChild>

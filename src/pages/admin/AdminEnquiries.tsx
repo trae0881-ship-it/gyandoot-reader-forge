@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Loader2, Mail, Trash2, RefreshCw, Eye, Download } from "lucide-react";
+import UploadCsvButton from "@/components/admin/UploadCsvButton";
 
 type Enquiry = {
   id: string;

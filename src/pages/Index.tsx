@@ -26,6 +26,9 @@ import useSEO from "@/hooks/useSEO";
 import LiveReaderStrip from "@/components/LiveReaderStrip";
 import RecentPurchasesToast from "@/components/RecentPurchasesToast";
 import CompareSection from "@/components/CompareSection";
+import GuaranteeSection from "@/components/GuaranteeSection";
+import FaqStrip from "@/components/FaqStrip";
+import NewsletterCta from "@/components/NewsletterCta";
 import { useEffect, useRef, useState } from "react";
 
 /* ─── Animated Counter ─── */

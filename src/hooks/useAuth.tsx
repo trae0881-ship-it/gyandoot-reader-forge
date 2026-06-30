@@ -36,9 +36,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    const syncAuthState = async (nextSession: Session | null) => {
+    const syncAuthState = async (nextSession: Session | null, isInitial = false) => {
       if (!isMounted) return;
-      setLoading(true);
+      // Only show full-page loading on the very first hydration.
+      // Subsequent auth events (TOKEN_REFRESHED, SIGNED_IN on tab refocus, etc.)
+      // must NOT flip `loading` back to true — that would unmount the current
+      // route and wipe local form state (e.g. half-written blog posts).
+      if (isInitial) setLoading(true);
 
       const nextUser = nextSession?.user ?? null;
 
@@ -62,23 +66,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
-      const admin = await getAdminStatus(nextUser.id);
-      if (!isMounted) return;
+      // Skip admin re-check if it's the same user — avoids needless RPC on refocus.
+      let admin = isAdmin;
+      setSession((prev) => {
+        if (prev?.user?.id !== nextUser.id) admin = admin; // placeholder, real check below
+        return nextSession;
+      });
+      setUser((prevUser) => {
+        return nextUser;
+      });
 
-      setSession(nextSession);
-      setUser(nextUser);
-      setIsAdmin(admin);
+      // Re-query admin status only on initial load or when user actually changes.
+      const needsAdminCheck = isInitial || user?.id !== nextUser.id;
+      if (needsAdminCheck) {
+        admin = await getAdminStatus(nextUser.id);
+        if (!isMounted) return;
+        setIsAdmin(admin);
+      }
+
       setLoading(false);
     };
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      void syncAuthState(nextSession);
+      void syncAuthState(nextSession, false);
     });
 
     supabase.auth.getSession().then(({ data: { session }, error }) => {
-      void syncAuthState(error ? null : session);
+      void syncAuthState(error ? null : session, true);
     });
 
     return () => {

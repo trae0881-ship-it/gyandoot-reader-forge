@@ -7,7 +7,7 @@ import Layout from "@/components/layout/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { BookOpen, Loader2, Search } from "lucide-react";
+import { BookOpen, Loader2, Search, ShieldCheck, Infinity as InfinityIcon, Lock, Star, Users } from "lucide-react";
 
 const CATEGORIES = [
   { value: "all", label: "All" },
@@ -87,10 +87,20 @@ const Books = () => {
 
   return (
     <Layout>
-      <section className="py-12">
+      <section className="py-8 md:py-12">
         <div className="container">
-          <h1 className="font-serif text-4xl font-bold">Books Library</h1>
-          <p className="mt-2 text-muted-foreground">Explore our collection of spiritual literature</p>
+          <h1 className="font-serif text-3xl md:text-4xl font-bold">हमारी पूरी Library</h1>
+          <p className="mt-2 text-sm md:text-base text-muted-foreground">
+            एक बार खरीदिए, जीवनभर पढ़िए — हर book mobile, tablet aur laptop par padh sakte hain.
+          </p>
+
+          {/* Trust strip */}
+          <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs md:text-sm text-foreground/80">
+            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-primary" /> 7-दिन पैसा वापसी</span>
+            <span className="inline-flex items-center gap-1.5"><InfinityIcon className="h-4 w-4 text-primary" /> जीवनभर access</span>
+            <span className="inline-flex items-center gap-1.5"><Lock className="h-4 w-4 text-primary" /> Secure payment</span>
+            <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4 text-primary" /> 24,000+ पाठक</span>
+          </div>
 
           {/* Search */}
           <div className="mt-6 relative max-w-md">

@@ -507,6 +507,15 @@ const Index = () => {
         </div>
       </section>
 
+      {/* ─── 7.5. GUARANTEE / TRUST ─── */}
+      <GuaranteeSection />
+
+      {/* ─── 7.7. FAQ STRIP ─── */}
+      <FaqStrip />
+
+      {/* ─── 7.9. NEWSLETTER ─── */}
+      <NewsletterCta />
+
       {/* ─── 8. SEO CONTENT — KEYWORD-RICH ─── */}
       <section className="py-20">
         <div className="container max-w-4xl">

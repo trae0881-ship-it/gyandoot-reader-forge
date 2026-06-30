@@ -248,6 +248,7 @@ const BookDetail = () => {
 
   return (
     <Layout>
+      <RecentPurchasesToast />
       <section className="py-12">
         <div className="container">
           <div className="grid gap-8 md:grid-cols-3">

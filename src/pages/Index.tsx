@@ -12,6 +12,13 @@ import {
   Quote,
   ArrowRight,
   TrendingUp,
+  ShieldCheck,
+  Smartphone,
+  Infinity as InfinityIcon,
+  RefreshCw,
+  Lock,
+  CheckCircle2,
+  Star,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -103,32 +110,80 @@ const Index = () => {
           }}
         />
         <div className="container relative text-center">
-          <h1 className="font-serif text-4xl font-extrabold leading-tight text-primary-foreground md:text-6xl lg:text-7xl">
-            Authentic <span className="text-secondary">Dharmik Granth</span> — Vishnu Sahasraname, Geeta, Ramayana
+          <div className="inline-flex items-center gap-2 rounded-full bg-secondary/20 px-4 py-1.5 text-xs font-semibold text-secondary mb-5">
+            <Star className="h-3.5 w-3.5 fill-secondary" /> 4.8/5 • 24,000+ संतुष्ट पाठक
+          </div>
+          <h1 className="font-serif text-3xl font-extrabold leading-tight text-primary-foreground md:text-5xl lg:text-6xl">
+            अधूरे ज्ञान को छोड़िए — <span className="text-secondary">200,000+ प्रामाणिक ग्रंथ</span>,
+            <br className="hidden md:block" /> एक बार खरीदिए, <span className="underline decoration-secondary decoration-4 underline-offset-4">जीवनभर पढ़िए।</span>
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-primary-foreground/90 md:text-xl">
-            Buy and read spiritual books online — Vishnu Sahasraname, Bhagwat Geeta, Ramayana, Hanuman Chalisa & more.
-            India's trusted platform for sacred literature.
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-primary-foreground/90 md:text-lg">
+            मोबाइल, टैबलेट, लैपटॉप — कहीं भी, कभी भी। पन्ने टूटेंगे नहीं, खोएंगे नहीं, चोरी नहीं होंगे।
+            <strong className="text-secondary"> आपकी अपनी डिजिटल आध्यात्मिक लाइब्रेरी।</strong>
           </p>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button
               size="lg"
-              className="bg-primary-foreground text-primary font-semibold hover:bg-primary-foreground/90 shadow-lg px-8"
+              className="bg-secondary text-secondary-foreground font-bold hover:bg-secondary/90 shadow-xl px-8 text-base"
               asChild
             >
               <Link to="/books">
-                <BookOpen className="mr-2 h-5 w-5" /> Explore Books
+                <BookOpen className="mr-2 h-5 w-5" /> ₹49 से पढ़ना शुरू करें →
               </Link>
             </Button>
             <Button
               size="lg"
-              className="bg-secondary text-secondary-foreground font-semibold hover:bg-secondary/90 shadow-lg px-8"
+              variant="outline"
+              className="border-2 border-primary-foreground/40 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 font-semibold px-8"
               asChild
             >
-              <Link to="/support-us">
-                <Heart className="mr-2 h-5 w-5" /> Support Us
+              <Link to="/books?filter=free">
+                पहला अध्याय मुफ़्त पढ़ें
               </Link>
             </Button>
+          </div>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs md:text-sm text-primary-foreground/80">
+            <span className="inline-flex items-center gap-1.5"><Lock className="h-3.5 w-3.5 text-secondary" /> सुरक्षित पढ़ाई</span>
+            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-secondary" /> 7-दिन पैसा वापसी</span>
+            <span className="inline-flex items-center gap-1.5"><InfinityIcon className="h-3.5 w-3.5 text-secondary" /> जीवनभर access</span>
+            <span className="inline-flex items-center gap-1.5"><RefreshCw className="h-3.5 w-3.5 text-secondary" /> Free updates</span>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── 1.5. WHY NO DOWNLOAD — Objection → Trust ─── */}
+      <section className="bg-muted/40 py-14">
+        <div className="container max-w-5xl">
+          <div className="text-center mb-10">
+            <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-wider">
+              आपके फ़ायदे के लिए
+            </span>
+            <h2 className="mt-3 font-serif text-2xl md:text-3xl font-bold">
+              PDF download क्यों नहीं? <span className="text-primary">क्योंकि यह आपके लिए बेहतर है।</span>
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">हमने वो problem solve किया है जो हर e-book का है।</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-5">
+              <h3 className="font-semibold text-destructive mb-3 flex items-center gap-2">❌ साधारण PDF Download</h3>
+              <ul className="space-y-2 text-sm text-foreground/80">
+                <li>📵 फ़ोन बदला/खोया → फ़ाइल गई</li>
+                <li>💾 Storage भरता है</li>
+                <li>📑 पन्ने corrupt, format टूटता है</li>
+                <li>🔓 चोरी / forward का डर</li>
+                <li>🚫 कोई update नहीं मिलता</li>
+              </ul>
+            </div>
+            <div className="rounded-xl border-2 border-primary/30 bg-primary/5 p-5 shadow-md">
+              <h3 className="font-semibold text-primary mb-3 flex items-center gap-2">✅ GyandootNova Lifetime Reader</h3>
+              <ul className="space-y-2 text-sm text-foreground/90 font-medium">
+                <li>🔐 एक login = हमेशा available</li>
+                <li>☁️ 0 MB आपके device पर</li>
+                <li>📖 हमेशा HD, हमेशा clean</li>
+                <li>🛡️ सिर्फ़ आप पढ़ सकते हैं</li>
+                <li>🎁 Author updates <strong>मुफ़्त lifetime</strong></li>
+              </ul>
+            </div>
           </div>
         </div>
       </section>

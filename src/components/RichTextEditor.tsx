@@ -7,6 +7,10 @@ import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import TextAlign from "@tiptap/extension-text-align";
 import Highlight from "@tiptap/extension-highlight";
+import { Table } from "@tiptap/extension-table";
+import { TableRow } from "@tiptap/extension-table-row";
+import { TableHeader } from "@tiptap/extension-table-header";
+import { TableCell } from "@tiptap/extension-table-cell";
 import { useCallback, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -16,7 +20,8 @@ import {
   AlignLeft, AlignCenter, AlignRight, AlignJustify,
   List, ListOrdered, Link as LinkIcon, Image as ImageIcon,
   Highlighter, Palette, Undo, Redo, Quote, Minus, Code,
-  Upload,
+  Upload, Table as TableIcon, Plus, Trash2,
+  Columns3, Rows3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -93,12 +98,16 @@ const RichTextEditor = ({ value, onChange, placeholder = "Start writing…", min
       Link.configure({ openOnClick: false, HTMLAttributes: { class: "text-primary underline cursor-pointer" } }),
       Image.configure({ inline: false, HTMLAttributes: { class: "rounded-lg my-3 mx-auto block" } }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
+      Table.configure({ resizable: true, HTMLAttributes: { class: "rte-table" } }),
+      TableRow,
+      TableHeader,
+      TableCell,
     ],
     content: value,
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
     editorProps: {
       attributes: {
-        class: "outline-none prose prose-sm max-w-none px-4 py-3",
+        class: "outline-none prose prose-sm max-w-none px-4 py-3 rte-content",
         style: `min-height:${minHeight}px`,
       },
     },
@@ -289,6 +298,28 @@ const RichTextEditor = ({ value, onChange, placeholder = "Start writing…", min
           className="hidden"
           onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageUpload(f); e.target.value = ""; }}
         />
+
+        <Divider />
+        {/* Table controls */}
+        <ToolBtn title="Insert Table (3×3)" onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}>
+          <TableIcon className="h-3.5 w-3.5" />
+        </ToolBtn>
+        {editor.isActive("table") && (
+          <>
+            <ToolBtn title="Add column" onClick={() => editor.chain().focus().addColumnAfter().run()}>
+              <Columns3 className="h-3.5 w-3.5" />
+            </ToolBtn>
+            <ToolBtn title="Add row" onClick={() => editor.chain().focus().addRowAfter().run()}>
+              <Rows3 className="h-3.5 w-3.5" />
+            </ToolBtn>
+            <ToolBtn title="Toggle header row" onClick={() => editor.chain().focus().toggleHeaderRow().run()}>
+              <Plus className="h-3.5 w-3.5" />
+            </ToolBtn>
+            <ToolBtn title="Delete table" onClick={() => editor.chain().focus().deleteTable().run()}>
+              <Trash2 className="h-3.5 w-3.5" />
+            </ToolBtn>
+          </>
+        )}
       </div>
 
       {/* ─── IMAGE SIZE HELPER (shows when image is selected) ─────── */}

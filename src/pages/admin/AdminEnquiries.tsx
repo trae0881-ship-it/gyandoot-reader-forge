@@ -83,6 +83,57 @@ export default function AdminEnquiries() {
     toast.success("Deleted");
   };
 
+  const downloadCsv = async () => {
+    const t = toast.loading("Preparing download…");
+    try {
+      // Fetch ALL rows (current + future), paginated to avoid PostgREST 1000-row cap
+      const pageSize = 1000;
+      let from = 0;
+      let all: Enquiry[] = [];
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { data, error } = await supabase
+          .from("contact_enquiries" as any)
+          .select("*")
+          .order("created_at", { ascending: false })
+          .range(from, from + pageSize - 1);
+        if (error) throw error;
+        const batch = (data ?? []) as unknown as Enquiry[];
+        all = all.concat(batch);
+        if (batch.length < pageSize) break;
+        from += pageSize;
+      }
+
+      const headers = [
+        "id","created_at","name","email","subject","message",
+        "status","admin_notes","source_ip","user_agent",
+      ];
+      const esc = (v: unknown) => {
+        const s = v === null || v === undefined ? "" : String(v);
+        return `"${s.replace(/"/g, '""').replace(/\r?\n/g, " ")}"`;
+      };
+      const csv = [
+        headers.join(","),
+        ...all.map((r) => headers.map((h) => esc((r as any)[h])).join(",")),
+      ].join("\n");
+
+      // UTF-8 BOM so Excel renders Hindi correctly
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+      a.href = url;
+      a.download = `contact-enquiries-${stamp}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast.success(`Downloaded ${all.length} enquiries`, { id: t });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Download failed", { id: t });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">

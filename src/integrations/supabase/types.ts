@@ -224,6 +224,35 @@ export type Database = {
           },
         ]
       }
+      book_files: {
+        Row: {
+          book_id: string
+          created_at: string
+          file_url: string
+          updated_at: string
+        }
+        Insert: {
+          book_id: string
+          created_at?: string
+          file_url: string
+          updated_at?: string
+        }
+        Update: {
+          book_id?: string
+          created_at?: string
+          file_url?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_files_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: true
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookmarks: {
         Row: {
           book_id: string
@@ -286,7 +315,6 @@ export type Database = {
           created_at: string
           description: string | null
           file_type: string | null
-          file_url: string | null
           id: string
           is_featured: boolean
           is_free: boolean
@@ -305,7 +333,6 @@ export type Database = {
           created_at?: string
           description?: string | null
           file_type?: string | null
-          file_url?: string | null
           id?: string
           is_featured?: boolean
           is_free?: boolean
@@ -324,7 +351,6 @@ export type Database = {
           created_at?: string
           description?: string | null
           file_type?: string | null
-          file_url?: string | null
           id?: string
           is_featured?: boolean
           is_free?: boolean
@@ -917,6 +943,10 @@ export type Database = {
     }
     Functions: {
       admin_get_book_file_url: { Args: { _book_id: string }; Returns: string }
+      admin_set_book_file_url: {
+        Args: { _book_id: string; _file_url: string }
+        Returns: undefined
+      }
       apply_coupon:
         | { Args: { _code: string; _order_amount: number }; Returns: Json }
         | {

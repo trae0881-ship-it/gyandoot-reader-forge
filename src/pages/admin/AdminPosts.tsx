@@ -373,6 +373,7 @@ const AdminPosts = () => {
           <Button variant="outline" onClick={() => downloadTableAsCsv({ table: "posts", filenamePrefix: "posts", orderBy: { column: "created_at", ascending: false } })}>
             <Download className="mr-1 h-4 w-4" /> Download All
           </Button>
+          <UploadCsvButton table="posts" size="default" label="Upload CSV" onDone={loadPosts} />
           <Button onClick={() => setView("form")}><Plus className="mr-1 h-4 w-4" /> Add Post</Button>
         </div>
       </div>

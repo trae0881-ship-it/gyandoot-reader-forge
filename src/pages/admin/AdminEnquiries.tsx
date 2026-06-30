@@ -158,6 +158,7 @@ export default function AdminEnquiries() {
           <Button variant="default" size="sm" onClick={downloadCsv}>
             <Download className="h-4 w-4 mr-1" /> Download All
           </Button>
+          <UploadCsvButton table="contact_enquiries" label="Upload CSV" onDone={load} />
           <Button variant="outline" size="sm" onClick={load}>
             <RefreshCw className="h-4 w-4" />
           </Button>

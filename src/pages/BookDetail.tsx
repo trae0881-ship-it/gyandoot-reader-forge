@@ -304,7 +304,7 @@ const BookDetail = () => {
               )}
 
               {!canRead && !book.is_free && (
-                <div className="mt-6 space-y-3">
+                <div id="buy-section" className="mt-6 space-y-3">
                   {/* Value Stack / Anchoring */}
                   <div className="rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
                     <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">आप क्या पा रहे हैं</p>

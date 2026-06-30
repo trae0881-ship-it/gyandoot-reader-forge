@@ -66,20 +66,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
-      // Skip admin re-check if it's the same user — avoids needless RPC on refocus.
-      let admin = isAdmin;
-      setSession((prev) => {
-        if (prev?.user?.id !== nextUser.id) admin = admin; // placeholder, real check below
-        return nextSession;
-      });
-      setUser((prevUser) => {
-        return nextUser;
-      });
+      const prevUserId = user?.id ?? null;
+      setSession(nextSession);
+      setUser(nextUser);
 
       // Re-query admin status only on initial load or when user actually changes.
-      const needsAdminCheck = isInitial || user?.id !== nextUser.id;
-      if (needsAdminCheck) {
-        admin = await getAdminStatus(nextUser.id);
+      if (isInitial || prevUserId !== nextUser.id) {
+        const admin = await getAdminStatus(nextUser.id);
         if (!isMounted) return;
         setIsAdmin(admin);
       }

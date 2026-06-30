@@ -66,7 +66,7 @@ const AdminSettings = () => {
   });
 
   const handleSave = () => {
-    const updates = SOCIAL_KEYS.map(({ key }) => ({ key, value: values[key] ?? "" }));
+    const updates = [...SOCIAL_KEYS, ...URGENCY_KEYS].map(({ key }) => ({ key, value: values[key] ?? "" }));
     mutation.mutate(updates);
   };
 
@@ -77,19 +77,19 @@ const AdminSettings = () => {
         <h1 className="font-serif text-3xl font-bold">Site Settings</h1>
       </div>
 
-      <Card className="max-w-2xl">
-        <CardHeader>
-          <CardTitle>Social Media & Contact Links</CardTitle>
-          <CardDescription>
-            These links appear in the header (WhatsApp) and footer of your website. Leave blank to hide.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          {isLoading ? (
-            <p className="text-sm text-muted-foreground">Loading settings...</p>
-          ) : (
-            <>
-              {SOCIAL_KEYS.map(({ key, label, icon: Icon, placeholder, hint }) => (
+      <div className="space-y-6 max-w-2xl">
+        <Card>
+          <CardHeader>
+            <CardTitle>Social Media & Contact Links</CardTitle>
+            <CardDescription>
+              These links appear in the header (WhatsApp) and footer of your website. Leave blank to hide.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            {isLoading ? (
+              <p className="text-sm text-muted-foreground">Loading settings...</p>
+            ) : (
+              SOCIAL_KEYS.map(({ key, label, icon: Icon, placeholder, hint }) => (
                 <div key={key} className="space-y-1.5">
                   <Label className="flex items-center gap-2">
                     <Icon className="h-4 w-4 text-muted-foreground" />
@@ -102,19 +102,47 @@ const AdminSettings = () => {
                   />
                   <p className="text-xs text-muted-foreground">{hint}</p>
                 </div>
-              ))}
+              ))
+            )}
+          </CardContent>
+        </Card>
 
-              <Button
-                className="mt-4 w-full sm:w-auto"
-                onClick={handleSave}
-                disabled={mutation.isPending}
-              >
-                {mutation.isPending ? "Saving..." : "Save Settings"}
-              </Button>
-            </>
-          )}
-        </CardContent>
-      </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Flame className="h-5 w-5 text-secondary" /> Urgency Banner (Top Strip)
+            </CardTitle>
+            <CardDescription>
+              ऊपर scroll पर दिखने वाली "आज की डील" strip। Coupon code, discount label और countdown end-time यहाँ से बदलें।
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            {isLoading ? (
+              <p className="text-sm text-muted-foreground">Loading...</p>
+            ) : (
+              URGENCY_KEYS.map(({ key, label, placeholder, hint }) => (
+                <div key={key} className="space-y-1.5">
+                  <Label>{label}</Label>
+                  <Input
+                    value={values[key] ?? ""}
+                    onChange={(e) => setValues((prev) => ({ ...prev, [key]: e.target.value }))}
+                    placeholder={placeholder}
+                  />
+                  <p className="text-xs text-muted-foreground">{hint}</p>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
+        <Button
+          className="w-full sm:w-auto"
+          onClick={handleSave}
+          disabled={mutation.isPending || isLoading}
+        >
+          {mutation.isPending ? "Saving..." : "Save All Settings"}
+        </Button>
+      </div>
     </div>
   );
 };

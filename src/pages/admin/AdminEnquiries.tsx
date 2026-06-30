@@ -155,9 +155,13 @@ export default function AdminEnquiries() {
               ))}
             </SelectContent>
           </Select>
+          <Button variant="default" size="sm" onClick={downloadCsv}>
+            <Download className="h-4 w-4 mr-1" /> Download All
+          </Button>
           <Button variant="outline" size="sm" onClick={load}>
             <RefreshCw className="h-4 w-4" />
           </Button>
+
         </div>
       </div>
 

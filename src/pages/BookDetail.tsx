@@ -579,9 +579,15 @@ const BookDetail = () => {
           {chapters && chapters.length > 0 && (
             <div className="mt-12">
               <h2 className="font-serif text-2xl font-bold mb-4">Table of Contents</h2>
+              {!canRead && !book.is_free && (
+                <div className="mb-4 rounded-lg border-2 border-green-600/40 bg-green-50 dark:bg-green-950/20 p-3 text-sm">
+                  🎁 <strong>पहला अध्याय 100% मुफ़्त है</strong> — Login कीजिए और पढ़कर देखिए, पसंद आए तभी खरीदिए।
+                </div>
+              )}
               <div className="space-y-2">
                 {chapters.map((ch) => {
-                  const accessible = canRead || ch.is_preview || ch.chapter_number <= previewChapters;
+                  const isFirstChapter = ch.chapter_number === 1;
+                  const accessible = canRead || ch.is_preview || ch.chapter_number <= previewChapters || (!!user && isFirstChapter);
                   return (
                     <Card key={ch.id} className={accessible ? "hover:shadow transition-shadow" : "opacity-60"}>
                       <CardContent className="flex items-center justify-between p-4">
@@ -591,6 +597,9 @@ const BookDetail = () => {
                           </span>
                           <span className="font-medium">{ch.title}</span>
                           {ch.is_preview && <span className="text-xs text-primary font-medium">Preview</span>}
+                          {!ch.is_preview && isFirstChapter && !canRead && !book.is_free && (
+                            <span className="text-[10px] bg-green-600 text-white font-bold px-1.5 py-0.5 rounded">FREE</span>
+                          )}
                         </div>
                         {accessible ? (
                           <Button size="sm" variant="ghost" asChild>

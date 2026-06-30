@@ -381,7 +381,10 @@ const AdminBooks = () => {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-serif text-2xl font-bold sm:text-3xl">Books</h1>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <Button size="sm" variant="outline" onClick={() => downloadTableAsCsv({ table: "books", filenamePrefix: "books", orderBy: { column: "created_at", ascending: false } })}>
+            <Download className="mr-1 h-4 w-4" /> Download All
+          </Button>
           <BulkBookUpload />
           <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
             <DialogTrigger asChild>

@@ -244,10 +244,22 @@ const Index = () => {
             <p className="mt-2 text-muted-foreground">Handpicked spiritual literature for seekers</p>
           </div>
           {featuredBooks && featuredBooks.length > 0 ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {featuredBooks.map((book) => (
-                <Link key={book.id} to={`/books/${book.slug}`}>
-                  <Card className="group overflow-hidden border-border transition-all hover:shadow-lg hover:-translate-y-1">
+                <Link key={book.id} to={`/books/${book.slug}`} className="group">
+                  <Card className="overflow-hidden border-border transition-all hover:shadow-xl hover:-translate-y-1 h-full flex flex-col relative">
+                    <div className="absolute top-2 left-2 z-10">
+                      {book.is_free ? (
+                        <span className="inline-block rounded-md bg-green-600 text-white px-2 py-0.5 text-[10px] font-bold shadow">FREE</span>
+                      ) : (
+                        <span className="inline-block rounded-md bg-secondary text-secondary-foreground px-2 py-0.5 text-[10px] font-bold shadow">⭐ BESTSELLER</span>
+                      )}
+                    </div>
+                    {!book.is_free && (
+                      <div className="absolute top-2 right-2 z-10">
+                        <span className="inline-block rounded-md bg-primary/95 text-primary-foreground px-2 py-0.5 text-[10px] font-bold shadow">जीवनभर</span>
+                      </div>
+                    )}
                     <div className="aspect-[3/4] bg-muted flex items-center justify-center overflow-hidden">
                       {book.cover_url ? (
                         <img
@@ -260,18 +272,29 @@ const Index = () => {
                         <BookOpen className="h-12 w-12 text-muted-foreground/30" />
                       )}
                     </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-serif font-semibold text-card-foreground group-hover:text-primary transition-colors line-clamp-1">
+                    <CardContent className="p-3 md:p-4 flex flex-col flex-1">
+                      <h3 className="font-serif font-semibold text-[15px] leading-snug text-card-foreground group-hover:text-primary transition-colors line-clamp-2 min-h-[2.6rem]">
                         {book.title}
                       </h3>
-                      <p className="text-sm text-muted-foreground">{book.author}</p>
-                      <span
-                        className={`mt-2 inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                          book.is_free ? "bg-green-100 text-green-700" : "bg-secondary/20 text-secondary-foreground"
-                        }`}
-                      >
-                        {book.is_free ? "Free" : `₹${book.price}`}
-                      </span>
+                      <p className="text-xs text-muted-foreground mt-0.5 truncate">{book.author}</p>
+                      <div className="mt-2 flex items-center gap-1 text-[11px] text-muted-foreground">
+                        <Star className="h-3 w-3 fill-secondary text-secondary" />
+                        <span className="font-medium text-foreground">4.8</span>
+                        <span>• Verified</span>
+                      </div>
+                      <div className="mt-3 flex items-center justify-between gap-2">
+                        {book.is_free ? (
+                          <span className="text-base font-bold text-green-700">₹0</span>
+                        ) : (
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-base font-bold text-primary">₹{book.price}</span>
+                            <span className="text-[10px] text-muted-foreground line-through">₹{Math.round((book.price as number) * 2.5)}</span>
+                          </div>
+                        )}
+                        <span className="text-[11px] font-bold text-primary group-hover:underline">
+                          {book.is_free ? "पढ़ें →" : "Unlock →"}
+                        </span>
+                      </div>
                     </CardContent>
                   </Card>
                 </Link>

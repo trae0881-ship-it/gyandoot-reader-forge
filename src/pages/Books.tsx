@@ -149,34 +149,68 @@ const Books = () => {
             <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
           ) : visible.length > 0 ? (
             <>
-              <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                {visible.map((book) => (
-                  <Link key={book.id} to={`/books/${book.slug}`}>
-                    <Card className="group overflow-hidden transition-shadow hover:shadow-lg h-full">
-                      <div className="aspect-[3/4] bg-muted flex items-center justify-center">
-                        {book.cover_url ? (
-                          <img src={book.cover_url} alt={book.title} className="h-full w-full object-cover" loading="lazy" />
-                        ) : (
-                          <BookOpen className="h-12 w-12 text-muted-foreground/40" />
+              <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                {visible.map((book) => {
+                  const readers = Math.max(book.purchase_count ?? 0, 100);
+                  return (
+                    <Link key={book.id} to={`/books/${book.slug}`} className="group">
+                      <Card className="overflow-hidden transition-all hover:shadow-xl hover:-translate-y-1 h-full flex flex-col border-border relative">
+                        {/* Top badge */}
+                        <div className="absolute top-2 left-2 z-10">
+                          {book.is_free ? (
+                            <span className="inline-block rounded-md bg-green-600 text-white px-2 py-0.5 text-[10px] font-bold shadow">FREE</span>
+                          ) : book.is_featured ? (
+                            <span className="inline-block rounded-md bg-secondary text-secondary-foreground px-2 py-0.5 text-[10px] font-bold shadow">⭐ BESTSELLER</span>
+                          ) : null}
+                        </div>
+                        {!book.is_free && (
+                          <div className="absolute top-2 right-2 z-10">
+                            <span className="inline-block rounded-md bg-primary/95 text-primary-foreground px-2 py-0.5 text-[10px] font-bold shadow">जीवनभर</span>
+                          </div>
                         )}
-                      </div>
-                      <CardContent className="p-4">
-                        <h2 className="font-serif font-semibold group-hover:text-primary transition-colors line-clamp-2">{book.title}</h2>
-                        <p className="text-sm text-muted-foreground">{book.author}</p>
-                        <div className="mt-2 flex items-center gap-2">
-                          <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${book.is_free ? "bg-green-100 text-green-700" : "bg-secondary/20 text-secondary-foreground"}`}>
-                            {book.is_free ? "Free" : `₹${book.price}`}
-                          </span>
-                          {book.category && (
-                            <span className="inline-block rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground capitalize">
-                              {CATEGORIES.find((c) => c.value === book.category)?.label ?? book.category}
-                            </span>
+
+                        <div className="aspect-[3/4] bg-muted flex items-center justify-center overflow-hidden">
+                          {book.cover_url ? (
+                            <img src={book.cover_url} alt={book.title} className="h-full w-full object-cover transition-transform group-hover:scale-105" loading="lazy" />
+                          ) : (
+                            <BookOpen className="h-12 w-12 text-muted-foreground/40" />
                           )}
                         </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ))}
+                        <CardContent className="p-3 md:p-4 flex flex-col flex-1">
+                          <h2 className="font-serif font-semibold text-[15px] leading-snug group-hover:text-primary transition-colors line-clamp-2 min-h-[2.6rem]">
+                            {book.title}
+                          </h2>
+                          <p className="text-xs text-muted-foreground mt-0.5 truncate">{book.author}</p>
+
+                          {/* Social proof */}
+                          <div className="mt-2 flex items-center gap-1 text-[11px] text-muted-foreground">
+                            <Star className="h-3 w-3 fill-secondary text-secondary" />
+                            <span className="font-medium text-foreground">4.8</span>
+                            <span>•</span>
+                            <span>{readers.toLocaleString()}+ पाठक</span>
+                          </div>
+
+                          {/* Price + CTA */}
+                          <div className="mt-3 flex items-center justify-between gap-2">
+                            <div>
+                              {book.is_free ? (
+                                <span className="text-base font-bold text-green-700">₹0</span>
+                              ) : (
+                                <div className="flex items-baseline gap-1">
+                                  <span className="text-base font-bold text-primary">₹{book.price}</span>
+                                  <span className="text-[10px] text-muted-foreground line-through">₹{Math.round((book.price as number) * 2.5)}</span>
+                                </div>
+                              )}
+                            </div>
+                            <span className="text-[11px] font-bold text-primary group-hover:underline">
+                              {book.is_free ? "पढ़ें →" : "Unlock →"}
+                            </span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  );
+                })}
               </div>
 
               {hasMore && (

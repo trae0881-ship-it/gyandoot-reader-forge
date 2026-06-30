@@ -13,7 +13,6 @@ import {
   ArrowRight,
   TrendingUp,
   ShieldCheck,
-  Smartphone,
   Infinity as InfinityIcon,
   RefreshCw,
   Lock,

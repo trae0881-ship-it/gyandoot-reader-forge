@@ -250,6 +250,10 @@ const AdminBooks = () => {
     const bucket = folder === "covers" ? "book-covers" : "book-files";
     const { error } = await supabase.storage.from(bucket).upload(path, file, { upsert: true });
     if (error) throw error;
+    if (bucket === "book-files") {
+      // Private bucket: store only the object path; admin RPC fetches it later.
+      return path;
+    }
     const { data } = supabase.storage.from(bucket).getPublicUrl(path);
     return data.publicUrl;
   };
@@ -294,16 +298,28 @@ const AdminBooks = () => {
       const payload = {
         title: form.title, slug: finalSlug, author: form.author, description: form.description,
         price: form.is_free ? 0 : form.price, is_free: form.is_free, is_featured: form.is_featured,
-        cover_url, file_url, file_type, preview_chapters: form.preview_chapters, category: form.category,
+        cover_url, file_type, preview_chapters: form.preview_chapters, category: form.category,
         referral_commission_percent: form.referral_commission_percent,
       };
+      let bookId = editing?.id as string | undefined;
       if (editing) {
         const { error } = await supabase.from("books").update(payload).eq("id", editing.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("books").insert(payload);
+        const { data: inserted, error } = await supabase.from("books").insert(payload).select("id").single();
         if (error) throw error;
+        bookId = inserted?.id;
       }
+
+      // Save the private file path through the admin-only RPC.
+      if (bookId) {
+        const { error: rpcError } = await supabase.rpc("admin_set_book_file_url" as any, {
+          _book_id: bookId,
+          _file_url: file_url ?? "",
+        });
+        if (rpcError) throw rpcError;
+      }
+
       setUploadProgress(100);
     },
     onSuccess: () => {
@@ -334,12 +350,12 @@ const AdminBooks = () => {
 
   const openEdit = async (book: any) => {
     setEditing(book);
-    let fileUrl = book.file_url ?? "";
+    let fileUrl = "";
     try {
       const { data } = await supabase.rpc("admin_get_book_file_url" as any, { _book_id: book.id });
       if (typeof data === "string") fileUrl = data;
     } catch {
-      // fallback
+      // ignore
     }
     setForm({
       title: book.title, slug: book.slug ?? "", author: book.author,

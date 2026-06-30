@@ -16,6 +16,9 @@ import { initiatePayment, type PaymentGateway } from "@/lib/payment";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import AskScripture from "@/components/AskScripture";
+import AuthorCredibility from "@/components/AuthorCredibility";
+import BundleDecoy from "@/components/BundleDecoy";
+import RecentPurchasesToast from "@/components/RecentPurchasesToast";
 import { getReferrerId } from "@/hooks/useReferral";
 
 const BookDetail = () => {
@@ -245,6 +248,7 @@ const BookDetail = () => {
 
   return (
     <Layout>
+      <RecentPurchasesToast />
       <section className="py-12">
         <div className="container">
           <div className="grid gap-8 md:grid-cols-3">
@@ -301,7 +305,7 @@ const BookDetail = () => {
               )}
 
               {!canRead && !book.is_free && (
-                <div className="mt-6 space-y-3">
+                <div id="buy-section" className="mt-6 space-y-3">
                   {/* Value Stack / Anchoring */}
                   <div className="rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
                     <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">आप क्या पा रहे हैं</p>
@@ -531,6 +535,17 @@ const BookDetail = () => {
               ))}
             </ul>
           </div>
+
+          <AuthorCredibility author={book.author} />
+
+          {!hasPurchased && !book.is_free && (
+            <BundleDecoy
+              price={book.price}
+              onSelectSingle={() => {
+                document.getElementById("buy-section")?.scrollIntoView({ behavior: "smooth", block: "center" });
+              }}
+            />
+          )}
 
           {canRead && continueChapterSlug && (
             <div className="mt-8 rounded-xl border border-primary/20 bg-primary/5 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

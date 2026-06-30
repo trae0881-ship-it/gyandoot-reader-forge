@@ -23,6 +23,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
 import useSEO from "@/hooks/useSEO";
+import LiveReaderStrip from "@/components/LiveReaderStrip";
+import RecentPurchasesToast from "@/components/RecentPurchasesToast";
 import { useEffect, useRef, useState } from "react";
 
 /* ─── Animated Counter ─── */
@@ -99,6 +101,8 @@ const Index = () => {
 
   return (
     <Layout>
+      <LiveReaderStrip />
+      <RecentPurchasesToast />
       {/* ─── 1. HERO ─── */}
       <section className="relative overflow-hidden bg-primary py-14 md:py-20">
         <div

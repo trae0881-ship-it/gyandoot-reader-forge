@@ -27,7 +27,7 @@ export async function downloadTableAsCsv({ table, filenamePrefix, columns, order
       if (orderBy) q = q.order(orderBy.column, { ascending: orderBy.ascending ?? false });
       const { data, error } = await q;
       if (error) throw error;
-      const batch = (data ?? []) as Record<string, unknown>[];
+      const batch = ((data ?? []) as unknown) as Record<string, unknown>[];
       all = all.concat(batch);
       if (batch.length < pageSize) break;
       from += pageSize;

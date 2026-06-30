@@ -611,6 +611,33 @@ const BookDetail = () => {
 
       <SimilarBooks currentBookId={book.id} category={book.category} />
       {book && canRead && <AskScripture bookId={book.id} bookTitle={book.title} />}
+
+      {/* Sticky Mobile Purchase CTA */}
+      {!canRead && !book.is_free && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border shadow-2xl p-3 flex items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">जीवनभर access</p>
+            <div className="flex items-baseline gap-1">
+              <span className="text-lg font-bold text-primary">₹{appliedCoupon ? appliedCoupon.final_amount : book.price}</span>
+              <span className="text-[10px] text-primary">✓ 7-दिन refund</span>
+            </div>
+          </div>
+          <Button onClick={handlePurchase} disabled={purchasing} size="lg" className="font-bold shadow-md shrink-0">
+            {purchasing ? <Loader2 className="h-4 w-4 animate-spin" /> : <>🔓 अभी unlock करें</>}
+          </Button>
+        </div>
+      )}
+      {showFreeBuyCard && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border shadow-2xl p-3 flex items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">100% Free</p>
+            <span className="text-lg font-bold text-primary">₹0 — जीवनभर</span>
+          </div>
+          <Button onClick={handleClaimFreeBook} disabled={claimingFree} size="lg" className="font-bold shadow-md shrink-0">
+            {claimingFree ? <Loader2 className="h-4 w-4 animate-spin" /> : <>अभी पढ़ें →</>}
+          </Button>
+        </div>
+      )}
     </Layout>
   );
 };

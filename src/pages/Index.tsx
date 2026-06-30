@@ -26,6 +26,9 @@ import useSEO from "@/hooks/useSEO";
 import LiveReaderStrip from "@/components/LiveReaderStrip";
 import RecentPurchasesToast from "@/components/RecentPurchasesToast";
 import CompareSection from "@/components/CompareSection";
+import GuaranteeSection from "@/components/GuaranteeSection";
+import FaqStrip from "@/components/FaqStrip";
+import NewsletterCta from "@/components/NewsletterCta";
 import { useEffect, useRef, useState } from "react";
 
 /* ─── Animated Counter ─── */
@@ -503,6 +506,15 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* ─── 7.5. GUARANTEE / TRUST ─── */}
+      <GuaranteeSection />
+
+      {/* ─── 7.7. FAQ STRIP ─── */}
+      <FaqStrip />
+
+      {/* ─── 7.9. NEWSLETTER ─── */}
+      <NewsletterCta />
 
       {/* ─── 8. SEO CONTENT — KEYWORD-RICH ─── */}
       <section className="py-20">

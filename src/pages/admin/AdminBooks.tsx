@@ -10,7 +10,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, Upload, Image, FileText, X, ChevronRight, ArrowLeft, Globe, Eye, CheckCircle, AlertTriangle } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload, Image, FileText, X, ChevronRight, ArrowLeft, Globe, Eye, CheckCircle, AlertTriangle, Download } from "lucide-react";
+import { downloadTableAsCsv } from "@/lib/exportCsv";
 import { Progress } from "@/components/ui/progress";
 import RichTextEditor from "@/components/RichTextEditor";
 import BulkBookUpload from "@/components/admin/BulkBookUpload";
@@ -380,7 +381,10 @@ const AdminBooks = () => {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-serif text-2xl font-bold sm:text-3xl">Books</h1>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <Button size="sm" variant="outline" onClick={() => downloadTableAsCsv({ table: "books", filenamePrefix: "books", orderBy: { column: "created_at", ascending: false } })}>
+            <Download className="mr-1 h-4 w-4" /> Download All
+          </Button>
           <BulkBookUpload />
           <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
             <DialogTrigger asChild>

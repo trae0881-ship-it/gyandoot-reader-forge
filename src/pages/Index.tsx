@@ -25,6 +25,7 @@ import Layout from "@/components/layout/Layout";
 import useSEO from "@/hooks/useSEO";
 import LiveReaderStrip from "@/components/LiveReaderStrip";
 import RecentPurchasesToast from "@/components/RecentPurchasesToast";
+import CompareSection from "@/components/CompareSection";
 import { useEffect, useRef, useState } from "react";
 
 /* ─── Animated Counter ─── */
@@ -323,6 +324,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* ─── 3.5. COMPARE — printed vs PDF vs us ─── */}
+      <CompareSection />
 
       {/* ─── 4. PROGRAMS / DISCOURSES ─── */}
       <section className="py-20">

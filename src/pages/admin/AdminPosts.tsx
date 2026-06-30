@@ -369,7 +369,12 @@ const AdminPosts = () => {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-serif text-3xl font-bold">Posts</h1>
-        <Button onClick={() => setView("form")}><Plus className="mr-1 h-4 w-4" /> Add Post</Button>
+        <div className="flex gap-2 flex-wrap">
+          <Button variant="outline" onClick={() => downloadTableAsCsv({ table: "posts", filenamePrefix: "posts", orderBy: { column: "created_at", ascending: false } })}>
+            <Download className="mr-1 h-4 w-4" /> Download All
+          </Button>
+          <Button onClick={() => setView("form")}><Plus className="mr-1 h-4 w-4" /> Add Post</Button>
+        </div>
       </div>
 
       <Card>

@@ -1,0 +1,59 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Flame, X } from "lucide-react";
+
+/* End-of-day countdown — resets daily, creates honest urgency */
+function getEndOfDay(): number {
+  const d = new Date();
+  d.setHours(23, 59, 59, 999);
+  return d.getTime();
+}
+
+function format(ms: number) {
+  if (ms < 0) ms = 0;
+  const h = Math.floor(ms / 3_600_000);
+  const m = Math.floor((ms % 3_600_000) / 60_000);
+  const s = Math.floor((ms % 60_000) / 1000);
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+export default function UrgencyBanner() {
+  const [closed, setClosed] = useState(false);
+  const [remaining, setRemaining] = useState(() => getEndOfDay() - Date.now());
+
+  useEffect(() => {
+    if (sessionStorage.getItem("gn_urgency_closed")) setClosed(true);
+    const id = window.setInterval(() => setRemaining(getEndOfDay() - Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  if (closed) return null;
+
+  return (
+    <div className="bg-gradient-to-r from-secondary via-secondary/95 to-secondary text-secondary-foreground">
+      <div className="container flex items-center justify-between gap-2 py-1.5 text-xs md:text-sm">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <Flame className="h-3.5 w-3.5 shrink-0 animate-pulse" />
+          <p className="truncate font-semibold">
+            आज की डील — कोड{" "}
+            <Link to="/books" className="underline underline-offset-2 font-extrabold">
+              BHAKTI20
+            </Link>{" "}
+            से 20% off • खत्म होने में{" "}
+            <span className="font-mono font-bold tabular-nums">{format(remaining)}</span>
+          </p>
+        </div>
+        <button
+          aria-label="Close"
+          className="shrink-0 rounded p-1 hover:bg-secondary-foreground/10"
+          onClick={() => {
+            sessionStorage.setItem("gn_urgency_closed", "1");
+            setClosed(true);
+          }}
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    </div>
+  );
+}

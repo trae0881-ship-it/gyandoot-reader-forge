@@ -12,7 +12,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Loader2, Mail, Trash2, RefreshCw, Eye } from "lucide-react";
+import { Loader2, Mail, Trash2, RefreshCw, Eye, Download } from "lucide-react";
 
 type Enquiry = {
   id: string;

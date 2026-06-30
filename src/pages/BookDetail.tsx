@@ -16,6 +16,9 @@ import { initiatePayment, type PaymentGateway } from "@/lib/payment";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import AskScripture from "@/components/AskScripture";
+import AuthorCredibility from "@/components/AuthorCredibility";
+import BundleDecoy from "@/components/BundleDecoy";
+import RecentPurchasesToast from "@/components/RecentPurchasesToast";
 import { getReferrerId } from "@/hooks/useReferral";
 
 const BookDetail = () => {
@@ -531,6 +534,17 @@ const BookDetail = () => {
               ))}
             </ul>
           </div>
+
+          <AuthorCredibility author={book.author} />
+
+          {!hasPurchased && !book.is_free && (
+            <BundleDecoy
+              price={book.price}
+              onSelectSingle={() => {
+                document.getElementById("buy-section")?.scrollIntoView({ behavior: "smooth", block: "center" });
+              }}
+            />
+          )}
 
           {canRead && continueChapterSlug && (
             <div className="mt-8 rounded-xl border border-primary/20 bg-primary/5 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

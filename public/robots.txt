@@ -85,3 +85,4 @@ Disallow: /api/
 Disallow: /*?ref=
 
 Sitemap: https://gyandootnova.in/sitemap.xml
+Sitemap: https://vrzngahawxtbpwrgxtmb.supabase.co/functions/v1/sitemap

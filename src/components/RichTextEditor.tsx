@@ -98,12 +98,16 @@ const RichTextEditor = ({ value, onChange, placeholder = "Start writing…", min
       Link.configure({ openOnClick: false, HTMLAttributes: { class: "text-primary underline cursor-pointer" } }),
       Image.configure({ inline: false, HTMLAttributes: { class: "rounded-lg my-3 mx-auto block" } }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
+      Table.configure({ resizable: true, HTMLAttributes: { class: "rte-table" } }),
+      TableRow,
+      TableHeader,
+      TableCell,
     ],
     content: value,
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
     editorProps: {
       attributes: {
-        class: "outline-none prose prose-sm max-w-none px-4 py-3",
+        class: "outline-none prose prose-sm max-w-none px-4 py-3 rte-content",
         style: `min-height:${minHeight}px`,
       },
     },

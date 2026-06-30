@@ -433,30 +433,40 @@ const Index = () => {
           <div className="grid gap-6 md:grid-cols-3">
             {[
               {
-                quote:
-                  "These books have transformed my understanding of spirituality. Every page carries profound wisdom.",
-                name: "Aarav S.",
-                role: "Spiritual Seeker",
+                quote: "मैं रोज़ सुबह 20 मिनट गीता पढ़ता हूँ। 3 महीने में जीवन का नज़रिया ही बदल गया। एक बार खरीदी, अब हमेशा मेरे साथ है।",
+                name: "राजेश शर्मा",
+                role: "जयपुर, राजस्थान",
+                rating: 5,
               },
               {
-                quote:
-                  "The articles are beautifully written and deeply insightful. A treasure trove for anyone on the spiritual path.",
-                name: "Priya M.",
-                role: "Daily Reader",
+                quote: "PDF download नहीं होती ये पहले अजीब लगा, लेकिन अब समझ आया — मेरा फ़ोन बदला फिर भी सारी books वहीं की वहीं। बहुत smart system है।",
+                name: "प्रिया मिश्रा",
+                role: "लखनऊ, उत्तर प्रदेश",
+                rating: 5,
               },
               {
-                quote:
-                  "The meditation programs helped me find inner peace during the most challenging time of my life.",
-                name: "Rajan K.",
-                role: "Program Participant",
+                quote: "Sundarkand और हनुमान चालीसा रोज़ पढ़ता हूँ। Dark mode से रात को आँख नहीं दुखती। एक ही जगह सारे ग्रंथ — पैसा वसूल।",
+                name: "राजन कुमार",
+                role: "पटना, बिहार",
+                rating: 5,
               },
             ].map((t) => (
-              <Card key={t.name} className="border-border p-6">
-                <Quote className="h-8 w-8 text-secondary" />
-                <p className="mt-4 text-sm text-muted-foreground leading-relaxed italic">"{t.quote}"</p>
-                <div className="mt-5 border-t border-border pt-4">
-                  <p className="font-serif font-semibold text-card-foreground">{t.name}</p>
-                  <p className="text-xs text-muted-foreground">{t.role}</p>
+              <Card key={t.name} className="border-border p-6 relative">
+                <div className="flex items-center gap-1 mb-3">
+                  {Array.from({ length: t.rating }).map((_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-secondary text-secondary" />
+                  ))}
+                </div>
+                <Quote className="h-6 w-6 text-secondary/40" />
+                <p className="mt-3 text-sm text-foreground/85 leading-relaxed">"{t.quote}"</p>
+                <div className="mt-5 border-t border-border pt-4 flex items-center justify-between">
+                  <div>
+                    <p className="font-serif font-semibold text-card-foreground">{t.name}</p>
+                    <p className="text-xs text-muted-foreground">{t.role}</p>
+                  </div>
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Verified
+                  </span>
                 </div>
               </Card>
             ))}

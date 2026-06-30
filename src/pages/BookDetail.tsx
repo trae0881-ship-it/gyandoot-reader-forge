@@ -302,6 +302,19 @@ const BookDetail = () => {
 
               {!canRead && !book.is_free && (
                 <div className="mt-6 space-y-3">
+                  {/* Value Stack / Anchoring */}
+                  <div className="rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
+                    <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">आप क्या पा रहे हैं</p>
+                    <ul className="space-y-1.5 text-sm">
+                      <li className="flex justify-between"><span>📖 पुस्तक का lifetime access</span><span className="text-muted-foreground">₹{book.price}</span></li>
+                      <li className="flex justify-between"><span>📱 सभी devices पर पढ़ें</span><span className="text-muted-foreground line-through">₹500</span></li>
+                      <li className="flex justify-between"><span>🔖 Bookmarks + Notes</span><span className="text-muted-foreground line-through">₹300</span></li>
+                      <li className="flex justify-between"><span>🔍 Continue reading + Progress</span><span className="text-muted-foreground line-through">₹200</span></li>
+                      <li className="flex justify-between"><span>🎁 जीवनभर Free updates</span><span className="text-muted-foreground line-through">₹500</span></li>
+                      <li className="flex justify-between font-bold border-t border-primary/20 pt-2 mt-2"><span>आज आपका मूल्य</span><span className="text-primary text-lg">₹{book.price}</span></li>
+                    </ul>
+                  </div>
+
                   <div className="flex gap-2">
                     <Button type="button" variant={gateway === "razorpay" ? "default" : "outline"} size="sm" onClick={() => setGateway("razorpay")}>Razorpay</Button>
                     <Button type="button" variant={gateway === "paypal" ? "default" : "outline"} size="sm" onClick={() => setGateway("paypal")}>PayPal</Button>
@@ -345,7 +358,7 @@ const BookDetail = () => {
                     {appliedCoupon && (
                       <span className="text-muted-foreground line-through text-sm">₹{book.price}</span>
                     )}
-                    <span className="text-xl font-bold text-primary">
+                    <span className="text-2xl font-bold text-primary">
                       ₹{appliedCoupon ? appliedCoupon.final_amount : book.price}
                     </span>
                     {appliedCoupon && (
@@ -353,15 +366,31 @@ const BookDetail = () => {
                         Save ₹{appliedCoupon.discount_amount}
                       </span>
                     )}
+                    <span className="text-xs text-muted-foreground ml-auto">जीवनभर</span>
                   </div>
 
-                  <Button size="lg" onClick={handlePurchase} disabled={purchasing}>
+                  <Button size="lg" onClick={handlePurchase} disabled={purchasing} className="w-full text-base font-bold shadow-lg">
                     {purchasing ? (
                       <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</>
                     ) : (
-                      <><Lock className="mr-2 h-4 w-4" /> Purchase to Read — ₹{appliedCoupon ? appliedCoupon.final_amount : book.price}</>
+                      <><Lock className="mr-2 h-4 w-4" /> 🔓 अभी unlock करें — ₹{appliedCoupon ? appliedCoupon.final_amount : book.price} (जीवनभर)</>
                     )}
                   </Button>
+
+                  {/* Risk Reversal */}
+                  <div className="flex items-start gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3">
+                    <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <div className="text-xs text-foreground/80">
+                      <strong className="text-foreground">7-दिन 100% पैसा वापसी की गारंटी</strong> — पसंद ना आए तो एक click में refund। कोई सवाल नहीं।
+                    </div>
+                  </div>
+
+                  {/* Trust badges */}
+                  <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground pt-1">
+                    <span>🔒 SSL Secured</span>
+                    <span>💳 UPI / Card / NetBanking</span>
+                    <span>♾️ Lifetime Access</span>
+                  </div>
                 </div>
               )}
               {/* Referral Link Section */}

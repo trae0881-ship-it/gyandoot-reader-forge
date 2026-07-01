@@ -4,24 +4,24 @@ import { ChevronDown, HelpCircle } from "lucide-react";
 
 const faqs = [
   {
-    q: "क्या एक बार खरीदने पर हमेशा access रहेगा?",
-    a: "जी हाँ, बिल्कुल। एक बार खरीदी हुई ग्रंथ आपके account में जीवनभर रहती है — कोई subscription नहीं, कोई renewal नहीं।",
+    q: "एक बार लिया — फिर हमेशा मेरा?",
+    a: "हाँ। जो ग्रंथ आपके account में जुड़ गया, वो जीवन-भर रहेगा। न किराया, न renewal। लेखक के आगे के सुधार भी बिना पैसे मिलते रहेंगे।",
   },
   {
-    q: "क्या मैं फ़ोन और लैपटॉप दोनों पर पढ़ सकता हूँ?",
-    a: "हाँ, एक ही login से mobile, tablet और desktop — कहीं भी, कभी भी। आपकी पढ़ाई का progress automatically sync होता है।",
+    q: "फ़ोन, tablet, laptop — तीनों पर चलेगा?",
+    a: "एक ही login से हर device पर। पढ़ाई कहाँ छूटी थी, यह भी अपने-आप याद रहता है — अगला पन्ना वहीं से खुलेगा।",
   },
   {
-    q: "PDF download क्यों नहीं मिलती?",
-    a: "क्योंकि हम आपको असली सुरक्षा देते हैं। फ़ोन खोया तो भी ग्रंथ नहीं खोएंगे, और कोई आपकी किताब चुरा या forward नहीं कर सकता।",
+    q: "फ़ाइल डाउनलोड क्यों नहीं मिलती?",
+    a: "क्योंकि उसमें पाठक का नुक़सान ज़्यादा है — फ़ोन खोया तो सब गया, storage भरा तो झंझट। हमारे यहाँ login ही आपकी pothi है, कहीं खोने का सवाल नहीं।",
   },
   {
     q: "Payment सुरक्षित है क्या?",
-    a: "100% सुरक्षित। Razorpay और PayPal जैसे bank-grade gateways से payment होता है। हम आपका card number कभी save नहीं करते।",
+    a: "पूरी तरह। Razorpay और PayPal — दोनों bank-स्तर की सुरक्षा वाले हैं। आपके card की जानकारी कभी हमारे server पर नहीं आती।",
   },
   {
-    q: "अगर पसंद न आए तो?",
-    a: "7 दिनों के अंदर बिना कोई कारण बताए पूरा refund। बस WhatsApp पर message कीजिए — पैसा वापस।",
+    q: "अगर पसंद न आया?",
+    a: "7 दिन के भीतर एक message — बस इतना काफ़ी है। पूरा पैसा 24 घंटे में वापस, बिना कोई सवाल।",
   },
 ];
 
@@ -33,10 +33,10 @@ export default function FaqStrip() {
       <div className="container max-w-3xl">
         <div className="text-center mb-8">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-wider">
-            <HelpCircle className="h-3 w-3" /> पूछे जाने वाले सवाल
+            <HelpCircle className="h-3 w-3" /> मन की उलझनें
           </span>
           <h2 className="mt-3 font-serif text-2xl md:text-3xl font-bold">
-            आपके मन के <span className="text-primary">सारे सवाल</span>
+            जो पूछने में झिझक होती है, <span className="text-primary">वो सब यहाँ।</span>
           </h2>
         </div>
 
@@ -74,7 +74,7 @@ export default function FaqStrip() {
             to="/faq"
             className="inline-flex items-center text-sm font-semibold text-primary hover:underline"
           >
-            सभी सवाल देखें →
+            बाक़ी सारे सवाल देखिए →
           </Link>
         </div>
       </div>

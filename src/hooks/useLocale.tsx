@@ -65,23 +65,28 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
   const [rates, setRates] = useState<Record<Currency, number>>(FALLBACK_RATES);
   const [country, setCountry] = useState<string | null>(null);
 
-  // Auto-detect country on first visit
+  // Auto-detect country every load; apply unless the user manually overrode
   useEffect(() => {
-    const alreadySet = localStorage.getItem("gn_locale_detected");
-    if (alreadySet) return;
     fetch("https://ipapi.co/json/")
       .then((r) => r.json())
       .then((d) => {
         const code = (d.country_code || "").toUpperCase();
         setCountry(code);
         const map = COUNTRY_MAP[code];
-        if (map) {
+        if (!map) return;
+
+        const manualCurrency = localStorage.getItem("gn_currency_manual") === "1";
+        const manualLanguage = localStorage.getItem("gn_language_manual") === "1";
+
+        if (!manualCurrency) {
           setCurrencyState(map.currency);
-          setLanguageState(map.language);
           localStorage.setItem("gn_currency", map.currency);
-          localStorage.setItem("gn_language", map.language);
         }
-        localStorage.setItem("gn_locale_detected", "1");
+        if (!manualLanguage) {
+          setLanguageState(map.language);
+          localStorage.setItem("gn_language", map.language);
+          triggerGoogleTranslate(map.language);
+        }
       })
       .catch(() => {});
   }, []);
@@ -104,12 +109,13 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
   const setCurrency = useCallback((c: Currency) => {
     setCurrencyState(c);
     localStorage.setItem("gn_currency", c);
+    localStorage.setItem("gn_currency_manual", "1");
   }, []);
 
   const setLanguage = useCallback((l: Language) => {
     setLanguageState(l);
     localStorage.setItem("gn_language", l);
-    // trigger Google Translate
+    localStorage.setItem("gn_language_manual", "1");
     triggerGoogleTranslate(l);
   }, []);
 

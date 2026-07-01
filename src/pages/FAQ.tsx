@@ -5,52 +5,52 @@ import { ShieldCheck, Lock, Infinity as InfinityIcon, RefreshCw } from "lucide-r
 
 const faqs = [
   {
-    q: "क्या मैं book download कर सकता हूँ?",
-    a: "नहीं — और यह आपके फ़ायदे के लिए है। फ़ोन बदलने, खोने या storage भरने पर भी आपकी सारी books safe रहती हैं। बस login कीजिए — मोबाइल, टैबलेट, लैपटॉप, कहीं भी पढ़िए। पन्ने कभी corrupt नहीं होंगे, format कभी नहीं टूटेगा।",
+    q: "फ़ाइल डाउनलोड क्यों नहीं मिलती?",
+    a: "क्योंकि हमने पाठक की सुविधा को पहले रखा है। फ़ोन खोए, बदले या storage भरे — आपकी pothi वहीं की वहीं रहती है। बस login कीजिए, और किसी भी device पर पढ़ना शुरू कर दीजिए। न पन्ने बिगड़ते हैं, न font टूटता है।",
   },
   {
-    q: "क्या यह सच में जीवनभर का access है?",
-    a: "हाँ, 100%। एक बार खरीदी हुई book हमेशा आपके account में रहती है — कोई subscription नहीं, कोई renewal fees नहीं, कोई expiry नहीं। Author updates भी जीवनभर मुफ़्त मिलेंगे।",
+    q: "क्या access सचमुच जीवन-भर का है?",
+    a: "जी हाँ। एक बार जो ग्रंथ आपके account में जुड़ गया, वो हमेशा रहेगा। न कोई मासिक शुल्क, न कोई renewal। लेखक भविष्य में जो सुधार करेंगे, वे भी बिना अलग पैसे आप तक पहुँचेंगे।",
   },
   {
-    q: "अगर book पसंद ना आए तो पैसा वापस मिलेगा?",
-    a: "हाँ — 7 दिन के अंदर, बिना कोई सवाल पूछे, 100% refund। बस एक email या contact form से request कीजिए, 24 घंटे में पैसे आपके account में।",
+    q: "अगर पढ़कर मन न लगे तो?",
+    a: "पहले 7 दिन में एक message काफ़ी है — पूरा पैसा 24 घंटे के भीतर वापस। कोई कारण पूछा नहीं जाता, कोई formalities नहीं।",
   },
   {
-    q: "क्या free में पढ़ने को मिलेगा?",
-    a: "बिल्कुल। हर paid book का पहला अध्याय Login करते ही free पढ़ सकते हैं। साथ ही 100+ books पूरी तरह FREE हैं — 'Free' badge देखकर पहचानिए। पहले try कीजिए, पसंद आए तो ही खरीदिए।",
+    q: "मुफ़्त में कुछ मिलेगा भी?",
+    a: "बिलकुल। हर paid ग्रंथ का पहला अध्याय login करते ही खुल जाता है। इसके अलावा 100 से अधिक ग्रंथ पूरी तरह मुफ़्त हैं — 'निःशुल्क' का tag देखकर पहचान लीजिए।",
   },
   {
-    q: "Payment safe है ना? कौन से options हैं?",
-    a: "100% safe। हम Razorpay (India का सबसे trusted gateway) और PayPal (international) use करते हैं। UPI, Credit/Debit Card, Net Banking, Wallets — सब accept है। आपकी payment details कभी हमारे server पर store नहीं होतीं।",
+    q: "Payment किस-किस तरीक़े से हो सकता है?",
+    a: "UPI, credit/debit card, net banking, wallet — सब चलते हैं। भारत में Razorpay और विदेश के पाठकों के लिए PayPal। कार्ड की details कभी हमारे पास save नहीं होतीं।",
   },
   {
-    q: "मोबाइल पर पढ़ना comfortable है?",
-    a: "बहुत ही ज़्यादा। हमारा reader specially design किया गया है — Dark mode (रात के लिए), font size adjust, bookmarks, और 'जहाँ छोड़ा था वहीं से' continue feature। आँखों पर ज़ोर नहीं पड़ता।",
+    q: "मोबाइल पर आँखों को तकलीफ़ तो नहीं होगी?",
+    a: "इसी बात को ध्यान में रखकर reader बनाया है। रात वाला हल्का रंग, font बड़ा-छोटा करने का option, और 'जहाँ छोड़ा था' वहीं से आगे — इन सबसे लंबी पढ़ाई भी थकाती नहीं।",
   },
   {
-    q: "क्या ग्रंथ authentic हैं?",
-    a: "हर ग्रंथ संस्कृत विद्वानों और experienced editors द्वारा verify किया गया है। मूल श्लोक के साथ सरल हिंदी अनुवाद, टीका, और अर्थ — सब प्रामाणिक sources से। 24,000+ पाठक भरोसा कर चुके हैं।",
+    q: "आपके अनुवाद कितने भरोसेमंद हैं?",
+    a: "हर पाठ को पहले संस्कृत के जानकार जाँचते हैं, फिर सरल हिंदी में उतारा जाता है। मूल श्लोक साथ में रहता है ताकि पाठक ख़ुद मिला सके। किसी भी ग़लती की सूचना मिलते ही अगले संस्करण में सुधार हो जाता है।",
   },
   {
-    q: "अगर वेबसाइट कभी बंद हो जाए तो?",
-    a: "GyandootNova एक registered Indian company है, 2020 से active और तेज़ी से बढ़ रही है। फिर भी — हम email पर हर update भेजते हैं, और किसी भी major change से पहले 90 दिन पहले notice देते हैं।",
+    q: "अगर कल को वेबसाइट बंद हो गई तो?",
+    a: "GyandootNova एक विधिवत पंजीकृत भारतीय संस्था है और नियमित रूप से बढ़ रही है। फिर भी — हर बड़े बदलाव से पहले पाठकों को email से 90 दिन का पूर्व-सूचना दी जाती है, ताकि किसी को अचानक कुछ बदलता न लगे।",
   },
   {
-    q: "क्या मुझे account बनाना ज़रूरी है?",
-    a: "हाँ — और सिर्फ़ 30 second में हो जाता है। Account से आपकी books, bookmarks, और reading progress हमेशा safe रहती है। Google sign-in से एक click में हो जाएगा।",
+    q: "क्या account बनाना ज़रूरी है?",
+    a: "हाँ, पर इसमें सिर्फ़ आधा मिनट लगता है। Google से sign-in एक tap में हो जाता है। Account से आपके bookmark, नोट, और आधी पढ़ी हुई किताब — सब सुरक्षित रहते हैं।",
   },
   {
-    q: "किसी book या topic का सुझाव दे सकते हैं?",
-    a: "बिल्कुल! Contact page से लिखिए — हमारी editorial team हर सुझाव पढ़ती है। पिछले महीने 12 reader-requested books publish हुई हैं।",
+    q: "कोई नया ग्रंथ जोड़ने का सुझाव कैसे दूँ?",
+    a: "Contact form या WhatsApp पर लिख भेजिए। संपादकीय टीम हर सुझाव पढ़ती है। पिछले महीने पाठकों की माँग पर 12 नए ग्रंथ जोड़े गए हैं।",
   },
   {
-    q: "क्या Highlights और Notes save होते हैं?",
-    a: "हाँ — कोई भी पंक्ति select करके highlight या personal note add कर सकते हैं। अगली बार login करने पर सब वहीं मिलेगा। आपकी अपनी डिजिटल pothi बन जाएगी।",
+    q: "पढ़ते वक़्त कुछ highlight या note कर सकते हैं?",
+    a: "जी हाँ। कोई भी पंक्ति चुनकर highlight कर लीजिए या अपनी छोटी टिप्पणी जोड़ दीजिए। अगली बार login करते ही सब कुछ वहीं मिलेगा — आपकी अपनी डिजिटल pothi बनती जाती है।",
   },
   {
-    q: "Bulk discount या gift कर सकते हैं?",
-    a: "हाँ! 3+ books एक साथ खरीदने पर automatic discount। किसी और को gift करने के लिए contact कीजिए — हम gift link भेज देंगे।",
+    q: "कई ग्रंथ एक साथ लेने या किसी को उपहार देने का तरीक़ा?",
+    a: "3 या अधिक ग्रंथ एक साथ जोड़ते ही छूट अपने-आप लग जाती है। किसी परिजन को उपहार देना हो, तो contact कीजिए — हम gift link तैयार कर देते हैं।",
   },
 ];
 
@@ -69,8 +69,9 @@ const faqJsonLd = {
 
 const FAQ = () => {
   useSEO({
-    title: "FAQ — GyandootNova | आपके सवालों के जवाब",
-    description: "GyandootNova के सभी सवालों के जवाब — lifetime access, refund policy, payment safety, mobile reading aur authentic dharmik granth के बारे में।",
+    title: "अक्सर पूछे जाने वाले सवाल — GyandootNova",
+    description:
+      "पढ़ाई, payment, refund और account से जुड़े हर सवाल का सीधा जवाब — बिना घुमाए, बिना छुपाए।",
     canonical: "/faq",
     jsonLd: faqJsonLd,
   });
@@ -81,12 +82,12 @@ const FAQ = () => {
         <nav aria-label="Breadcrumb" className="mb-6 text-sm text-muted-foreground">
           <ol className="flex items-center gap-1.5" itemScope itemType="https://schema.org/BreadcrumbList">
             <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
-              <a href="/" itemProp="item"><span itemProp="name">Home</span></a>
+              <a href="/" itemProp="item"><span itemProp="name">मुख्य पृष्ठ</span></a>
               <meta itemProp="position" content="1" />
             </li>
             <li className="text-muted-foreground" aria-hidden="true">/</li>
             <li itemProp="itemListElement" itemScope itemType="https://schema.org/ListItem">
-              <span itemProp="name" className="text-foreground font-medium">FAQ</span>
+              <span itemProp="name" className="text-foreground font-medium">सवाल-जवाब</span>
               <meta itemProp="position" content="2" />
             </li>
           </ol>
@@ -94,16 +95,16 @@ const FAQ = () => {
 
         <section className="text-center mb-10">
           <h1 className="font-serif text-3xl md:text-5xl font-bold text-primary mb-3">
-            आपके सवाल, साफ़ जवाब
+            जो भी उलझन है, यहाँ खुल जाएगी
           </h1>
           <p className="text-base md:text-lg text-muted-foreground">
-            खरीदने से पहले जो भी confusion है — यहाँ हर जवाब मिलेगा।
+            पैसे लगाने से पहले हर बात साफ़ पूछिए — जवाब बिना घुमाए।
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs md:text-sm text-foreground/80">
-            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-primary" /> 7-दिन पैसा वापसी</span>
-            <span className="inline-flex items-center gap-1.5"><InfinityIcon className="h-4 w-4 text-primary" /> जीवनभर access</span>
-            <span className="inline-flex items-center gap-1.5"><Lock className="h-4 w-4 text-primary" /> Secure payment</span>
-            <span className="inline-flex items-center gap-1.5"><RefreshCw className="h-4 w-4 text-primary" /> Free updates</span>
+            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-primary" /> 7 दिन में पूरा refund</span>
+            <span className="inline-flex items-center gap-1.5"><InfinityIcon className="h-4 w-4 text-primary" /> उम्रभर पहुँच</span>
+            <span className="inline-flex items-center gap-1.5"><Lock className="h-4 w-4 text-primary" /> सुरक्षित payment</span>
+            <span className="inline-flex items-center gap-1.5"><RefreshCw className="h-4 w-4 text-primary" /> नए संस्करण मुफ़्त</span>
           </div>
         </section>
 
@@ -121,14 +122,14 @@ const FAQ = () => {
         </Accordion>
 
         <div className="mt-12 rounded-2xl border-2 border-primary/20 bg-primary/5 p-6 md:p-8 text-center">
-          <h2 className="font-serif text-xl md:text-2xl font-bold text-foreground">अभी भी कोई सवाल है?</h2>
-          <p className="mt-2 text-sm text-muted-foreground">हम WhatsApp aur email par 24 ghante mein reply karte hain.</p>
+          <h2 className="font-serif text-xl md:text-2xl font-bold text-foreground">कुछ और पूछना है?</h2>
+          <p className="mt-2 text-sm text-muted-foreground">WhatsApp या email — जो सुविधा हो। जवाब उसी दिन।</p>
           <div className="mt-5 flex flex-wrap justify-center gap-3">
             <a href="/contact" className="inline-flex items-center justify-center rounded-md bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90">
-              Contact करें
+              हमसे बात करें
             </a>
             <a href="/books" className="inline-flex items-center justify-center rounded-md border-2 border-primary px-6 py-2.5 text-sm font-semibold text-primary hover:bg-primary hover:text-primary-foreground">
-              Books देखें →
+              पुस्तकालय देखें →
             </a>
           </div>
         </div>

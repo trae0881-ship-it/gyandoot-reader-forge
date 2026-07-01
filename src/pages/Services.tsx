@@ -5,46 +5,47 @@ import useSEO from "@/hooks/useSEO";
 const services = [
   {
     icon: BookOpen,
-    title: "Online Book Reading",
+    title: "Browser में सीधा पाठ",
     description:
-      "Access our complete library of spiritual books directly in your browser. Our custom reader supports font resizing, dark/light mode, bookmarking, and chapter-by-chapter navigation — no downloads needed.",
+      "कोई app नहीं, कोई download नहीं। जो mobile या laptop पास है, उसी पर login कीजिए और अगली पंक्ति वहीं से पढ़िए जहाँ कल छोड़ी थी। Font, रंग, bookmark — सब आपकी पसंद के अनुसार।",
   },
   {
     icon: FileText,
-    title: "Spiritual Articles & Blogs",
+    title: "जीवन-सूत्र लेख",
     description:
-      "Stay inspired with regularly published articles covering meditation, self-realization, dharma, and practical spirituality. All content is freely accessible.",
+      "गुस्सा, चिंता, रिश्तों की उलझन — शास्त्रों में इनका क्या हल है, वो सरल भाषा में लेखों की शक्ल में। हर हफ़्ते कुछ नया, बिना विज्ञापन।",
   },
   {
     icon: Headphones,
-    title: "Discourses & Programs",
+    title: "सुनने वाले सत्संग",
     description:
-      "Explore recorded discourses and structured spiritual programs designed to guide you on your inner journey, from beginner to advanced levels.",
+      "पढ़ने का समय नहीं मिलता? कोई बात नहीं — गाड़ी में, टहलते वक़्त, या रसोई में काम करते हुए भी सुन लीजिए। छोटी-छोटी बैठकें, बड़ा असर।",
   },
   {
     icon: Monitor,
-    title: "Digital Publication",
+    title: "प्रकाशकों के लिए मंच",
     description:
-      "We publish sacred texts in digital formats optimized for web reading. Authors and spiritual teachers can reach a global audience through our platform.",
+      "आपके पास कोई अनमोल पांडुलिपि है और उसे लोगों तक पहुँचाना चाहते हैं? हमारी संपादकीय टीम मदद करेगी — proofread से लेकर publish तक।",
   },
   {
     icon: Heart,
-    title: "Donation & Seva",
+    title: "दान से चलता एक हिस्सा",
     description:
-      "Support the dissemination of spiritual knowledge through donations. Every contribution helps us publish more books and reach more seekers worldwide.",
+      "बहुत सारे ग्रंथ हम मुफ़्त रखते हैं ताकि पैसा किसी के भी आड़े न आए। यह संभव आपके योगदान से होता है — जितना बन पड़े, उतना।",
   },
   {
     icon: Users,
-    title: "Community Engagement",
+    title: "पाठकों का अपना गोल",
     description:
-      "Connect with like-minded seekers, participate in discussions, and be part of a growing spiritual community committed to conscious living.",
+      "WhatsApp, email — जहाँ भी सुविधा हो, जुड़िए। कोई नया ग्रंथ चाहिए तो बताइए, कोई शब्द अटक गया तो पूछिए। जवाब उसी दिन।",
   },
 ];
 
 const Services = () => {
   useSEO({
-    title: "Our Services — Online Book Reading, Spiritual Articles & Programs | GyandootNova",
-    description: "Explore GyandootNova services: read dharmik granth online, spiritual articles, meditation programs, digital publication & community engagement.",
+    title: "हमारी सेवाएँ — Online ग्रंथ, लेख और सत्संग | GyandootNova",
+    description:
+      "GyandootNova क्या-क्या देती है — online reader, लेख, सत्संग, प्रकाशन सहायता और पाठक-समुदाय। सब कुछ एक जगह।",
     canonical: "/services",
   });
 
@@ -53,10 +54,10 @@ const Services = () => {
       <main className="container py-16">
         <section className="text-center mb-16">
           <h1 className="font-serif text-4xl md:text-5xl font-bold text-primary mb-4">
-            Our Services
+            क्या-क्या मिलता है यहाँ
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Discover the range of spiritual services and resources GyandootNova offers to support your journey of self-discovery.
+            केवल किताबें नहीं — पढ़ने, सुनने, समझने और पूछने की पूरी सुविधा एक ही जगह।
           </p>
         </section>
 

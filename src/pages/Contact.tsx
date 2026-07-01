@@ -10,10 +10,12 @@ import useSEO from "@/hooks/useSEO";
 
 const Contact = () => {
   useSEO({
-    title: "Contact GyandootNova — Spiritual Books Support & Enquiry",
-    description: "Contact GyandootNova for questions about dharmik granth, book orders, spiritual programs, or collaboration. Email, phone & contact form available.",
+    title: "हमसे बात करें — GyandootNova से जुड़िए",
+    description:
+      "ग्रंथ, order, सुझाव या साझेदारी — जो भी बात हो, WhatsApp, email या form से पहुँचिए। जवाब उसी दिन।",
     canonical: "/contact",
   });
+
   const { toast } = useToast();
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [sending, setSending] = useState(false);
@@ -26,11 +28,12 @@ const Contact = () => {
         body: form,
       });
       if (error) throw error;
-      toast({ title: "Message Sent ✅", description: "Thank you! We'll get back to you soon." });
+      toast({ title: "संदेश पहुँच गया ✅", description: "बहुत जल्द जवाब मिलेगा।" });
       setForm({ name: "", email: "", subject: "", message: "" });
     } catch {
-      toast({ title: "Failed to send", description: "Please try again or email us directly.", variant: "destructive" });
+      toast({ title: "भेजने में दिक़्क़त हुई", description: "थोड़ी देर बाद कोशिश कीजिए या सीधे email कीजिए।", variant: "destructive" });
     } finally {
+
       setSending(false);
     }
   };
@@ -39,50 +42,51 @@ const Contact = () => {
     <Layout>
       <main className="container py-16">
         <section className="text-center mb-16">
-          <h1 className="font-serif text-4xl md:text-5xl font-bold text-primary mb-4">Contact Us</h1>
+          <h1 className="font-serif text-4xl md:text-5xl font-bold text-primary mb-4">एक बात कहनी है?</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Have questions, feedback, or want to collaborate? We'd love to hear from you.
+            शिकायत, सुझाव, या बस हाल-चाल — जो भी हो, लिख भेजिए। हम पढ़ते हैं, और उसी दिन जवाब देते हैं।
           </p>
         </section>
+
 
         <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
           {/* Contact Info */}
           <div>
-            <h2 className="font-serif text-2xl font-bold text-foreground mb-6">Get in Touch</h2>
+            <h2 className="font-serif text-2xl font-bold text-foreground mb-6">सीधा सम्पर्क</h2>
             <div className="space-y-6">
               <div className="flex items-start gap-4">
                 <Mail className="h-6 w-6 text-primary mt-1" />
                 <div>
-                  <p className="font-semibold text-foreground">Email</p>
+                  <p className="font-semibold text-foreground">ईमेल</p>
                   <p className="text-muted-foreground">contact@gyandootnova.in</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
                 <Phone className="h-6 w-6 text-primary mt-1" />
                 <div>
-                  <p className="font-semibold text-foreground">Phone</p>
+                  <p className="font-semibold text-foreground">फ़ोन / WhatsApp</p>
                   <p className="text-muted-foreground">+91 91615 33353</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
                 <MapPin className="h-6 w-6 text-primary mt-1" />
                 <div>
-                  <p className="font-semibold text-foreground">Address</p>
-                  <p className="text-muted-foreground">Unnao UP, India</p>
+                  <p className="font-semibold text-foreground">पता</p>
+                  <p className="text-muted-foreground">उन्नाव, उत्तर प्रदेश — भारत</p>
                 </div>
               </div>
             </div>
 
             <div className="mt-8 p-6 bg-muted/50 rounded-xl">
-              <h3 className="font-serif font-semibold text-foreground mb-2">Working Hours</h3>
-              <p className="text-sm text-muted-foreground">Monday – Saturday: 10:00 AM – 6:00 PM IST</p>
-              <p className="text-sm text-muted-foreground">Sunday: Closed</p>
+              <h3 className="font-serif font-semibold text-foreground mb-2">कब पहुँचें</h3>
+              <p className="text-sm text-muted-foreground">सोम से शनि: सुबह 10 से शाम 6 (भारतीय समय)</p>
+              <p className="text-sm text-muted-foreground">रविवार: विश्राम दिवस</p>
             </div>
           </div>
 
-          {/* Contact Form */}
           <div>
-            <h2 className="font-serif text-2xl font-bold text-foreground mb-6">Send a Message</h2>
+            <h2 className="font-serif text-2xl font-bold text-foreground mb-6">फ़ॉर्म भरिए</h2>
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <Input
                 placeholder="Your Name"

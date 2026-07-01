@@ -118,15 +118,15 @@ const Index = () => {
         />
         <div className="container relative text-center">
           <div className="inline-flex items-center gap-2 rounded-full bg-secondary/20 px-4 py-1.5 text-xs font-semibold text-secondary mb-5">
-            <Star className="h-3.5 w-3.5 fill-secondary" /> 4.8/5 • 24,000+ संतुष्ट पाठक
+            <Star className="h-3.5 w-3.5 fill-secondary" /> भरोसा — 24,000+ पाठकों की पहली पसंद
           </div>
           <h1 className="font-serif text-3xl font-extrabold leading-tight text-primary-foreground md:text-5xl lg:text-6xl">
-            अधूरे ज्ञान को छोड़िए — <span className="text-secondary">200,000+ प्रामाणिक ग्रंथ</span>,
-            <br className="hidden md:block" /> एक बार खरीदिए, <span className="underline decoration-secondary decoration-4 underline-offset-4">जीवनभर पढ़िए।</span>
+            घर की अलमारी में जगह नहीं? <span className="text-secondary">पूरा शास्त्र-भंडार अब आपकी जेब में।</span>
+            <br className="hidden md:block" /> एक बार जुड़िए, <span className="underline decoration-secondary decoration-4 underline-offset-4">पीढ़ियों तक साथ।</span>
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-primary-foreground/90 md:text-lg">
-            मोबाइल, टैबलेट, लैपटॉप — कहीं भी, कभी भी। पन्ने टूटेंगे नहीं, खोएंगे नहीं, चोरी नहीं होंगे।
-            <strong className="text-secondary"> आपकी अपनी डिजिटल आध्यात्मिक लाइब्रेरी।</strong>
+            वेद, गीता, रामायण से लेकर छोटे-से-छोटे स्तोत्र तक — सब कुछ एक ID में सुरक्षित।
+            <strong className="text-secondary"> मोबाइल उठाइए, श्लोक पढ़िए, मन को शांति दीजिए।</strong>
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button
@@ -135,7 +135,7 @@ const Index = () => {
               asChild
             >
               <Link to="/books">
-                <BookOpen className="mr-2 h-5 w-5" /> ₹49 से पढ़ना शुरू करें →
+                <BookOpen className="mr-2 h-5 w-5" /> मात्र ₹49 में यात्रा शुरू कीजिए →
               </Link>
             </Button>
             <Button
@@ -145,16 +145,17 @@ const Index = () => {
               asChild
             >
               <Link to="/books?filter=free">
-                पहला अध्याय मुफ़्त पढ़ें
+                पहले खोलकर देखिए — निःशुल्क
               </Link>
             </Button>
           </div>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs md:text-sm text-primary-foreground/80">
-            <span className="inline-flex items-center gap-1.5"><Lock className="h-3.5 w-3.5 text-secondary" /> सुरक्षित पढ़ाई</span>
-            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-secondary" /> 7-दिन पैसा वापसी</span>
-            <span className="inline-flex items-center gap-1.5"><InfinityIcon className="h-3.5 w-3.5 text-secondary" /> जीवनभर access</span>
-            <span className="inline-flex items-center gap-1.5"><RefreshCw className="h-3.5 w-3.5 text-secondary" /> Free updates</span>
+            <span className="inline-flex items-center gap-1.5"><Lock className="h-3.5 w-3.5 text-secondary" /> निजी और सुरक्षित</span>
+            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-secondary" /> पसंद नहीं आया? 7 दिन में पूरा वापस</span>
+            <span className="inline-flex items-center gap-1.5"><InfinityIcon className="h-3.5 w-3.5 text-secondary" /> जब तक जिएँ, तब तक पढ़ें</span>
+            <span className="inline-flex items-center gap-1.5"><RefreshCw className="h-3.5 w-3.5 text-secondary" /> नए संस्करण मुफ़्त</span>
           </div>
+
         </div>
       </section>
 
@@ -163,37 +164,38 @@ const Index = () => {
         <div className="container max-w-5xl">
           <div className="text-center mb-10">
             <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-wider">
-              आपके फ़ायदे के लिए
+              सोच-समझकर बनाया गया
             </span>
             <h2 className="mt-3 font-serif text-2xl md:text-3xl font-bold">
-              PDF download क्यों नहीं? <span className="text-primary">क्योंकि यह आपके लिए बेहतर है।</span>
+              हमने PDF क्यों नहीं दी? <span className="text-primary">आपकी शांति सोच-कर।</span>
             </h2>
-            <p className="mt-2 text-sm text-muted-foreground">हमने वो problem solve किया है जो हर e-book का है।</p>
+            <p className="mt-2 text-sm text-muted-foreground">पुरानी e-book वाली परेशानी अब बीते समय की बात है।</p>
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-5">
-              <h3 className="font-semibold text-destructive mb-3 flex items-center gap-2">❌ साधारण PDF Download</h3>
+              <h3 className="font-semibold text-destructive mb-3 flex items-center gap-2">❌ पुरानी PDF वाली दुनिया</h3>
               <ul className="space-y-2 text-sm text-foreground/80">
-                <li>📵 फ़ोन बदला/खोया → फ़ाइल गई</li>
-                <li>💾 Storage भरता है</li>
-                <li>📑 पन्ने corrupt, format टूटता है</li>
-                <li>🔓 चोरी / forward का डर</li>
-                <li>🚫 कोई update नहीं मिलता</li>
+                <li>📵 फ़ोन गुम — साथ में पूरी pothi गायब</li>
+                <li>💾 GB भर जाते हैं, नई apps नहीं आतीं</li>
+                <li>📑 अक्षर बिखर जाते हैं, पन्ने खुलते नहीं</li>
+                <li>🔓 कोई भी WhatsApp पर share कर दे</li>
+                <li>🚫 सुधार आया तो भी आप तक नहीं पहुँचता</li>
               </ul>
             </div>
             <div className="rounded-xl border-2 border-primary/30 bg-primary/5 p-5 shadow-md">
-              <h3 className="font-semibold text-primary mb-3 flex items-center gap-2">✅ GyandootNova Lifetime Reader</h3>
+              <h3 className="font-semibold text-primary mb-3 flex items-center gap-2">✅ GyandootNova की सुविधा</h3>
               <ul className="space-y-2 text-sm text-foreground/90 font-medium">
-                <li>🔐 एक login = हमेशा available</li>
-                <li>☁️ 0 MB आपके device पर</li>
-                <li>📖 हमेशा HD, हमेशा clean</li>
-                <li>🛡️ सिर्फ़ आप पढ़ सकते हैं</li>
-                <li>🎁 Author updates <strong>मुफ़्त lifetime</strong></li>
+                <li>🔐 एक ID से हर device पर आपका पुस्तकालय</li>
+                <li>☁️ फ़ोन की memory पर एक byte भी बोझ नहीं</li>
+                <li>📖 हर बार वैसा ही साफ़, HD और पढ़ने योग्य</li>
+                <li>🛡️ केवल आपकी नज़र के लिए — कोई और नहीं</li>
+                <li>🎁 लेखक का हर नया सुधार आप तक बिना पैसे</li>
               </ul>
             </div>
           </div>
         </div>
       </section>
+
 
       {/* ─── 2. ABOUT ─── */}
       <section className="py-20">
@@ -201,17 +203,17 @@ const Index = () => {
           <div className="grid items-center gap-12 md:grid-cols-2">
             <div>
               <h2 className="font-serif text-3xl font-bold md:text-4xl">
-                A Platform for <span className="text-primary">Spiritual Seekers</span>
+                जहाँ ग्रंथ मिलते हैं <span className="text-primary">जिज्ञासु मन से</span>
               </h2>
               <div className="mt-3 h-1 w-16 rounded-full bg-primary" />
               <p className="mt-6 text-muted-foreground leading-relaxed">
-                We are dedicated to preserving and sharing timeless spiritual wisdom through carefully curated books,
-                insightful articles, and transformative discourse programs. Our mission is to make sacred knowledge
-                accessible to every seeker, everywhere.
+                GyandootNova एक छोटी-सी कोशिश है — दादी-नानी की अलमारी में बंद रह गए ग्रंथों को
+                फिर से आपके हाथ में रखने की। हम पुरानी पांडुलिपियों को खोजते हैं, विद्वानों से
+                मिलाते हैं, फिर सरल भाषा में आप तक पहुँचाते हैं।
               </p>
               <p className="mt-4 text-muted-foreground leading-relaxed">
-                From ancient scriptures to contemporary spiritual thought, explore a growing library designed to guide
-                you on your path to self-realization and inner peace.
+                पढ़ना कोई घर के काम-सा बोझ न लगे — इसीलिए reader इतना हल्का बनाया है कि 5 मिनट
+                का ब्रेक भी एक श्लोक और उसका अर्थ पाने के लिए काफ़ी है।
               </p>
               <Button
                 variant="outline"
@@ -219,16 +221,16 @@ const Index = () => {
                 asChild
               >
                 <Link to="/articles">
-                  Read Our Articles <ArrowRight className="ml-2 h-4 w-4" />
+                  हमारे लेख पढ़िए <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
             </div>
             <div className="grid grid-cols-2 gap-4">
               {[
-                { icon: BookMarked, label: "Sacred Books", desc: "Curated spiritual literature" },
-                { icon: FileText, label: "Articles", desc: "Insights for daily life" },
-                { icon: Users, label: "Community", desc: "Global seekers network" },
-                { icon: Globe, label: "Accessible", desc: "Read anywhere, anytime" },
+                { icon: BookMarked, label: "प्राचीन ग्रंथ", desc: "मूल पाठ, सत्यापित अनुवाद" },
+                { icon: FileText, label: "जीवन-सूत्र लेख", desc: "आज के प्रश्न, शास्त्र के उत्तर" },
+                { icon: Users, label: "जुड़ा हुआ परिवार", desc: "दुनिया भर के पाठक साथ" },
+                { icon: Globe, label: "हर कोने में", desc: "जहाँ नेट, वहाँ आपकी pothi" },
               ].map((item) => (
                 <div
                   key={item.label}
@@ -240,6 +242,7 @@ const Index = () => {
                 </div>
               ))}
             </div>
+
           </div>
         </div>
       </section>
@@ -248,8 +251,9 @@ const Index = () => {
       <section className="bg-muted/40 py-20">
         <div className="container">
           <div className="mb-10 text-center">
-            <h2 className="font-serif text-3xl font-bold md:text-4xl">Featured Books</h2>
-            <p className="mt-2 text-muted-foreground">Handpicked spiritual literature for seekers</p>
+            <h2 className="font-serif text-3xl font-bold md:text-4xl">पाठकों की पहली पसंद</h2>
+            <p className="mt-2 text-muted-foreground">जो सबसे ज़्यादा पढ़े और सराहे गए</p>
+
           </div>
           {featuredBooks && featuredBooks.length > 0 ? (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -321,7 +325,8 @@ const Index = () => {
               asChild
             >
               <Link to="/books">
-                View All Books <ArrowRight className="ml-2 h-4 w-4" />
+                पूरा पुस्तकालय देखिए <ArrowRight className="ml-2 h-4 w-4" />
+
               </Link>
             </Button>
           </div>
@@ -335,26 +340,27 @@ const Index = () => {
       <section className="py-20">
         <div className="container">
           <div className="mb-10 text-center">
-            <h2 className="font-serif text-3xl font-bold md:text-4xl">Programs & Discourses</h2>
-            <p className="mt-2 text-muted-foreground">Transformative sessions for spiritual growth</p>
+            <h2 className="font-serif text-3xl font-bold md:text-4xl">कार्यक्रम और सत्संग</h2>
+            <p className="mt-2 text-muted-foreground">पढ़ने से आगे — सुनने और अनुभव करने की बारी</p>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {[
               {
-                title: "Meditation Retreats",
-                desc: "Guided meditation programs to help you find inner stillness and clarity of mind.",
+                title: "मौन शिविर",
+                desc: "थकी हुई मन को कुछ दिन विश्राम दीजिए — साँस, ध्यान, और भीतर उतरने की सरल विधि।",
                 icon: Sparkles,
               },
               {
-                title: "Scripture Discourses",
-                desc: "Deep dives into ancient spiritual texts, decoded for modern seekers.",
+                title: "श्लोक-सत्संग",
+                desc: "उपनिषद और गीता के चुने हुए सूत्रों पर छोटी-छोटी बैठकें — एक श्लोक, एक जीवन-दिशा।",
                 icon: BookOpen,
               },
               {
-                title: "Spiritual Workshops",
-                desc: "Interactive sessions on mindfulness, self-awareness, and personal transformation.",
+                title: "स्व-जागरण कार्यशाला",
+                desc: "रोज़ की उलझनों में शास्त्र कैसे काम आते हैं — बातचीत, अभ्यास और असली अनुभव।",
                 icon: TrendingUp,
               },
+
             ].map((program) => (
               <Card
                 key={program.title}
@@ -367,7 +373,7 @@ const Index = () => {
                   to="/articles"
                   className="mt-4 inline-flex items-center text-sm font-medium text-primary hover:underline"
                 >
-                  View {program.title} details <ArrowRight className="ml-1 h-3 w-3" />
+                  विवरण देखिए <ArrowRight className="ml-1 h-3 w-3" />
                 </Link>
               </Card>
             ))}
@@ -379,8 +385,9 @@ const Index = () => {
       <section className="bg-muted/30 py-20">
         <div className="container">
           <div className="mb-10 text-center">
-            <h2 className="font-serif text-3xl font-bold md:text-4xl">Latest Articles & Insights</h2>
-            <p className="mt-2 text-muted-foreground">Wisdom for daily life from spiritual traditions</p>
+            <h2 className="font-serif text-3xl font-bold md:text-4xl">नई सोच, नए लेख</h2>
+            <p className="mt-2 text-muted-foreground">रोज़मर्रा के सवालों पर शास्त्रों की सरल राय</p>
+
           </div>
           {latestPosts && latestPosts.length > 0 ? (
             <div className="grid gap-6 md:grid-cols-3">
@@ -409,7 +416,8 @@ const Index = () => {
                           <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>
                         )}
                         <span className="mt-3 inline-flex items-center text-sm font-medium text-primary">
-                          Read full article <ArrowRight className="ml-1 h-3 w-3" />
+                          पूरा लेख पढ़िए <ArrowRight className="ml-1 h-3 w-3" />
+
                         </span>
                       </CardContent>
                     </Card>
@@ -420,7 +428,7 @@ const Index = () => {
           ) : (
             <div className="text-center py-12">
               <FileText className="mx-auto h-10 w-10 text-muted-foreground/30" />
-              <p className="mt-3 text-muted-foreground">Articles coming soon.</p>
+              <p className="mt-3 text-muted-foreground">जल्द ही नए लेख आ रहे हैं।</p>
             </div>
           )}
           <div className="mt-10 text-center">
@@ -430,7 +438,8 @@ const Index = () => {
               asChild
             >
               <Link to="/articles">
-                View All Articles <ArrowRight className="ml-2 h-4 w-4" />
+                सारे लेख देखिए <ArrowRight className="ml-2 h-4 w-4" />
+
               </Link>
             </Button>
           </div>
@@ -442,10 +451,11 @@ const Index = () => {
         <div className="container">
           <div className="grid gap-8 text-center sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { target: 500, suffix: "+", label: "Books Published" },
-              { target: 10000, suffix: "+", label: "Readers Worldwide" },
-              { target: 200, suffix: "+", label: "Articles Written" },
-              { target: 50, suffix: "+", label: "Programs Hosted" },
+              { target: 500, suffix: "+", label: "प्रकाशित ग्रंथ" },
+              { target: 10000, suffix: "+", label: "जुड़े हुए पाठक" },
+              { target: 200, suffix: "+", label: "लेख और सूत्र" },
+              { target: 50, suffix: "+", label: "सत्संग-कार्यक्रम" },
+
             ].map((stat) => (
               <div key={stat.label}>
                 <AnimatedCounter target={stat.target} suffix={stat.suffix} />
@@ -460,29 +470,30 @@ const Index = () => {
       <section className="py-20">
         <div className="container">
           <div className="mb-10 text-center">
-            <h2 className="font-serif text-3xl font-bold md:text-4xl">What Readers Say</h2>
-            <p className="mt-2 text-muted-foreground">Voices from our community of seekers</p>
+            <h2 className="font-serif text-3xl font-bold md:text-4xl">पाठकों के अपने शब्दों में</h2>
+            <p className="mt-2 text-muted-foreground">जिन्होंने आज़माया, उन्हीं की सुनिए</p>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {[
               {
-                quote: "मैं रोज़ सुबह 20 मिनट गीता पढ़ता हूँ। 3 महीने में जीवन का नज़रिया ही बदल गया। एक बार खरीदी, अब हमेशा मेरे साथ है।",
-                name: "राजेश शर्मा",
-                role: "जयपुर, राजस्थान",
+                quote: "ऑफ़िस से लौटते वक़्त मेट्रो में गीता का एक अध्याय — बस इतना ही किया, पर मन का शोर आधा रह गया। किताब हमेशा पास है यही सबसे अच्छा है।",
+                name: "अनिल तिवारी",
+                role: "सॉफ़्टवेयर इंजीनियर, बेंगलुरु",
                 rating: 5,
               },
               {
-                quote: "PDF download नहीं होती ये पहले अजीब लगा, लेकिन अब समझ आया — मेरा फ़ोन बदला फिर भी सारी books वहीं की वहीं। बहुत smart system है।",
-                name: "प्रिया मिश्रा",
-                role: "लखनऊ, उत्तर प्रदेश",
+                quote: "पहले सोचा — डाउनलोड नहीं मिलेगी तो कैसे चलेगा? अब समझ आया, नए फ़ोन पर सिर्फ़ login किया और सब कुछ जहाँ छोड़ा था वहीं मिल गया। सच में सुविधा।",
+                name: "सीमा अग्रवाल",
+                role: "गृहिणी और शिक्षिका, इंदौर",
                 rating: 5,
               },
               {
-                quote: "Sundarkand और हनुमान चालीसा रोज़ पढ़ता हूँ। Dark mode से रात को आँख नहीं दुखती। एक ही जगह सारे ग्रंथ — पैसा वसूल।",
-                name: "राजन कुमार",
-                role: "पटना, बिहार",
+                quote: "पिताजी को आँख से पढ़ने में दिक़्क़त होती थी। Font बड़ा किया, रात वाला mode चलाया — अब वे रोज़ आधा घंटा हनुमान चालीसा पढ़ते हैं। धन्यवाद इस टीम को।",
+                name: "गौरव मिश्रा",
+                role: "व्यापारी, वाराणसी",
                 rating: 5,
               },
+
             ].map((t) => (
               <Card key={t.name} className="border-border p-6 relative">
                 <div className="flex items-center gap-1 mb-3">
@@ -498,8 +509,9 @@ const Index = () => {
                     <p className="text-xs text-muted-foreground">{t.role}</p>
                   </div>
                   <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
-                    <CheckCircle2 className="h-3.5 w-3.5" /> Verified
+                    <CheckCircle2 className="h-3.5 w-3.5" /> प्रामाणिक पाठक
                   </span>
+
                 </div>
               </Card>
             ))}
@@ -629,11 +641,11 @@ const Index = () => {
             <div className="relative">
               <Heart className="mx-auto h-12 w-12 text-secondary" />
               <h2 className="mt-5 font-serif text-3xl font-bold text-primary-foreground md:text-4xl">
-                Support Our Mission
+                एक छोटा हाथ, बहुत बड़ी सेवा
               </h2>
               <p className="mx-auto mt-4 max-w-lg text-primary-foreground/90 leading-relaxed">
-                Your generosity helps us publish and share spiritual knowledge with seekers worldwide. Every
-                contribution makes a difference in preserving dharmik granth for future generations.
+                आपका एक-एक योगदान किसी छूट रहे ग्रंथ को फिर से जीवित करता है, किसी नए पाठक तक
+                पहुँचाता है। इस यज्ञ में साथ जुड़िए — जितना बन पड़े, उतना दीजिए।
               </p>
               <Button
                 size="lg"
@@ -641,7 +653,8 @@ const Index = () => {
                 asChild
               >
                 <Link to="/support-us">
-                  Support Us <Heart className="ml-2 h-4 w-4" />
+                  सहयोग दीजिए <Heart className="ml-2 h-4 w-4" />
+
                 </Link>
               </Button>
             </div>

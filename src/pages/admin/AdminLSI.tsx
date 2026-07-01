@@ -148,7 +148,7 @@ const AdminLSI = () => {
           </div>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Button size="sm" variant="outline" onClick={() => exportTableToCsv("lsi_keywords", "lsi_keywords.csv")}>
+          <Button size="sm" variant="outline" onClick={() => downloadTableAsCsv({ table: "lsi_keywords", filenamePrefix: "lsi_keywords" })}>
             Download CSV
           </Button>
           <UploadCsvButton

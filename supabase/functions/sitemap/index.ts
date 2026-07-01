@@ -37,6 +37,7 @@ Deno.serve(async () => {
     { loc: "/support", priority: "0.4", changefreq: "monthly" },
     { loc: "/support-us", priority: "0.5", changefreq: "monthly" },
     { loc: "/sitemap", priority: "0.3", changefreq: "monthly" },
+    { loc: "/keywords", priority: "0.7", changefreq: "weekly" },
     { loc: "/privacy-policy", priority: "0.3", changefreq: "yearly" },
     { loc: "/terms-conditions", priority: "0.3", changefreq: "yearly" },
     { loc: "/refund-policy", priority: "0.3", changefreq: "yearly" },

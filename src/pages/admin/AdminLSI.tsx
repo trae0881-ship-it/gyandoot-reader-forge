@@ -15,7 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Pencil, Trash2, Search, Tag, ExternalLink } from "lucide-react";
 import UploadCsvButton from "@/components/admin/UploadCsvButton";
-import { exportTableToCsv } from "@/lib/exportCsv";
+import { downloadTableAsCsv } from "@/lib/exportCsv";
 
 type Kw = {
   id: string;

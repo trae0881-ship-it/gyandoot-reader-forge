@@ -1,11 +1,12 @@
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
+import useSEO from "@/hooks/useSEO";
 
 type Kw = {
   id: string;
@@ -33,62 +34,53 @@ const Keywords = () => {
 
   const terms = data ?? [];
 
-  // JSON-LD DefinedTermSet — best schema for keyword/glossary content
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "DefinedTermSet",
-    name: "GyandootNova — Sanatan Dharma & Hindu Scripture Keywords",
-    description:
-      "सनातन धर्म, वेद, उपनिषद, गीता, रामायण, महाभारत और आध्यात्मिक विषयों के प्रामाणिक कीवर्ड्स एवं संबंधित शब्दावली।",
-    url: "https://gyandootnova.in/keywords",
-    inLanguage: ["hi", "en", "sa"],
-    hasDefinedTerm: terms.map((t) => ({
-      "@type": "DefinedTerm",
-      name: t.term,
-      description: t.description || undefined,
-      inDefinedTermSet: "https://gyandootnova.in/keywords",
-      termCode: t.category || undefined,
-      alternateName: t.related_terms || undefined,
-    })),
-  };
+  const jsonLd = useMemo(
+    () => ({
+      "@context": "https://schema.org",
+      "@type": "DefinedTermSet",
+      name: "GyandootNova — Sanatan Dharma & Hindu Scripture Keywords",
+      description:
+        "सनातन धर्म, वेद, उपनिषद, गीता, रामायण, महाभारत और आध्यात्मिक विषयों के प्रामाणिक कीवर्ड्स।",
+      url: "https://gyandootnova.in/keywords",
+      inLanguage: ["hi", "en", "sa"],
+      hasDefinedTerm: terms.map((t) => ({
+        "@type": "DefinedTerm",
+        name: t.term,
+        description: t.description || undefined,
+        inDefinedTermSet: "https://gyandootnova.in/keywords",
+        termCode: t.category || undefined,
+        alternateName: t.related_terms || undefined,
+      })),
+    }),
+    [terms]
+  );
 
-  // Group by category
+  useSEO({
+    title: "Keywords & Topics — Sanatan Dharma, Vedas, Gita",
+    description:
+      "GyandootNova का प्रामाणिक कीवर्ड हब — भगवद्गीता, रामायण, महाभारत, वेद, उपनिषद, योग, भक्ति और सनातन धर्म से जुड़े सभी विषय एक जगह।",
+    canonical: "/keywords",
+    ogType: "website",
+    jsonLd,
+  });
+
   const grouped = terms.reduce<Record<string, Kw[]>>((acc, k) => {
     const cat = k.category || "General";
     (acc[cat] ||= []).push(k);
     return acc;
   }, {});
 
-  const flatKeywords = terms
-    .flatMap((t) => [t.term, ...(t.related_terms || [])])
-    .filter(Boolean)
-    .join(", ");
-
   return (
     <Layout>
-      <Helmet>
-        <title>Keywords & Topics — Sanatan Dharma, Vedas, Gita | GyandootNova</title>
-        <meta
-          name="description"
-          content="GyandootNova का प्रामाणिक कीवर्ड हब — भगवद्गीता, रामायण, महाभारत, वेद, उपनिषद, योग, भक्ति और सनातन धर्म से जुड़े सभी विषय एक जगह।"
-        />
-        <meta name="keywords" content={flatKeywords} />
-        <link rel="canonical" href="https://gyandootnova.in/keywords" />
-        <meta property="og:title" content="Sanatan Dharma Keywords Hub — GyandootNova" />
-        <meta property="og:url" content="https://gyandootnova.in/keywords" />
-        <meta property="og:type" content="website" />
-        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
-      </Helmet>
-
       <div className="container mx-auto max-w-6xl px-4 py-10">
         <header className="mb-10 text-center">
           <h1 className="font-serif text-4xl md:text-5xl font-bold text-primary mb-3">
             विषय-सूची एवं कीवर्ड्स
           </h1>
           <p className="text-muted-foreground max-w-3xl mx-auto">
-            सनातन धर्म, वेद, उपनिषद, गीता, रामायण, महाभारत और आध्यात्मिक विषयों से
-            जुड़े प्रमुख कीवर्ड्स। AI सर्च और Google पर हमारा प्रामाणिक हिंदी-संस्कृत
-            ज्ञान भंडार यहाँ से खोजें।
+            सनातन धर्म, वेद, उपनिषद, गीता, रामायण, महाभारत और आध्यात्मिक विषयों से जुड़े
+            प्रमुख कीवर्ड्स। AI सर्च और Google पर हमारा प्रामाणिक हिंदी-संस्कृत ज्ञान
+            भंडार यहाँ से खोजें।
           </p>
         </header>
 
@@ -134,9 +126,7 @@ const Keywords = () => {
             ))}
 
             <div className="mt-12 text-center">
-              <p className="text-sm text-muted-foreground mb-3">
-                और अधिक पढ़ें —
-              </p>
+              <p className="text-sm text-muted-foreground mb-3">और अधिक पढ़ें —</p>
               <div className="flex flex-wrap gap-3 justify-center">
                 <Link to="/books" className="text-primary hover:underline">सभी पुस्तकें</Link>
                 <span className="text-muted-foreground">•</span>

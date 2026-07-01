@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { LocaleProvider } from "@/hooks/useLocale";
+import PriceAutoConvert from "@/components/PriceAutoConvert";
 
 import { lazy, Suspense } from "react";
 
@@ -68,9 +70,11 @@ const AppContent = () => {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+          <LocaleProvider>
+            <PriceAutoConvert />
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Index />} />
@@ -117,8 +121,9 @@ const AppContent = () => {
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </Suspense>
-          </BrowserRouter>
+              </Suspense>
+            </BrowserRouter>
+          </LocaleProvider>
         </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>

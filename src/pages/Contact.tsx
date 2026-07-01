@@ -89,26 +89,26 @@ const Contact = () => {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <Input
-                placeholder="Your Name"
+                placeholder="आपका नाम"
                 required
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
               <Input
                 type="email"
-                placeholder="Your Email"
+                placeholder="ईमेल पता"
                 required
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
               />
               <Input
-                placeholder="Subject"
+                placeholder="विषय"
                 required
                 value={form.subject}
                 onChange={(e) => setForm({ ...form, subject: e.target.value })}
               />
               <Textarea
-                placeholder="Your Message"
+                placeholder="अपनी बात लिखिए…"
                 required
                 rows={5}
                 value={form.message}
@@ -117,12 +117,13 @@ const Contact = () => {
               <Button type="submit" className="w-full" disabled={sending}>
                 {sending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> भेज रहे हैं…
                   </>
                 ) : (
-                  "Send Message"
+                  "संदेश भेजें"
                 )}
               </Button>
+
             </form>
           </div>
         </div>

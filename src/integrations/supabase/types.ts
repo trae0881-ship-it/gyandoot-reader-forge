@@ -601,6 +601,42 @@ export type Database = {
         }
         Relationships: []
       }
+      lsi_keywords: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          priority: number
+          related_terms: string[] | null
+          term: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          priority?: number
+          related_terms?: string[] | null
+          term: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          priority?: number
+          related_terms?: string[] | null
+          term?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       otp_providers: {
         Row: {
           channel: string

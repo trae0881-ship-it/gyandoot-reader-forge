@@ -149,7 +149,7 @@ const Books = () => {
             <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
           ) : visible.length > 0 ? (
             <>
-              <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="mt-8 grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7">
                 {visible.map((book) => {
                   const readers = Math.max(book.purchase_count ?? 0, 100);
                   return (

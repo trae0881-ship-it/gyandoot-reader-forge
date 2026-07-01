@@ -256,7 +256,7 @@ const Index = () => {
 
           </div>
           {featuredBooks && featuredBooks.length > 0 ? (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7">
               {featuredBooks.map((book) => (
                 <Link key={book.id} to={`/books/${book.slug}`} className="group">
                   <Card className="overflow-hidden border-border transition-all hover:shadow-xl hover:-translate-y-1 h-full flex flex-col relative">

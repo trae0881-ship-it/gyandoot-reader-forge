@@ -35,6 +35,7 @@ const ShippingPolicy = lazy(() => import("./pages/ShippingPolicy"));
 const SitemapPage = lazy(() => import("./pages/Sitemap"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const Keywords = lazy(() => import("./pages/Keywords"));
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminBooks = lazy(() => import("./pages/admin/AdminBooks"));
@@ -49,6 +50,7 @@ const AdminAI = lazy(() => import("./pages/admin/AdminAI"));
 const AdminScripts = lazy(() => import("./pages/admin/AdminScripts"));
 const AdminAuthProviders = lazy(() => import("./pages/admin/AdminAuthProviders"));
 const AdminEnquiries = lazy(() => import("./pages/admin/AdminEnquiries"));
+const AdminLSI = lazy(() => import("./pages/admin/AdminLSI"));
 
 // Minimal loading spinner
 const PageLoader = () => (
@@ -96,6 +98,7 @@ const AppContent = () => {
                 <Route path="/refund-policy" element={<RefundPolicy />} />
                 <Route path="/shipping-policy" element={<ShippingPolicy />} />
                 <Route path="/sitemap" element={<SitemapPage />} />
+                <Route path="/keywords" element={<Keywords />} />
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<AdminDashboard />} />
                   <Route path="users" element={<AdminUsers />} />
@@ -109,6 +112,7 @@ const AppContent = () => {
                   <Route path="scripts" element={<AdminScripts />} />
                   <Route path="auth-providers" element={<AdminAuthProviders />} />
                   <Route path="enquiries" element={<AdminEnquiries />} />
+                  <Route path="lsi" element={<AdminLSI />} />
                   <Route path="settings" element={<AdminSettings />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />

@@ -19,6 +19,7 @@ Key topics: Sanatan Dharma, Vedas, Upanishads, Bhagavad Gita, Ramayana, Mahabhar
 - [Careers](/careers): Join the GyandootNova team
 - [Services](/services): Publishing and digital reading services
 - [Portfolio](/portfolio): Our published works
+- [Keywords Hub](/keywords): Complete LSI keyword & topic index — Sanatan Dharma, Vedas, Gita, Ramayana, Mahabharata, Upanishads, Yoga, Bhakti terminology (structured DefinedTermSet JSON-LD)
 
 ## Policies
 - [Privacy Policy](/privacy-policy): How we handle user data

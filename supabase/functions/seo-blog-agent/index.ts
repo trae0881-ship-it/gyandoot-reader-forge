@@ -186,9 +186,7 @@ async function callLLM(messages: ChatMsg[], json: boolean, log: any, sb: any, st
 // ─── Search providers ────────────────────────────────────────────────
 type Source = { url: string; title: string; snippet: string; provider?: string };
 
-async function searchTavily(query: string, opts: { topic?: "news" | "general" } = {}): Promise<Source[]> {
-  const key = Deno.env.get("TAVILY_API_KEY");
-  if (!key) throw new Error("no-key");
+async function searchTavily(query: string, key: string, opts: { topic?: "news" | "general" } = {}): Promise<Source[]> {
   const res = await withTimeout(fetch("https://api.tavily.com/search", {
     method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ api_key: key, query, max_results: 6, search_depth: "advanced", topic: opts.topic || "general" }),
@@ -197,9 +195,7 @@ async function searchTavily(query: string, opts: { topic?: "news" | "general" } 
   const data = await res.json();
   return (data.results || []).map((r: any) => ({ url: r.url, title: r.title || "", snippet: r.content || "", provider: "tavily" })).filter((s: Source) => s.url);
 }
-async function searchExa(query: string, opts: { type?: "neural" | "keyword" } = {}): Promise<Source[]> {
-  const key = Deno.env.get("EXA_API_KEY");
-  if (!key) throw new Error("no-key");
+async function searchExa(query: string, key: string, opts: { type?: "neural" | "keyword" } = {}): Promise<Source[]> {
   const res = await withTimeout(fetch("https://api.exa.ai/search", {
     method: "POST", headers: { "Content-Type": "application/json", "x-api-key": key },
     body: JSON.stringify({ query, numResults: 6, type: opts.type || "neural", contents: { text: { maxCharacters: 800 } } }),
@@ -208,9 +204,7 @@ async function searchExa(query: string, opts: { type?: "neural" | "keyword" } = 
   const data = await res.json();
   return (data.results || []).map((r: any) => ({ url: r.url, title: r.title || "", snippet: r.text || r.snippet || "", provider: "exa" })).filter((s: Source) => s.url);
 }
-async function searchFirecrawl(query: string): Promise<Source[]> {
-  const key = Deno.env.get("FIRECRAWL_API_KEY");
-  if (!key) throw new Error("no-key");
+async function searchFirecrawl(query: string, key: string): Promise<Source[]> {
   const res = await withTimeout(fetch("https://api.firecrawl.dev/v2/search", {
     method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     body: JSON.stringify({ query, limit: 6 }),
@@ -220,9 +214,7 @@ async function searchFirecrawl(query: string): Promise<Source[]> {
   const items = data?.data || data?.web?.results || [];
   return items.map((r: any) => ({ url: r.url || r.link, title: r.title || "", snippet: r.description || r.snippet || "", provider: "firecrawl" })).filter((s: Source) => s.url);
 }
-async function searchSerpAPI(query: string): Promise<Source[]> {
-  const key = Deno.env.get("SERPAPI_API_KEY");
-  if (!key) throw new Error("no-key");
+async function searchSerpAPI(query: string, key: string): Promise<Source[]> {
   const url = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(query)}&num=6&api_key=${key}`;
   const res = await withTimeout(fetch(url), 30000);
   if (!res.ok) throw new Error(`serpapi ${res.status}`);
@@ -230,13 +222,14 @@ async function searchSerpAPI(query: string): Promise<Source[]> {
   return (data.organic_results || []).map((r: any) => ({ url: r.link, title: r.title || "", snippet: r.snippet || "", provider: "serpapi" })).filter((s: Source) => s.url);
 }
 
-type SearchFn = (q: string) => Promise<Source[]>;
+type SearchFn = (q: string, key: string) => Promise<Source[]>;
 const ROUTES: Record<string, [string, SearchFn][]> = {
-  trending: [["tavily", (q) => searchTavily(q, { topic: "news" })], ["exa", (q) => searchExa(q)], ["serpapi", searchSerpAPI]],
-  semantic: [["exa", (q) => searchExa(q, { type: "neural" })], ["tavily", (q) => searchTavily(q)], ["serpapi", searchSerpAPI]],
-  crawl:    [["firecrawl", searchFirecrawl], ["exa", (q) => searchExa(q)], ["tavily", (q) => searchTavily(q)]],
-  google:   [["serpapi", searchSerpAPI], ["tavily", (q) => searchTavily(q)], ["exa", (q) => searchExa(q)]],
+  trending: [["tavily", (q, k) => searchTavily(q, k, { topic: "news" })], ["exa", (q, k) => searchExa(q, k)], ["serpapi", searchSerpAPI]],
+  semantic: [["exa", (q, k) => searchExa(q, k, { type: "neural" })], ["tavily", (q, k) => searchTavily(q, k)], ["serpapi", searchSerpAPI]],
+  crawl:    [["firecrawl", searchFirecrawl], ["exa", (q, k) => searchExa(q, k)], ["tavily", (q, k) => searchTavily(q, k)]],
+  google:   [["serpapi", searchSerpAPI], ["tavily", (q, k) => searchTavily(q, k)], ["exa", (q, k) => searchExa(q, k)]],
 };
+
 
 // spam/low-quality domains to drop
 const SPAM_DOMAINS = /(pinterest\.|quora\.|answers\.|.*\.blogspot\.|medium\.com\/@|reddit\.com\/r\/|scribd\.|slideshare\.|ezinearticles\.)/i;

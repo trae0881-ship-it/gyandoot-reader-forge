@@ -94,6 +94,7 @@ const AdminPosts = () => {
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState({ ...emptyForm });
   const [uploading, setUploading] = useState(false);
+  const [aiRunning, setAiRunning] = useState(false);
 
   const { data: posts } = useQuery({
     queryKey: ["admin-posts"],

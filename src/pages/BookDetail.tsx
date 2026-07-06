@@ -189,10 +189,17 @@ const BookDetail = () => {
     );
   };
 
-  const cleanedDesc = book?.description?.replace(/<[^>]*>/g, "").trim().slice(0, 155);
-  const bookDescription = (cleanedDesc && cleanedDesc.length >= 20)
-    ? cleanedDesc
-    : (book ? `${book.title} — ${book.author} द्वारा रचित पुस्तक GyandootNova पर पढ़ें, खरीदें और डाउनलोड करें।` : "Loading book...");
+  const cleanedDesc = book?.description?.replace(/<[^>]*>/g, "").trim();
+  const priceLabel = book ? (book.is_free ? "मुफ़्त" : `₹${book.price}`) : "";
+  const shortDesc = cleanedDesc && cleanedDesc.length >= 20 ? cleanedDesc.slice(0, 110) : "";
+  const bookDescription = book
+    ? (shortDesc
+        ? `${shortDesc}… ${book.author} द्वारा। ${priceLabel} — Instant digital delivery, UPI/Card/COD-friendly checkout।`
+        : `${book.title} — ${book.author} द्वारा। ${priceLabel} में पढ़ें, तुरंत access, सभी devices पर। GyandootNova पर सुरक्षित checkout।`)
+    : "Loading book...";
+  const bookMetaTitle = book
+    ? `${book.title} — ${book.author} | ${priceLabel} | GyandootNova`
+    : "Loading... | GyandootNova";
 
 
   const bookJsonLd = book ? {
@@ -208,11 +215,13 @@ const BookDetail = () => {
       "price": book.is_free ? "0" : String(book.price),
       "priceCurrency": "INR",
       "availability": "https://schema.org/InStock",
+      "url": `https://gyandootnova.in/books/${book.slug}`,
+      "deliveryLeadTime": { "@type": "QuantitativeValue", "minValue": 0, "maxValue": 1, "unitCode": "MIN" },
     },
   } : undefined;
 
   useSEO({
-    title: book ? `${book.title} by ${book.author} — Buy Online` : "Loading... | GyandootNova",
+    title: bookMetaTitle,
     description: bookDescription,
     canonical: book ? `/books/${book.slug}` : undefined,
     ogImage: book?.cover_url ?? undefined,
@@ -281,6 +290,14 @@ const BookDetail = () => {
               <span className={`mt-3 inline-block rounded-full px-3 py-1 text-sm font-medium ${book.is_free ? "bg-muted text-primary" : "bg-secondary/20 text-secondary-foreground"}`}>
                 {book.is_free ? "Free to Read" : `₹${book.price}`}
               </span>
+
+              <div className="mt-4 grid grid-cols-2 gap-2 rounded-lg border border-border bg-muted/30 p-3 text-xs sm:grid-cols-4">
+                <div className="flex items-center gap-1.5"><Tag className="h-3.5 w-3.5 text-primary" /><span><strong>{book.is_free ? "मुफ़्त" : `₹${book.price}`}</strong> कीमत</span></div>
+                <div className="flex items-center gap-1.5"><PlayCircle className="h-3.5 w-3.5 text-primary" /><span><strong>तुरंत</strong> delivery (0 min)</span></div>
+                <div className="flex items-center gap-1.5"><CreditCard className="h-3.5 w-3.5 text-primary" /><span>UPI · Card · <strong>COD*</strong></span></div>
+                <div className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-primary" /><span><strong>7-day</strong> refund</span></div>
+                <p className="col-span-2 sm:col-span-4 mt-1 text-[10px] text-muted-foreground">*COD only for physical add-ons; digital books unlock instantly after payment.</p>
+              </div>
 
               {showFreeBuyCard && (
                 <div className="mt-6 space-y-3 rounded-xl border border-primary/20 bg-primary/5 p-5">

@@ -530,11 +530,14 @@ async function main() {
       entry = { status, attempts, fetchMs, redirectChain: chain, finalUrl, ...audit };
       // Redirect-chain sanity: the final URL must resolve to the same path
       // we asked for (canonical/og:url are checked separately in auditPage).
+      // Redirect-chain sanity: the final URL must resolve to the same path
+      // we asked for (ignoring trailing slash). Off-route redirects fail;
+      // trailing-slash normalizations are silent.
       if (finalUrl && finalUrl !== url) {
         const mm = canonicalMismatch(url, finalUrl);
         if (mm) entry.problems.push(`redirect landed off-route — ${mm.replace(/^canonical /, "")}`);
-        else entry.problems.push(`normalized redirect (${chain.length - 1} hop${chain.length - 1 === 1 ? "" : "s"}) — ${url} → ${finalUrl}`);
       }
+
       if (MAX_FETCH_MS && fetchMs > MAX_FETCH_MS) {
         entry.problems.push(`fetch too slow: ${fetchMs}ms > ${MAX_FETCH_MS}ms`);
       }

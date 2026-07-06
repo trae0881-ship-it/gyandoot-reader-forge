@@ -131,8 +131,29 @@ const AdminAIProviders = () => {
 
         <TabsContent value="providers" className="mt-4">
           <Card>
-            <CardHeader className="pb-3">
+            <CardHeader className="pb-3 flex flex-row items-center justify-between">
               <CardTitle className="text-base">Configured Providers</CardTitle>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={busyRow === "all:test" || !(providers || []).some(p => p.key_last4)}
+                onClick={async () => {
+                  setBusyRow("all:test");
+                  try {
+                    const targets = (providers || []).filter(p => p.key_last4);
+                    await Promise.all(targets.map(p => invoke({ action: "test", provider: p.provider })));
+                    toast({ title: `Tested ${targets.length} provider(s)` });
+                    refresh();
+                  } catch (e: any) {
+                    toast({ title: "Error", description: e.message, variant: "destructive" });
+                  } finally {
+                    setBusyRow(null);
+                  }
+                }}
+              >
+                {busyRow === "all:test" ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Zap className="h-3 w-3 mr-1" />}
+                Test All (Go Live)
+              </Button>
             </CardHeader>
             <CardContent>
               {isLoading ? (

@@ -958,6 +958,54 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_agent_alerts: {
+        Row: {
+          created_at: string
+          emailed: boolean
+          error_type: string
+          extra: Json | null
+          http_status: number | null
+          id: string
+          message: string | null
+          provider: string | null
+          recovered: boolean
+          retry_count: number | null
+          severity: string
+          step: string | null
+          subject: string | null
+        }
+        Insert: {
+          created_at?: string
+          emailed?: boolean
+          error_type: string
+          extra?: Json | null
+          http_status?: number | null
+          id?: string
+          message?: string | null
+          provider?: string | null
+          recovered?: boolean
+          retry_count?: number | null
+          severity?: string
+          step?: string | null
+          subject?: string | null
+        }
+        Update: {
+          created_at?: string
+          emailed?: boolean
+          error_type?: string
+          extra?: Json | null
+          http_status?: number | null
+          id?: string
+          message?: string | null
+          provider?: string | null
+          recovered?: boolean
+          retry_count?: number | null
+          severity?: string
+          step?: string | null
+          subject?: string | null
+        }
+        Relationships: []
+      }
       seo_agent_logs: {
         Row: {
           action: string | null
@@ -1015,6 +1063,33 @@ export type Database = {
           status?: string
           topic?: string | null
           word_count?: number | null
+        }
+        Relationships: []
+      }
+      seo_provider_health: {
+        Row: {
+          consecutive_failures: number
+          last_error: string | null
+          last_http_status: number | null
+          paused_until: string | null
+          provider: string
+          updated_at: string
+        }
+        Insert: {
+          consecutive_failures?: number
+          last_error?: string | null
+          last_http_status?: number | null
+          paused_until?: string | null
+          provider: string
+          updated_at?: string
+        }
+        Update: {
+          consecutive_failures?: number
+          last_error?: string | null
+          last_http_status?: number | null
+          paused_until?: string | null
+          provider?: string
+          updated_at?: string
         }
         Relationships: []
       }

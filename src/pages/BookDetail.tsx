@@ -105,7 +105,7 @@ const BookDetail = () => {
       return;
     }
     setAppliedCoupon(data);
-    toast({ title: `Coupon Applied! 🎉`, description: `You save ₹${data.discount_amount}` });
+    toast({ title: "Coupon Applied!", description: `You save ₹${data.discount_amount}` });
   };
 
   const removeCoupon = () => {

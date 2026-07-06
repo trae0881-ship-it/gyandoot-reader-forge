@@ -1,7 +1,14 @@
 import Layout from "@/components/layout/Layout";
+import useSEO from "@/hooks/useSEO";
 
 const TermsConditions = () => {
+  useSEO({
+    title: "Terms & Conditions | GyandootNova",
+    description: "GyandootNova ki Terms & Conditions — platform use karne ke rules, user responsibilities aur legal terms.",
+    canonical: "/terms-conditions",
+  });
   return (
+
     <Layout>
       <main className="container py-16 max-w-3xl mx-auto prose prose-neutral dark:prose-invert">
         <h1 className="font-serif text-4xl font-bold text-primary">Terms & Conditions</h1>

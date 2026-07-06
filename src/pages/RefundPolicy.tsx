@@ -1,7 +1,14 @@
 import Layout from "@/components/layout/Layout";
+import useSEO from "@/hooks/useSEO";
 
 const RefundPolicy = () => {
+  useSEO({
+    title: "Refund Policy | GyandootNova",
+    description: "GyandootNova ki Refund Policy — 7-din refund guarantee, eligibility aur process ki poori jaankari.",
+    canonical: "/refund-policy",
+  });
   return (
+
     <Layout>
       <main className="container py-16 max-w-3xl mx-auto prose prose-neutral dark:prose-invert">
         <h1 className="font-serif text-4xl font-bold text-primary">Refund & Cancellation Policy</h1>

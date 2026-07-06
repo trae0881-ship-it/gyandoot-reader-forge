@@ -1,7 +1,14 @@
 import Layout from "@/components/layout/Layout";
+import useSEO from "@/hooks/useSEO";
 
 const PrivacyPolicy = () => {
+  useSEO({
+    title: "Privacy Policy | GyandootNova",
+    description: "GyandootNova ki Privacy Policy — hum aapka data kaise collect, use aur protect karte hain.",
+    canonical: "/privacy-policy",
+  });
   return (
+
     <Layout>
       <main className="container py-16 max-w-3xl mx-auto prose prose-neutral dark:prose-invert">
         <h1 className="font-serif text-4xl font-bold text-primary">Privacy Policy</h1>

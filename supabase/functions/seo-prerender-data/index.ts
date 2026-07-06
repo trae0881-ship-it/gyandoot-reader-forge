@@ -124,7 +124,7 @@ Deno.serve(async (req) => {
       })
       .filter(Boolean);
 
-    return new Response(JSON.stringify({ generated_at: new Date().toISOString(), chapters }), { headers });
+    return new Response(JSON.stringify({ generated_at: new Date().toISOString(), books: booksPayload, chapters }), { headers });
   } catch (error) {
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
       status: 500,

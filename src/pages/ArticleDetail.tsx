@@ -47,7 +47,11 @@ const ArticleDetail = () => {
     enabled: !!post,
   });
 
-  const articleDesc = post?.meta_description || post?.excerpt?.replace(/<[^>]*>/g, "").slice(0, 155) || (post ? `Read ${post.title} on GyandootNova.` : "Spiritual articles and insights at GyandootNova.");
+  const rawDesc = (post?.meta_description || post?.excerpt?.replace(/<[^>]*>/g, "").trim() || "").slice(0, 155);
+  const articleDesc = (rawDesc && rawDesc.length >= 20)
+    ? rawDesc
+    : (post ? `${post.title} — GyandootNova पर आध्यात्मिक लेख, विचार और ज्ञान पढ़ें।` : "Spiritual articles and insights at GyandootNova.");
+
 
   const articleJsonLd = post ? {
     "@context": "https://schema.org",

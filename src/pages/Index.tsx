@@ -205,26 +205,45 @@ const Index = () => {
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-5">
-              <h3 className="font-semibold text-destructive mb-3 flex items-center gap-2">❌ पुरानी PDF वाली दुनिया</h3>
+              <h3 className="font-semibold text-destructive mb-3 flex items-center gap-2">
+                <XCircle className="h-5 w-5" /> पुरानी PDF वाली दुनिया
+              </h3>
               <ul className="space-y-2 text-sm text-foreground/80">
-                <li>📵 फ़ोन गुम — साथ में पूरी pothi गायब</li>
-                <li>💾 GB भर जाते हैं, नई apps नहीं आतीं</li>
-                <li>📑 अक्षर बिखर जाते हैं, पन्ने खुलते नहीं</li>
-                <li>🔓 कोई भी WhatsApp पर share कर दे</li>
-                <li>🚫 सुधार आया तो भी आप तक नहीं पहुँचता</li>
+                {[
+                  { Icon: Smartphone, text: "फ़ोन गुम — साथ में पूरी pothi गायब" },
+                  { Icon: HardDrive, text: "GB भर जाते हैं, नई apps नहीं आतीं" },
+                  { Icon: FileWarning, text: "अक्षर बिखर जाते हैं, पन्ने खुलते नहीं" },
+                  { Icon: Unlock, text: "कोई भी WhatsApp पर share कर दे" },
+                  { Icon: Ban, text: "सुधार आया तो भी आप तक नहीं पहुँचता" },
+                ].map(({ Icon, text }) => (
+                  <li key={text} className="flex items-start gap-2">
+                    <Icon className="h-4 w-4 mt-0.5 text-destructive/70 shrink-0" />
+                    <span>{text}</span>
+                  </li>
+                ))}
               </ul>
             </div>
             <div className="rounded-xl border-2 border-primary/30 bg-primary/5 p-5 shadow-md">
-              <h3 className="font-semibold text-primary mb-3 flex items-center gap-2">✅ GyandootNova की सुविधा</h3>
+              <h3 className="font-semibold text-primary mb-3 flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5" /> GyandootNova की सुविधा
+              </h3>
               <ul className="space-y-2 text-sm text-foreground/90 font-medium">
-                <li>🔐 एक ID से हर device पर आपका पुस्तकालय</li>
-                <li>☁️ फ़ोन की memory पर एक byte भी बोझ नहीं</li>
-                <li>📖 हर बार वैसा ही साफ़, HD और पढ़ने योग्य</li>
-                <li>🛡️ केवल आपकी नज़र के लिए — कोई और नहीं</li>
-                <li>🎁 लेखक का हर नया सुधार आप तक बिना पैसे</li>
+                {[
+                  { Icon: Lock, text: "एक ID से हर device पर आपका पुस्तकालय" },
+                  { Icon: Cloud, text: "फ़ोन की memory पर एक byte भी बोझ नहीं" },
+                  { Icon: BookOpen, text: "हर बार वैसा ही साफ़, HD और पढ़ने योग्य" },
+                  { Icon: ShieldCheck, text: "केवल आपकी नज़र के लिए — कोई और नहीं" },
+                  { Icon: Gift, text: "लेखक का हर नया सुधार आप तक बिना पैसे" },
+                ].map(({ Icon, text }) => (
+                  <li key={text} className="flex items-start gap-2">
+                    <Icon className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+                    <span>{text}</span>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
+
         </div>
       </section>
 

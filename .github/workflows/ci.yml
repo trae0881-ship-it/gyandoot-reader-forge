@@ -71,12 +71,12 @@ jobs:
             --min-words=60 \
             --max-fetch-ms=4000 \
             --max-asset-ms=3000 \
-            --max-fetch-ms-rule="/books/*=6000" \
-            --max-fetch-ms-rule="/articles/*=6000" \
-            --max-asset-ms-rule="/books/*=5000" \
+            --config=.github/seo-verify.config.yaml \
             --report=dist/seo-live-report.json \
             --html=dist/seo-live-report.html \
             --csv=dist/seo-live-report.csv \
+            --sarif=dist/seo-live-report.sarif \
+            --debug-log=dist/seo-live-debug.ndjson \
             --github-summary
       - name: Stop preview
         if: always()
@@ -90,8 +90,24 @@ jobs:
             dist/seo-live-report.json
             dist/seo-live-report.html
             dist/seo-live-report.csv
+            dist/seo-live-report.sarif
           retention-days: 14
           if-no-files-found: warn
+      - name: Upload SEO debug log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-live-debug
+          path: dist/seo-live-debug.ndjson
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Upload SARIF to GitHub code scanning
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: dist/seo-live-report.sarif
+          category: seo-live-verify
+
 
 
 

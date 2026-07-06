@@ -44,18 +44,32 @@
  *                           Example: --max-fetch-ms-rule="/books/*=6000"
  *   --max-asset-ms-rule=<glob>=<ms>
  *                           Per-route override for --max-asset-ms (repeatable).
+ *   --config=<path>         Load defaults from a JSON or YAML config file
+ *                           (see loadConfig() for the shape). CLI flags
+ *                           always override the config file.
+ *   --debug-log=<path>      Emit an NDJSON debug log with per-URL fetch
+ *                           timings, redirect chains, and image-byte details.
+ *                           Default: dist/seo-live-debug.ndjson (unless
+ *                           --no-debug-log is passed).
+ *   --sarif=<path>          Emit a SARIF v2.1.0 report so GitHub can display
+ *                           failing routes inline on pull requests.
+ *                           Default: dist/seo-live-report.sarif.
+ *   --allow-redirect=<glob> Suppress "redirect landed off-route" failures for
+ *                           URLs matching <glob>. Repeatable.
+ *   --allow-canonical-mismatch=<glob>
+ *                           Suppress canonical/og:url mismatch failures for
+ *                           URLs matching <glob>. Repeatable.
  *   --github-summary        Append a compact table to $GITHUB_STEP_SUMMARY and
  *                           emit ::error:: annotations for failing routes.
  *   --resume=<path>         Reuse a previous JSON report; skip URLs that
  *                           passed there (default: off). Pair with --report to
  *                           point at the same file.
-
-
  *
  * Single-page curl (for spot checks):
  *   curl -sA "Googlebot" https://gyandootnova.in/books/rigved \
  *     | grep -E "<title|og:image|<h1|name=\"description\""
  */
+
 import { writeFileSync, mkdirSync, appendFileSync, readFileSync, existsSync } from "node:fs";
 import { dirname } from "node:path";
 
@@ -135,8 +149,130 @@ const DEFAULT_SCHEMA_RULES = [
 ];
 const SCHEMA_RULES_ORDERED = [...USER_SCHEMA_RULES, ...DEFAULT_SCHEMA_RULES];
 
-const MAX_FETCH_MS_RULES = many("max-fetch-ms-rule").map(parseTimingRule).filter(Boolean);
-const MAX_ASSET_MS_RULES = many("max-asset-ms-rule").map(parseTimingRule).filter(Boolean);
+// ---------- config file (--config=<path>) ----------
+// Shape (JSON or YAML):
+//   maxFetchMsRules: [{ pattern: "/books/*", ms: 6000 }]
+//   maxAssetMsRules: [{ pattern: "/articles/*", ms: 4000 }]
+//   allowlist:
+//     redirects:          ["/legacy/*", "/promo/**"]
+//     canonicalMismatch:  ["/campaign/*"]
+async function loadConfig(path) {
+  if (!path) return {};
+  if (!existsSync(path)) { console.warn(`⚠ config: ${path} not found`); return {}; }
+  const raw = readFileSync(path, "utf8");
+  const ext = path.toLowerCase().split(".").pop();
+  if (ext === "json") return JSON.parse(raw);
+  if (ext === "yaml" || ext === "yml") {
+    try {
+      const mod = await import("yaml").catch(() => null);
+      if (mod) return mod.parse(raw);
+      // Minimal fallback parser for the shallow schema we document above.
+      return parseTinyYaml(raw);
+    } catch (e) { console.warn(`⚠ config: YAML parse failed (${e.message})`); return {}; }
+  }
+  console.warn(`⚠ config: unsupported extension .${ext}`);
+  return {};
+}
+function parseTinyYaml(text) {
+  // Handles the documented shape only:
+  //   key: value
+  //   key:
+  //     nested: value
+  //     - scalar
+  //     - key: val         <- introduces a map inside a list; subsequent
+  //       key2: val           indented lines add to that same map
+  const root = {};
+  // Contexts: { indent, container, pendingKey? }
+  //   container is either an object or an array.
+  //   pendingKey (map only) — the key that will hold the next indented block.
+  const ctx = [{ indent: -1, container: root }];
+  const coerce = (v) => {
+    v = v.replace(/^["']|["']$/g, "");
+    if (/^-?\d+$/.test(v)) return parseInt(v, 10);
+    if (/^-?\d+\.\d+$/.test(v)) return parseFloat(v);
+    if (v === "true") return true;
+    if (v === "false") return false;
+    if (v === "null" || v === "~") return null;
+    return v;
+  };
+  for (const rawLine of text.split(/\r?\n/)) {
+    const line = rawLine.replace(/\t/g, "  ");
+    if (!line.trim() || line.trim().startsWith("#")) continue;
+    const indent = line.match(/^\s*/)[0].length;
+    const trimmed = line.trim();
+    // Dedent: pop contexts whose indent is deeper than this line.
+    while (ctx.length > 1 && indent < ctx[ctx.length - 1].indent) ctx.pop();
+
+    let top = ctx[ctx.length - 1];
+
+    // If parent has a pendingKey, this indented line resolves what type
+    // that key holds. First line decides: "- ..." → array, "key: ..." → object.
+    if (top.pendingKey !== undefined) {
+      const parent = top.container;
+      const newContainer = trimmed.startsWith("- ") ? [] : {};
+      parent[top.pendingKey] = newContainer;
+      top.pendingKey = undefined;
+      ctx.push({ indent, container: newContainer });
+      top = ctx[ctx.length - 1];
+    }
+
+    if (trimmed.startsWith("- ")) {
+      if (!Array.isArray(top.container)) {
+        // Shouldn't happen if input is well-formed; skip.
+        continue;
+      }
+      const rest = trimmed.slice(2).trim();
+      const colon = rest.indexOf(":");
+      if (colon > 0) {
+        // "- key: value" or "- key:" — introduces a map into the list.
+        const obj = {};
+        const key = rest.slice(0, colon).trim();
+        const val = rest.slice(colon + 1).trim();
+        if (val === "") obj[key] = null; else obj[key] = coerce(val);
+        top.container.push(obj);
+        // Sibling "key: val" lines at deeper indent attach to this map.
+        ctx.push({ indent: indent + 2, container: obj });
+      } else {
+        top.container.push(coerce(rest));
+      }
+    } else {
+      const colon = trimmed.indexOf(":");
+      if (colon < 0) continue;
+      if (Array.isArray(top.container)) continue;
+      const key = trimmed.slice(0, colon).trim();
+      const val = trimmed.slice(colon + 1).trim();
+      if (val === "" ) {
+        // Container follows on subsequent indented lines.
+        top.pendingKey = key;
+      } else if (val === "[]") {
+        top.container[key] = [];
+      } else if (val === "{}") {
+        top.container[key] = {};
+      } else {
+        top.container[key] = coerce(val);
+      }
+    }
+  }
+  return root;
+}
+
+
+const CONFIG = await loadConfig(opt("config", ""));
+
+function mergeTimingRules(cliRules, cfgRules) {
+  const fromCfg = (cfgRules || []).map((r) => (r && r.pattern && r.ms)
+    ? { pattern: r.pattern, ms: parseInt(r.ms, 10), re: globToRegExp(r.pattern) } : null).filter(Boolean);
+  // CLI wins → put CLI first so it matches before config entries.
+  return [...cliRules, ...fromCfg];
+}
+const MAX_FETCH_MS_RULES = mergeTimingRules(
+  many("max-fetch-ms-rule").map(parseTimingRule).filter(Boolean),
+  CONFIG.maxFetchMsRules,
+);
+const MAX_ASSET_MS_RULES = mergeTimingRules(
+  many("max-asset-ms-rule").map(parseTimingRule).filter(Boolean),
+  CONFIG.maxAssetMsRules,
+);
 function timingLimit(url, rules, fallback) {
   try {
     const path = new URL(url).pathname;
@@ -144,6 +280,28 @@ function timingLimit(url, rules, fallback) {
   } catch { /* ignore */ }
   return fallback || 0;
 }
+
+// ---------- allowlists ----------
+const ALLOW_REDIRECT_PATTERNS = [
+  ...many("allow-redirect"),
+  ...(CONFIG.allowlist?.redirects || []),
+].map(globToRegExp);
+const ALLOW_CANONICAL_MISMATCH_PATTERNS = [
+  ...many("allow-canonical-mismatch"),
+  ...(CONFIG.allowlist?.canonicalMismatch || []),
+].map(globToRegExp);
+function matchesAllowlist(url, patterns) {
+  if (!patterns.length) return false;
+  try {
+    const path = new URL(url).pathname;
+    return patterns.some((re) => re.test(path));
+  } catch { return false; }
+}
+
+// ---------- output paths ----------
+const DEBUG_LOG = flag("no-debug-log") ? null : opt("debug-log", "dist/seo-live-debug.ndjson");
+const SARIF_REPORT = flag("no-sarif") ? null : opt("sarif", "dist/seo-live-report.sarif");
+
 
 
 // ---------- resume mode ----------
@@ -323,24 +481,35 @@ function selectorPresent(rootHtml, sel) {
   return new RegExp(`<${tag}\\b`, "i").test(rootHtml);
 }
 
-// Canonical URL must match the URL we fetched (ignoring trailing slash and
-// hash). Both origin-swap and homepage-pointing bugs get caught here.
+// Canonical URL must match the URL we fetched, ignoring differences that
+// are semantically insignificant: trailing slash, scheme/host case, default
+// ports, fragments, and query-param ordering. Both origin-swap and
+// homepage-pointing bugs still get caught.
+function normalizeUrl(u) {
+  try {
+    const x = new URL(u);
+    const protocol = x.protocol.toLowerCase();
+    const host = x.hostname.toLowerCase();
+    const defaultPort = (protocol === "http:" && x.port === "80") || (protocol === "https:" && x.port === "443");
+    const port = defaultPort || !x.port ? "" : `:${x.port}`;
+    let p = x.pathname.replace(/\/+$/, "");
+    if (p === "") p = "/";
+    // Sort query params for stable comparison; drop empty query.
+    const params = [...x.searchParams.entries()].sort(([a], [b]) => a.localeCompare(b));
+    const qs = params.length ? "?" + params.map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join("&") : "";
+    // Fragment intentionally dropped — never affects server response.
+    return `${protocol}//${host}${port}${p}${qs}`;
+  } catch { return null; }
+}
 function canonicalMismatch(fetchedUrl, canonicalHref) {
   if (!canonicalHref) return null;
-  const norm = (u) => {
-    try {
-      const x = new URL(u);
-      let p = x.pathname.replace(/\/+$/, "");
-      if (p === "") p = "/";
-      return `${x.origin}${p}`;
-    } catch { return null; }
-  };
-  const a = norm(fetchedUrl);
-  const b = norm(canonicalHref);
+  const a = normalizeUrl(fetchedUrl);
+  const b = normalizeUrl(canonicalHref);
   if (!a || !b) return `canonical URL not parseable (${canonicalHref})`;
   if (a !== b) return `canonical mismatch — fetched ${a}, canonical ${b}`;
   return null;
 }
+
 
 function auditPage(url, html) {
   const problems = [];
@@ -666,7 +835,73 @@ function renderCsv(summary) {
   return [header.map(csvCell).join(","), ...rows].join("\n") + "\n";
 }
 
-
+// ---------- SARIF v2.1.0 ----------
+// Groups problems by category so GitHub renders each SEO check as its own
+// rule (with a stable ruleId) and each failing route as a result.
+function classifyProblem(msg) {
+  if (msg.startsWith("HTTP ")) return { id: "SEO001", name: "unreachable", level: "error" };
+  if (msg.startsWith("no <title>") || msg.startsWith("no meta description") || msg.startsWith("no canonical") || msg.startsWith("no og:image") || msg.startsWith("no twitter:card")) return { id: "SEO010", name: "missing-meta", level: "error" };
+  if (msg.startsWith("canonical mismatch") || msg.startsWith("og:url mismatch") || msg.startsWith("canonical URL not parseable")) return { id: "SEO011", name: "canonical-mismatch", level: "error" };
+  if (msg.startsWith("redirect landed off-route")) return { id: "SEO012", name: "redirect-off-route", level: "error" };
+  if (msg.startsWith("empty #root") || msg.startsWith("only ") || msg.startsWith("missing content selector")) return { id: "SEO020", name: "no-prerendered-content", level: "error" };
+  if (msg.startsWith("missing <h1>") || msg.startsWith("multiple <h1>")) return { id: "SEO021", name: "h1-issue", level: "warning" };
+  if (msg.startsWith("missing JSON-LD") || msg.startsWith("JSON-LD ")) return { id: "SEO030", name: "jsonld", level: "warning" };
+  if (msg.startsWith("og:image") || msg.startsWith("twitter:image")) return { id: "SEO040", name: "social-image", level: "error" };
+  if (msg.startsWith("duplicate title") || msg.startsWith("duplicate description")) return { id: "SEO050", name: "duplicate-meta", level: "warning" };
+  if (msg.includes("too slow")) return { id: "SEO060", name: "slow-response", level: "warning" };
+  return { id: "SEO999", name: "other", level: "note" };
+}
+function renderSarif(summary) {
+  const rulesMap = new Map();
+  const sarifResults = [];
+  for (const r of summary.results) {
+    for (const p of r.problems || []) {
+      const rule = classifyProblem(p);
+      if (!rulesMap.has(rule.id)) {
+        rulesMap.set(rule.id, {
+          id: rule.id,
+          name: rule.name,
+          shortDescription: { text: rule.name },
+          fullDescription: { text: `SEO check: ${rule.name}` },
+          defaultConfiguration: { level: rule.level },
+        });
+      }
+      sarifResults.push({
+        ruleId: rule.id,
+        level: rule.level,
+        message: { text: p },
+        locations: [{
+          physicalLocation: {
+            artifactLocation: { uri: r.url },
+            region: { startLine: 1 },
+          },
+          logicalLocations: [{ name: new URL(r.url).pathname, kind: "route" }],
+        }],
+        properties: { fetchMs: r.fetchMs || 0, status: r.status || 0 },
+      });
+    }
+  }
+  return {
+    $schema: "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+    version: "2.1.0",
+    runs: [{
+      tool: {
+        driver: {
+          name: "verify-live-seo",
+          informationUri: "https://gyandootnova.in",
+          version: "1.1.0",
+          rules: [...rulesMap.values()],
+        },
+      },
+      invocations: [{
+        executionSuccessful: summary.failed === 0,
+        startTimeUtc: summary.generatedAt,
+        properties: { origin: summary.origin, total: summary.total, failed: summary.failed },
+      }],
+      results: sarifResults,
+    }],
+  };
+}
 
 
 // ---------- main ----------
@@ -767,6 +1002,25 @@ async function main() {
     }
   }
 
+  // Apply allowlists — suppress specific problem categories without touching
+  // the underlying audit data. Silenced problems are moved to `ignored` for
+  // transparency in reports.
+  for (const r of results) {
+    if (!r.problems?.length) continue;
+    const allowRedirect = matchesAllowlist(r.url, ALLOW_REDIRECT_PATTERNS);
+    const allowCanon = matchesAllowlist(r.url, ALLOW_CANONICAL_MISMATCH_PATTERNS);
+    if (!allowRedirect && !allowCanon) continue;
+    const kept = [], ignored = [];
+    for (const p of r.problems) {
+      if (allowRedirect && p.startsWith("redirect landed off-route")) { ignored.push(p); continue; }
+      if (allowCanon && (p.startsWith("canonical mismatch") || p.startsWith("og:url mismatch"))) { ignored.push(p); continue; }
+      kept.push(p);
+    }
+    r.problems = kept;
+    if (ignored.length) r.ignoredProblems = ignored;
+  }
+
+
   const failed = results.filter((r) => r.problems?.length).length;
   const summary = {
     origin: ORIGIN,
@@ -803,6 +1057,33 @@ async function main() {
     writeFileSync(CSV_REPORT, renderCsv(summary));
     console.log(`CSV report  → ${CSV_REPORT}`);
   }
+  if (DEBUG_LOG) {
+    mkdirSync(dirname(DEBUG_LOG), { recursive: true });
+    // NDJSON: one line per URL. Keeps everything needed to reproduce a run.
+    const lines = results.map((r) => JSON.stringify({
+      url: r.url,
+      status: r.status,
+      finalUrl: r.finalUrl || null,
+      fetchMs: r.fetchMs || 0,
+      attempts: r.attempts || 0,
+      redirectChain: r.redirectChain || [],
+      ogImage: r.ogImage || null,
+      ogImageCheck: r.ogImageCheck || null,
+      twImage: r.twImage || null,
+      twImageCheck: r.twImageCheck || null,
+      jsonldTypes: r.jsonldTypes || [],
+      appliedRule: r.appliedRule || null,
+      problems: r.problems || [],
+      ignoredProblems: r.ignoredProblems || [],
+    }));
+    writeFileSync(DEBUG_LOG, lines.join("\n") + "\n");
+    console.log(`Debug log   → ${DEBUG_LOG}`);
+  }
+  if (SARIF_REPORT) {
+    mkdirSync(dirname(SARIF_REPORT), { recursive: true });
+    writeFileSync(SARIF_REPORT, JSON.stringify(renderSarif(summary), null, 2));
+    console.log(`SARIF       → ${SARIF_REPORT}`);
+  }
 
   if (GITHUB_SUMMARY) {
     emitGitHubAnnotations(results);
@@ -811,6 +1092,7 @@ async function main() {
   console.log(`${results.length - failed}/${results.length} URLs pass all checks`);
   if (failed) process.exit(1);
 }
+
 
 main().catch((e) => { console.error(e); process.exit(1); });
 

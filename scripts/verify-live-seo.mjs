@@ -200,8 +200,9 @@ function parseTinyYaml(text) {
     if (!line.trim() || line.trim().startsWith("#")) continue;
     const indent = line.match(/^\s*/)[0].length;
     const trimmed = line.trim();
-    // Dedent: pop contexts we've moved out of.
-    while (ctx.length > 1 && indent <= ctx[ctx.length - 1].indent) ctx.pop();
+    // Dedent: pop contexts whose indent is deeper than this line.
+    while (ctx.length > 1 && indent < ctx[ctx.length - 1].indent) ctx.pop();
+
     let top = ctx[ctx.length - 1];
 
     // If parent has a pendingKey, this indented line resolves what type

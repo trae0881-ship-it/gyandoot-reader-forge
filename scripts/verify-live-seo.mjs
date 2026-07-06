@@ -638,7 +638,11 @@ async function main() {
     minConcurrency: MIN_CONCURRENCY,
     finalConcurrency: throttle.current,
     retries: RETRIES,
+    timeoutMs: TIMEOUT_MS,
+    maxFetchMs: MAX_FETCH_MS || null,
+    maxAssetMs: MAX_ASSET_MS || null,
     minWords: MIN_WORDS,
+
     selectors: SELECTORS,
     schemaRules: SCHEMA_RULES_ORDERED.map(({ pattern, type, required }) => ({ pattern, type, required })),
     resumed: RESUMED_PASSING.size,

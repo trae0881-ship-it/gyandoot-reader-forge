@@ -229,13 +229,17 @@ async function main() {
     const page = await context.newPage();
     page.on("pageerror", () => {});
 
+    const seen = { titles: new Map(), descs: new Map() };
     for (const route of routes) {
       try {
         const snapshot = await snapshotRoute(page, route);
-        const missing = validateHead(route, snapshot.head);
+        const missing = [
+          ...validateHead(route, snapshot.head, seen),
+          ...validateBody(route, snapshot.rootHtml),
+        ];
         if (missing.length) {
           failures.push({ route, missing });
-          console.log(`  ✗ ${route}  missing: ${missing.join(", ")}`);
+          console.log(`  ✗ ${route}  ${missing.join(", ")}`);
         } else {
           console.log(`  ✓ ${route}`);
         }
@@ -246,6 +250,7 @@ async function main() {
       }
       processed++;
     }
+
 
     await browser.close();
   } finally {

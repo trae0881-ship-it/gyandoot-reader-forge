@@ -18,6 +18,14 @@ import {
   Lock,
   CheckCircle2,
   Star,
+  XCircle,
+  Smartphone,
+  HardDrive,
+  FileWarning,
+  Unlock,
+  Ban,
+  Cloud,
+  Gift,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";

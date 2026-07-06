@@ -36,6 +36,53 @@ jobs:
           path: dist
           retention-days: 3
 
+  seo-live-verify:
+    name: Live SEO verifier (curl-based)
+    runs-on: ubuntu-latest
+    needs: verify
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - name: Download prerendered dist
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - name: Serve dist on :4175
+        run: |
+          bunx vite preview --port 4175 --strictPort > preview.log 2>&1 &
+          echo $! > preview.pid
+          for i in $(seq 1 40); do
+            if curl -fsS http://localhost:4175/ > /dev/null; then echo "preview up"; break; fi
+            sleep 0.5
+          done
+      - name: Run live SEO verifier against local preview
+        run: |
+          node scripts/verify-live-seo.mjs \
+            --origin=http://localhost:4175 \
+            --concurrency=8 \
+            --retries=3 \
+            --backoff=500 \
+            --min-words=60 \
+            --report=dist/seo-live-report.json \
+            --html=dist/seo-live-report.html
+      - name: Stop preview
+        if: always()
+        run: kill "$(cat preview.pid)" || true
+      - name: Upload SEO reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-live-report
+          path: |
+            dist/seo-live-report.json
+            dist/seo-live-report.html
+          retention-days: 7
+
+
   lighthouse:
     name: Lighthouse performance budgets
     runs-on: ubuntu-latest

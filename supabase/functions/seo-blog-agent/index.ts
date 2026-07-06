@@ -14,12 +14,14 @@ import {
   sendAlert, sendRecovery, isProviderPaused, recordProviderFailure,
   recordProviderSuccess, classifyError,
 } from "../_shared/seo-alerts.ts";
+import { buildKeyResolver, KeyResolver } from "../_shared/ai-key-resolver.ts";
 
 const NICHE = "Books, Spirituality, Meditation, Self Growth, Mindfulness, Consciousness";
 const SITE = "https://gyandootnova.in";
 const AUTHOR = "GyandootNova Editorial";
 const SIMILARITY_THRESHOLD = 0.7;
 const CONTENT_SCORE_THRESHOLD = Number(Deno.env.get("SEO_CONTENT_SCORE_MIN") || "55");
+
 
 
 // ─── helpers ─────────────────────────────────────────────────────────

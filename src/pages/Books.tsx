@@ -190,7 +190,7 @@ const Books = () => {
                             <span>{readers.toLocaleString()}+ पाठक</span>
                           </div>
 
-                          {/* Price + CTA */}
+                          {/* Price + CTA (C.3) */}
                           <div className="mt-3 flex items-center justify-between gap-2">
                             <div>
                               {book.is_free ? (
@@ -203,15 +203,21 @@ const Books = () => {
                               )}
                             </div>
                             <span className="text-[11px] font-bold text-primary group-hover:underline">
-                              {book.is_free ? "पढ़ें →" : "Unlock →"}
+                              {book.is_free ? "पढ़ें →" : "Free Sample Padhein →"}
                             </span>
                           </div>
+                          {!book.is_free && (
+                            <p className="mt-1.5 text-[10px] text-muted-foreground">
+                              Poora granth chahiye? <span className="font-semibold text-primary">→ Premium Lein</span>
+                            </p>
+                          )}
                         </CardContent>
                       </Card>
                     </Link>
                   );
                 })}
               </div>
+
 
               {hasMore && (
                 <div ref={loaderRef} className="mt-8 text-center">

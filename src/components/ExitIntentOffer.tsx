@@ -70,15 +70,15 @@ export default function ExitIntentOffer() {
             <Gift className="h-7 w-7 text-secondary" />
           </div>
           <h3 className="mt-4 font-serif text-2xl font-bold text-card-foreground">
-            रुकिए! आपके लिए तोहफ़ा 🎁
+            Rukiye! 🙏
           </h3>
           <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-            पहली खरीद पर पाएँ <strong className="text-primary">20% की छूट</strong> — सभी प्रीमियम ग्रंथों पर मान्य।
+            Aaj hi shuru karein apni <strong className="text-primary">adhyatmik yatra</strong> — pehla granth bilkul free hai.
           </p>
 
           <div className="mt-5 rounded-xl border-2 border-dashed border-secondary bg-secondary/5 p-4">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              आपका कूपन कोड
+              Bonus — Premium par 20% off
             </p>
             <button
               onClick={copy}
@@ -89,10 +89,10 @@ export default function ExitIntentOffer() {
             <p className="mt-1 text-xs text-muted-foreground">
               {copied ? (
                 <span className="inline-flex items-center gap-1 text-green-700 font-semibold">
-                  <Check className="h-3 w-3" /> Copy हो गया!
+                  <Check className="h-3 w-3" /> Copy ho gaya!
                 </span>
               ) : (
-                "कोड पर क्लिक करके copy करें"
+                "Code par click karke copy karein"
               )}
             </p>
           </div>
@@ -102,15 +102,16 @@ export default function ExitIntentOffer() {
             size="lg"
             className="mt-5 w-full bg-secondary text-secondary-foreground font-bold hover:bg-secondary/90"
           >
-            <Link to="/books" onClick={() => setOpen(false)}>
-              अभी ग्रंथ चुनें →
+            <Link to="/books?filter=free" onClick={() => setOpen(false)}>
+              Abhi Free Mein Padhein →
             </Link>
           </Button>
 
           <p className="mt-3 text-[11px] text-muted-foreground">
-            सीमित समय के लिए • एक खाते पर एक बार
+            Seemit samay ke liye • Ek khaate par ek baar
           </p>
         </div>
+
       </div>
     </div>
   );

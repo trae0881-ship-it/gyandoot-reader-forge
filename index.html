@@ -137,59 +137,11 @@
     <!-- Meta Pixel noscript fallback -->
     <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=941870495003655&ev=PageView&noscript=1" /></noscript>
 
-    <!-- SSR-like static content for crawlers — visible until React mounts -->
-    <div id="seo-fallback">
-      <header>
-        <h1>GyandootNova — Dharmik Granth Online Padhein Hindi Mein</h1>
-        <p>Vishnu Sahasraname, Bhagwat Geeta, Ramayana, Hanuman Chalisa aur 50+ spiritual books ab online padhein. India ka sabse bharosemand dharmik pustak platform.</p>
-      </header>
-
-      <main>
-        <section>
-          <h2>Hamare Lokpriya Dharmik Granth</h2>
-          <p>GyandootNova par aapko milenge — Vishnu Sahasraname book with meaning, Bhagwat Geeta Hindi mein, Sampurna Ramayana, Hanuman Chalisa, Mahabharat, Sundarkand Path, Vishnu Purana, Shrimad Bhagwatam, Chalisa Sangrah, Stotra Sangrah aur bahut kuch. Har granth ko saral Hindi mein samjhaya gaya hai taaki har koi padh sake aur samajh sake.</p>
-          <ul>
-            <li><a href="/books/bhagavad-gita-simplified">Bhagavad Gita Simplified — Saral Hindi Mein Padhein</a></li>
-            <li><a href="/books/yajur-ved">Yajur Ved — Sampurna Text Online</a></li>
-            <li><a href="/books/advanced-meditation-techniques">Advanced Meditation Techniques</a></li>
-            <li><a href="/books">Sabhi Books Dekhein →</a></li>
-          </ul>
-        </section>
-
-        <section>
-          <h2>Spiritual Articles aur Pravachan</h2>
-          <p>Hamare experts dwara likhe gaye articles padhein — Geeta saar, dhyan vidhi, yoga sadhna, karma siddhant, bhakti marg aur adhyatmik gyan ke baare mein. Naye articles har hafte publish hote hain.</p>
-          <ul>
-            <li><a href="/articles">Sabhi Articles Padhein</a></li>
-          </ul>
-        </section>
-
-        <section>
-          <h2>GyandootNova Kyon Chunein?</h2>
-          <p>100+ readers ka bharosa, free aur premium books, mobile-friendly reader, dark mode support, bookmark aur notes feature, aur bilkul safe online reading experience. Bina download ke seedha browser mein padhein.</p>
-        </section>
-
-        <section>
-          <h2>Adhik Jaankari</h2>
-          <ul>
-            <li><a href="/about">GyandootNova Ke Baare Mein</a></li>
-            <li><a href="/contact">Sampark Karein</a></li>
-            <li><a href="/faq">Aksar Poochhe Jaane Wale Prashn (FAQ)</a></li>
-            <li><a href="/donate">Daan Karein — Gyan Ka Prasar Karein</a></li>
-            <li><a href="/services">Hamari Sevayen</a></li>
-            <li><a href="/careers">Careers — Hamari Team Mein Shamil Hon</a></li>
-            <li><a href="/privacy-policy">Privacy Policy</a></li>
-            <li><a href="/terms-and-conditions">Terms &amp; Conditions</a></li>
-            <li><a href="/sitemap">Sitemap</a></li>
-          </ul>
-        </section>
-      </main>
-
-      <footer>
-        <p>© 2025 GyandootNova. Sabhi adhikar surakshit. Vishnu Sahasranama lyrics, Bhagavad Gita Chapter 1 Hindi, Sunderkand path online, Ramcharitmanas online reading, Geeta saar in Hindi — sab kuch GyandootNova par uplabdh hai.</p>
-      </footer>
-    </div>
-    <script>document.getElementById('seo-fallback').style.display='none';</script>
+    <!-- Minimal no-JS fallback. Per-route SEO is handled client-side by useSEO. -->
+    <noscript>
+      <h1>GyandootNova — Dharmik Granth Online</h1>
+      <p>JavaScript enable karke padhein — Geeta, Ramayana, Hanuman Chalisa aur 50+ dharmik granth Hindi mein.</p>
+    </noscript>
 
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

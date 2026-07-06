@@ -107,7 +107,7 @@ const Index = () => {
     <Layout>
       <LiveReaderStrip />
       <RecentPurchasesToast />
-      {/* ─── 1. HERO ─── */}
+      {/* ─── 1. HERO (C.1) ─── */}
       <section className="relative overflow-hidden bg-primary py-14 md:py-20">
         <div
           className="absolute inset-0 opacity-[0.07]"
@@ -121,12 +121,13 @@ const Index = () => {
             <Star className="h-3.5 w-3.5 fill-secondary" /> भरोसा — 24,000+ पाठकों की पहली पसंद
           </div>
           <h1 className="font-serif text-3xl font-extrabold leading-tight text-primary-foreground md:text-5xl lg:text-6xl">
-            घर की अलमारी में जगह नहीं? <span className="text-secondary">पूरा शास्त्र-भंडार अब आपकी जेब में।</span>
-            <br className="hidden md:block" /> एक बार जुड़िए, <span className="underline decoration-secondary decoration-4 underline-offset-4">पीढ़ियों तक साथ।</span>
+            Geeta, Ramayana aur Hanuman Chalisa —{" "}
+            <span className="text-secondary">Saral Hindi Mein,</span>
+            <br className="hidden md:block" /> Bina Kisi Jhanjhat Ke
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-primary-foreground/90 md:text-lg">
-            वेद, गीता, रामायण से लेकर छोटे-से-छोटे स्तोत्र तक — सब कुछ एक ID में सुरक्षित।
-            <strong className="text-secondary"> मोबाइल उठाइए, श्लोक पढ़िए, मन को शांति दीजिए।</strong>
+            50+ dharmik granth ab ek hi jagah. Free padhna shuru karein, ya{" "}
+            <strong className="text-secondary">premium granth unlock karke sampurna gyaan paayein.</strong>
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button
@@ -134,8 +135,8 @@ const Index = () => {
               className="bg-secondary text-secondary-foreground font-bold hover:bg-secondary/90 shadow-xl px-8 text-base"
               asChild
             >
-              <Link to="/books">
-                <BookOpen className="mr-2 h-5 w-5" /> मात्र ₹49 में यात्रा शुरू कीजिए →
+              <Link to="/books?filter=free">
+                <BookOpen className="mr-2 h-5 w-5" /> Free Mein Padhna Shuru Karein →
               </Link>
             </Button>
             <Button
@@ -144,8 +145,8 @@ const Index = () => {
               className="border-2 border-primary-foreground/40 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 font-semibold px-8"
               asChild
             >
-              <Link to="/books?filter=free">
-                पहले खोलकर देखिए — निःशुल्क
+              <Link to="/books?filter=paid">
+                Premium Granth Dekhein
               </Link>
             </Button>
           </div>
@@ -158,6 +159,37 @@ const Index = () => {
 
         </div>
       </section>
+
+      {/* ─── 1.1 TRUST SECTION (C.2) ─── */}
+      <section className="border-b border-border bg-background py-10 md:py-14">
+        <div className="container max-w-5xl text-center">
+          <h2 className="font-serif text-2xl md:text-3xl font-bold">
+            Kyun <span className="text-primary">Lakhon Log</span> GyandootNova Par Bharosa Karte Hain
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-sm md:text-base text-muted-foreground leading-relaxed">
+            Har granth Sanskrit se saral Hindi mein, vidwano ki dekh-rekh mein taiyar kiya gaya hai. Koi hidden charges nahi, koi app download nahi — seedha browser mein padhein.
+          </p>
+          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            {[
+              { icon: Lock, label: "Safe & Secure Payment" },
+              { icon: CheckCircle2, label: "Vidwano dwara verified content" },
+              { icon: BookOpen, label: "Kisi bhi device par padhein" },
+              { icon: ShieldCheck, label: "7-din refund guarantee" },
+            ].map((b) => (
+              <div
+                key={b.label}
+                className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-4 text-center shadow-sm"
+              >
+                <b.icon className="h-6 w-6 text-primary" />
+                <span className="text-xs md:text-sm font-semibold text-card-foreground leading-tight">
+                  {b.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
 
       {/* ─── 1.5. WHY NO DOWNLOAD — Objection → Trust ─── */}
       <section className="bg-muted/40 py-14">

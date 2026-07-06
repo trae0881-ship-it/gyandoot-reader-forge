@@ -157,7 +157,21 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-10 border-t border-background/10 pt-6 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-background/40">
+        {/* WhatsApp CTA row (C.6) — replaces old keyword-stuffed line */}
+        {whatsappLink && (
+          <div className="mt-10 rounded-xl border border-background/15 bg-background/5 p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-background/80 text-center md:text-left">
+              Roz naye granth aur articles ke liye humse judiye — WhatsApp par updates paayein.
+            </p>
+            <Button asChild size="lg" className="bg-secondary text-secondary-foreground font-bold hover:bg-secondary/90 shrink-0">
+              <a href={whatsappLink} target="_blank" rel="noopener noreferrer">
+                <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp Par Judiye
+              </a>
+            </Button>
+          </div>
+        )}
+
+        <div className="mt-8 border-t border-background/10 pt-6 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-background/40">
           <p>© {new Date().getFullYear()} GyandootNova. सर्वाधिकार सुरक्षित।</p>
           <div className="flex gap-4">
             <Link to="/privacy-policy" className="hover:text-secondary transition-colors">गोपनीयता</Link>
@@ -166,6 +180,7 @@ const Footer = () => {
           </div>
 
         </div>
+
       </div>
     </footer>
   );

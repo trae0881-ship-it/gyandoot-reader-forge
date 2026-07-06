@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
     const [booksRes, chaptersRes] = await Promise.all([
       supabase
         .from("books")
-        .select("id,title,slug,author,cover_url,description,is_free,preview_chapters,created_at,updated_at,file_type")
+        .select("id,title,slug,author,cover_url,description,is_free,price,purchase_count,preview_chapters,created_at,updated_at,file_type")
         .order("created_at", { ascending: false }),
       supabase
         .from("book_chapters")
@@ -40,12 +40,16 @@ Deno.serve(async (req) => {
     if (booksRes.error) throw booksRes.error;
     if (chaptersRes.error) throw chaptersRes.error;
 
+    const books = booksRes.data ?? [];
+    const bookById = new Map(books.map((book) => [book.id, book]));
+
     // Group chapters by book, ordered by chapter_number.
     const chaptersByBook = new Map();
     for (const ch of chaptersRes.data ?? []) {
       if (!chaptersByBook.has(ch.book_id)) chaptersByBook.set(ch.book_id, []);
       chaptersByBook.get(ch.book_id).push(ch);
     }
+
 
     // Build book-detail payloads for prerender (includes first free chapter excerpt + TOC + purchase count).
     const purchaseCountByBook = new Map();

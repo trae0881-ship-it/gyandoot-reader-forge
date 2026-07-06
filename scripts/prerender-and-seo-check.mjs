@@ -150,9 +150,10 @@ async function main() {
 
   console.log("→ fetching dynamic slugs from Supabase…");
   const [bookSlugs, articleSlugs] = await Promise.all([
-    fetchSlugs("books", "&is_published=eq.true"),
-    fetchSlugs("posts", "&status=eq.published"),
+    fetchSlugs("books"),
+    fetchSlugs("posts", "&is_published=eq.true"),
   ]);
+
   console.log(`  books=${bookSlugs.length}  articles=${articleSlugs.length}`);
 
   const routes = [

@@ -169,12 +169,17 @@ function note2xx() {
   }
 }
 
-async function httpFetch(url, { method = "GET" } = {}) {
+// Single-hop fetch (no redirect following). Adds AbortController-based
+// timeout and treats timeouts as retriable.
+async function httpFetchOnce(url, { method = "GET" } = {}) {
   let attempt = 0;
   const t0 = Date.now();
   while (true) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(new Error(`timeout ${TIMEOUT_MS}ms`)), TIMEOUT_MS);
     try {
-      const r = await fetch(url, { method, headers: EXTRA_HEADERS, redirect: "manual" });
+      const r = await fetch(url, { method, headers: EXTRA_HEADERS, redirect: "manual", signal: ctrl.signal });
+      clearTimeout(timer);
       const retriable = r.status === 429 || (r.status >= 500 && r.status <= 599);
       if (r.status === 429) note429();
       else if (r.status >= 200 && r.status < 400) note2xx();
@@ -186,13 +191,49 @@ async function httpFetch(url, { method = "GET" } = {}) {
         continue;
       }
       const body = method === "HEAD" ? "" : await r.text().catch(() => "");
-      return { status: r.status, body, redirect: r.headers.get("location") || "", attempts: attempt + 1, ms: Date.now() - t0 };
+      return {
+        status: r.status,
+        body,
+        redirect: r.headers.get("location") || "",
+        contentType: r.headers.get("content-type") || "",
+        contentLength: parseInt(r.headers.get("content-length") || "0", 10) || 0,
+        attempts: attempt + 1,
+        ms: Date.now() - t0,
+      };
     } catch (e) {
-      if (attempt < RETRIES) { await sleep(BACKOFF * 2 ** attempt); attempt++; continue; }
-      return { status: 0, body: "", redirect: "", attempts: attempt + 1, ms: Date.now() - t0, error: e.message };
+      clearTimeout(timer);
+      const timedOut = e?.name === "AbortError" || /timeout|aborted/i.test(e?.message || "");
+      if (attempt < RETRIES) {
+        await sleep(BACKOFF * 2 ** attempt + Math.floor(Math.random() * 200));
+        attempt++;
+        continue;
+      }
+      return { status: 0, body: "", redirect: "", contentType: "", contentLength: 0, attempts: attempt + 1, ms: Date.now() - t0, error: timedOut ? `timeout after ${TIMEOUT_MS}ms` : e.message };
     }
   }
 }
+
+// Follows up to 5 redirects, recording the chain. The final response's URL
+// is what audits/canonical checks run against.
+async function httpFetch(url, opts = {}) {
+  const chain = [];
+  let current = url;
+  let totalMs = 0;
+  let attemptsSum = 0;
+  for (let hop = 0; hop < 6; hop++) {
+    const r = await httpFetchOnce(current, opts);
+    totalMs += r.ms;
+    attemptsSum += r.attempts;
+    const isRedirect = r.status >= 300 && r.status < 400 && r.redirect;
+    chain.push({ url: current, status: r.status, location: r.redirect || null, ms: r.ms });
+    if (!isRedirect) {
+      return { ...r, finalUrl: current, chain, ms: totalMs, attempts: attemptsSum };
+    }
+    current = new URL(r.redirect, current).toString();
+  }
+  return { status: 0, body: "", redirect: "", contentType: "", contentLength: 0, finalUrl: current, chain, ms: totalMs, attempts: attemptsSum, error: "too many redirects (>5)" };
+}
+
 
 
 async function loadSitemap() {

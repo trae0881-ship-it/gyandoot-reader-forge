@@ -48,6 +48,24 @@ async function fetchRows(table, select) {
   return r.json();
 }
 
+async function fetchReaderRows() {
+  const endpoint = `${SUPABASE_URL}/functions/v1/seo-prerender-data`;
+  try {
+    const r = await fetch(endpoint, {
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
+    });
+    if (!r.ok) {
+      console.warn(`[sitemap] reader routes fetch failed (${r.status})`);
+      return [];
+    }
+    const json = await r.json();
+    return Array.isArray(json?.chapters) ? json.chapters : [];
+  } catch (e) {
+    console.warn(`[sitemap] reader routes fetch failed (${e.message})`);
+    return [];
+  }
+}
+
 function xmlEscape(s) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
@@ -67,9 +85,10 @@ function entry({ path, lastmod, changefreq, priority }) {
 }
 
 async function main() {
-  const [books, posts] = await Promise.all([
+  const [books, posts, readerRows] = await Promise.all([
     fetchRows("books", "slug,updated_at"),
     fetchRows("posts", "slug,updated_at,is_published"),
+    fetchReaderRows(),
   ]);
   const bookEntries = books
     .filter((b) => b.slug)
@@ -87,8 +106,16 @@ async function main() {
       changefreq: "weekly",
       priority: "0.7",
     }));
+  const readerEntries = readerRows
+    .filter((r) => r.book_slug && r.chapter_slug)
+    .map((r) => ({
+      path: encPath(`/books/${r.book_slug}/${r.chapter_slug}`),
+      lastmod: r.updated_at?.slice(0, 10),
+      changefreq: "weekly",
+      priority: r.is_excerpt ? "0.5" : "0.65",
+    }));
 
-  const all = [...STATIC, ...bookEntries, ...postEntries];
+  const all = [...STATIC, ...bookEntries, ...readerEntries, ...postEntries];
   const xml = [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
@@ -98,7 +125,7 @@ async function main() {
 
   writeFileSync(resolve("public/sitemap.xml"), xml);
   console.log(
-    `sitemap.xml written: ${all.length} entries (${STATIC.length} static + ${bookEntries.length} books + ${postEntries.length} articles)`
+    `sitemap.xml written: ${all.length} entries (${STATIC.length} static + ${bookEntries.length} books + ${readerEntries.length} reader pages + ${postEntries.length} articles)`
   );
 }
 

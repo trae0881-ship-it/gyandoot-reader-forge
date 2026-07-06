@@ -206,6 +206,7 @@ const BookDetail = () => {
     "@context": "https://schema.org",
     "@type": "Book",
     "name": book.title,
+    "inLanguage": "hi-IN",
     "author": { "@type": "Person", "name": book.author },
     "description": bookDescription,
     "url": `https://gyandootnova.in/books/${book.slug}`,

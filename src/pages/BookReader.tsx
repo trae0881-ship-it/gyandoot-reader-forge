@@ -14,6 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import SecureRichReader from "@/components/SecureRichReader";
 import { useAntiCopy } from "@/hooks/useAntiCopy";
+import useSEO from "@/hooks/useSEO";
 
 /* ─── Types ─────────────────────────────────────────────────────────── */
 interface Highlight {
@@ -151,6 +152,36 @@ const BookReader = () => {
   const nextChapter = chapters && currentIndex < chapters.length - 1 ? chapters[currentIndex + 1] : null;
   const totalChapters = chapters?.length ?? 1;
   const chapterProgress = totalChapters > 0 ? ((currentIndex + 1) / totalChapters) * 100 : 0;
+  const readerDescription = book && chapter
+    ? `${book.title} ka ${chapter.title} Hindi mein padhein. Sanskrit shlok, saral Hindi arth aur spiritual study ke liye GyandootNova reader.`
+    : "GyandootNova reader mein dharmik granth Hindi mein padhein.";
+  const readerJsonLd = book ? {
+    "@context": "https://schema.org",
+    "@type": "Book",
+    "name": book.title,
+    "inLanguage": "hi-IN",
+    "author": { "@type": "Person", "name": book.author },
+    "description": (book.description ?? readerDescription).replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim(),
+    "url": `https://gyandootnova.in/books/${book.slug}`,
+    ...(book.cover_url && { "image": book.cover_url }),
+    ...(chapter && {
+      "workExample": {
+        "@type": "Chapter",
+        "name": chapter.title,
+        "position": chapter.chapter_number,
+        "url": `https://gyandootnova.in/books/${book.slug}/${chapter.slug}`,
+      },
+    }),
+  } : undefined;
+
+  useSEO({
+    title: book && chapter ? `${chapter.title} — ${book.title} | GyandootNova` : "Reader | GyandootNova",
+    description: readerDescription,
+    canonical: book && chapter ? `/books/${book.slug}/${chapter.slug}` : undefined,
+    ogImage: book?.cover_url ?? undefined,
+    ogType: "book",
+    jsonLd: readerJsonLd,
+  });
 
   /* ─── Highlights ───────────────────────────────────────────────────── */
   const { data: highlights = [] } = useQuery<Highlight[]>({
@@ -768,7 +799,7 @@ const BookReader = () => {
             </Button>
           ) : (
             <Button variant="outline" asChild>
-              <Link to={`/books/${slug}`}>🎉 Finished! Back to Book</Link>
+              <Link to={`/books/${slug}`}>Finished! Back to Book</Link>
             </Button>
           )}
         </div>

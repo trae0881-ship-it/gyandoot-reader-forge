@@ -3,7 +3,7 @@
  * Prerender + SEO validator.
  *
  * - Boots `vite preview` on port 4173
- * - Fetches book/article slugs from Supabase REST (anon key)
+ * - Fetches book/article slugs and SEO-safe reader chapter content
  * - For every route: navigates via Playwright, waits for react-helmet-style
  *   head mutation, then snapshots the final <head> and rewrites
  *   `dist/<route>/index.html` so social-preview crawlers see route-specific
@@ -18,9 +18,10 @@ import { chromium } from "playwright";
 import { spawn } from "node:child_process";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
-import { resolve, join } from "node:path";
+import { resolve, join, dirname } from "node:path";
 
 const CHECK_ONLY = process.argv.includes("--check");
+const NO_FAIL = process.argv.includes("--no-fail");
 const DIST = resolve("dist");
 const PORT = 4173;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -69,6 +70,24 @@ async function fetchSlugs(table, filter = "") {
   return rows.map((r) => r.slug).filter(Boolean);
 }
 
+async function fetchSeoReaderRows() {
+  const url = `${SUPABASE_URL}/functions/v1/seo-prerender-data`;
+  try {
+    const res = await fetch(url, {
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
+    });
+    if (!res.ok) {
+      console.warn(`[warn] seo-prerender-data fetch failed (${res.status})`);
+      return [];
+    }
+    const json = await res.json();
+    return Array.isArray(json?.chapters) ? json.chapters : [];
+  } catch (e) {
+    console.warn(`[warn] seo-prerender-data fetch failed (${e.message})`);
+    return [];
+  }
+}
+
 function waitForServer(url, timeoutMs = 30_000) {
   const start = Date.now();
   return new Promise((res, rej) => {
@@ -110,6 +129,118 @@ const REQUIRED = [
 function extract(re, s) {
   const m = s.match(re);
   return m ? m[1].trim() : "";
+}
+
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  }[c]));
+}
+
+function stripTags(s) {
+  return String(s ?? "")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function isHtml(s) {
+  return /<\/?(p|div|span|strong|em|br|h[1-6]|ul|ol|li|blockquote|table|thead|tbody|tr|td|th|pre|code)\b/i.test(String(s ?? ""));
+}
+
+function textToHtml(text) {
+  return String(text ?? "")
+    .split(/\n{2,}/)
+    .map((para) => `<p>${esc(para).replace(/\n/g, "<br>")}</p>`)
+    .join("\n");
+}
+
+function safeContentHtml(content) {
+  const raw = String(content ?? "").trim();
+  if (!raw) return "<p>इस अध्याय की सामग्री उपलब्ध नहीं है।</p>";
+  if (!isHtml(raw)) return textToHtml(raw);
+  return raw
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<\/h1>/gi, "</h2>")
+    .replace(/<h1\b/gi, "<h2")
+    .replace(/\son\w+=("[^"]*"|'[^']*'|[^\s>]+)/gi, "")
+    .replace(/javascript:/gi, "");
+}
+
+function routePathForReader(row) {
+  return `/${["books", row.book_slug, row.chapter_slug].map(encodeURIComponent).join("/")}`;
+}
+
+function renderReaderSnapshot(row) {
+  const route = routePathForReader(row);
+  const abs = `${BASE_URL}${route}`;
+  const bookUrl = `${BASE_URL}/books/${encodeURIComponent(row.book_slug)}`;
+  const title = `${row.chapter_title} — ${row.book_title} | GyandootNova`;
+  const plainContent = stripTags(row.content);
+  const plainBookDesc = stripTags(row.book_description);
+  const description = `${row.book_title} ka ${row.chapter_title} Hindi mein padhein. ${plainContent || plainBookDesc}`.slice(0, 155);
+  const image = row.cover_url || `${BASE_URL}/og-default.jpg`;
+  const contentHtml = safeContentHtml(row.content);
+  const h1 = esc(row.chapter_title);
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Book",
+    "name": row.book_title,
+    "inLanguage": "hi-IN",
+    "author": { "@type": "Person", "name": row.author || "GyandootNova" },
+    "description": plainBookDesc || description,
+    "url": bookUrl,
+    ...(row.cover_url ? { "image": row.cover_url } : {}),
+    "workExample": {
+      "@type": "Chapter",
+      "name": row.chapter_title,
+      "position": row.chapter_number,
+      "url": abs,
+    },
+  };
+  const head = `
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${esc(title)}</title>
+    <meta name="description" content="${esc(description)}">
+    <meta name="author" content="GyandootNova">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <link rel="canonical" href="${esc(abs)}">
+    <link rel="icon" href="/gyandoot-nova-icon.ico" type="image/x-icon">
+    <meta property="og:title" content="${esc(title)}">
+    <meta property="og:description" content="${esc(description)}">
+    <meta property="og:type" content="book">
+    <meta property="og:url" content="${esc(abs)}">
+    <meta property="og:image" content="${esc(image)}">
+    <meta property="og:site_name" content="GyandootNova">
+    <meta property="og:locale" content="hi_IN">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="${esc(title)}">
+    <meta name="twitter:description" content="${esc(description)}">
+    <meta name="twitter:image" content="${esc(image)}">
+    <script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, "\\u003c")}</script>
+  `;
+  const rootHtml = `
+    <main class="min-h-screen bg-background text-foreground">
+      <article class="mx-auto max-w-3xl px-6 py-10">
+        <p class="mb-2 text-sm text-muted-foreground">${esc(row.book_title)} · Chapter ${esc(row.chapter_number)}</p>
+        <h1 class="font-serif text-3xl font-bold mb-4">${h1}</h1>
+        <p class="mb-6 text-muted-foreground">${esc(row.author || "GyandootNova")}</p>
+        <div class="secure-rich-reader max-w-none" data-prerendered-reader="true">
+          ${contentHtml}
+        </div>
+        ${row.is_excerpt ? `<p class="mt-8 text-sm text-muted-foreground">यह SEO preview है। पूरा अध्याय पढ़ने के लिए GyandootNova reader में access unlock करें।</p>` : ""}
+      </article>
+    </main>
+  `;
+  return { head, rootHtml };
 }
 
 function validateHead(route, headHtml, seen) {
@@ -176,10 +307,31 @@ async function writeRouteFile(route, baseHtml, snapshot) {
       `<div id="root">${snapshot.rootHtml}</div>`
     );
   }
-  const outDir =
-    route === "/" ? DIST : join(DIST, route.replace(/^\//, ""));
-  await mkdir(outDir, { recursive: true });
-  await writeFile(join(outDir, "index.html"), rewritten, "utf8");
+  const targets = outputTargetsForRoute(route);
+  for (const target of targets) {
+    await mkdir(dirname(target), { recursive: true });
+    await writeFile(target, rewritten, "utf8");
+  }
+}
+
+function outputTargetsForRoute(route) {
+  if (route === "/") return [join(DIST, "index.html")];
+  const rel = route.replace(/^\//, "");
+  const variants = new Set([rel]);
+  try { variants.add(decodeURIComponent(rel)); } catch {}
+  const targets = new Set();
+  for (const variant of variants) {
+    targets.add(join(DIST, variant, "index.html"));
+    targets.add(join(DIST, `${variant}.html`));
+  }
+  return Array.from(targets);
+}
+
+async function writeReaderRouteFile(row, baseHtml) {
+  const route = routePathForReader(row);
+  const snapshot = renderReaderSnapshot(row);
+  await writeRouteFile(route, baseHtml, snapshot);
+  return route;
 }
 
 async function main() {
@@ -190,19 +342,22 @@ async function main() {
   const baseHtml = await readFile(join(DIST, "index.html"), "utf8");
 
   console.log("→ fetching dynamic slugs from Supabase…");
-  const [bookSlugs, articleSlugs] = await Promise.all([
+  const [bookSlugs, articleSlugs, readerRows] = await Promise.all([
     fetchSlugs("books"),
     fetchSlugs("posts", "&is_published=eq.true"),
+    fetchSeoReaderRows(),
   ]);
 
-  console.log(`  books=${bookSlugs.length}  articles=${articleSlugs.length}`);
+  console.log(`  books=${bookSlugs.length}  reader-pages=${readerRows.length}  articles=${articleSlugs.length}`);
 
   const routes = [
     ...STATIC_ROUTES,
     ...bookSlugs.map((s) => `/books/${s}`),
     ...articleSlugs.map((s) => `/articles/${s}`),
   ];
-  console.log(`→ ${routes.length} routes total (${CHECK_ONLY ? "check-only" : "prerender+check"})`);
+  const readerRoutes = readerRows.map(routePathForReader);
+  const allRoutesCount = routes.length + readerRoutes.length;
+  console.log(`→ ${allRoutesCount} routes total (${CHECK_ONLY ? "check-only" : "prerender+check"})`);
 
   console.log("→ starting vite preview…");
   const preview = await startPreview();
@@ -251,6 +406,28 @@ async function main() {
       processed++;
     }
 
+    for (const row of readerRows) {
+      const route = routePathForReader(row);
+      try {
+        const snapshot = renderReaderSnapshot(row);
+        const missing = [
+          ...validateHead(route, snapshot.head, seen),
+          ...validateBody(route, snapshot.rootHtml),
+        ];
+        if (missing.length) {
+          failures.push({ route, missing });
+          console.log(`  ✗ ${route}  ${missing.join(", ")}`);
+        } else {
+          console.log(`  ✓ ${route}`);
+        }
+        if (!CHECK_ONLY) await writeReaderRouteFile(row, baseHtml);
+      } catch (e) {
+        failures.push({ route, missing: [`render error: ${e.message}`] });
+        console.log(`  ✗ ${route}  ${e.message}`);
+      }
+      processed++;
+    }
+
 
     await browser.close();
   } finally {
@@ -261,7 +438,7 @@ async function main() {
   if (failures.length) {
     console.error(`\nSEO failures on ${failures.length} route(s):`);
     failures.forEach((f) => console.error(`  ${f.route} — ${f.missing.join(", ")}`));
-    process.exit(1);
+    if (!NO_FAIL) process.exit(1);
   }
 }
 

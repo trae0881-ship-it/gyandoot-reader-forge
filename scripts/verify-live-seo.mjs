@@ -341,11 +341,13 @@ function renderHtmlReport(summary) {
   const rows = summary.results.map((r) => {
     const bad = r.problems?.length ? "fail" : "pass";
     const diffs = (r.problems || []).map((p) => `<li>${esc(p)}</li>`).join("");
-    const og = r.ogImageCheck ? `${r.ogImageCheck.status} ${esc(r.ogImageCheck.url || "")}` : "—";
-    const tw = r.twImageCheck ? `${r.twImageCheck.status} ${esc(r.twImageCheck.url || "")}` : "—";
+    const og = r.ogImageCheck ? `${r.ogImageCheck.status} · ${r.ogImageCheck.ms ?? "-"}ms` : "—";
+    const tw = r.twImageCheck ? `${r.twImageCheck.status} · ${r.twImageCheck.ms ?? "-"}ms` : "—";
+    const skipped = r.skipped ? ' <span title="resumed from previous report">↺</span>' : "";
     return `<tr class="${bad}">
-      <td class="url"><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a></td>
+      <td class="url"><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a>${skipped}</td>
       <td>${r.status ?? "-"}</td>
+      <td>${r.fetchMs ?? "-"}</td>
       <td>${r.h1Count ?? "-"}</td>
       <td>${r.wordCount ?? "-"}</td>
       <td class="mono">${esc(r.title || "")}</td>
@@ -355,6 +357,9 @@ function renderHtmlReport(summary) {
     </tr>`;
   }).join("\n");
 
+  const timings = summary.results.map((r) => r.fetchMs).filter((n) => typeof n === "number").sort((a, b) => a - b);
+  const p = (q) => timings.length ? timings[Math.min(timings.length - 1, Math.floor(timings.length * q))] : 0;
+
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8" />
 <title>SEO Live Report — ${esc(summary.origin)}</title>
@@ -362,7 +367,7 @@ function renderHtmlReport(summary) {
   body { font: 14px/1.5 system-ui, sans-serif; margin: 24px; color:#111; background:#fafafa; }
   h1 { margin:0 0 4px; font-size:22px; }
   .meta { color:#666; margin-bottom:16px; font-size:13px; }
-  .stats { display:flex; gap:16px; margin-bottom:16px; }
+  .stats { display:flex; gap:16px; margin-bottom:16px; flex-wrap:wrap; }
   .stat { background:#fff; padding:10px 14px; border-radius:6px; border:1px solid #e5e5e5; }
   .stat.ok { border-color:#16a34a; color:#166534; }
   .stat.bad { border-color:#dc2626; color:#991b1b; }
@@ -376,17 +381,19 @@ function renderHtmlReport(summary) {
   ul { margin:0; padding-left:18px; color:#991b1b; }
 </style></head><body>
 <h1>SEO Live Report</h1>
-<div class="meta">Origin: <b>${esc(summary.origin)}</b> · Generated ${esc(summary.generatedAt)} · Concurrency ${summary.maxConcurrency} (final ${summary.finalConcurrency}) · Min words ${summary.minWords}</div>
+<div class="meta">Origin: <b>${esc(summary.origin)}</b> · Generated ${esc(summary.generatedAt)} · Concurrency ${summary.maxConcurrency} (final ${summary.finalConcurrency}) · Min words ${summary.minWords}${summary.resumed ? ` · resumed ${summary.resumed} URL(s)` : ""}</div>
 <div class="stats">
   <div class="stat ok">✓ ${summary.total - summary.failed} passing</div>
   <div class="stat bad">✗ ${summary.failed} failing</div>
   <div class="stat">Σ ${summary.total} routes</div>
+  <div class="stat">fetch p50 ${p(0.5)}ms · p95 ${p(0.95)}ms · max ${timings[timings.length - 1] || 0}ms</div>
 </div>
 <table>
-<thead><tr><th>URL</th><th>Status</th><th>H1</th><th>Words</th><th>Title</th><th>og:image</th><th>twitter:image</th><th>Problems</th></tr></thead>
+<thead><tr><th>URL</th><th>Status</th><th>Fetch ms</th><th>H1</th><th>Words</th><th>Title</th><th>og:image</th><th>twitter:image</th><th>Problems</th></tr></thead>
 <tbody>${rows}</tbody></table>
 </body></html>`;
 }
+
 
 // ---------- GitHub Actions integration ----------
 function emitGitHubAnnotations(results) {

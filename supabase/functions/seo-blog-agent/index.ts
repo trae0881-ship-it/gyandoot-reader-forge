@@ -425,8 +425,17 @@ Return STRICT JSON (no markdown fences):
     const raw = await callLLM([
       { role: "system", content: "You are a senior SEO editor and domain writer. Follow Google Helpful Content. Output ONLY valid JSON, no code fences." },
       { role: "user", content: genPrompt },
-    ], true, log);
-    const article = JSON.parse(raw);
+    ], true, log, supabase, "draft-generation");
+    let article: any;
+    try { article = JSON.parse(raw); }
+    catch (e: any) {
+      await sendAlert(supabase, {
+        errorType: "Draft generation failed", step: "draft-generation",
+        message: `LLM returned unparseable JSON: ${String(e?.message || e)}`,
+        severity: "high", suggestion: "Inspect llm_attempts in seo_agent_logs and consider prompt tightening.",
+      });
+      throw new Error(`Draft JSON parse failed: ${e?.message || e}`);
+    }
 
     // 6) Assemble final HTML
     const h2s = [...String(article.body_html).matchAll(/<h2[^>]*>(.*?)<\/h2>/gi)].map(m => m[1].replace(/<[^>]+>/g, ""));

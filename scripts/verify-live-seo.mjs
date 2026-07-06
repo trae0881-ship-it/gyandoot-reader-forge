@@ -75,10 +75,15 @@ const SKIP_OG = flag("skip-og-check");
 const SKIP_JSONLD = flag("skip-jsonld-check");
 const REPORT = opt("report", "dist/seo-live-report.json");
 const HTML_REPORT = flag("no-html") ? null : opt("html", "dist/seo-live-report.html");
+const CSV_REPORT = flag("no-csv") ? null : opt("csv", "dist/seo-live-report.csv");
 const GITHUB_SUMMARY = flag("github-summary") || !!process.env.GITHUB_STEP_SUMMARY;
 const RESUME = opt("resume", "");
+const TIMEOUT_MS = Math.max(1000, parseInt(opt("timeout", "15000"), 10));
+const MAX_FETCH_MS = parseInt(opt("max-fetch-ms", "0"), 10) || 0;
+const MAX_ASSET_MS = parseInt(opt("max-asset-ms", "0"), 10) || 0;
 const DEFAULT_UA = "Mozilla/5.0 (compatible; GyandootSEOVerifier/1.0; +https://gyandootnova.in)";
 const UA = opt("user-agent", DEFAULT_UA);
+
 
 const EXTRA_HEADERS = { "User-Agent": UA, Accept: "text/html,*/*" };
 for (const h of many("header")) {

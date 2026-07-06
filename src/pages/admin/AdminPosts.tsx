@@ -399,6 +399,7 @@ const AdminPosts = () => {
             {aiRunning ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Plus className="mr-1 h-4 w-4" />}
             Run SEO Agent
           </Button>
+          <AgentLogsDialog />
           <Button onClick={() => setView("form")}><Plus className="mr-1 h-4 w-4" /> Add Post</Button>
         </div>
       </div>

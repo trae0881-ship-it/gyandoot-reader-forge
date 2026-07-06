@@ -10,11 +10,17 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import {
+  sendAlert, sendRecovery, isProviderPaused, recordProviderFailure,
+  recordProviderSuccess, classifyError,
+} from "../_shared/seo-alerts.ts";
 
 const NICHE = "Books, Spirituality, Meditation, Self Growth, Mindfulness, Consciousness";
 const SITE = "https://gyandootnova.in";
 const AUTHOR = "GyandootNova Editorial";
 const SIMILARITY_THRESHOLD = 0.7;
+const CONTENT_SCORE_THRESHOLD = Number(Deno.env.get("SEO_CONTENT_SCORE_MIN") || "55");
+
 
 // ─── helpers ─────────────────────────────────────────────────────────
 function slugify(s: string) {
@@ -122,24 +128,60 @@ const LLM_CHAIN: [string, (m: ChatMsg[], j: boolean) => Promise<string>][] = [
   ["anthropic", llmAnthropic], ["openai", llmOpenAI], ["deepseek", llmDeepSeek], ["gemini", llmGemini],
 ];
 
-async function callLLM(messages: ChatMsg[], json: boolean, log: any): Promise<string> {
+function parseStatus(msg: string): number | null {
+  const m = msg.match(/\b(\d{3})\b/);
+  return m ? Number(m[1]) : null;
+}
+
+async function callLLM(messages: ChatMsg[], json: boolean, log: any, sb: any, step: string): Promise<string> {
   log.llm_attempts = log.llm_attempts || [];
   const errors: string[] = [];
+  const failedProviders: { name: string; error: string; status: number | null }[] = [];
   for (const [name, fn] of LLM_CHAIN) {
+    if (await isProviderPaused(sb, name)) {
+      log.llm_attempts.push({ provider: name, ok: false, skipped: "paused" });
+      continue;
+    }
     try {
       const out = await retryOnce(() => fn(messages, json));
       if (!out) throw new Error("empty");
       log.llm_attempts.push({ provider: name, ok: true });
       log.llm_used = log.llm_used || name;
+      // Recovery: if previous LLMs in this call failed, notify
+      const wasFailing = await recordProviderSuccess(sb, name);
+      if (failedProviders.length > 0) {
+        const first = failedProviders[0];
+        const cls = classifyError(first.name, first.error, first.status);
+        await sendRecovery(sb, {
+          errorType: cls.errorType, provider: first.name, message: first.error,
+          httpStatus: first.status, step, recoveryMethod: "LLM fallback chain", switchedTo: name,
+          originalError: `${first.name}: ${first.error}`,
+        });
+      } else if (wasFailing) {
+        await sendRecovery(sb, {
+          errorType: `${name} recovered`, provider: name, step,
+          recoveryMethod: "provider became healthy", switchedTo: name,
+        });
+      }
       return json ? stripFences(out) : out;
     } catch (e: any) {
       const msg = String(e?.message || e);
+      const status = parseStatus(msg);
       log.llm_attempts.push({ provider: name, ok: false, error: msg.slice(0, 200) });
       errors.push(`${name}: ${msg}`);
+      failedProviders.push({ name, error: msg, status });
+      const { consecutive, paused } = await recordProviderFailure(sb, name, msg, status);
+      const cls = classifyError(name, msg, status);
+      await sendAlert(sb, {
+        errorType: cls.errorType, provider: name, message: msg.slice(0, 500),
+        httpStatus: status, step, retryCount: 1, suggestion: cls.suggestion,
+        severity: paused || consecutive >= 3 ? "high" : cls.severity,
+      });
     }
   }
   throw new Error(`All LLM providers failed: ${errors.join(" | ")}`);
 }
+
 
 // ─── Search providers ────────────────────────────────────────────────
 type Source = { url: string; title: string; snippet: string; provider?: string };
@@ -209,30 +251,62 @@ function scoreSource(s: Source): number {
   return score;
 }
 
-async function routedSearch(task: keyof typeof ROUTES, query: string, log: any): Promise<Source[]> {
+async function routedSearch(task: keyof typeof ROUTES, query: string, log: any, sb: any): Promise<Source[]> {
   log.search_attempts = log.search_attempts || [];
   log.fallback_sequence = log.fallback_sequence || [];
   const chain = ROUTES[task];
+  const failedProviders: { name: string; error: string; status: number | null }[] = [];
   for (const [name, fn] of chain) {
+    if (await isProviderPaused(sb, name)) {
+      log.search_attempts.push({ task, provider: name, ok: false, skipped: "paused" });
+      continue;
+    }
     try {
       const results = await retryOnce(() => fn(query));
       log.search_attempts.push({ task, provider: name, ok: true, count: results.length });
       log.fallback_sequence.push(`${task}:${name}`);
+      const wasFailing = await recordProviderSuccess(sb, name);
+      if (failedProviders.length > 0) {
+        const first = failedProviders[0];
+        const cls = classifyError(first.name, first.error, first.status);
+        await sendRecovery(sb, {
+          errorType: cls.errorType, provider: first.name, message: first.error,
+          httpStatus: first.status, step: `search:${task}`,
+          recoveryMethod: "search provider fallback", switchedTo: name,
+          originalError: `${first.name}: ${first.error}`,
+        });
+      } else if (wasFailing) {
+        await sendRecovery(sb, {
+          errorType: `${name} recovered`, provider: name, step: `search:${task}`,
+          recoveryMethod: "provider became healthy", switchedTo: name,
+        });
+      }
       return results;
     } catch (e: any) {
-      log.search_attempts.push({ task, provider: name, ok: false, error: String(e?.message || e).slice(0, 150) });
+      const msg = String(e?.message || e);
+      const status = parseStatus(msg);
+      log.search_attempts.push({ task, provider: name, ok: false, error: msg.slice(0, 150) });
+      failedProviders.push({ name, error: msg, status });
+      const { consecutive, paused } = await recordProviderFailure(sb, name, msg, status);
+      const cls = classifyError(name, msg, status);
+      await sendAlert(sb, {
+        errorType: cls.errorType, provider: name, message: msg.slice(0, 500),
+        httpStatus: status, step: `search:${task}`, retryCount: 1, suggestion: cls.suggestion,
+        severity: paused || consecutive >= 3 ? "high" : cls.severity,
+      });
     }
   }
   return [];
 }
 
-async function researchTopic(topic: string, log: any): Promise<Source[]> {
+async function researchTopic(topic: string, log: any, sb: any): Promise<Source[]> {
   // Load-balanced: run trending + semantic + google in parallel, each with its own fallback chain
   const [trending, semantic, google] = await Promise.all([
-    routedSearch("trending", topic, log),
-    routedSearch("semantic", topic, log),
-    routedSearch("google", topic, log),
+    routedSearch("trending", topic, log, sb),
+    routedSearch("semantic", topic, log, sb),
+    routedSearch("google", topic, log, sb),
   ]);
+
 
   const merged: Source[] = [];
   const seen = new Set<string>();
@@ -276,7 +350,7 @@ Deno.serve(async (req) => {
       const raw = await callLLM([
         { role: "system", content: `You are an SEO strategist for a publisher in the niche: ${NICHE}. Propose ONE high-search-intent English blog topic NOT already covered. Return JSON: {"topic":"...","rationale":"..."}` },
         { role: "user", content: `Existing posts:\n${existingList || "(none)"}\n\nRules:\n- Evergreen or trending in books/spirituality/meditation/self-growth/mindfulness/consciousness.\n- Different angle from anything above.\n- Serve real reader search intent.` },
-      ], true, log);
+      ], true, log, supabase, "topic-discovery");
       topic = JSON.parse(raw).topic;
     }
     log.topic = topic;
@@ -295,12 +369,17 @@ Deno.serve(async (req) => {
     log.action = willUpdate ? "updated" : "created";
 
     // 4) Load-balanced multi-provider research (parallel + fallback per task)
-    const sources = await researchTopic(topic!, log);
+    const sources = await researchTopic(topic!, log, supabase);
     if (sources.length === 0) {
       log.status = "error";
       log.error = "All search providers unavailable or returned no results";
       log.execution_ms = Date.now() - started;
       await supabase.from("seo_agent_logs").insert(log);
+      await sendAlert(supabase, {
+        errorType: "All search providers unavailable", step: "research",
+        message: log.error, severity: "high",
+        suggestion: "Check Tavily/Exa/Firecrawl/SerpAPI keys and quotas.",
+      });
       return new Response(JSON.stringify({ success: false, error: log.error, log }), {
         status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -346,8 +425,17 @@ Return STRICT JSON (no markdown fences):
     const raw = await callLLM([
       { role: "system", content: "You are a senior SEO editor and domain writer. Follow Google Helpful Content. Output ONLY valid JSON, no code fences." },
       { role: "user", content: genPrompt },
-    ], true, log);
-    const article = JSON.parse(raw);
+    ], true, log, supabase, "draft-generation");
+    let article: any;
+    try { article = JSON.parse(raw); }
+    catch (e: any) {
+      await sendAlert(supabase, {
+        errorType: "Draft generation failed", step: "draft-generation",
+        message: `LLM returned unparseable JSON: ${String(e?.message || e)}`,
+        severity: "high", suggestion: "Inspect llm_attempts in seo_agent_logs and consider prompt tightening.",
+      });
+      throw new Error(`Draft JSON parse failed: ${e?.message || e}`);
+    }
 
     // 6) Assemble final HTML
     const h2s = [...String(article.body_html).matchAll(/<h2[^>]*>(.*?)<\/h2>/gi)].map(m => m[1].replace(/<[^>]+>/g, ""));
@@ -418,41 +506,68 @@ Return STRICT JSON (no markdown fences):
       (h2s.length >= 4 ? 15 : 5) +
       15);
 
+    // Content quality threshold alert (non-fatal)
+    if (log.content_score < CONTENT_SCORE_THRESHOLD) {
+      await sendAlert(supabase, {
+        errorType: "Content quality score below threshold",
+        step: "quality-check", severity: "normal",
+        message: `content_score=${log.content_score} (threshold ${CONTENT_SCORE_THRESHOLD}); word_count=${log.word_count}`,
+        suggestion: "Article saved as Draft. Review and edit before publishing.",
+      });
+    }
+    if (log.internal_links.length === 0 && (existing || []).length > 5) {
+      await sendAlert(supabase, {
+        errorType: "Internal linking failed", step: "internal-linking", severity: "normal",
+        message: "No valid internal links inserted despite available post pool.",
+        suggestion: "Check LLM prompt compliance and slug validation.",
+      });
+    }
+
     // 7) Save (Draft always)
     let postId: string | null = null;
     let finalSlug = slugFinal;
 
-    if (willUpdate && bestMatch) {
-      const post = bestMatch.post;
-      finalSlug = post.slug;
-      await supabase.from("post_revisions").insert({
-        post_id: post.id, title: post.title, content: post.content, excerpt: post.excerpt,
-        meta_title: null, meta_description: post.meta_description,
-        reason: post.manually_edited ? "seo-agent: pre-update snapshot (manually edited)" : "seo-agent: pre-update snapshot",
-      });
-      const { error } = await supabase.from("posts").update({
-        title: article.h1 || article.seo_title, content: finalHtml, excerpt: article.excerpt,
-        meta_title: article.meta_title, meta_description: article.meta_description,
-        manually_edited: false, is_published: false,
-      }).eq("id", post.id);
-      if (error) throw error;
-      postId = post.id;
-    } else {
-      let candidate = finalSlug;
-      for (let i = 2; i < 30; i++) {
-        const { data: clash } = await supabase.from("posts").select("id").eq("slug", candidate).maybeSingle();
-        if (!clash) break;
-        candidate = `${finalSlug}-${i}`;
+    try {
+      if (willUpdate && bestMatch) {
+        const post = bestMatch.post;
+        finalSlug = post.slug;
+        await supabase.from("post_revisions").insert({
+          post_id: post.id, title: post.title, content: post.content, excerpt: post.excerpt,
+          meta_title: null, meta_description: post.meta_description,
+          reason: post.manually_edited ? "seo-agent: pre-update snapshot (manually edited)" : "seo-agent: pre-update snapshot",
+        });
+        const { error } = await supabase.from("posts").update({
+          title: article.h1 || article.seo_title, content: finalHtml, excerpt: article.excerpt,
+          meta_title: article.meta_title, meta_description: article.meta_description,
+          manually_edited: false, is_published: false,
+        }).eq("id", post.id);
+        if (error) throw error;
+        postId = post.id;
+      } else {
+        let candidate = finalSlug;
+        for (let i = 2; i < 30; i++) {
+          const { data: clash } = await supabase.from("posts").select("id").eq("slug", candidate).maybeSingle();
+          if (!clash) break;
+          candidate = `${finalSlug}-${i}`;
+        }
+        finalSlug = candidate;
+        const { data: ins, error } = await supabase.from("posts").insert({
+          title: article.h1 || article.seo_title, slug: finalSlug, content: finalHtml,
+          excerpt: article.excerpt, meta_title: article.meta_title, meta_description: article.meta_description,
+          post_type: "article", is_published: false,
+        }).select("id").single();
+        if (error) throw error;
+        postId = ins.id;
       }
-      finalSlug = candidate;
-      const { data: ins, error } = await supabase.from("posts").insert({
-        title: article.h1 || article.seo_title, slug: finalSlug, content: finalHtml,
-        excerpt: article.excerpt, meta_title: article.meta_title, meta_description: article.meta_description,
-        post_type: "article", is_published: false,
-      }).select("id").single();
-      if (error) throw error;
-      postId = ins.id;
+    } catch (saveErr: any) {
+      await sendAlert(supabase, {
+        errorType: "Blog save failed", step: willUpdate ? "post-update" : "post-insert",
+        severity: "high", message: String(saveErr?.message || saveErr).slice(0, 500),
+        suggestion: "Check RLS/grants on posts and post_revisions tables and DB connectivity.",
+      });
+      throw saveErr;
     }
+
 
     log.post_id = postId;
     log.slug = finalSlug;
@@ -475,7 +590,26 @@ Return STRICT JSON (no markdown fences):
     log.status = "error";
     log.error = String(e?.message || e).slice(0, 1000);
     log.execution_ms = Date.now() - started;
-    try { await supabase.from("seo_agent_logs").insert(log); } catch {}
+    try { await supabase.from("seo_agent_logs").insert(log); } catch (dbe) {
+      try {
+        await sendAlert(supabase, {
+          errorType: "Database connection failed", step: "log-persistence",
+          severity: "high", message: String((dbe as any)?.message || dbe).slice(0, 500),
+          suggestion: "Verify Lovable Cloud database availability and service role key.",
+        });
+      } catch {}
+    }
+    // Any unhandled exception → alert (skip if already emitted a specific one)
+    const already = /All (LLM|search) providers|Blog save failed|Draft JSON parse failed/i.test(log.error);
+    if (!already) {
+      try {
+        await sendAlert(supabase, {
+          errorType: "Unexpected exception", step: "seo-agent",
+          severity: "high", message: log.error,
+          suggestion: "Inspect edge function logs and recent seo_agent_logs entries.",
+        });
+      } catch {}
+    }
     return new Response(JSON.stringify({ success: false, error: log.error, log }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

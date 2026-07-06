@@ -12,4 +12,9 @@ verify_jwt = false
 [functions.seo-blog-agent]
 verify_jwt = false
 
+[functions.seo-agent-health-report]
+verify_jwt = false
+
+
+
 

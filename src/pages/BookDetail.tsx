@@ -255,12 +255,21 @@ const BookDetail = () => {
             <div className="md:col-span-1">
               <div className="aspect-[3/4] overflow-hidden rounded-lg bg-muted flex items-center justify-center">
                 {book.cover_url ? (
-                  <img src={book.cover_url} alt={book.title} className="h-full w-full object-cover" />
+                  <img
+                    src={book.cover_url}
+                    alt={`${book.title} — ${book.author}`}
+                    width={600}
+                    height={800}
+                    decoding="async"
+                    fetchPriority="high"
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   <BookOpen className="h-16 w-16 text-muted-foreground/40" />
                 )}
               </div>
             </div>
+
 
             <div className="md:col-span-2">
               <h1 className="font-serif text-3xl font-bold md:text-4xl">{book.title}</h1>

@@ -581,7 +581,30 @@ async function main() {
       processed++;
     }
 
+    for (const book of bookRows) {
+      const route = routePathForBook(book);
+      try {
+        const snapshot = renderBookDetailSnapshot(book);
+        const missing = [
+          ...validateHead(route, snapshot.head, seen),
+          ...validateBody(route, snapshot.rootHtml),
+        ];
+        if (missing.length) {
+          failures.push({ route, missing });
+          console.log(`  ✗ ${route}  ${missing.join(", ")}`);
+        } else {
+          console.log(`  ✓ ${route}`);
+        }
+        if (!CHECK_ONLY) await writeBookRouteFile(book, baseHtml);
+      } catch (e) {
+        failures.push({ route, missing: [`render error: ${e.message}`] });
+        console.log(`  ✗ ${route}  ${e.message}`);
+      }
+      processed++;
+    }
+
     for (const row of readerRows) {
+
       const route = routePathForReader(row);
       try {
         const snapshot = renderReaderSnapshot(row);

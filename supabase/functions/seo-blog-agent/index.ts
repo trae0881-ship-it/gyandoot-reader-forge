@@ -10,11 +10,17 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import {
+  sendAlert, sendRecovery, isProviderPaused, recordProviderFailure,
+  recordProviderSuccess, classifyError,
+} from "../_shared/seo-alerts.ts";
 
 const NICHE = "Books, Spirituality, Meditation, Self Growth, Mindfulness, Consciousness";
 const SITE = "https://gyandootnova.in";
 const AUTHOR = "GyandootNova Editorial";
 const SIMILARITY_THRESHOLD = 0.7;
+const CONTENT_SCORE_THRESHOLD = Number(Deno.env.get("SEO_CONTENT_SCORE_MIN") || "55");
+
 
 // ─── helpers ─────────────────────────────────────────────────────────
 function slugify(s: string) {

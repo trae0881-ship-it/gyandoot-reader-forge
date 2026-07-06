@@ -85,7 +85,7 @@ const Index = () => {
         .from("books")
         .select("id, title, slug, author, cover_url, price, is_free")
         .eq("is_featured", true)
-        .limit(4);
+        .limit(5);
       return data ?? [];
     },
   });
@@ -354,7 +354,7 @@ const Index = () => {
 
           </div>
           {featuredBooks && featuredBooks.length > 0 ? (
-            <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7">
+            <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
               {featuredBooks.map((book) => (
                 <Link key={book.id} to={`/books/${book.slug}`} className="group">
                   <Card className="overflow-hidden border-border transition-all hover:shadow-xl hover:-translate-y-1 h-full flex flex-col relative">
@@ -406,8 +406,9 @@ const Index = () => {
                           </div>
                         )}
                         <span className="text-[11px] font-bold text-primary group-hover:underline">
-                          {book.is_free ? "पढ़ें →" : "Unlock →"}
+                          {book.is_free ? "पढ़ें →" : "Buy Now →"}
                         </span>
+
                       </div>
                     </CardContent>
                   </Card>

@@ -189,7 +189,11 @@ const BookDetail = () => {
     );
   };
 
-  const bookDescription = book?.description?.replace(/<[^>]*>/g, "").slice(0, 155) ?? (book ? `Read ${book.title} by ${book.author} online at GyandootNova.` : "Loading book...");
+  const cleanedDesc = book?.description?.replace(/<[^>]*>/g, "").trim().slice(0, 155);
+  const bookDescription = (cleanedDesc && cleanedDesc.length >= 20)
+    ? cleanedDesc
+    : (book ? `${book.title} — ${book.author} द्वारा रचित पुस्तक GyandootNova पर पढ़ें, खरीदें और डाउनलोड करें।` : "Loading book...");
+
 
   const bookJsonLd = book ? {
     "@context": "https://schema.org",

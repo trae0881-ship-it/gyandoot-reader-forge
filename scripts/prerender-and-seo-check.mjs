@@ -202,15 +202,15 @@ async function main() {
 
     for (const route of routes) {
       try {
-        const headInner = await snapshotRoute(page, route);
-        const missing = validateHead(route, headInner);
+        const snapshot = await snapshotRoute(page, route);
+        const missing = validateHead(route, snapshot.head);
         if (missing.length) {
           failures.push({ route, missing });
           console.log(`  ✗ ${route}  missing: ${missing.join(", ")}`);
         } else {
           console.log(`  ✓ ${route}`);
         }
-        if (!CHECK_ONLY) await writeRouteFile(route, baseHtml, headInner);
+        if (!CHECK_ONLY) await writeRouteFile(route, baseHtml, snapshot);
       } catch (e) {
         failures.push({ route, missing: [`render error: ${e.message}`] });
         console.log(`  ✗ ${route}  ${e.message}`);

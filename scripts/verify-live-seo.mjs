@@ -436,24 +436,35 @@ function selectorPresent(rootHtml, sel) {
   return new RegExp(`<${tag}\\b`, "i").test(rootHtml);
 }
 
-// Canonical URL must match the URL we fetched (ignoring trailing slash and
-// hash). Both origin-swap and homepage-pointing bugs get caught here.
+// Canonical URL must match the URL we fetched, ignoring differences that
+// are semantically insignificant: trailing slash, scheme/host case, default
+// ports, fragments, and query-param ordering. Both origin-swap and
+// homepage-pointing bugs still get caught.
+function normalizeUrl(u) {
+  try {
+    const x = new URL(u);
+    const protocol = x.protocol.toLowerCase();
+    const host = x.hostname.toLowerCase();
+    const defaultPort = (protocol === "http:" && x.port === "80") || (protocol === "https:" && x.port === "443");
+    const port = defaultPort || !x.port ? "" : `:${x.port}`;
+    let p = x.pathname.replace(/\/+$/, "");
+    if (p === "") p = "/";
+    // Sort query params for stable comparison; drop empty query.
+    const params = [...x.searchParams.entries()].sort(([a], [b]) => a.localeCompare(b));
+    const qs = params.length ? "?" + params.map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join("&") : "";
+    // Fragment intentionally dropped — never affects server response.
+    return `${protocol}//${host}${port}${p}${qs}`;
+  } catch { return null; }
+}
 function canonicalMismatch(fetchedUrl, canonicalHref) {
   if (!canonicalHref) return null;
-  const norm = (u) => {
-    try {
-      const x = new URL(u);
-      let p = x.pathname.replace(/\/+$/, "");
-      if (p === "") p = "/";
-      return `${x.origin}${p}`;
-    } catch { return null; }
-  };
-  const a = norm(fetchedUrl);
-  const b = norm(canonicalHref);
+  const a = normalizeUrl(fetchedUrl);
+  const b = normalizeUrl(canonicalHref);
   if (!a || !b) return `canonical URL not parseable (${canonicalHref})`;
   if (a !== b) return `canonical mismatch — fetched ${a}, canonical ${b}`;
   return null;
 }
+
 
 function auditPage(url, html) {
   const problems = [];

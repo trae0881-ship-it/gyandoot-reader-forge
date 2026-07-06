@@ -599,39 +599,67 @@ function csvCell(v) {
 }
 function renderCsv(summary) {
   const header = [
-    "url", "status", "final_url", "redirects", "fetch_ms", "attempts",
+    "url", "status", "final_url",
+    "redirect_hops", "redirect_chain", "final_matches_canonical", "final_matches_og_url",
+    "fetch_ms", "attempts",
     "h1_count", "word_count", "title", "description", "canonical", "og_url",
     "og_image", "og_image_status", "og_image_ms", "og_image_type",
+    "og_image_magic", "og_image_magic_ok",
     "tw_image", "tw_image_status", "tw_image_ms", "tw_image_type",
+    "tw_image_magic", "tw_image_magic_ok",
     "jsonld_types", "applied_rule", "problems",
   ];
-  const rows = summary.results.map((r) => [
-    r.url,
-    r.status ?? "",
-    r.finalUrl ?? "",
-    r.redirectChain ? Math.max(0, r.redirectChain.length - 1) : 0,
-    r.fetchMs ?? "",
-    r.attempts ?? "",
-    r.h1Count ?? "",
-    r.wordCount ?? "",
-    r.title ?? "",
-    r.desc ?? "",
-    r.canonical ?? "",
-    r.ogUrl ?? "",
-    r.ogImage ?? "",
-    r.ogImageCheck?.status ?? "",
-    r.ogImageCheck?.ms ?? "",
-    r.ogImageCheck?.contentType ?? "",
-    r.twImage ?? "",
-    r.twImageCheck?.status ?? "",
-    r.twImageCheck?.ms ?? "",
-    r.twImageCheck?.contentType ?? "",
-    (r.jsonldTypes || []).join("|"),
-    r.appliedRule ?? "",
-    (r.problems || []).join(" | "),
-  ].map(csvCell).join(","));
+  const normEq = (a, b) => {
+    if (!a || !b) return "";
+    try {
+      const norm = (u) => {
+        const x = new URL(u);
+        let p = x.pathname.replace(/\/+$/, "") || "/";
+        return `${x.origin}${p}`;
+      };
+      return norm(a) === norm(b) ? "yes" : "no";
+    } catch { return ""; }
+  };
+  const rows = summary.results.map((r) => {
+    const chain = r.redirectChain || [];
+    // Chain URLs joined with " → ". Each hop shows "STATUS url" for context.
+    const chainStr = chain.map((h, i) => i === 0 ? h.url : `${h.status || "?"} ${h.url}`).join(" → ");
+    return [
+      r.url,
+      r.status ?? "",
+      r.finalUrl ?? "",
+      Math.max(0, chain.length - 1),
+      chainStr,
+      normEq(r.finalUrl, r.canonical),
+      normEq(r.finalUrl, r.ogUrl),
+      r.fetchMs ?? "",
+      r.attempts ?? "",
+      r.h1Count ?? "",
+      r.wordCount ?? "",
+      r.title ?? "",
+      r.desc ?? "",
+      r.canonical ?? "",
+      r.ogUrl ?? "",
+      r.ogImage ?? "",
+      r.ogImageCheck?.status ?? "",
+      r.ogImageCheck?.ms ?? "",
+      r.ogImageCheck?.contentType ?? "",
+      r.ogImageCheck?.sniffedFormat ?? "",
+      r.ogImageCheck ? (r.ogImageCheck.magicByteMatch ? "yes" : "no") : "",
+      r.twImage ?? "",
+      r.twImageCheck?.status ?? "",
+      r.twImageCheck?.ms ?? "",
+      r.twImageCheck?.contentType ?? "",
+      r.twImageCheck?.sniffedFormat ?? "",
+      r.twImageCheck ? (r.twImageCheck.magicByteMatch ? "yes" : "no") : "",
+      (r.jsonldTypes || []).join("|"),
+      r.appliedRule ?? "",
+      (r.problems || []).join(" | "),
+    ].map(csvCell).join(",");
+  });
   return [header.map(csvCell).join(","), ...rows].join("\n") + "\n";
 }
+
 
 
 

@@ -128,24 +128,60 @@ const LLM_CHAIN: [string, (m: ChatMsg[], j: boolean) => Promise<string>][] = [
   ["anthropic", llmAnthropic], ["openai", llmOpenAI], ["deepseek", llmDeepSeek], ["gemini", llmGemini],
 ];
 
-async function callLLM(messages: ChatMsg[], json: boolean, log: any): Promise<string> {
+function parseStatus(msg: string): number | null {
+  const m = msg.match(/\b(\d{3})\b/);
+  return m ? Number(m[1]) : null;
+}
+
+async function callLLM(messages: ChatMsg[], json: boolean, log: any, sb: any, step: string): Promise<string> {
   log.llm_attempts = log.llm_attempts || [];
   const errors: string[] = [];
+  const failedProviders: { name: string; error: string; status: number | null }[] = [];
   for (const [name, fn] of LLM_CHAIN) {
+    if (await isProviderPaused(sb, name)) {
+      log.llm_attempts.push({ provider: name, ok: false, skipped: "paused" });
+      continue;
+    }
     try {
       const out = await retryOnce(() => fn(messages, json));
       if (!out) throw new Error("empty");
       log.llm_attempts.push({ provider: name, ok: true });
       log.llm_used = log.llm_used || name;
+      // Recovery: if previous LLMs in this call failed, notify
+      const wasFailing = await recordProviderSuccess(sb, name);
+      if (failedProviders.length > 0) {
+        const first = failedProviders[0];
+        const cls = classifyError(first.name, first.error, first.status);
+        await sendRecovery(sb, {
+          errorType: cls.errorType, provider: first.name, message: first.error,
+          httpStatus: first.status, step, recoveryMethod: "LLM fallback chain", switchedTo: name,
+          originalError: `${first.name}: ${first.error}`,
+        });
+      } else if (wasFailing) {
+        await sendRecovery(sb, {
+          errorType: `${name} recovered`, provider: name, step,
+          recoveryMethod: "provider became healthy", switchedTo: name,
+        });
+      }
       return json ? stripFences(out) : out;
     } catch (e: any) {
       const msg = String(e?.message || e);
+      const status = parseStatus(msg);
       log.llm_attempts.push({ provider: name, ok: false, error: msg.slice(0, 200) });
       errors.push(`${name}: ${msg}`);
+      failedProviders.push({ name, error: msg, status });
+      const { consecutive, paused } = await recordProviderFailure(sb, name, msg, status);
+      const cls = classifyError(name, msg, status);
+      await sendAlert(sb, {
+        errorType: cls.errorType, provider: name, message: msg.slice(0, 500),
+        httpStatus: status, step, retryCount: 1, suggestion: cls.suggestion,
+        severity: paused || consecutive >= 3 ? "high" : cls.severity,
+      });
     }
   }
   throw new Error(`All LLM providers failed: ${errors.join(" | ")}`);
 }
+
 
 // ─── Search providers ────────────────────────────────────────────────
 type Source = { url: string; title: string; snippet: string; provider?: string };

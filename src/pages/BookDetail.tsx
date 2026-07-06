@@ -189,10 +189,17 @@ const BookDetail = () => {
     );
   };
 
-  const cleanedDesc = book?.description?.replace(/<[^>]*>/g, "").trim().slice(0, 155);
-  const bookDescription = (cleanedDesc && cleanedDesc.length >= 20)
-    ? cleanedDesc
-    : (book ? `${book.title} — ${book.author} द्वारा रचित पुस्तक GyandootNova पर पढ़ें, खरीदें और डाउनलोड करें।` : "Loading book...");
+  const cleanedDesc = book?.description?.replace(/<[^>]*>/g, "").trim();
+  const priceLabel = book ? (book.is_free ? "मुफ़्त" : `₹${book.price}`) : "";
+  const shortDesc = cleanedDesc && cleanedDesc.length >= 20 ? cleanedDesc.slice(0, 110) : "";
+  const bookDescription = book
+    ? (shortDesc
+        ? `${shortDesc}… ${book.author} द्वारा। ${priceLabel} — Instant digital delivery, UPI/Card/COD-friendly checkout।`
+        : `${book.title} — ${book.author} द्वारा। ${priceLabel} में पढ़ें, तुरंत access, सभी devices पर। GyandootNova पर सुरक्षित checkout।`)
+    : "Loading book...";
+  const bookMetaTitle = book
+    ? `${book.title} — ${book.author} | ${priceLabel} | GyandootNova`
+    : "Loading... | GyandootNova";
 
 
   const bookJsonLd = book ? {
@@ -208,11 +215,13 @@ const BookDetail = () => {
       "price": book.is_free ? "0" : String(book.price),
       "priceCurrency": "INR",
       "availability": "https://schema.org/InStock",
+      "url": `https://gyandootnova.in/books/${book.slug}`,
+      "deliveryLeadTime": { "@type": "QuantitativeValue", "minValue": 0, "maxValue": 1, "unitCode": "MIN" },
     },
   } : undefined;
 
   useSEO({
-    title: book ? `${book.title} by ${book.author} — Buy Online` : "Loading... | GyandootNova",
+    title: bookMetaTitle,
     description: bookDescription,
     canonical: book ? `/books/${book.slug}` : undefined,
     ogImage: book?.cover_url ?? undefined,

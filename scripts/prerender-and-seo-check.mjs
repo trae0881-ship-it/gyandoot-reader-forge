@@ -169,7 +169,11 @@ async function main() {
   const failures = [];
   let processed = 0;
   try {
-    const browser = await chromium.launch({ headless: true });
+    const browser = await chromium.launch({
+      headless: true,
+      executablePath: process.env.CHROMIUM_PATH || undefined,
+    });
+
     const context = await browser.newContext({
       viewport: { width: 1280, height: 900 },
       userAgent: "Mozilla/5.0 (compatible; LovableSEOBot/1.0)",

@@ -244,7 +244,7 @@ function scoreSource(s: Source): number {
   return score;
 }
 
-async function routedSearch(task: keyof typeof ROUTES, query: string, log: any, sb: any): Promise<Source[]> {
+async function routedSearch(task: keyof typeof ROUTES, query: string, log: any, sb: any, resolveKey: KeyResolver): Promise<Source[]> {
   log.search_attempts = log.search_attempts || [];
   log.fallback_sequence = log.fallback_sequence || [];
   const chain = ROUTES[task];
@@ -254,8 +254,13 @@ async function routedSearch(task: keyof typeof ROUTES, query: string, log: any, 
       log.search_attempts.push({ task, provider: name, ok: false, skipped: "paused" });
       continue;
     }
+    const key = await resolveKey(name);
+    if (!key) {
+      log.search_attempts.push({ task, provider: name, ok: false, skipped: "no-key" });
+      continue;
+    }
     try {
-      const results = await retryOnce(() => fn(query));
+      const results = await retryOnce(() => fn(query, key));
       log.search_attempts.push({ task, provider: name, ok: true, count: results.length });
       log.fallback_sequence.push(`${task}:${name}`);
       const wasFailing = await recordProviderSuccess(sb, name);
@@ -292,13 +297,13 @@ async function routedSearch(task: keyof typeof ROUTES, query: string, log: any, 
   return [];
 }
 
-async function researchTopic(topic: string, log: any, sb: any): Promise<Source[]> {
-  // Load-balanced: run trending + semantic + google in parallel, each with its own fallback chain
+async function researchTopic(topic: string, log: any, sb: any, resolveKey: KeyResolver): Promise<Source[]> {
   const [trending, semantic, google] = await Promise.all([
-    routedSearch("trending", topic, log, sb),
-    routedSearch("semantic", topic, log, sb),
-    routedSearch("google", topic, log, sb),
+    routedSearch("trending", topic, log, sb, resolveKey),
+    routedSearch("semantic", topic, log, sb, resolveKey),
+    routedSearch("google", topic, log, sb, resolveKey),
   ]);
+
 
 
   const merged: Source[] = [];

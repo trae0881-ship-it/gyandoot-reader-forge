@@ -519,21 +519,48 @@ async function main() {
       console.log(`  [${done}/${urls.length}] ↺ ${url} (skipped — passed in previous run)`);
       return { url, status: 200, skipped: true, problems: [], fetchMs: 0 };
     }
-    const { status, body, redirect, attempts, ms: fetchMs } = await httpFetch(url);
+    const res = await httpFetch(url);
+    const { status, body, attempts, ms: fetchMs, finalUrl, chain, error } = res;
     let entry;
     if (status !== 200) {
-      entry = { url, status, attempts, fetchMs, problems: [`HTTP ${status}${redirect ? ` → ${redirect}` : ""}`] };
+      const trail = (chain || []).map((h) => `${h.status}${h.location ? ` → ${h.location}` : ""}`).join(" ");
+      entry = { url, status, attempts, fetchMs, redirectChain: chain, finalUrl, problems: [`HTTP ${status}${error ? ` (${error})` : ""}${trail ? ` [${trail}]` : ""}`] };
     } else {
       const audit = auditPage(url, body);
-      entry = { status, attempts, fetchMs, ...audit };
+      entry = { status, attempts, fetchMs, redirectChain: chain, finalUrl, ...audit };
+      // Redirect-chain sanity: the final URL must resolve to the same path
+      // we asked for (canonical/og:url are checked separately in auditPage).
+      if (finalUrl && finalUrl !== url) {
+        const mm = canonicalMismatch(url, finalUrl);
+        if (mm) entry.problems.push(`redirect landed off-route — ${mm.replace(/^canonical /, "")}`);
+        else entry.problems.push(`normalized redirect (${chain.length - 1} hop${chain.length - 1 === 1 ? "" : "s"}) — ${url} → ${finalUrl}`);
+      }
+      if (MAX_FETCH_MS && fetchMs > MAX_FETCH_MS) {
+        entry.problems.push(`fetch too slow: ${fetchMs}ms > ${MAX_FETCH_MS}ms`);
+      }
       if (!SKIP_OG) {
         const [og, tw] = await Promise.all([checkAssetExists(audit.ogImage), checkAssetExists(audit.twImage)]);
         entry.ogImageCheck = og;
         entry.twImageCheck = tw;
-        if (audit.ogImage && !og.ok) entry.problems.push(`og:image not reachable (HTTP ${og.status})`);
-        if (audit.twImage && !tw.ok) entry.problems.push(`twitter:image not reachable (HTTP ${tw.status})`);
+        const flagAsset = (label, meta, probe) => {
+          if (!meta) return;
+          if (probe.status < 200 || probe.status >= 400) {
+            entry.problems.push(`${label} not reachable (HTTP ${probe.status})`);
+            return;
+          }
+          if (probe.looksLikeErrorPage) {
+            entry.problems.push(`${label} returned non-image content-type "${probe.contentType || "unknown"}" (likely error page)`);
+          } else if (!probe.isImage) {
+            entry.problems.push(`${label} content-type is "${probe.contentType || "unknown"}", expected image/*`);
+          }
+          if (probe.tooSmall) entry.problems.push(`${label} suspiciously small (${probe.contentLength} bytes — broken placeholder?)`);
+          if (MAX_ASSET_MS && probe.ms > MAX_ASSET_MS) entry.problems.push(`${label} probe too slow: ${probe.ms}ms > ${MAX_ASSET_MS}ms`);
+        };
+        flagAsset("og:image", audit.ogImage, og);
+        flagAsset("twitter:image", audit.twImage, tw);
       }
     }
+
     done++;
     const mark = entry.problems?.length ? "✗" : "✓";
     const timing = entry.fetchMs != null ? ` ${entry.fetchMs}ms` : "";

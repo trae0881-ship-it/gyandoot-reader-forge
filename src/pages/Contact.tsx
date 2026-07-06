@@ -58,7 +58,7 @@ const Contact = () => {
                 <Mail className="h-6 w-6 text-primary mt-1" />
                 <div>
                   <p className="font-semibold text-foreground">ईमेल</p>
-                  <p className="text-muted-foreground">contact@gyandootnova.in</p>
+                  <p className="text-muted-foreground">amrendra8765@gmail.com</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">

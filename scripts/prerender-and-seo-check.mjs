@@ -114,7 +114,7 @@ async function snapshotRoute(page, route) {
   const url = `${ORIGIN}${route}`;
   await page.goto(url, { waitUntil: "networkidle", timeout: 30_000 });
   // Give react-helmet-style hooks a tick to mutate head after data loads.
-  await page.waitForTimeout(600);
+  await page.waitForTimeout(800);
   // Wait until canonical points at this route (best-effort).
   try {
     await page.waitForFunction(
@@ -126,15 +126,27 @@ async function snapshotRoute(page, route) {
       { timeout: 4000 }
     );
   } catch {}
-  return page.evaluate(() => document.head.innerHTML);
+  return page.evaluate(() => ({
+    head: document.head.innerHTML,
+    rootHtml: document.getElementById("root")?.innerHTML ?? "",
+  }));
 }
 
-async function writeRouteFile(route, baseHtml, headInner) {
+async function writeRouteFile(route, baseHtml, snapshot) {
   // Replace the head content of the base index.html with the rendered head.
-  const rewritten = baseHtml.replace(
+  let rewritten = baseHtml.replace(
     /<head>[\s\S]*?<\/head>/i,
-    `<head>\n${headInner}\n</head>`
+    `<head>\n${snapshot.head}\n</head>`
   );
+  // Inject the rendered body content into #root so crawlers (and users with
+  // JS disabled) see real text without executing JavaScript. React will
+  // hydrate on top of this markup on first client render.
+  if (snapshot.rootHtml && snapshot.rootHtml.length > 20) {
+    rewritten = rewritten.replace(
+      /<div id="root"><\/div>/,
+      `<div id="root">${snapshot.rootHtml}</div>`
+    );
+  }
   const outDir =
     route === "/" ? DIST : join(DIST, route.replace(/^\//, ""));
   await mkdir(outDir, { recursive: true });
@@ -190,15 +202,15 @@ async function main() {
 
     for (const route of routes) {
       try {
-        const headInner = await snapshotRoute(page, route);
-        const missing = validateHead(route, headInner);
+        const snapshot = await snapshotRoute(page, route);
+        const missing = validateHead(route, snapshot.head);
         if (missing.length) {
           failures.push({ route, missing });
           console.log(`  ✗ ${route}  missing: ${missing.join(", ")}`);
         } else {
           console.log(`  ✓ ${route}`);
         }
-        if (!CHECK_ONLY) await writeRouteFile(route, baseHtml, headInner);
+        if (!CHECK_ONLY) await writeRouteFile(route, baseHtml, snapshot);
       } catch (e) {
         failures.push({ route, missing: [`render error: ${e.message}`] });
         console.log(`  ✗ ${route}  ${e.message}`);

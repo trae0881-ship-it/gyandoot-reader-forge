@@ -70,7 +70,7 @@ async function fetchSlugs(table, filter = "") {
   return rows.map((r) => r.slug).filter(Boolean);
 }
 
-async function fetchSeoReaderRows() {
+async function fetchSeoPrerenderPayload() {
   const url = `${SUPABASE_URL}/functions/v1/seo-prerender-data`;
   try {
     const res = await fetch(url, {
@@ -78,15 +78,19 @@ async function fetchSeoReaderRows() {
     });
     if (!res.ok) {
       console.warn(`[warn] seo-prerender-data fetch failed (${res.status})`);
-      return [];
+      return { books: [], chapters: [] };
     }
     const json = await res.json();
-    return Array.isArray(json?.chapters) ? json.chapters : [];
+    return {
+      books: Array.isArray(json?.books) ? json.books : [],
+      chapters: Array.isArray(json?.chapters) ? json.chapters : [],
+    };
   } catch (e) {
     console.warn(`[warn] seo-prerender-data fetch failed (${e.message})`);
-    return [];
+    return { books: [], chapters: [] };
   }
 }
+
 
 function waitForServer(url, timeoutMs = 30_000) {
   const start = Date.now();

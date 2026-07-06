@@ -251,30 +251,62 @@ function scoreSource(s: Source): number {
   return score;
 }
 
-async function routedSearch(task: keyof typeof ROUTES, query: string, log: any): Promise<Source[]> {
+async function routedSearch(task: keyof typeof ROUTES, query: string, log: any, sb: any): Promise<Source[]> {
   log.search_attempts = log.search_attempts || [];
   log.fallback_sequence = log.fallback_sequence || [];
   const chain = ROUTES[task];
+  const failedProviders: { name: string; error: string; status: number | null }[] = [];
   for (const [name, fn] of chain) {
+    if (await isProviderPaused(sb, name)) {
+      log.search_attempts.push({ task, provider: name, ok: false, skipped: "paused" });
+      continue;
+    }
     try {
       const results = await retryOnce(() => fn(query));
       log.search_attempts.push({ task, provider: name, ok: true, count: results.length });
       log.fallback_sequence.push(`${task}:${name}`);
+      const wasFailing = await recordProviderSuccess(sb, name);
+      if (failedProviders.length > 0) {
+        const first = failedProviders[0];
+        const cls = classifyError(first.name, first.error, first.status);
+        await sendRecovery(sb, {
+          errorType: cls.errorType, provider: first.name, message: first.error,
+          httpStatus: first.status, step: `search:${task}`,
+          recoveryMethod: "search provider fallback", switchedTo: name,
+          originalError: `${first.name}: ${first.error}`,
+        });
+      } else if (wasFailing) {
+        await sendRecovery(sb, {
+          errorType: `${name} recovered`, provider: name, step: `search:${task}`,
+          recoveryMethod: "provider became healthy", switchedTo: name,
+        });
+      }
       return results;
     } catch (e: any) {
-      log.search_attempts.push({ task, provider: name, ok: false, error: String(e?.message || e).slice(0, 150) });
+      const msg = String(e?.message || e);
+      const status = parseStatus(msg);
+      log.search_attempts.push({ task, provider: name, ok: false, error: msg.slice(0, 150) });
+      failedProviders.push({ name, error: msg, status });
+      const { consecutive, paused } = await recordProviderFailure(sb, name, msg, status);
+      const cls = classifyError(name, msg, status);
+      await sendAlert(sb, {
+        errorType: cls.errorType, provider: name, message: msg.slice(0, 500),
+        httpStatus: status, step: `search:${task}`, retryCount: 1, suggestion: cls.suggestion,
+        severity: paused || consecutive >= 3 ? "high" : cls.severity,
+      });
     }
   }
   return [];
 }
 
-async function researchTopic(topic: string, log: any): Promise<Source[]> {
+async function researchTopic(topic: string, log: any, sb: any): Promise<Source[]> {
   // Load-balanced: run trending + semantic + google in parallel, each with its own fallback chain
   const [trending, semantic, google] = await Promise.all([
-    routedSearch("trending", topic, log),
-    routedSearch("semantic", topic, log),
-    routedSearch("google", topic, log),
+    routedSearch("trending", topic, log, sb),
+    routedSearch("semantic", topic, log, sb),
+    routedSearch("google", topic, log, sb),
   ]);
+
 
   const merged: Source[] = [];
   const seen = new Set<string>();

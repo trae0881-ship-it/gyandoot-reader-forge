@@ -129,6 +129,17 @@ const DEFAULT_SCHEMA_RULES = [
 ];
 const SCHEMA_RULES_ORDERED = [...USER_SCHEMA_RULES, ...DEFAULT_SCHEMA_RULES];
 
+const MAX_FETCH_MS_RULES = many("max-fetch-ms-rule").map(parseTimingRule).filter(Boolean);
+const MAX_ASSET_MS_RULES = many("max-asset-ms-rule").map(parseTimingRule).filter(Boolean);
+function timingLimit(url, rules, fallback) {
+  try {
+    const path = new URL(url).pathname;
+    for (const r of rules) if (r.re.test(path)) return r.ms;
+  } catch { /* ignore */ }
+  return fallback || 0;
+}
+
+
 // ---------- resume mode ----------
 const RESUMED_PASSING = new Set();
 if (RESUME && existsSync(RESUME)) {

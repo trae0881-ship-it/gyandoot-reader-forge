@@ -369,7 +369,7 @@ Deno.serve(async (req) => {
     log.action = willUpdate ? "updated" : "created";
 
     // 4) Load-balanced multi-provider research (parallel + fallback per task)
-    const sources = await researchTopic(topic!, log, supabase);
+    const sources = await researchTopic(topic!, log, supabase, resolveKey);
     if (sources.length === 0) {
       log.status = "error";
       log.error = "All search providers unavailable or returned no results";

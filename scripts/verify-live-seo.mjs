@@ -8,22 +8,30 @@
  *
  * Options:
  *   --origin=<url>          Target origin (default: https://gyandootnova.in).
- *   --concurrency=<n>       Parallel requests (default: 6).
+ *   --concurrency=<n>       Max parallel requests (default: 6). Auto-throttles on 429.
+ *   --min-concurrency=<n>   Floor for adaptive throttling (default: 1).
  *   --retries=<n>           Max retries per URL on 429/5xx (default: 3).
- *   --backoff=<ms>          Base backoff in ms; exponential (default: 500).
+ *   --backoff=<ms>          Base backoff in ms; exponential + jitter (default: 500).
  *   --min-words=<n>         Minimum visible words per page (default: 60).
  *   --selector=<css>        Required content selector, repeatable
  *                           (default: main, article).
+ *   --header="K: V"         Extra request header, repeatable
+ *                           (e.g. --header="Authorization: Bearer xyz").
+ *   --user-agent=<str>      Override the User-Agent header.
+ *   --cookie=<str>          Add a Cookie header (shortcut for --header="Cookie: ...").
  *   --skip-og-check         Skip the og:image / twitter:image HEAD probe.
+ *   --skip-jsonld-check     Skip JSON-LD schema validation.
  *   --report=<path>         JSON report path (default: dist/seo-live-report.json).
  *   --html=<path>           HTML report path (default: dist/seo-live-report.html).
  *   --no-html               Do not emit the HTML report.
+ *   --github-summary        Append a compact table to $GITHUB_STEP_SUMMARY and
+ *                           emit ::error:: annotations for failing routes.
  *
  * Single-page curl (for spot checks):
  *   curl -sA "Googlebot" https://gyandootnova.in/books/rigved \
  *     | grep -E "<title|og:image|<h1|name=\"description\""
  */
-import { writeFileSync, mkdirSync } from "node:fs";
+import { writeFileSync, mkdirSync, appendFileSync } from "node:fs";
 import { dirname } from "node:path";
 
 // ---------- CLI ----------
@@ -37,33 +45,76 @@ const flag = (name) => args.includes(`--${name}`);
 const many = (name) => args.filter((a) => a.startsWith(`--${name}=`)).map((a) => a.slice(name.length + 3));
 
 const ORIGIN = (opt("origin", positional || process.env.ORIGIN || "https://gyandootnova.in")).replace(/\/$/, "");
-const CONCURRENCY = Math.max(1, parseInt(opt("concurrency", "6"), 10));
+const MAX_CONCURRENCY = Math.max(1, parseInt(opt("concurrency", "6"), 10));
+const MIN_CONCURRENCY = Math.max(1, parseInt(opt("min-concurrency", "1"), 10));
 const RETRIES = Math.max(0, parseInt(opt("retries", "3"), 10));
 const BACKOFF = Math.max(50, parseInt(opt("backoff", "500"), 10));
 const MIN_WORDS = Math.max(0, parseInt(opt("min-words", "60"), 10));
 const SELECTORS = many("selector").length ? many("selector") : ["main", "article"];
 const SKIP_OG = flag("skip-og-check");
+const SKIP_JSONLD = flag("skip-jsonld-check");
 const REPORT = opt("report", "dist/seo-live-report.json");
 const HTML_REPORT = flag("no-html") ? null : opt("html", "dist/seo-live-report.html");
-const UA = "Mozilla/5.0 (compatible; GyandootSEOVerifier/1.0; +https://gyandootnova.in)";
+const GITHUB_SUMMARY = flag("github-summary") || !!process.env.GITHUB_STEP_SUMMARY;
+const DEFAULT_UA = "Mozilla/5.0 (compatible; GyandootSEOVerifier/1.0; +https://gyandootnova.in)";
+const UA = opt("user-agent", DEFAULT_UA);
+
+const EXTRA_HEADERS = { "User-Agent": UA, Accept: "text/html,*/*" };
+for (const h of many("header")) {
+  const idx = h.indexOf(":");
+  if (idx > 0) EXTRA_HEADERS[h.slice(0, idx).trim()] = h.slice(idx + 1).trim();
+}
+const cookie = opt("cookie", "");
+if (cookie) EXTRA_HEADERS["Cookie"] = cookie;
 
 // ---------- helpers ----------
 const pick = (re, s) => { const m = s.match(re); return m ? m[1].trim() : ""; };
 const countMatches = (re, s) => (s.match(re) || []).length;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// ---------- adaptive throttle ----------
+// Reduce concurrency when sustained 429s appear; ramp back up after quiet window.
+const throttle = {
+  current: MAX_CONCURRENCY,
+  recent429: 0,           // rolling count of 429s in the last window
+  lastAdjustAt: Date.now(),
+  cooldownUntil: 0,       // wall-clock when we may attempt to ramp back up
+  windowMs: 5000,
+  rampUpMs: 10_000,
+};
+function note429() {
+  throttle.recent429++;
+  const now = Date.now();
+  if (throttle.recent429 >= 3 && throttle.current > MIN_CONCURRENCY) {
+    const next = Math.max(MIN_CONCURRENCY, Math.floor(throttle.current / 2));
+    console.log(`  ⚠︎ sustained 429s — lowering concurrency ${throttle.current} → ${next}`);
+    throttle.current = next;
+    throttle.cooldownUntil = now + throttle.rampUpMs;
+    throttle.recent429 = 0;
+    throttle.lastAdjustAt = now;
+  }
+}
+function note2xx() {
+  const now = Date.now();
+  if (now - throttle.lastAdjustAt > throttle.windowMs) throttle.recent429 = 0;
+  if (now >= throttle.cooldownUntil && throttle.current < MAX_CONCURRENCY) {
+    throttle.current = Math.min(MAX_CONCURRENCY, throttle.current + 1);
+    console.log(`  ↑ ramping concurrency back up → ${throttle.current}`);
+    throttle.cooldownUntil = now + throttle.rampUpMs;
+  }
+}
+
 async function httpFetch(url, { method = "GET" } = {}) {
   let attempt = 0;
   while (true) {
     try {
-      const r = await fetch(url, {
-        method,
-        headers: { "User-Agent": UA, Accept: "text/html,*/*" },
-        redirect: "manual",
-      });
+      const r = await fetch(url, { method, headers: EXTRA_HEADERS, redirect: "manual" });
       const retriable = r.status === 429 || (r.status >= 500 && r.status <= 599);
+      if (r.status === 429) note429();
+      else if (r.status >= 200 && r.status < 400) note2xx();
       if (retriable && attempt < RETRIES) {
-        const wait = BACKOFF * 2 ** attempt + Math.floor(Math.random() * 100);
+        const retryAfter = parseInt(r.headers.get("retry-after") || "0", 10) * 1000;
+        const wait = retryAfter || (BACKOFF * 2 ** attempt + Math.floor(Math.random() * 200));
         await sleep(wait);
         attempt++;
         continue;
@@ -76,6 +127,7 @@ async function httpFetch(url, { method = "GET" } = {}) {
     }
   }
 }
+
 
 async function loadSitemap() {
   const { status, body } = await httpFetch(`${ORIGIN}/sitemap.xml`);

@@ -506,41 +506,68 @@ Return STRICT JSON (no markdown fences):
       (h2s.length >= 4 ? 15 : 5) +
       15);
 
+    // Content quality threshold alert (non-fatal)
+    if (log.content_score < CONTENT_SCORE_THRESHOLD) {
+      await sendAlert(supabase, {
+        errorType: "Content quality score below threshold",
+        step: "quality-check", severity: "normal",
+        message: `content_score=${log.content_score} (threshold ${CONTENT_SCORE_THRESHOLD}); word_count=${log.word_count}`,
+        suggestion: "Article saved as Draft. Review and edit before publishing.",
+      });
+    }
+    if (log.internal_links.length === 0 && (existing || []).length > 5) {
+      await sendAlert(supabase, {
+        errorType: "Internal linking failed", step: "internal-linking", severity: "normal",
+        message: "No valid internal links inserted despite available post pool.",
+        suggestion: "Check LLM prompt compliance and slug validation.",
+      });
+    }
+
     // 7) Save (Draft always)
     let postId: string | null = null;
     let finalSlug = slugFinal;
 
-    if (willUpdate && bestMatch) {
-      const post = bestMatch.post;
-      finalSlug = post.slug;
-      await supabase.from("post_revisions").insert({
-        post_id: post.id, title: post.title, content: post.content, excerpt: post.excerpt,
-        meta_title: null, meta_description: post.meta_description,
-        reason: post.manually_edited ? "seo-agent: pre-update snapshot (manually edited)" : "seo-agent: pre-update snapshot",
-      });
-      const { error } = await supabase.from("posts").update({
-        title: article.h1 || article.seo_title, content: finalHtml, excerpt: article.excerpt,
-        meta_title: article.meta_title, meta_description: article.meta_description,
-        manually_edited: false, is_published: false,
-      }).eq("id", post.id);
-      if (error) throw error;
-      postId = post.id;
-    } else {
-      let candidate = finalSlug;
-      for (let i = 2; i < 30; i++) {
-        const { data: clash } = await supabase.from("posts").select("id").eq("slug", candidate).maybeSingle();
-        if (!clash) break;
-        candidate = `${finalSlug}-${i}`;
+    try {
+      if (willUpdate && bestMatch) {
+        const post = bestMatch.post;
+        finalSlug = post.slug;
+        await supabase.from("post_revisions").insert({
+          post_id: post.id, title: post.title, content: post.content, excerpt: post.excerpt,
+          meta_title: null, meta_description: post.meta_description,
+          reason: post.manually_edited ? "seo-agent: pre-update snapshot (manually edited)" : "seo-agent: pre-update snapshot",
+        });
+        const { error } = await supabase.from("posts").update({
+          title: article.h1 || article.seo_title, content: finalHtml, excerpt: article.excerpt,
+          meta_title: article.meta_title, meta_description: article.meta_description,
+          manually_edited: false, is_published: false,
+        }).eq("id", post.id);
+        if (error) throw error;
+        postId = post.id;
+      } else {
+        let candidate = finalSlug;
+        for (let i = 2; i < 30; i++) {
+          const { data: clash } = await supabase.from("posts").select("id").eq("slug", candidate).maybeSingle();
+          if (!clash) break;
+          candidate = `${finalSlug}-${i}`;
+        }
+        finalSlug = candidate;
+        const { data: ins, error } = await supabase.from("posts").insert({
+          title: article.h1 || article.seo_title, slug: finalSlug, content: finalHtml,
+          excerpt: article.excerpt, meta_title: article.meta_title, meta_description: article.meta_description,
+          post_type: "article", is_published: false,
+        }).select("id").single();
+        if (error) throw error;
+        postId = ins.id;
       }
-      finalSlug = candidate;
-      const { data: ins, error } = await supabase.from("posts").insert({
-        title: article.h1 || article.seo_title, slug: finalSlug, content: finalHtml,
-        excerpt: article.excerpt, meta_title: article.meta_title, meta_description: article.meta_description,
-        post_type: "article", is_published: false,
-      }).select("id").single();
-      if (error) throw error;
-      postId = ins.id;
+    } catch (saveErr: any) {
+      await sendAlert(supabase, {
+        errorType: "Blog save failed", step: willUpdate ? "post-update" : "post-insert",
+        severity: "high", message: String(saveErr?.message || saveErr).slice(0, 500),
+        suggestion: "Check RLS/grants on posts and post_revisions tables and DB connectivity.",
+      });
+      throw saveErr;
     }
+
 
     log.post_id = postId;
     log.slug = finalSlug;

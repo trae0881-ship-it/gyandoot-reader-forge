@@ -203,8 +203,9 @@ const Books = () => {
                               )}
                             </div>
                             <span className="text-[11px] font-bold text-primary group-hover:underline">
-                              {book.is_free ? "पढ़ें →" : "Free Sample Padhein →"}
+                              {book.is_free ? "पढ़ें →" : "Buy Now →"}
                             </span>
+
                           </div>
                           {!book.is_free && (
                             <p className="mt-1.5 text-[10px] text-muted-foreground">

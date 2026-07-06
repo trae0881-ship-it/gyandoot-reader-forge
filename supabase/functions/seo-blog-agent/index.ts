@@ -65,17 +65,14 @@ async function retryOnce<T>(fn: () => Promise<T>): Promise<T> {
 // ─── LLM providers ───────────────────────────────────────────────────
 type ChatMsg = { role: "system" | "user" | "assistant"; content: string };
 
-async function llmAnthropic(messages: ChatMsg[], json: boolean): Promise<string> {
-  const key = Deno.env.get("ANTHROPIC_API_KEY");
-  if (!key) throw new Error("no-key");
+async function llmAnthropic(messages: ChatMsg[], json: boolean, key: string): Promise<string> {
   const sys = messages.filter(m => m.role === "system").map(m => m.content).join("\n\n");
   const rest = messages.filter(m => m.role !== "system");
   const res = await withTimeout(fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
     body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 8000,
+      model: "claude-sonnet-4-20250514", max_tokens: 8000,
       system: sys + (json ? "\n\nReturn ONLY valid JSON. No markdown fences." : ""),
       messages: rest.map(m => ({ role: m.role, content: m.content })),
     }),
@@ -84,9 +81,7 @@ async function llmAnthropic(messages: ChatMsg[], json: boolean): Promise<string>
   const data = await res.json();
   return data.content?.[0]?.text ?? "";
 }
-async function llmOpenAI(messages: ChatMsg[], json: boolean): Promise<string> {
-  const key = Deno.env.get("OPENAI_API_KEY");
-  if (!key) throw new Error("no-key");
+async function llmOpenAI(messages: ChatMsg[], json: boolean, key: string): Promise<string> {
   const res = await withTimeout(fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
@@ -96,9 +91,7 @@ async function llmOpenAI(messages: ChatMsg[], json: boolean): Promise<string> {
   const data = await res.json();
   return data.choices?.[0]?.message?.content ?? "";
 }
-async function llmDeepSeek(messages: ChatMsg[], json: boolean): Promise<string> {
-  const key = Deno.env.get("DEEPSEEK_API_KEY");
-  if (!key) throw new Error("no-key");
+async function llmDeepSeek(messages: ChatMsg[], json: boolean, key: string): Promise<string> {
   const res = await withTimeout(fetch("https://api.deepseek.com/chat/completions", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
@@ -108,9 +101,7 @@ async function llmDeepSeek(messages: ChatMsg[], json: boolean): Promise<string> 
   const data = await res.json();
   return data.choices?.[0]?.message?.content ?? "";
 }
-async function llmGemini(messages: ChatMsg[], json: boolean): Promise<string> {
-  const key = Deno.env.get("GEMINI_API_KEY");
-  if (!key) throw new Error("no-key");
+async function llmGemini(messages: ChatMsg[], json: boolean, key: string): Promise<string> {
   const sys = messages.filter(m => m.role === "system").map(m => m.content).join("\n\n");
   const user = messages.filter(m => m.role !== "system").map(m => m.content).join("\n\n");
   const res = await withTimeout(fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
@@ -126,7 +117,8 @@ async function llmGemini(messages: ChatMsg[], json: boolean): Promise<string> {
   return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 }
 
-const LLM_CHAIN: [string, (m: ChatMsg[], j: boolean) => Promise<string>][] = [
+type LLMFn = (m: ChatMsg[], j: boolean, key: string) => Promise<string>;
+const LLM_CHAIN: [string, LLMFn][] = [
   ["anthropic", llmAnthropic], ["openai", llmOpenAI], ["deepseek", llmDeepSeek], ["gemini", llmGemini],
 ];
 
@@ -134,6 +126,7 @@ function parseStatus(msg: string): number | null {
   const m = msg.match(/\b(\d{3})\b/);
   return m ? Number(m[1]) : null;
 }
+
 
 async function callLLM(messages: ChatMsg[], json: boolean, log: any, sb: any, step: string): Promise<string> {
   log.llm_attempts = log.llm_attempts || [];

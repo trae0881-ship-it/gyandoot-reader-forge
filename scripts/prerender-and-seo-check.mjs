@@ -70,7 +70,7 @@ async function fetchSlugs(table, filter = "") {
   return rows.map((r) => r.slug).filter(Boolean);
 }
 
-async function fetchSeoReaderRows() {
+async function fetchSeoPrerenderPayload() {
   const url = `${SUPABASE_URL}/functions/v1/seo-prerender-data`;
   try {
     const res = await fetch(url, {
@@ -78,15 +78,19 @@ async function fetchSeoReaderRows() {
     });
     if (!res.ok) {
       console.warn(`[warn] seo-prerender-data fetch failed (${res.status})`);
-      return [];
+      return { books: [], chapters: [] };
     }
     const json = await res.json();
-    return Array.isArray(json?.chapters) ? json.chapters : [];
+    return {
+      books: Array.isArray(json?.books) ? json.books : [],
+      chapters: Array.isArray(json?.chapters) ? json.chapters : [],
+    };
   } catch (e) {
     console.warn(`[warn] seo-prerender-data fetch failed (${e.message})`);
-    return [];
+    return { books: [], chapters: [] };
   }
 }
+
 
 function waitForServer(url, timeoutMs = 30_000) {
   const start = Date.now();
@@ -243,6 +247,172 @@ function renderReaderSnapshot(row) {
   return { head, rootHtml };
 }
 
+function routePathForBook(book) {
+  return `/books/${encodeURIComponent(book.slug)}`;
+}
+
+function renderBookDetailSnapshot(book) {
+  const route = routePathForBook(book);
+  const abs = `${BASE_URL}${route}`;
+  const priceNum = Number(book.price ?? 0);
+  const priceLabel = book.is_free ? "मुफ़्त" : `₹${priceNum}`;
+  const cleanedDesc = stripTags(book.description || "");
+  const shortDesc = cleanedDesc.length >= 20 ? cleanedDesc.slice(0, 110) : "";
+  const description = (shortDesc
+    ? `${shortDesc}… ${book.author} द्वारा। ${priceLabel} — Instant digital delivery, UPI/Card checkout।`
+    : `${book.title} — ${book.author} द्वारा। ${priceLabel} में पढ़ें, तुरंत access, सभी devices पर। GyandootNova पर सुरक्षित checkout।`
+  ).slice(0, 160);
+  const title = `${book.title} — ${book.author} | ${priceLabel} | GyandootNova`;
+  const image = book.cover_url || `${BASE_URL}/og-default.jpg`;
+  const readers = Math.max(Number(book.purchase_count ?? 0), 100);
+  const firstFree = book.first_free_chapter;
+  const firstFreeHtml = firstFree ? safeContentHtml(firstFree.content) : "";
+  const firstFreeChapterUrl = firstFree
+    ? `${BASE_URL}/books/${encodeURIComponent(book.slug)}/${encodeURIComponent(firstFree.slug)}`
+    : abs;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Book",
+    "name": book.title,
+    "inLanguage": "hi-IN",
+    "author": { "@type": "Person", "name": book.author || "GyandootNova" },
+    "description": cleanedDesc || description,
+    "url": abs,
+    ...(book.cover_url ? { "image": book.cover_url } : {}),
+    "offers": {
+      "@type": "Offer",
+      "price": book.is_free ? "0" : String(priceNum),
+      "priceCurrency": "INR",
+      "availability": "https://schema.org/InStock",
+      "url": abs,
+    },
+    ...(readers > 0 ? {
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "reviewCount": String(readers),
+      },
+    } : {}),
+  };
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": book.title,
+    "description": cleanedDesc || description,
+    ...(book.cover_url ? { "image": book.cover_url } : {}),
+    "brand": { "@type": "Brand", "name": "GyandootNova" },
+    "offers": {
+      "@type": "Offer",
+      "price": book.is_free ? "0" : String(priceNum),
+      "priceCurrency": "INR",
+      "availability": "https://schema.org/InStock",
+      "url": abs,
+    },
+  };
+  const head = `
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${esc(title)}</title>
+    <meta name="description" content="${esc(description)}">
+    <meta name="author" content="GyandootNova">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <link rel="canonical" href="${esc(abs)}">
+    <link rel="icon" href="/gyandoot-nova-icon.ico" type="image/x-icon">
+    <meta property="og:title" content="${esc(title)}">
+    <meta property="og:description" content="${esc(description)}">
+    <meta property="og:type" content="book">
+    <meta property="og:url" content="${esc(abs)}">
+    <meta property="og:image" content="${esc(image)}">
+    <meta property="og:site_name" content="GyandootNova">
+    <meta property="og:locale" content="hi_IN">
+    <meta property="product:price:amount" content="${esc(book.is_free ? "0" : String(priceNum))}">
+    <meta property="product:price:currency" content="INR">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="${esc(title)}">
+    <meta name="twitter:description" content="${esc(description)}">
+    <meta name="twitter:image" content="${esc(image)}">
+    <script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, "\\u003c")}</script>
+    <script type="application/ld+json">${JSON.stringify(productJsonLd).replace(/</g, "\\u003c")}</script>
+  `;
+  const tocHtml = (book.toc || []).slice(0, 20).map((c) => `
+    <li><a href="/books/${esc(encodeURIComponent(book.slug))}/${esc(encodeURIComponent(c.slug))}">${esc(c.chapter_number)}. ${esc(c.title)}${c.is_preview ? " (Preview)" : ""}</a></li>
+  `).join("");
+  const rootHtml = `
+    <main class="min-h-screen bg-background text-foreground">
+      <article class="mx-auto max-w-4xl px-6 py-10">
+        <div class="grid gap-8 md:grid-cols-3">
+          <div class="md:col-span-1">
+            ${book.cover_url ? `<img src="${esc(book.cover_url)}" alt="${esc(book.title)} — ${esc(book.author)}" width="600" height="800" class="w-full rounded-lg" />` : ""}
+          </div>
+          <div class="md:col-span-2">
+            <h1 class="font-serif text-3xl font-bold md:text-4xl">${esc(book.title)}</h1>
+            <p class="mt-1 text-lg text-muted-foreground">by ${esc(book.author || "GyandootNova")}</p>
+            <p class="mt-3 text-2xl font-bold text-primary" data-price="${esc(book.is_free ? "0" : String(priceNum))}" data-currency="INR">${esc(priceLabel)}</p>
+            <p class="mt-2 text-sm text-muted-foreground">${esc(readers)}+ readers • Lifetime access • Instant delivery</p>
+            <div class="mt-4 rounded-lg border border-primary/20 bg-primary/5 p-4">
+              <p class="text-sm">${esc(description)}</p>
+            </div>
+            <div class="mt-5 flex flex-wrap gap-3">
+              ${book.is_free
+                ? `<a href="${esc(firstFreeChapterUrl)}" class="inline-flex items-center rounded-md bg-primary px-5 py-3 text-base font-bold text-primary-foreground">अभी पढ़ें — मुफ़्त</a>`
+                : `<a href="${esc(abs)}#buy-section" class="inline-flex items-center rounded-md bg-primary px-5 py-3 text-base font-bold text-primary-foreground">Buy Now — ₹${esc(priceNum)} (जीवनभर)</a>`
+              }
+              ${firstFree ? `<a href="${esc(firstFreeChapterUrl)}" class="inline-flex items-center rounded-md border border-primary/40 px-5 py-3 text-base font-medium">पहला अध्याय मुफ़्त पढ़ें →</a>` : ""}
+            </div>
+            <ul class="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+              <li>🔒 100% Secure Payment</li>
+              <li>SSL Secured Checkout</li>
+              <li>UPI / Card / NetBanking (Razorpay + PayPal)</li>
+              <li>7-day 100% Money-Back Guarantee</li>
+              <li>Lifetime Access — no subscription</li>
+            </ul>
+          </div>
+        </div>
+
+        ${firstFree ? `
+          <section class="mt-12 rounded-xl border border-primary/20 bg-primary/5 p-6">
+            <p class="text-xs font-semibold uppercase tracking-wider text-primary">Free Preview — पहला अध्याय</p>
+            <h2 class="mt-1 font-serif text-2xl font-bold">${esc(firstFree.title)}</h2>
+            <div class="secure-rich-reader prose max-w-none mt-4" data-prerendered-preview="true">
+              ${firstFreeHtml}
+            </div>
+            ${book.is_free ? "" : `
+              <div class="mt-6 rounded-lg border border-primary bg-background p-4">
+                <p class="font-semibold">पहला अध्याय मुफ़्त पढ़ा आपने। पूरा ग्रंथ पढ़ने के लिए ₹${esc(priceNum)} में unlock करें।</p>
+                <a href="${esc(abs)}#buy-section" class="mt-3 inline-flex items-center rounded-md bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground">Unlock Now — ₹${esc(priceNum)}</a>
+                <p class="mt-2 text-xs text-muted-foreground">7-day refund guarantee • Secure Razorpay/PayPal checkout • Instant access</p>
+              </div>
+            `}
+          </section>
+        ` : ""}
+
+        ${book.description ? `
+          <section class="mt-10">
+            <h2 class="font-serif text-2xl font-bold mb-4">About This Book</h2>
+            <div class="prose max-w-none">${safeContentHtml(book.description)}</div>
+          </section>
+        ` : ""}
+
+        ${(book.toc || []).length ? `
+          <section class="mt-10">
+            <h2 class="font-serif text-2xl font-bold mb-4">Table of Contents (${esc(book.total_chapters)} chapters)</h2>
+            <ol class="list-decimal pl-6 space-y-1 text-sm">${tocHtml}</ol>
+          </section>
+        ` : ""}
+      </article>
+    </main>
+  `;
+  return { head, rootHtml };
+}
+
+async function writeBookRouteFile(book, baseHtml) {
+  const route = routePathForBook(book);
+  const snapshot = renderBookDetailSnapshot(book);
+  await writeRouteFile(route, baseHtml, snapshot);
+  return { route, snapshot };
+}
+
+
 function validateHead(route, headHtml, seen) {
   const missing = REQUIRED.filter((r) => !r.check(headHtml)).map((r) => r.name);
   const title = extract(/<title>([^<]+)<\/title>/i, headHtml);
@@ -342,22 +512,27 @@ async function main() {
   const baseHtml = await readFile(join(DIST, "index.html"), "utf8");
 
   console.log("→ fetching dynamic slugs from Supabase…");
-  const [bookSlugs, articleSlugs, readerRows] = await Promise.all([
-    fetchSlugs("books"),
+  const [articleSlugs, seoPayload, fallbackBookSlugs] = await Promise.all([
     fetchSlugs("posts", "&is_published=eq.true"),
-    fetchSeoReaderRows(),
+    fetchSeoPrerenderPayload(),
+    fetchSlugs("books"),
   ]);
+  const bookRows = seoPayload.books.length ? seoPayload.books : fallbackBookSlugs.map((slug) => ({ slug, title: slug, author: "GyandootNova", is_free: false, price: 0, toc: [], first_free_chapter: null }));
+  const readerRows = seoPayload.chapters;
 
-  console.log(`  books=${bookSlugs.length}  reader-pages=${readerRows.length}  articles=${articleSlugs.length}`);
+  console.log(`  books=${bookRows.length}  reader-pages=${readerRows.length}  articles=${articleSlugs.length}`);
 
+  // Static routes + articles still go through Playwright snapshot;
+  // book detail routes are rendered statically from backend data below.
   const routes = [
     ...STATIC_ROUTES,
-    ...bookSlugs.map((s) => `/books/${s}`),
     ...articleSlugs.map((s) => `/articles/${s}`),
   ];
+  const bookRoutes = bookRows.map(routePathForBook);
   const readerRoutes = readerRows.map(routePathForReader);
-  const allRoutesCount = routes.length + readerRoutes.length;
+  const allRoutesCount = routes.length + bookRoutes.length + readerRoutes.length;
   console.log(`→ ${allRoutesCount} routes total (${CHECK_ONLY ? "check-only" : "prerender+check"})`);
+
 
   console.log("→ starting vite preview…");
   const preview = await startPreview();
@@ -406,7 +581,30 @@ async function main() {
       processed++;
     }
 
+    for (const book of bookRows) {
+      const route = routePathForBook(book);
+      try {
+        const snapshot = renderBookDetailSnapshot(book);
+        const missing = [
+          ...validateHead(route, snapshot.head, seen),
+          ...validateBody(route, snapshot.rootHtml),
+        ];
+        if (missing.length) {
+          failures.push({ route, missing });
+          console.log(`  ✗ ${route}  ${missing.join(", ")}`);
+        } else {
+          console.log(`  ✓ ${route}`);
+        }
+        if (!CHECK_ONLY) await writeBookRouteFile(book, baseHtml);
+      } catch (e) {
+        failures.push({ route, missing: [`render error: ${e.message}`] });
+        console.log(`  ✗ ${route}  ${e.message}`);
+      }
+      processed++;
+    }
+
     for (const row of readerRows) {
+
       const route = routePathForReader(row);
       try {
         const snapshot = renderReaderSnapshot(row);

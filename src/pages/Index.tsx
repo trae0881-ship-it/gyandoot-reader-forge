@@ -323,7 +323,7 @@ const Index = () => {
                       {book.is_free ? (
                         <span className="inline-block rounded-md bg-green-600 text-white px-2 py-0.5 text-[10px] font-bold shadow">FREE</span>
                       ) : (
-                        <span className="inline-block rounded-md bg-secondary text-secondary-foreground px-2 py-0.5 text-[10px] font-bold shadow">⭐ BESTSELLER</span>
+                        <span className="inline-flex items-center gap-0.5 rounded-md bg-secondary text-secondary-foreground px-2 py-0.5 text-[10px] font-bold shadow"><Star className="h-2.5 w-2.5 fill-current" /> BESTSELLER</span>
                       )}
                     </div>
                     {!book.is_free && (

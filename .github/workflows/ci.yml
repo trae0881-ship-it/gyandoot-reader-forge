@@ -67,9 +67,16 @@ jobs:
             --min-concurrency=2 \
             --retries=3 \
             --backoff=500 \
+            --timeout=15000 \
             --min-words=60 \
+            --max-fetch-ms=4000 \
+            --max-asset-ms=3000 \
+            --max-fetch-ms-rule="/books/*=6000" \
+            --max-fetch-ms-rule="/articles/*=6000" \
+            --max-asset-ms-rule="/books/*=5000" \
             --report=dist/seo-live-report.json \
             --html=dist/seo-live-report.html \
+            --csv=dist/seo-live-report.csv \
             --github-summary
       - name: Stop preview
         if: always()
@@ -82,7 +89,10 @@ jobs:
           path: |
             dist/seo-live-report.json
             dist/seo-live-report.html
-          retention-days: 7
+            dist/seo-live-report.csv
+          retention-days: 14
+          if-no-files-found: warn
+
 
 
   lighthouse:

@@ -39,11 +39,17 @@
  *                           duration (default: unlimited).
  *   --max-asset-ms=<ms>     Fail routes whose og/twitter image probe exceeds
  *                           this duration (default: unlimited).
+ *   --max-fetch-ms-rule=<glob>=<ms>
+ *                           Per-route override for --max-fetch-ms (repeatable).
+ *                           Example: --max-fetch-ms-rule="/books/*=6000"
+ *   --max-asset-ms-rule=<glob>=<ms>
+ *                           Per-route override for --max-asset-ms (repeatable).
  *   --github-summary        Append a compact table to $GITHUB_STEP_SUMMARY and
  *                           emit ::error:: annotations for failing routes.
  *   --resume=<path>         Reuse a previous JSON report; skip URLs that
  *                           passed there (default: off). Pair with --report to
  *                           point at the same file.
+
 
  *
  * Single-page curl (for spot checks):
@@ -81,6 +87,18 @@ const RESUME = opt("resume", "");
 const TIMEOUT_MS = Math.max(1000, parseInt(opt("timeout", "15000"), 10));
 const MAX_FETCH_MS = parseInt(opt("max-fetch-ms", "0"), 10) || 0;
 const MAX_ASSET_MS = parseInt(opt("max-asset-ms", "0"), 10) || 0;
+// Per-route timing overrides — repeatable:
+//   --max-fetch-ms-rule="/books/*=6000"
+//   --max-asset-ms-rule="/articles/*=4000"
+function parseTimingRule(raw) {
+  const eq = raw.lastIndexOf("=");
+  if (eq < 0) return null;
+  const pattern = raw.slice(0, eq).trim();
+  const ms = parseInt(raw.slice(eq + 1).trim(), 10);
+  if (!pattern || !Number.isFinite(ms) || ms <= 0) return null;
+  return { pattern, ms, re: globToRegExp(pattern) };
+}
+
 const DEFAULT_UA = "Mozilla/5.0 (compatible; GyandootSEOVerifier/1.0; +https://gyandootnova.in)";
 const UA = opt("user-agent", DEFAULT_UA);
 
@@ -116,6 +134,17 @@ const DEFAULT_SCHEMA_RULES = [
   { pattern: "/articles/*", type: "Article", required: ["headline", "datePublished", "author"], re: globToRegExp("/articles/*") },
 ];
 const SCHEMA_RULES_ORDERED = [...USER_SCHEMA_RULES, ...DEFAULT_SCHEMA_RULES];
+
+const MAX_FETCH_MS_RULES = many("max-fetch-ms-rule").map(parseTimingRule).filter(Boolean);
+const MAX_ASSET_MS_RULES = many("max-asset-ms-rule").map(parseTimingRule).filter(Boolean);
+function timingLimit(url, rules, fallback) {
+  try {
+    const path = new URL(url).pathname;
+    for (const r of rules) if (r.re.test(path)) return r.ms;
+  } catch { /* ignore */ }
+  return fallback || 0;
+}
+
 
 // ---------- resume mode ----------
 const RESUMED_PASSING = new Set();
@@ -355,6 +384,58 @@ function auditPage(url, html) {
   return { url, title, desc, ogImage, ogUrl, twImage, twCard, canonical, h1Count, wordCount, missingSelectors, jsonldTypes, appliedRule, problems };
 }
 
+// Fetch just the first N bytes and identify the image format from its magic
+// signature. Catches spoofed HTML served as image/png, wrong content-types,
+// and truly broken placeholders regardless of Content-Type.
+async function sniffImageBytes(url) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), Math.min(TIMEOUT_MS, 8000));
+  try {
+    const r = await fetch(url, {
+      method: "GET",
+      headers: { ...EXTRA_HEADERS, Range: "bytes=0-63" },
+      redirect: "follow",
+      signal: ctrl.signal,
+    });
+    const buf = new Uint8Array(await r.arrayBuffer());
+    return { bytes: buf, status: r.status };
+  } catch {
+    return { bytes: new Uint8Array(0), status: 0 };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+function detectImageFormat(b) {
+  if (!b || b.length < 4) return null;
+  // PNG
+  if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) return "png";
+  // JPEG
+  if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return "jpeg";
+  // GIF
+  if (b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x38) return "gif";
+  // WebP: RIFF????WEBP
+  if (b.length >= 12 && b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 &&
+      b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50) return "webp";
+  // AVIF / HEIC: 'ftyp' at offset 4, brand at 8..11
+  if (b.length >= 12 && b[4] === 0x66 && b[5] === 0x74 && b[6] === 0x79 && b[7] === 0x70) {
+    const brand = String.fromCharCode(b[8], b[9], b[10], b[11]).toLowerCase();
+    if (["avif", "avis", "heic", "heix", "mif1"].includes(brand)) return brand.startsWith("avi") ? "avif" : "heic";
+  }
+  // BMP
+  if (b[0] === 0x42 && b[1] === 0x4d) return "bmp";
+  // TIFF
+  if ((b[0] === 0x49 && b[1] === 0x49 && b[2] === 0x2a && b[3] === 0x00) ||
+      (b[0] === 0x4d && b[1] === 0x4d && b[2] === 0x00 && b[3] === 0x2a)) return "tiff";
+  // ICO
+  if (b[0] === 0x00 && b[1] === 0x00 && b[2] === 0x01 && b[3] === 0x00) return "ico";
+  // SVG: text starts with "<?xml" or "<svg"
+  const head = new TextDecoder("utf-8", { fatal: false }).decode(b.slice(0, Math.min(b.length, 64))).trim().toLowerCase();
+  if (head.startsWith("<?xml") || head.startsWith("<svg")) return "svg";
+  // Common spoof: HTML doctype/tag
+  if (head.startsWith("<!doctype html") || head.startsWith("<html")) return "html";
+  return null;
+}
+
 async function checkAssetExists(assetUrl) {
   if (!assetUrl) return { ok: false, status: 0, ms: 0, reason: "missing url" };
   const abs = assetUrl.startsWith("http") ? assetUrl : `${ORIGIN}${assetUrl.startsWith("/") ? "" : "/"}${assetUrl}`;
@@ -363,24 +444,36 @@ async function checkAssetExists(assetUrl) {
   if (r.status === 405 || r.status === 0 || !r.contentType) r = await httpFetch(abs, { method: "GET" });
   const status = r.status;
   const contentType = (r.contentType || "").split(";")[0].trim().toLowerCase();
-  const isImage = contentType.startsWith("image/");
+  const isImageType = contentType.startsWith("image/");
   const httpOk = status >= 200 && status < 400;
-  // Broken-placeholder heuristic: HTTP 200 but body is HTML (error page), or tiny/zero payload.
-  const looksLikeErrorPage = httpOk && !isImage && (contentType.includes("html") || contentType === "" || contentType.includes("text/"));
+  const looksLikeErrorPage = httpOk && !isImageType && (contentType.includes("html") || contentType === "" || contentType.includes("text/"));
   const tooSmall = httpOk && r.contentLength > 0 && r.contentLength < 100;
+
+  // Magic-byte sniff: only run for reachable assets; skip if HEAD already
+  // proved it's a Ranged image *and* we care about identifying HTML spoofs.
+  let sniffedFormat = null;
+  if (httpOk) {
+    const sniff = await sniffImageBytes(r.finalUrl || abs);
+    sniffedFormat = detectImageFormat(sniff.bytes);
+  }
+  const isImageMagic = sniffedFormat && sniffedFormat !== "html" && sniffedFormat !== null;
+
   return {
-    ok: httpOk && isImage && !tooSmall,
+    ok: httpOk && (isImageType || isImageMagic) && !tooSmall && sniffedFormat !== "html",
     status,
     ms: Date.now() - t0,
     url: abs,
     contentType: r.contentType || "",
     contentLength: r.contentLength || 0,
     finalUrl: r.finalUrl || abs,
-    isImage,
+    isImage: isImageType,
+    sniffedFormat,           // "png" | "jpeg" | ... | "html" | null
+    magicByteMatch: !!isImageMagic,
     looksLikeErrorPage,
     tooSmall,
   };
 }
+
 
 
 
@@ -512,39 +605,67 @@ function csvCell(v) {
 }
 function renderCsv(summary) {
   const header = [
-    "url", "status", "final_url", "redirects", "fetch_ms", "attempts",
+    "url", "status", "final_url",
+    "redirect_hops", "redirect_chain", "final_matches_canonical", "final_matches_og_url",
+    "fetch_ms", "attempts",
     "h1_count", "word_count", "title", "description", "canonical", "og_url",
     "og_image", "og_image_status", "og_image_ms", "og_image_type",
+    "og_image_magic", "og_image_magic_ok",
     "tw_image", "tw_image_status", "tw_image_ms", "tw_image_type",
+    "tw_image_magic", "tw_image_magic_ok",
     "jsonld_types", "applied_rule", "problems",
   ];
-  const rows = summary.results.map((r) => [
-    r.url,
-    r.status ?? "",
-    r.finalUrl ?? "",
-    r.redirectChain ? Math.max(0, r.redirectChain.length - 1) : 0,
-    r.fetchMs ?? "",
-    r.attempts ?? "",
-    r.h1Count ?? "",
-    r.wordCount ?? "",
-    r.title ?? "",
-    r.desc ?? "",
-    r.canonical ?? "",
-    r.ogUrl ?? "",
-    r.ogImage ?? "",
-    r.ogImageCheck?.status ?? "",
-    r.ogImageCheck?.ms ?? "",
-    r.ogImageCheck?.contentType ?? "",
-    r.twImage ?? "",
-    r.twImageCheck?.status ?? "",
-    r.twImageCheck?.ms ?? "",
-    r.twImageCheck?.contentType ?? "",
-    (r.jsonldTypes || []).join("|"),
-    r.appliedRule ?? "",
-    (r.problems || []).join(" | "),
-  ].map(csvCell).join(","));
+  const normEq = (a, b) => {
+    if (!a || !b) return "";
+    try {
+      const norm = (u) => {
+        const x = new URL(u);
+        let p = x.pathname.replace(/\/+$/, "") || "/";
+        return `${x.origin}${p}`;
+      };
+      return norm(a) === norm(b) ? "yes" : "no";
+    } catch { return ""; }
+  };
+  const rows = summary.results.map((r) => {
+    const chain = r.redirectChain || [];
+    // Chain URLs joined with " → ". Each hop shows "STATUS url" for context.
+    const chainStr = chain.map((h, i) => i === 0 ? h.url : `${h.status || "?"} ${h.url}`).join(" → ");
+    return [
+      r.url,
+      r.status ?? "",
+      r.finalUrl ?? "",
+      Math.max(0, chain.length - 1),
+      chainStr,
+      normEq(r.finalUrl, r.canonical),
+      normEq(r.finalUrl, r.ogUrl),
+      r.fetchMs ?? "",
+      r.attempts ?? "",
+      r.h1Count ?? "",
+      r.wordCount ?? "",
+      r.title ?? "",
+      r.desc ?? "",
+      r.canonical ?? "",
+      r.ogUrl ?? "",
+      r.ogImage ?? "",
+      r.ogImageCheck?.status ?? "",
+      r.ogImageCheck?.ms ?? "",
+      r.ogImageCheck?.contentType ?? "",
+      r.ogImageCheck?.sniffedFormat ?? "",
+      r.ogImageCheck ? (r.ogImageCheck.magicByteMatch ? "yes" : "no") : "",
+      r.twImage ?? "",
+      r.twImageCheck?.status ?? "",
+      r.twImageCheck?.ms ?? "",
+      r.twImageCheck?.contentType ?? "",
+      r.twImageCheck?.sniffedFormat ?? "",
+      r.twImageCheck ? (r.twImageCheck.magicByteMatch ? "yes" : "no") : "",
+      (r.jsonldTypes || []).join("|"),
+      r.appliedRule ?? "",
+      (r.problems || []).join(" | "),
+    ].map(csvCell).join(",");
+  });
   return [header.map(csvCell).join(","), ...rows].join("\n") + "\n";
 }
+
 
 
 
@@ -583,13 +704,15 @@ async function main() {
         if (mm) entry.problems.push(`redirect landed off-route — ${mm.replace(/^canonical /, "")}`);
       }
 
-      if (MAX_FETCH_MS && fetchMs > MAX_FETCH_MS) {
-        entry.problems.push(`fetch too slow: ${fetchMs}ms > ${MAX_FETCH_MS}ms`);
+      const fetchLimit = timingLimit(url, MAX_FETCH_MS_RULES, MAX_FETCH_MS);
+      if (fetchLimit && fetchMs > fetchLimit) {
+        entry.problems.push(`fetch too slow: ${fetchMs}ms > ${fetchLimit}ms`);
       }
       if (!SKIP_OG) {
         const [og, tw] = await Promise.all([checkAssetExists(audit.ogImage), checkAssetExists(audit.twImage)]);
         entry.ogImageCheck = og;
         entry.twImageCheck = tw;
+        const assetLimit = timingLimit(url, MAX_ASSET_MS_RULES, MAX_ASSET_MS);
         const flagAsset = (label, meta, probe) => {
           if (!meta) return;
           if (probe.status < 200 || probe.status >= 400) {
@@ -601,13 +724,27 @@ async function main() {
           } else if (!probe.isImage) {
             entry.problems.push(`${label} content-type is "${probe.contentType || "unknown"}", expected image/*`);
           }
+          // Magic-byte checks catch spoofed HTML served as image/png etc.
+          if (probe.sniffedFormat === "html") {
+            entry.problems.push(`${label} magic bytes look like HTML — spoofed image (content-type claims "${probe.contentType || "unknown"}")`);
+          } else if (probe.sniffedFormat && probe.isImage) {
+            const expected = (probe.contentType.split("/")[1] || "").split(";")[0].trim();
+            const equiv = { jpg: "jpeg", "svg+xml": "svg", "vnd.microsoft.icon": "ico", "x-icon": "ico" };
+            const norm = equiv[expected] || expected;
+            if (norm && norm !== probe.sniffedFormat && !(norm === "png" && probe.sniffedFormat === "png")) {
+              entry.problems.push(`${label} content-type says image/${expected} but magic bytes say ${probe.sniffedFormat}`);
+            }
+          } else if (!probe.sniffedFormat && probe.isImage) {
+            entry.problems.push(`${label} content-type is image/* but no recognizable image signature in first 64 bytes`);
+          }
           if (probe.tooSmall) entry.problems.push(`${label} suspiciously small (${probe.contentLength} bytes — broken placeholder?)`);
-          if (MAX_ASSET_MS && probe.ms > MAX_ASSET_MS) entry.problems.push(`${label} probe too slow: ${probe.ms}ms > ${MAX_ASSET_MS}ms`);
+          if (assetLimit && probe.ms > assetLimit) entry.problems.push(`${label} probe too slow: ${probe.ms}ms > ${assetLimit}ms`);
         };
         flagAsset("og:image", audit.ogImage, og);
         flagAsset("twitter:image", audit.twImage, tw);
       }
     }
+
 
     done++;
     const mark = entry.problems?.length ? "✗" : "✓";

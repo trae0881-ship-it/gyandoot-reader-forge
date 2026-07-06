@@ -790,7 +790,73 @@ function renderCsv(summary) {
   return [header.map(csvCell).join(","), ...rows].join("\n") + "\n";
 }
 
-
+// ---------- SARIF v2.1.0 ----------
+// Groups problems by category so GitHub renders each SEO check as its own
+// rule (with a stable ruleId) and each failing route as a result.
+function classifyProblem(msg) {
+  if (msg.startsWith("HTTP ")) return { id: "SEO001", name: "unreachable", level: "error" };
+  if (msg.startsWith("no <title>") || msg.startsWith("no meta description") || msg.startsWith("no canonical") || msg.startsWith("no og:image") || msg.startsWith("no twitter:card")) return { id: "SEO010", name: "missing-meta", level: "error" };
+  if (msg.startsWith("canonical mismatch") || msg.startsWith("og:url mismatch") || msg.startsWith("canonical URL not parseable")) return { id: "SEO011", name: "canonical-mismatch", level: "error" };
+  if (msg.startsWith("redirect landed off-route")) return { id: "SEO012", name: "redirect-off-route", level: "error" };
+  if (msg.startsWith("empty #root") || msg.startsWith("only ") || msg.startsWith("missing content selector")) return { id: "SEO020", name: "no-prerendered-content", level: "error" };
+  if (msg.startsWith("missing <h1>") || msg.startsWith("multiple <h1>")) return { id: "SEO021", name: "h1-issue", level: "warning" };
+  if (msg.startsWith("missing JSON-LD") || msg.startsWith("JSON-LD ")) return { id: "SEO030", name: "jsonld", level: "warning" };
+  if (msg.startsWith("og:image") || msg.startsWith("twitter:image")) return { id: "SEO040", name: "social-image", level: "error" };
+  if (msg.startsWith("duplicate title") || msg.startsWith("duplicate description")) return { id: "SEO050", name: "duplicate-meta", level: "warning" };
+  if (msg.includes("too slow")) return { id: "SEO060", name: "slow-response", level: "warning" };
+  return { id: "SEO999", name: "other", level: "note" };
+}
+function renderSarif(summary) {
+  const rulesMap = new Map();
+  const sarifResults = [];
+  for (const r of summary.results) {
+    for (const p of r.problems || []) {
+      const rule = classifyProblem(p);
+      if (!rulesMap.has(rule.id)) {
+        rulesMap.set(rule.id, {
+          id: rule.id,
+          name: rule.name,
+          shortDescription: { text: rule.name },
+          fullDescription: { text: `SEO check: ${rule.name}` },
+          defaultConfiguration: { level: rule.level },
+        });
+      }
+      sarifResults.push({
+        ruleId: rule.id,
+        level: rule.level,
+        message: { text: p },
+        locations: [{
+          physicalLocation: {
+            artifactLocation: { uri: r.url },
+            region: { startLine: 1 },
+          },
+          logicalLocations: [{ name: new URL(r.url).pathname, kind: "route" }],
+        }],
+        properties: { fetchMs: r.fetchMs || 0, status: r.status || 0 },
+      });
+    }
+  }
+  return {
+    $schema: "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+    version: "2.1.0",
+    runs: [{
+      tool: {
+        driver: {
+          name: "verify-live-seo",
+          informationUri: "https://gyandootnova.in",
+          version: "1.1.0",
+          rules: [...rulesMap.values()],
+        },
+      },
+      invocations: [{
+        executionSuccessful: summary.failed === 0,
+        startTimeUtc: summary.generatedAt,
+        properties: { origin: summary.origin, total: summary.total, failed: summary.failed },
+      }],
+      results: sarifResults,
+    }],
+  };
+}
 
 
 // ---------- main ----------

@@ -590,7 +590,26 @@ Return STRICT JSON (no markdown fences):
     log.status = "error";
     log.error = String(e?.message || e).slice(0, 1000);
     log.execution_ms = Date.now() - started;
-    try { await supabase.from("seo_agent_logs").insert(log); } catch {}
+    try { await supabase.from("seo_agent_logs").insert(log); } catch (dbe) {
+      try {
+        await sendAlert(supabase, {
+          errorType: "Database connection failed", step: "log-persistence",
+          severity: "high", message: String((dbe as any)?.message || dbe).slice(0, 500),
+          suggestion: "Verify Lovable Cloud database availability and service role key.",
+        });
+      } catch {}
+    }
+    // Any unhandled exception → alert (skip if already emitted a specific one)
+    const already = /All (LLM|search) providers|Blog save failed|Draft JSON parse failed/i.test(log.error);
+    if (!already) {
+      try {
+        await sendAlert(supabase, {
+          errorType: "Unexpected exception", step: "seo-agent",
+          severity: "high", message: log.error,
+          suggestion: "Inspect edge function logs and recent seo_agent_logs entries.",
+        });
+      } catch {}
+    }
     return new Response(JSON.stringify({ success: false, error: log.error, log }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

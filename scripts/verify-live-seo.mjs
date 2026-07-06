@@ -946,6 +946,33 @@ async function main() {
     writeFileSync(CSV_REPORT, renderCsv(summary));
     console.log(`CSV report  → ${CSV_REPORT}`);
   }
+  if (DEBUG_LOG) {
+    mkdirSync(dirname(DEBUG_LOG), { recursive: true });
+    // NDJSON: one line per URL. Keeps everything needed to reproduce a run.
+    const lines = results.map((r) => JSON.stringify({
+      url: r.url,
+      status: r.status,
+      finalUrl: r.finalUrl || null,
+      fetchMs: r.fetchMs || 0,
+      attempts: r.attempts || 0,
+      redirectChain: r.redirectChain || [],
+      ogImage: r.ogImage || null,
+      ogImageCheck: r.ogImageCheck || null,
+      twImage: r.twImage || null,
+      twImageCheck: r.twImageCheck || null,
+      jsonldTypes: r.jsonldTypes || [],
+      appliedRule: r.appliedRule || null,
+      problems: r.problems || [],
+      ignoredProblems: r.ignoredProblems || [],
+    }));
+    writeFileSync(DEBUG_LOG, lines.join("\n") + "\n");
+    console.log(`Debug log   → ${DEBUG_LOG}`);
+  }
+  if (SARIF_REPORT) {
+    mkdirSync(dirname(SARIF_REPORT), { recursive: true });
+    writeFileSync(SARIF_REPORT, JSON.stringify(renderSarif(summary), null, 2));
+    console.log(`SARIF       → ${SARIF_REPORT}`);
+  }
 
   if (GITHUB_SUMMARY) {
     emitGitHubAnnotations(results);
@@ -954,6 +981,7 @@ async function main() {
   console.log(`${results.length - failed}/${results.length} URLs pass all checks`);
   if (failed) process.exit(1);
 }
+
 
 main().catch((e) => { console.error(e); process.exit(1); });
 

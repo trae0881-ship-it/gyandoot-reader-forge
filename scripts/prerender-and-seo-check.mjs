@@ -169,10 +169,17 @@ async function main() {
   const failures = [];
   let processed = 0;
   try {
-    const browser = await chromium.launch({
-      headless: true,
-      executablePath: process.env.CHROMIUM_PATH || undefined,
-    });
+    // Auto-detect chromium if the packaged one isn't installed (e.g. sandbox)
+    let execPath = process.env.CHROMIUM_PATH;
+    if (!execPath) {
+      const candidates = [
+        "/chromium_headless_shell-1194/chrome-linux/headless_shell",
+        "/chromium-1194/chrome-linux/chrome",
+      ];
+      for (const c of candidates) if (existsSync(c)) { execPath = c; break; }
+    }
+    const browser = await chromium.launch({ headless: true, executablePath: execPath || undefined });
+
 
     const context = await browser.newContext({
       viewport: { width: 1280, height: 900 },

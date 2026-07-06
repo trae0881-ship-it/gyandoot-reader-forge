@@ -39,11 +39,17 @@
  *                           duration (default: unlimited).
  *   --max-asset-ms=<ms>     Fail routes whose og/twitter image probe exceeds
  *                           this duration (default: unlimited).
+ *   --max-fetch-ms-rule=<glob>=<ms>
+ *                           Per-route override for --max-fetch-ms (repeatable).
+ *                           Example: --max-fetch-ms-rule="/books/*=6000"
+ *   --max-asset-ms-rule=<glob>=<ms>
+ *                           Per-route override for --max-asset-ms (repeatable).
  *   --github-summary        Append a compact table to $GITHUB_STEP_SUMMARY and
  *                           emit ::error:: annotations for failing routes.
  *   --resume=<path>         Reuse a previous JSON report; skip URLs that
  *                           passed there (default: off). Pair with --report to
  *                           point at the same file.
+
 
  *
  * Single-page curl (for spot checks):

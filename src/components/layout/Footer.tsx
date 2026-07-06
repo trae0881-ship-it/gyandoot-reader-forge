@@ -152,7 +152,7 @@ const Footer = () => {
 
             <div className="mt-4 flex items-start gap-2">
               <Mail className="h-4 w-4 text-secondary mt-0.5" />
-              <p className="text-sm text-background/70">contact@gyandootnova.in</p>
+              <p className="text-sm text-background/70">amrendra8765@gmail.com</p>
             </div>
           </div>
         </div>

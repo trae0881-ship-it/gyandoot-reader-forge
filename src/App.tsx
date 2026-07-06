@@ -53,6 +53,7 @@ const AdminScripts = lazy(() => import("./pages/admin/AdminScripts"));
 const AdminAuthProviders = lazy(() => import("./pages/admin/AdminAuthProviders"));
 const AdminEnquiries = lazy(() => import("./pages/admin/AdminEnquiries"));
 const AdminLSI = lazy(() => import("./pages/admin/AdminLSI"));
+const AdminAIProviders = lazy(() => import("./pages/admin/AdminAIProviders"));
 
 // Minimal loading spinner
 const PageLoader = () => (
@@ -117,7 +118,9 @@ const AppContent = () => {
                   <Route path="auth-providers" element={<AdminAuthProviders />} />
                   <Route path="enquiries" element={<AdminEnquiries />} />
                   <Route path="lsi" element={<AdminLSI />} />
+                  <Route path="ai-providers" element={<AdminAIProviders />} />
                   <Route path="settings" element={<AdminSettings />} />
+
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>

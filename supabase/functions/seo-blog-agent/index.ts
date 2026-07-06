@@ -14,12 +14,14 @@ import {
   sendAlert, sendRecovery, isProviderPaused, recordProviderFailure,
   recordProviderSuccess, classifyError,
 } from "../_shared/seo-alerts.ts";
+import { buildKeyResolver, KeyResolver } from "../_shared/ai-key-resolver.ts";
 
 const NICHE = "Books, Spirituality, Meditation, Self Growth, Mindfulness, Consciousness";
 const SITE = "https://gyandootnova.in";
 const AUTHOR = "GyandootNova Editorial";
 const SIMILARITY_THRESHOLD = 0.7;
 const CONTENT_SCORE_THRESHOLD = Number(Deno.env.get("SEO_CONTENT_SCORE_MIN") || "55");
+
 
 
 // ─── helpers ─────────────────────────────────────────────────────────
@@ -63,17 +65,14 @@ async function retryOnce<T>(fn: () => Promise<T>): Promise<T> {
 // ─── LLM providers ───────────────────────────────────────────────────
 type ChatMsg = { role: "system" | "user" | "assistant"; content: string };
 
-async function llmAnthropic(messages: ChatMsg[], json: boolean): Promise<string> {
-  const key = Deno.env.get("ANTHROPIC_API_KEY");
-  if (!key) throw new Error("no-key");
+async function llmAnthropic(messages: ChatMsg[], json: boolean, key: string): Promise<string> {
   const sys = messages.filter(m => m.role === "system").map(m => m.content).join("\n\n");
   const rest = messages.filter(m => m.role !== "system");
   const res = await withTimeout(fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
     body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 8000,
+      model: "claude-sonnet-4-20250514", max_tokens: 8000,
       system: sys + (json ? "\n\nReturn ONLY valid JSON. No markdown fences." : ""),
       messages: rest.map(m => ({ role: m.role, content: m.content })),
     }),
@@ -82,9 +81,7 @@ async function llmAnthropic(messages: ChatMsg[], json: boolean): Promise<string>
   const data = await res.json();
   return data.content?.[0]?.text ?? "";
 }
-async function llmOpenAI(messages: ChatMsg[], json: boolean): Promise<string> {
-  const key = Deno.env.get("OPENAI_API_KEY");
-  if (!key) throw new Error("no-key");
+async function llmOpenAI(messages: ChatMsg[], json: boolean, key: string): Promise<string> {
   const res = await withTimeout(fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
@@ -94,9 +91,7 @@ async function llmOpenAI(messages: ChatMsg[], json: boolean): Promise<string> {
   const data = await res.json();
   return data.choices?.[0]?.message?.content ?? "";
 }
-async function llmDeepSeek(messages: ChatMsg[], json: boolean): Promise<string> {
-  const key = Deno.env.get("DEEPSEEK_API_KEY");
-  if (!key) throw new Error("no-key");
+async function llmDeepSeek(messages: ChatMsg[], json: boolean, key: string): Promise<string> {
   const res = await withTimeout(fetch("https://api.deepseek.com/chat/completions", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
@@ -106,9 +101,7 @@ async function llmDeepSeek(messages: ChatMsg[], json: boolean): Promise<string> 
   const data = await res.json();
   return data.choices?.[0]?.message?.content ?? "";
 }
-async function llmGemini(messages: ChatMsg[], json: boolean): Promise<string> {
-  const key = Deno.env.get("GEMINI_API_KEY");
-  if (!key) throw new Error("no-key");
+async function llmGemini(messages: ChatMsg[], json: boolean, key: string): Promise<string> {
   const sys = messages.filter(m => m.role === "system").map(m => m.content).join("\n\n");
   const user = messages.filter(m => m.role !== "system").map(m => m.content).join("\n\n");
   const res = await withTimeout(fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
@@ -124,7 +117,8 @@ async function llmGemini(messages: ChatMsg[], json: boolean): Promise<string> {
   return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 }
 
-const LLM_CHAIN: [string, (m: ChatMsg[], j: boolean) => Promise<string>][] = [
+type LLMFn = (m: ChatMsg[], j: boolean, key: string) => Promise<string>;
+const LLM_CHAIN: [string, LLMFn][] = [
   ["anthropic", llmAnthropic], ["openai", llmOpenAI], ["deepseek", llmDeepSeek], ["gemini", llmGemini],
 ];
 
@@ -133,7 +127,8 @@ function parseStatus(msg: string): number | null {
   return m ? Number(m[1]) : null;
 }
 
-async function callLLM(messages: ChatMsg[], json: boolean, log: any, sb: any, step: string): Promise<string> {
+
+async function callLLM(messages: ChatMsg[], json: boolean, log: any, sb: any, step: string, resolveKey: KeyResolver): Promise<string> {
   log.llm_attempts = log.llm_attempts || [];
   const errors: string[] = [];
   const failedProviders: { name: string; error: string; status: number | null }[] = [];
@@ -142,12 +137,16 @@ async function callLLM(messages: ChatMsg[], json: boolean, log: any, sb: any, st
       log.llm_attempts.push({ provider: name, ok: false, skipped: "paused" });
       continue;
     }
+    const key = await resolveKey(name);
+    if (!key) {
+      log.llm_attempts.push({ provider: name, ok: false, skipped: "no-key" });
+      continue;
+    }
     try {
-      const out = await retryOnce(() => fn(messages, json));
+      const out = await retryOnce(() => fn(messages, json, key));
       if (!out) throw new Error("empty");
       log.llm_attempts.push({ provider: name, ok: true });
       log.llm_used = log.llm_used || name;
-      // Recovery: if previous LLMs in this call failed, notify
       const wasFailing = await recordProviderSuccess(sb, name);
       if (failedProviders.length > 0) {
         const first = failedProviders[0];
@@ -183,12 +182,11 @@ async function callLLM(messages: ChatMsg[], json: boolean, log: any, sb: any, st
 }
 
 
+
 // ─── Search providers ────────────────────────────────────────────────
 type Source = { url: string; title: string; snippet: string; provider?: string };
 
-async function searchTavily(query: string, opts: { topic?: "news" | "general" } = {}): Promise<Source[]> {
-  const key = Deno.env.get("TAVILY_API_KEY");
-  if (!key) throw new Error("no-key");
+async function searchTavily(query: string, key: string, opts: { topic?: "news" | "general" } = {}): Promise<Source[]> {
   const res = await withTimeout(fetch("https://api.tavily.com/search", {
     method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ api_key: key, query, max_results: 6, search_depth: "advanced", topic: opts.topic || "general" }),
@@ -197,9 +195,7 @@ async function searchTavily(query: string, opts: { topic?: "news" | "general" } 
   const data = await res.json();
   return (data.results || []).map((r: any) => ({ url: r.url, title: r.title || "", snippet: r.content || "", provider: "tavily" })).filter((s: Source) => s.url);
 }
-async function searchExa(query: string, opts: { type?: "neural" | "keyword" } = {}): Promise<Source[]> {
-  const key = Deno.env.get("EXA_API_KEY");
-  if (!key) throw new Error("no-key");
+async function searchExa(query: string, key: string, opts: { type?: "neural" | "keyword" } = {}): Promise<Source[]> {
   const res = await withTimeout(fetch("https://api.exa.ai/search", {
     method: "POST", headers: { "Content-Type": "application/json", "x-api-key": key },
     body: JSON.stringify({ query, numResults: 6, type: opts.type || "neural", contents: { text: { maxCharacters: 800 } } }),
@@ -208,9 +204,7 @@ async function searchExa(query: string, opts: { type?: "neural" | "keyword" } = 
   const data = await res.json();
   return (data.results || []).map((r: any) => ({ url: r.url, title: r.title || "", snippet: r.text || r.snippet || "", provider: "exa" })).filter((s: Source) => s.url);
 }
-async function searchFirecrawl(query: string): Promise<Source[]> {
-  const key = Deno.env.get("FIRECRAWL_API_KEY");
-  if (!key) throw new Error("no-key");
+async function searchFirecrawl(query: string, key: string): Promise<Source[]> {
   const res = await withTimeout(fetch("https://api.firecrawl.dev/v2/search", {
     method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     body: JSON.stringify({ query, limit: 6 }),
@@ -220,9 +214,7 @@ async function searchFirecrawl(query: string): Promise<Source[]> {
   const items = data?.data || data?.web?.results || [];
   return items.map((r: any) => ({ url: r.url || r.link, title: r.title || "", snippet: r.description || r.snippet || "", provider: "firecrawl" })).filter((s: Source) => s.url);
 }
-async function searchSerpAPI(query: string): Promise<Source[]> {
-  const key = Deno.env.get("SERPAPI_API_KEY");
-  if (!key) throw new Error("no-key");
+async function searchSerpAPI(query: string, key: string): Promise<Source[]> {
   const url = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(query)}&num=6&api_key=${key}`;
   const res = await withTimeout(fetch(url), 30000);
   if (!res.ok) throw new Error(`serpapi ${res.status}`);
@@ -230,13 +222,14 @@ async function searchSerpAPI(query: string): Promise<Source[]> {
   return (data.organic_results || []).map((r: any) => ({ url: r.link, title: r.title || "", snippet: r.snippet || "", provider: "serpapi" })).filter((s: Source) => s.url);
 }
 
-type SearchFn = (q: string) => Promise<Source[]>;
+type SearchFn = (q: string, key: string) => Promise<Source[]>;
 const ROUTES: Record<string, [string, SearchFn][]> = {
-  trending: [["tavily", (q) => searchTavily(q, { topic: "news" })], ["exa", (q) => searchExa(q)], ["serpapi", searchSerpAPI]],
-  semantic: [["exa", (q) => searchExa(q, { type: "neural" })], ["tavily", (q) => searchTavily(q)], ["serpapi", searchSerpAPI]],
-  crawl:    [["firecrawl", searchFirecrawl], ["exa", (q) => searchExa(q)], ["tavily", (q) => searchTavily(q)]],
-  google:   [["serpapi", searchSerpAPI], ["tavily", (q) => searchTavily(q)], ["exa", (q) => searchExa(q)]],
+  trending: [["tavily", (q, k) => searchTavily(q, k, { topic: "news" })], ["exa", (q, k) => searchExa(q, k)], ["serpapi", searchSerpAPI]],
+  semantic: [["exa", (q, k) => searchExa(q, k, { type: "neural" })], ["tavily", (q, k) => searchTavily(q, k)], ["serpapi", searchSerpAPI]],
+  crawl:    [["firecrawl", searchFirecrawl], ["exa", (q, k) => searchExa(q, k)], ["tavily", (q, k) => searchTavily(q, k)]],
+  google:   [["serpapi", searchSerpAPI], ["tavily", (q, k) => searchTavily(q, k)], ["exa", (q, k) => searchExa(q, k)]],
 };
+
 
 // spam/low-quality domains to drop
 const SPAM_DOMAINS = /(pinterest\.|quora\.|answers\.|.*\.blogspot\.|medium\.com\/@|reddit\.com\/r\/|scribd\.|slideshare\.|ezinearticles\.)/i;
@@ -251,7 +244,7 @@ function scoreSource(s: Source): number {
   return score;
 }
 
-async function routedSearch(task: keyof typeof ROUTES, query: string, log: any, sb: any): Promise<Source[]> {
+async function routedSearch(task: keyof typeof ROUTES, query: string, log: any, sb: any, resolveKey: KeyResolver): Promise<Source[]> {
   log.search_attempts = log.search_attempts || [];
   log.fallback_sequence = log.fallback_sequence || [];
   const chain = ROUTES[task];
@@ -261,8 +254,13 @@ async function routedSearch(task: keyof typeof ROUTES, query: string, log: any, 
       log.search_attempts.push({ task, provider: name, ok: false, skipped: "paused" });
       continue;
     }
+    const key = await resolveKey(name);
+    if (!key) {
+      log.search_attempts.push({ task, provider: name, ok: false, skipped: "no-key" });
+      continue;
+    }
     try {
-      const results = await retryOnce(() => fn(query));
+      const results = await retryOnce(() => fn(query, key));
       log.search_attempts.push({ task, provider: name, ok: true, count: results.length });
       log.fallback_sequence.push(`${task}:${name}`);
       const wasFailing = await recordProviderSuccess(sb, name);
@@ -299,13 +297,13 @@ async function routedSearch(task: keyof typeof ROUTES, query: string, log: any, 
   return [];
 }
 
-async function researchTopic(topic: string, log: any, sb: any): Promise<Source[]> {
-  // Load-balanced: run trending + semantic + google in parallel, each with its own fallback chain
+async function researchTopic(topic: string, log: any, sb: any, resolveKey: KeyResolver): Promise<Source[]> {
   const [trending, semantic, google] = await Promise.all([
-    routedSearch("trending", topic, log, sb),
-    routedSearch("semantic", topic, log, sb),
-    routedSearch("google", topic, log, sb),
+    routedSearch("trending", topic, log, sb, resolveKey),
+    routedSearch("semantic", topic, log, sb, resolveKey),
+    routedSearch("google", topic, log, sb, resolveKey),
   ]);
+
 
 
   const merged: Source[] = [];
@@ -330,6 +328,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  const resolveKey = await buildKeyResolver(supabase);
+
   const started = Date.now();
   const log: any = { status: "ok", sources: [], internal_links: [], external_links: [], action: "created" };
 
@@ -350,7 +350,7 @@ Deno.serve(async (req) => {
       const raw = await callLLM([
         { role: "system", content: `You are an SEO strategist for a publisher in the niche: ${NICHE}. Propose ONE high-search-intent English blog topic NOT already covered. Return JSON: {"topic":"...","rationale":"..."}` },
         { role: "user", content: `Existing posts:\n${existingList || "(none)"}\n\nRules:\n- Evergreen or trending in books/spirituality/meditation/self-growth/mindfulness/consciousness.\n- Different angle from anything above.\n- Serve real reader search intent.` },
-      ], true, log, supabase, "topic-discovery");
+      ], true, log, supabase, "topic-discovery", resolveKey);
       topic = JSON.parse(raw).topic;
     }
     log.topic = topic;
@@ -369,7 +369,7 @@ Deno.serve(async (req) => {
     log.action = willUpdate ? "updated" : "created";
 
     // 4) Load-balanced multi-provider research (parallel + fallback per task)
-    const sources = await researchTopic(topic!, log, supabase);
+    const sources = await researchTopic(topic!, log, supabase, resolveKey);
     if (sources.length === 0) {
       log.status = "error";
       log.error = "All search providers unavailable or returned no results";
@@ -425,7 +425,7 @@ Return STRICT JSON (no markdown fences):
     const raw = await callLLM([
       { role: "system", content: "You are a senior SEO editor and domain writer. Follow Google Helpful Content. Output ONLY valid JSON, no code fences." },
       { role: "user", content: genPrompt },
-    ], true, log, supabase, "draft-generation");
+    ], true, log, supabase, "draft-generation", resolveKey);
     let article: any;
     try { article = JSON.parse(raw); }
     catch (e: any) {

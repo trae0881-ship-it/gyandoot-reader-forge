@@ -19,6 +19,7 @@ const navItems = [
   { to: "/admin/lsi", label: "LSI Keywords", icon: Hash },
   { to: "/admin/scripts", label: "Custom Scripts", icon: Code },
   { to: "/admin/auth-providers", label: "Auth Providers", icon: KeyRound },
+  { to: "/admin/ai-providers", label: "AI Providers", icon: KeyRound },
   { to: "/admin/settings", label: "Settings", icon: Settings },
 ];
 

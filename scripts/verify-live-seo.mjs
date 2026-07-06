@@ -29,12 +29,22 @@
  *                             --schema-rule="/faq=FAQPage:mainEntity"
  *   --report=<path>         JSON report path (default: dist/seo-live-report.json).
  *   --html=<path>           HTML report path (default: dist/seo-live-report.html).
+ *   --csv=<path>            CSV report path (default: dist/seo-live-report.csv).
+ *                           One row per route, easy to sort/share in spreadsheets.
  *   --no-html               Do not emit the HTML report.
+ *   --no-csv                Do not emit the CSV report.
+ *   --timeout=<ms>          Per-request timeout (default: 15000). Timed-out
+ *                           requests count as retriable errors (like 5xx).
+ *   --max-fetch-ms=<ms>     Fail routes whose page fetch exceeds this
+ *                           duration (default: unlimited).
+ *   --max-asset-ms=<ms>     Fail routes whose og/twitter image probe exceeds
+ *                           this duration (default: unlimited).
  *   --github-summary        Append a compact table to $GITHUB_STEP_SUMMARY and
  *                           emit ::error:: annotations for failing routes.
  *   --resume=<path>         Reuse a previous JSON report; skip URLs that
  *                           passed there (default: off). Pair with --report to
  *                           point at the same file.
+
  *
  * Single-page curl (for spot checks):
  *   curl -sA "Googlebot" https://gyandootnova.in/books/rigved \

@@ -360,9 +360,28 @@ async function checkAssetExists(assetUrl) {
   const abs = assetUrl.startsWith("http") ? assetUrl : `${ORIGIN}${assetUrl.startsWith("/") ? "" : "/"}${assetUrl}`;
   const t0 = Date.now();
   let r = await httpFetch(abs, { method: "HEAD" });
-  if (r.status === 405 || r.status === 0) r = await httpFetch(abs, { method: "GET" });
-  return { ok: r.status >= 200 && r.status < 400, status: r.status, ms: Date.now() - t0, url: abs };
+  if (r.status === 405 || r.status === 0 || !r.contentType) r = await httpFetch(abs, { method: "GET" });
+  const status = r.status;
+  const contentType = (r.contentType || "").split(";")[0].trim().toLowerCase();
+  const isImage = contentType.startsWith("image/");
+  const httpOk = status >= 200 && status < 400;
+  // Broken-placeholder heuristic: HTTP 200 but body is HTML (error page), or tiny/zero payload.
+  const looksLikeErrorPage = httpOk && !isImage && (contentType.includes("html") || contentType === "" || contentType.includes("text/"));
+  const tooSmall = httpOk && r.contentLength > 0 && r.contentLength < 100;
+  return {
+    ok: httpOk && isImage && !tooSmall,
+    status,
+    ms: Date.now() - t0,
+    url: abs,
+    contentType: r.contentType || "",
+    contentLength: r.contentLength || 0,
+    finalUrl: r.finalUrl || abs,
+    isImage,
+    looksLikeErrorPage,
+    tooSmall,
+  };
 }
+
 
 
 // Adaptive worker pool — reads throttle.current on every task pick so

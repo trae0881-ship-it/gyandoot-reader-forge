@@ -305,7 +305,7 @@ function renderHtmlReport(summary) {
   ul { margin:0; padding-left:18px; color:#991b1b; }
 </style></head><body>
 <h1>SEO Live Report</h1>
-<div class="meta">Origin: <b>${esc(summary.origin)}</b> · Generated ${esc(summary.generatedAt)} · Concurrency ${summary.concurrency} · Min words ${summary.minWords}</div>
+<div class="meta">Origin: <b>${esc(summary.origin)}</b> · Generated ${esc(summary.generatedAt)} · Concurrency ${summary.maxConcurrency} (final ${summary.finalConcurrency}) · Min words ${summary.minWords}</div>
 <div class="stats">
   <div class="stat ok">✓ ${summary.total - summary.failed} passing</div>
   <div class="stat bad">✗ ${summary.failed} failing</div>

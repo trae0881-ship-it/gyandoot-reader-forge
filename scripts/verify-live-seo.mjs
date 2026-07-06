@@ -66,6 +66,7 @@ const SKIP_JSONLD = flag("skip-jsonld-check");
 const REPORT = opt("report", "dist/seo-live-report.json");
 const HTML_REPORT = flag("no-html") ? null : opt("html", "dist/seo-live-report.html");
 const GITHUB_SUMMARY = flag("github-summary") || !!process.env.GITHUB_STEP_SUMMARY;
+const RESUME = opt("resume", "");
 const DEFAULT_UA = "Mozilla/5.0 (compatible; GyandootSEOVerifier/1.0; +https://gyandootnova.in)";
 const UA = opt("user-agent", DEFAULT_UA);
 
@@ -77,10 +78,49 @@ for (const h of many("header")) {
 const cookie = opt("cookie", "");
 if (cookie) EXTRA_HEADERS["Cookie"] = cookie;
 
+// Parse --schema-rule flags into ordered [pattern, {type, required[]}] pairs.
+// First matching pattern wins; user rules take precedence over defaults.
+function parseSchemaRule(raw) {
+  const eq = raw.indexOf("=");
+  if (eq < 0) return null;
+  const pattern = raw.slice(0, eq).trim();
+  const rhs = raw.slice(eq + 1).trim();
+  const colon = rhs.indexOf(":");
+  const type = colon < 0 ? rhs : rhs.slice(0, colon).trim();
+  const required = colon < 0 ? [] : rhs.slice(colon + 1).split(",").map((s) => s.trim()).filter(Boolean);
+  return { pattern, type, required };
+}
+function globToRegExp(glob) {
+  const esc = glob.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*");
+  return new RegExp(`^${esc}$`);
+}
+const USER_SCHEMA_RULES = many("schema-rule").map(parseSchemaRule).filter(Boolean)
+  .map((r) => ({ ...r, re: globToRegExp(r.pattern) }));
+const DEFAULT_SCHEMA_RULES = [
+  { pattern: "/books/*", type: "Book", required: ["name", "inLanguage", "author"], re: globToRegExp("/books/*") },
+  { pattern: "/articles/*", type: "Article", required: ["headline", "datePublished", "author"], re: globToRegExp("/articles/*") },
+];
+const SCHEMA_RULES_ORDERED = [...USER_SCHEMA_RULES, ...DEFAULT_SCHEMA_RULES];
+
+// ---------- resume mode ----------
+const RESUMED_PASSING = new Set();
+if (RESUME && existsSync(RESUME)) {
+  try {
+    const prev = JSON.parse(readFileSync(RESUME, "utf8"));
+    for (const r of prev.results || []) {
+      if (!(r.problems && r.problems.length)) RESUMED_PASSING.add(r.url);
+    }
+    console.log(`↺ resume: ${RESUMED_PASSING.size} URL(s) previously passing will be skipped (${RESUME})`);
+  } catch (e) {
+    console.warn(`⚠ resume: could not parse ${RESUME}: ${e.message}`);
+  }
+}
+
 // ---------- helpers ----------
 const pick = (re, s) => { const m = s.match(re); return m ? m[1].trim() : ""; };
 const countMatches = (re, s) => (s.match(re) || []).length;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
 
 // ---------- adaptive throttle ----------
 // Reduce concurrency when sustained 429s appear; ramp back up after quiet window.

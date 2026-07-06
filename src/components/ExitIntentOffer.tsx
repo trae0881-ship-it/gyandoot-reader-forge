@@ -70,7 +70,7 @@ export default function ExitIntentOffer() {
             <Gift className="h-7 w-7 text-secondary" />
           </div>
           <h3 className="mt-4 font-serif text-2xl font-bold text-card-foreground">
-            Rukiye! 🙏
+            Rukiye!
           </h3>
           <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
             Aaj hi shuru karein apni <strong className="text-primary">adhyatmik yatra</strong> — pehla granth bilkul free hai.

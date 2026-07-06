@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, Eye, Lock, Loader2, PlayCircle, Tag, X, CheckCircle, User, Calendar, Layers, Globe, ShoppingCart, Star, Info, Share2, Copy } from "lucide-react";
+import { BookOpen, Eye, Lock, Loader2, PlayCircle, Tag, X, CheckCircle, User, Calendar, Layers, Globe, ShoppingCart, Star, Info, Share2, Copy, Smartphone, Bookmark, Gift, Infinity as InfinityIcon, ShieldCheck, CreditCard, Unlock } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useMemo, useEffect } from "react";
 
@@ -310,11 +310,11 @@ const BookDetail = () => {
                   <div className="rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
                     <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">आप क्या पा रहे हैं</p>
                     <ul className="space-y-1.5 text-sm">
-                      <li className="flex justify-between"><span>📖 पुस्तक का lifetime access</span><span className="text-muted-foreground">₹{book.price}</span></li>
-                      <li className="flex justify-between"><span>📱 सभी devices पर पढ़ें</span><span className="text-muted-foreground line-through">₹500</span></li>
-                      <li className="flex justify-between"><span>🔖 Bookmarks + Notes</span><span className="text-muted-foreground line-through">₹300</span></li>
-                      <li className="flex justify-between"><span>🔍 Continue reading + Progress</span><span className="text-muted-foreground line-through">₹200</span></li>
-                      <li className="flex justify-between"><span>🎁 जीवनभर Free updates</span><span className="text-muted-foreground line-through">₹500</span></li>
+                      <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5 text-primary" /> पुस्तक का lifetime access</span><span className="text-muted-foreground">₹{book.price}</span></li>
+                      <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><Smartphone className="h-3.5 w-3.5 text-primary" /> सभी devices पर पढ़ें</span><span className="text-muted-foreground line-through">₹500</span></li>
+                      <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><Bookmark className="h-3.5 w-3.5 text-primary" /> Bookmarks + Notes</span><span className="text-muted-foreground line-through">₹300</span></li>
+                      <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><PlayCircle className="h-3.5 w-3.5 text-primary" /> Continue reading + Progress</span><span className="text-muted-foreground line-through">₹200</span></li>
+                      <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><Gift className="h-3.5 w-3.5 text-primary" /> जीवनभर Free updates</span><span className="text-muted-foreground line-through">₹500</span></li>
                       <li className="flex justify-between font-bold border-t border-primary/20 pt-2 mt-2"><span>आज आपका मूल्य</span><span className="text-primary text-lg">₹{book.price}</span></li>
                     </ul>
                   </div>
@@ -377,7 +377,7 @@ const BookDetail = () => {
                     {purchasing ? (
                       <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</>
                     ) : (
-                      <><Lock className="mr-2 h-4 w-4" /> 🔓 अभी unlock करें — ₹{appliedCoupon ? appliedCoupon.final_amount : book.price} (जीवनभर)</>
+                      <><Unlock className="mr-2 h-4 w-4" /> अभी unlock करें — ₹{appliedCoupon ? appliedCoupon.final_amount : book.price} (जीवनभर)</>
                     )}
                   </Button>
 
@@ -391,9 +391,9 @@ const BookDetail = () => {
 
                   {/* Trust badges */}
                   <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground pt-1">
-                    <span>🔒 SSL Secured</span>
-                    <span>💳 UPI / Card / NetBanking</span>
-                    <span>♾️ Lifetime Access</span>
+                    <span className="inline-flex items-center gap-1"><Lock className="h-3 w-3" /> SSL Secured</span>
+                    <span className="inline-flex items-center gap-1"><CreditCard className="h-3 w-3" /> UPI / Card / NetBanking</span>
+                    <span className="inline-flex items-center gap-1"><InfinityIcon className="h-3 w-3" /> Lifetime Access</span>
                   </div>
                 </div>
               )}
@@ -595,8 +595,9 @@ const BookDetail = () => {
             <div className="mt-12">
               <h2 className="font-serif text-2xl font-bold mb-4">Table of Contents</h2>
               {!canRead && !book.is_free && (
-                <div className="mb-4 rounded-lg border-2 border-green-600/40 bg-green-50 dark:bg-green-950/20 p-3 text-sm">
-                  🎁 <strong>पहला अध्याय 100% मुफ़्त है</strong> — Login कीजिए और पढ़कर देखिए, पसंद आए तभी खरीदिए।
+                <div className="mb-4 rounded-lg border-2 border-green-600/40 bg-green-50 dark:bg-green-950/20 p-3 text-sm flex items-start gap-2">
+                  <Gift className="h-4 w-4 text-green-700 mt-0.5 shrink-0" />
+                  <span><strong>पहला अध्याय 100% मुफ़्त है</strong> — Login कीजिए और पढ़कर देखिए, पसंद आए तभी खरीदिए।</span>
                 </div>
               )}
               <div className="space-y-2">
@@ -643,11 +644,11 @@ const BookDetail = () => {
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground">जीवनभर access</p>
             <div className="flex items-baseline gap-1">
               <span className="text-lg font-bold text-primary">₹{appliedCoupon ? appliedCoupon.final_amount : book.price}</span>
-              <span className="text-[10px] text-primary">✓ 7-दिन refund</span>
+              <span className="text-[10px] text-primary inline-flex items-center gap-0.5"><CheckCircle className="h-2.5 w-2.5" /> 7-दिन refund</span>
             </div>
           </div>
           <Button onClick={handlePurchase} disabled={purchasing} size="lg" className="font-bold shadow-md shrink-0">
-            {purchasing ? <Loader2 className="h-4 w-4 animate-spin" /> : <>🔓 अभी unlock करें</>}
+            {purchasing ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Unlock className="mr-1 h-4 w-4" /> अभी unlock करें</>}
           </Button>
         </div>
       )}

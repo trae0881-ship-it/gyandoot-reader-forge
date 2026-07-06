@@ -55,7 +55,7 @@ const STATIC_ROUTES = [
 ];
 
 async function fetchSlugs(table, filter = "") {
-async function fetchSlugs(table, filter = "") {
+
   const url = `${SUPABASE_URL}/rest/v1/${table}?select=slug${filter}`;
 
   const res = await fetch(url, {

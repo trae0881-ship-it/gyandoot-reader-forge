@@ -425,7 +425,7 @@ Return STRICT JSON (no markdown fences):
     const raw = await callLLM([
       { role: "system", content: "You are a senior SEO editor and domain writer. Follow Google Helpful Content. Output ONLY valid JSON, no code fences." },
       { role: "user", content: genPrompt },
-    ], true, log, supabase, "draft-generation");
+    ], true, log, supabase, "draft-generation", resolveKey);
     let article: any;
     try { article = JSON.parse(raw); }
     catch (e: any) {

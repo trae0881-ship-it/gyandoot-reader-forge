@@ -512,22 +512,27 @@ async function main() {
   const baseHtml = await readFile(join(DIST, "index.html"), "utf8");
 
   console.log("→ fetching dynamic slugs from Supabase…");
-  const [bookSlugs, articleSlugs, readerRows] = await Promise.all([
-    fetchSlugs("books"),
+  const [articleSlugs, seoPayload, fallbackBookSlugs] = await Promise.all([
     fetchSlugs("posts", "&is_published=eq.true"),
-    fetchSeoReaderRows(),
+    fetchSeoPrerenderPayload(),
+    fetchSlugs("books"),
   ]);
+  const bookRows = seoPayload.books.length ? seoPayload.books : fallbackBookSlugs.map((slug) => ({ slug, title: slug, author: "GyandootNova", is_free: false, price: 0, toc: [], first_free_chapter: null }));
+  const readerRows = seoPayload.chapters;
 
-  console.log(`  books=${bookSlugs.length}  reader-pages=${readerRows.length}  articles=${articleSlugs.length}`);
+  console.log(`  books=${bookRows.length}  reader-pages=${readerRows.length}  articles=${articleSlugs.length}`);
 
+  // Static routes + articles still go through Playwright snapshot;
+  // book detail routes are rendered statically from backend data below.
   const routes = [
     ...STATIC_ROUTES,
-    ...bookSlugs.map((s) => `/books/${s}`),
     ...articleSlugs.map((s) => `/articles/${s}`),
   ];
+  const bookRoutes = bookRows.map(routePathForBook);
   const readerRoutes = readerRows.map(routePathForReader);
-  const allRoutesCount = routes.length + readerRoutes.length;
+  const allRoutesCount = routes.length + bookRoutes.length + readerRoutes.length;
   console.log(`→ ${allRoutesCount} routes total (${CHECK_ONLY ? "check-only" : "prerender+check"})`);
+
 
   console.log("→ starting vite preview…");
   const preview = await startPreview();

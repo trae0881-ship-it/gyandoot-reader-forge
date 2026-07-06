@@ -670,13 +670,15 @@ async function main() {
         if (mm) entry.problems.push(`redirect landed off-route — ${mm.replace(/^canonical /, "")}`);
       }
 
-      if (MAX_FETCH_MS && fetchMs > MAX_FETCH_MS) {
-        entry.problems.push(`fetch too slow: ${fetchMs}ms > ${MAX_FETCH_MS}ms`);
+      const fetchLimit = timingLimit(url, MAX_FETCH_MS_RULES, MAX_FETCH_MS);
+      if (fetchLimit && fetchMs > fetchLimit) {
+        entry.problems.push(`fetch too slow: ${fetchMs}ms > ${fetchLimit}ms`);
       }
       if (!SKIP_OG) {
         const [og, tw] = await Promise.all([checkAssetExists(audit.ogImage), checkAssetExists(audit.twImage)]);
         entry.ogImageCheck = og;
         entry.twImageCheck = tw;
+        const assetLimit = timingLimit(url, MAX_ASSET_MS_RULES, MAX_ASSET_MS);
         const flagAsset = (label, meta, probe) => {
           if (!meta) return;
           if (probe.status < 200 || probe.status >= 400) {
@@ -688,13 +690,27 @@ async function main() {
           } else if (!probe.isImage) {
             entry.problems.push(`${label} content-type is "${probe.contentType || "unknown"}", expected image/*`);
           }
+          // Magic-byte checks catch spoofed HTML served as image/png etc.
+          if (probe.sniffedFormat === "html") {
+            entry.problems.push(`${label} magic bytes look like HTML — spoofed image (content-type claims "${probe.contentType || "unknown"}")`);
+          } else if (probe.sniffedFormat && probe.isImage) {
+            const expected = (probe.contentType.split("/")[1] || "").split(";")[0].trim();
+            const equiv = { jpg: "jpeg", "svg+xml": "svg", "vnd.microsoft.icon": "ico", "x-icon": "ico" };
+            const norm = equiv[expected] || expected;
+            if (norm && norm !== probe.sniffedFormat && !(norm === "png" && probe.sniffedFormat === "png")) {
+              entry.problems.push(`${label} content-type says image/${expected} but magic bytes say ${probe.sniffedFormat}`);
+            }
+          } else if (!probe.sniffedFormat && probe.isImage) {
+            entry.problems.push(`${label} content-type is image/* but no recognizable image signature in first 64 bytes`);
+          }
           if (probe.tooSmall) entry.problems.push(`${label} suspiciously small (${probe.contentLength} bytes — broken placeholder?)`);
-          if (MAX_ASSET_MS && probe.ms > MAX_ASSET_MS) entry.problems.push(`${label} probe too slow: ${probe.ms}ms > ${MAX_ASSET_MS}ms`);
+          if (assetLimit && probe.ms > assetLimit) entry.problems.push(`${label} probe too slow: ${probe.ms}ms > ${assetLimit}ms`);
         };
         flagAsset("og:image", audit.ogImage, og);
         flagAsset("twitter:image", audit.twImage, tw);
       }
     }
+
 
     done++;
     const mark = entry.problems?.length ? "✗" : "✓";

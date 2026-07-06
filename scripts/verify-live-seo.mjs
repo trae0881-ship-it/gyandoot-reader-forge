@@ -81,6 +81,18 @@ const RESUME = opt("resume", "");
 const TIMEOUT_MS = Math.max(1000, parseInt(opt("timeout", "15000"), 10));
 const MAX_FETCH_MS = parseInt(opt("max-fetch-ms", "0"), 10) || 0;
 const MAX_ASSET_MS = parseInt(opt("max-asset-ms", "0"), 10) || 0;
+// Per-route timing overrides — repeatable:
+//   --max-fetch-ms-rule="/books/*=6000"
+//   --max-asset-ms-rule="/articles/*=4000"
+function parseTimingRule(raw) {
+  const eq = raw.lastIndexOf("=");
+  if (eq < 0) return null;
+  const pattern = raw.slice(0, eq).trim();
+  const ms = parseInt(raw.slice(eq + 1).trim(), 10);
+  if (!pattern || !Number.isFinite(ms) || ms <= 0) return null;
+  return { pattern, ms, re: globToRegExp(pattern) };
+}
+
 const DEFAULT_UA = "Mozilla/5.0 (compatible; GyandootSEOVerifier/1.0; +https://gyandootnova.in)";
 const UA = opt("user-agent", DEFAULT_UA);
 

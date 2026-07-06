@@ -128,7 +128,7 @@ function parseStatus(msg: string): number | null {
 }
 
 
-async function callLLM(messages: ChatMsg[], json: boolean, log: any, sb: any, step: string): Promise<string> {
+async function callLLM(messages: ChatMsg[], json: boolean, log: any, sb: any, step: string, resolveKey: KeyResolver): Promise<string> {
   log.llm_attempts = log.llm_attempts || [];
   const errors: string[] = [];
   const failedProviders: { name: string; error: string; status: number | null }[] = [];
@@ -137,12 +137,16 @@ async function callLLM(messages: ChatMsg[], json: boolean, log: any, sb: any, st
       log.llm_attempts.push({ provider: name, ok: false, skipped: "paused" });
       continue;
     }
+    const key = await resolveKey(name);
+    if (!key) {
+      log.llm_attempts.push({ provider: name, ok: false, skipped: "no-key" });
+      continue;
+    }
     try {
-      const out = await retryOnce(() => fn(messages, json));
+      const out = await retryOnce(() => fn(messages, json, key));
       if (!out) throw new Error("empty");
       log.llm_attempts.push({ provider: name, ok: true });
       log.llm_used = log.llm_used || name;
-      // Recovery: if previous LLMs in this call failed, notify
       const wasFailing = await recordProviderSuccess(sb, name);
       if (failedProviders.length > 0) {
         const first = failedProviders[0];
@@ -176,6 +180,7 @@ async function callLLM(messages: ChatMsg[], json: boolean, log: any, sb: any, st
   }
   throw new Error(`All LLM providers failed: ${errors.join(" | ")}`);
 }
+
 
 
 // ─── Search providers ────────────────────────────────────────────────

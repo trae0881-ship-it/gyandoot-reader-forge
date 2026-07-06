@@ -700,6 +700,42 @@ export type Database = {
         }
         Relationships: []
       }
+      post_revisions: {
+        Row: {
+          content: string | null
+          created_at: string
+          excerpt: string | null
+          id: string
+          meta_description: string | null
+          meta_title: string | null
+          post_id: string
+          reason: string | null
+          title: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          post_id: string
+          reason?: string | null
+          title?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          post_id?: string
+          reason?: string | null
+          title?: string | null
+        }
+        Relationships: []
+      }
       posts: {
         Row: {
           content: string | null
@@ -708,6 +744,7 @@ export type Database = {
           excerpt: string | null
           id: string
           is_published: boolean
+          manually_edited: boolean
           meta_description: string | null
           meta_title: string | null
           post_type: string
@@ -722,6 +759,7 @@ export type Database = {
           excerpt?: string | null
           id?: string
           is_published?: boolean
+          manually_edited?: boolean
           meta_description?: string | null
           meta_title?: string | null
           post_type?: string
@@ -736,6 +774,7 @@ export type Database = {
           excerpt?: string | null
           id?: string
           is_published?: boolean
+          manually_edited?: boolean
           meta_description?: string | null
           meta_title?: string | null
           post_type?: string
@@ -916,6 +955,66 @@ export type Database = {
           referrer_user_id?: string
           status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      seo_agent_logs: {
+        Row: {
+          action: string | null
+          error: string | null
+          external_links: Json | null
+          focus_keyword: string | null
+          id: string
+          internal_links: Json | null
+          matched_slug: string | null
+          meta: Json | null
+          post_id: string | null
+          reading_time_min: number | null
+          run_at: string
+          similarity_score: number | null
+          slug: string | null
+          sources: Json | null
+          status: string
+          topic: string | null
+          word_count: number | null
+        }
+        Insert: {
+          action?: string | null
+          error?: string | null
+          external_links?: Json | null
+          focus_keyword?: string | null
+          id?: string
+          internal_links?: Json | null
+          matched_slug?: string | null
+          meta?: Json | null
+          post_id?: string | null
+          reading_time_min?: number | null
+          run_at?: string
+          similarity_score?: number | null
+          slug?: string | null
+          sources?: Json | null
+          status?: string
+          topic?: string | null
+          word_count?: number | null
+        }
+        Update: {
+          action?: string | null
+          error?: string | null
+          external_links?: Json | null
+          focus_keyword?: string | null
+          id?: string
+          internal_links?: Json | null
+          matched_slug?: string | null
+          meta?: Json | null
+          post_id?: string | null
+          reading_time_min?: number | null
+          run_at?: string
+          similarity_score?: number | null
+          slug?: string | null
+          sources?: Json | null
+          status?: string
+          topic?: string | null
+          word_count?: number | null
         }
         Relationships: []
       }

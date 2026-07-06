@@ -11,7 +11,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, ArrowLeft, Eye, Globe, CheckCircle, AlertTriangle, Upload, X, Loader2, Download } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowLeft, Eye, Globe, CheckCircle, AlertTriangle, Upload, X, Loader2, Download, ScrollText } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { downloadTableAsCsv } from "@/lib/exportCsv";
 import RichTextEditor from "@/components/RichTextEditor";
 import UploadCsvButton from "@/components/admin/UploadCsvButton";
@@ -117,6 +118,7 @@ const AdminPosts = () => {
         meta_title: form.meta_title,
         meta_description: form.meta_description,
         cover_url: form.cover_url || null,
+        manually_edited: true,
       };
       if (editing) {
         const { error } = await supabase.from("posts").update(payload).eq("id", editing.id);
@@ -397,6 +399,7 @@ const AdminPosts = () => {
             {aiRunning ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Plus className="mr-1 h-4 w-4" />}
             Run SEO Agent
           </Button>
+          <AgentLogsDialog />
           <Button onClick={() => setView("form")}><Plus className="mr-1 h-4 w-4" /> Add Post</Button>
         </div>
       </div>
@@ -441,4 +444,95 @@ const AdminPosts = () => {
   );
 };
 
+function AgentLogsDialog() {
+  const [open, setOpen] = useState(false);
+  const { data: logs, isLoading } = useQuery({
+    queryKey: ["seo-agent-logs"],
+    enabled: open,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("seo_agent_logs")
+        .select("*")
+        .order("run_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return data || [];
+    },
+  });
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline"><ScrollText className="mr-1 h-4 w-4" /> Agent Logs</Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader><DialogTitle>SEO Agent — Recent Runs</DialogTitle></DialogHeader>
+        {isLoading ? (
+          <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin" /></div>
+        ) : !logs?.length ? (
+          <p className="text-sm text-muted-foreground text-center py-8">No runs yet.</p>
+        ) : (
+          <div className="space-y-3">
+            {logs.map((l: any) => (
+              <div key={l.id} className="rounded-lg border p-3 text-sm">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="font-semibold">{l.topic || "(no topic)"}</div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className={`px-2 py-0.5 rounded-full ${l.status === "error" ? "bg-red-500/10 text-red-600" : l.action === "updated" ? "bg-blue-500/10 text-blue-600" : "bg-green-500/10 text-green-600"}`}>
+                      {l.status === "error" ? "error" : l.action}
+                    </span>
+                    <span className="text-muted-foreground">
+                      {new Date(l.run_at).toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                </div>
+                <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-2 text-xs text-muted-foreground">
+                  <div>Slug: <span className="text-foreground">{l.slug || "—"}</span></div>
+                  <div>Focus: <span className="text-foreground">{l.focus_keyword || "—"}</span></div>
+                  <div>Similarity: <span className="text-foreground">{l.similarity_score != null ? Number(l.similarity_score).toFixed(2) : "—"}</span></div>
+                  <div>Words: <span className="text-foreground">{l.word_count || "—"} ({l.reading_time_min || "—"} min)</span></div>
+                </div>
+                {l.matched_slug && (
+                  <div className="mt-1 text-xs">Matched existing: <code>/{l.matched_slug}</code></div>
+                )}
+                {!!(l.sources?.length) && (
+                  <details className="mt-2 text-xs">
+                    <summary className="cursor-pointer text-muted-foreground">Sources researched ({l.sources.length})</summary>
+                    <ul className="mt-1 space-y-0.5 pl-4 list-disc">
+                      {l.sources.map((s: any, i: number) => (
+                        <li key={i}><a href={s.url} target="_blank" rel="noreferrer" className="text-primary hover:underline">{s.title || s.url}</a></li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
+                {!!(l.internal_links?.length) && (
+                  <details className="mt-1 text-xs">
+                    <summary className="cursor-pointer text-muted-foreground">Internal links added ({l.internal_links.length})</summary>
+                    <ul className="mt-1 space-y-0.5 pl-4 list-disc">
+                      {l.internal_links.map((s: any, i: number) => (
+                        <li key={i}><code>{s.url}</code> — {s.anchor}</li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
+                {!!(l.external_links?.length) && (
+                  <details className="mt-1 text-xs">
+                    <summary className="cursor-pointer text-muted-foreground">External links ({l.external_links.length})</summary>
+                    <ul className="mt-1 space-y-0.5 pl-4 list-disc">
+                      {l.external_links.map((s: any, i: number) => (
+                        <li key={i}><a href={s.url} target="_blank" rel="noreferrer" className="text-primary hover:underline">{s.anchor || s.url}</a></li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
+                {l.error && <div className="mt-2 text-xs text-red-600">Error: {l.error}</div>}
+              </div>
+            ))}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default AdminPosts;
+

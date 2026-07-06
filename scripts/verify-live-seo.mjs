@@ -8,22 +8,30 @@
  *
  * Options:
  *   --origin=<url>          Target origin (default: https://gyandootnova.in).
- *   --concurrency=<n>       Parallel requests (default: 6).
+ *   --concurrency=<n>       Max parallel requests (default: 6). Auto-throttles on 429.
+ *   --min-concurrency=<n>   Floor for adaptive throttling (default: 1).
  *   --retries=<n>           Max retries per URL on 429/5xx (default: 3).
- *   --backoff=<ms>          Base backoff in ms; exponential (default: 500).
+ *   --backoff=<ms>          Base backoff in ms; exponential + jitter (default: 500).
  *   --min-words=<n>         Minimum visible words per page (default: 60).
  *   --selector=<css>        Required content selector, repeatable
  *                           (default: main, article).
+ *   --header="K: V"         Extra request header, repeatable
+ *                           (e.g. --header="Authorization: Bearer xyz").
+ *   --user-agent=<str>      Override the User-Agent header.
+ *   --cookie=<str>          Add a Cookie header (shortcut for --header="Cookie: ...").
  *   --skip-og-check         Skip the og:image / twitter:image HEAD probe.
+ *   --skip-jsonld-check     Skip JSON-LD schema validation.
  *   --report=<path>         JSON report path (default: dist/seo-live-report.json).
  *   --html=<path>           HTML report path (default: dist/seo-live-report.html).
  *   --no-html               Do not emit the HTML report.
+ *   --github-summary        Append a compact table to $GITHUB_STEP_SUMMARY and
+ *                           emit ::error:: annotations for failing routes.
  *
  * Single-page curl (for spot checks):
  *   curl -sA "Googlebot" https://gyandootnova.in/books/rigved \
  *     | grep -E "<title|og:image|<h1|name=\"description\""
  */
-import { writeFileSync, mkdirSync } from "node:fs";
+import { writeFileSync, mkdirSync, appendFileSync } from "node:fs";
 import { dirname } from "node:path";
 
 // ---------- CLI ----------
@@ -37,33 +45,76 @@ const flag = (name) => args.includes(`--${name}`);
 const many = (name) => args.filter((a) => a.startsWith(`--${name}=`)).map((a) => a.slice(name.length + 3));
 
 const ORIGIN = (opt("origin", positional || process.env.ORIGIN || "https://gyandootnova.in")).replace(/\/$/, "");
-const CONCURRENCY = Math.max(1, parseInt(opt("concurrency", "6"), 10));
+const MAX_CONCURRENCY = Math.max(1, parseInt(opt("concurrency", "6"), 10));
+const MIN_CONCURRENCY = Math.max(1, parseInt(opt("min-concurrency", "1"), 10));
 const RETRIES = Math.max(0, parseInt(opt("retries", "3"), 10));
 const BACKOFF = Math.max(50, parseInt(opt("backoff", "500"), 10));
 const MIN_WORDS = Math.max(0, parseInt(opt("min-words", "60"), 10));
 const SELECTORS = many("selector").length ? many("selector") : ["main", "article"];
 const SKIP_OG = flag("skip-og-check");
+const SKIP_JSONLD = flag("skip-jsonld-check");
 const REPORT = opt("report", "dist/seo-live-report.json");
 const HTML_REPORT = flag("no-html") ? null : opt("html", "dist/seo-live-report.html");
-const UA = "Mozilla/5.0 (compatible; GyandootSEOVerifier/1.0; +https://gyandootnova.in)";
+const GITHUB_SUMMARY = flag("github-summary") || !!process.env.GITHUB_STEP_SUMMARY;
+const DEFAULT_UA = "Mozilla/5.0 (compatible; GyandootSEOVerifier/1.0; +https://gyandootnova.in)";
+const UA = opt("user-agent", DEFAULT_UA);
+
+const EXTRA_HEADERS = { "User-Agent": UA, Accept: "text/html,*/*" };
+for (const h of many("header")) {
+  const idx = h.indexOf(":");
+  if (idx > 0) EXTRA_HEADERS[h.slice(0, idx).trim()] = h.slice(idx + 1).trim();
+}
+const cookie = opt("cookie", "");
+if (cookie) EXTRA_HEADERS["Cookie"] = cookie;
 
 // ---------- helpers ----------
 const pick = (re, s) => { const m = s.match(re); return m ? m[1].trim() : ""; };
 const countMatches = (re, s) => (s.match(re) || []).length;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// ---------- adaptive throttle ----------
+// Reduce concurrency when sustained 429s appear; ramp back up after quiet window.
+const throttle = {
+  current: MAX_CONCURRENCY,
+  recent429: 0,           // rolling count of 429s in the last window
+  lastAdjustAt: Date.now(),
+  cooldownUntil: 0,       // wall-clock when we may attempt to ramp back up
+  windowMs: 5000,
+  rampUpMs: 10_000,
+};
+function note429() {
+  throttle.recent429++;
+  const now = Date.now();
+  if (throttle.recent429 >= 3 && throttle.current > MIN_CONCURRENCY) {
+    const next = Math.max(MIN_CONCURRENCY, Math.floor(throttle.current / 2));
+    console.log(`  ⚠︎ sustained 429s — lowering concurrency ${throttle.current} → ${next}`);
+    throttle.current = next;
+    throttle.cooldownUntil = now + throttle.rampUpMs;
+    throttle.recent429 = 0;
+    throttle.lastAdjustAt = now;
+  }
+}
+function note2xx() {
+  const now = Date.now();
+  if (now - throttle.lastAdjustAt > throttle.windowMs) throttle.recent429 = 0;
+  if (now >= throttle.cooldownUntil && throttle.current < MAX_CONCURRENCY) {
+    throttle.current = Math.min(MAX_CONCURRENCY, throttle.current + 1);
+    console.log(`  ↑ ramping concurrency back up → ${throttle.current}`);
+    throttle.cooldownUntil = now + throttle.rampUpMs;
+  }
+}
+
 async function httpFetch(url, { method = "GET" } = {}) {
   let attempt = 0;
   while (true) {
     try {
-      const r = await fetch(url, {
-        method,
-        headers: { "User-Agent": UA, Accept: "text/html,*/*" },
-        redirect: "manual",
-      });
+      const r = await fetch(url, { method, headers: EXTRA_HEADERS, redirect: "manual" });
       const retriable = r.status === 429 || (r.status >= 500 && r.status <= 599);
+      if (r.status === 429) note429();
+      else if (r.status >= 200 && r.status < 400) note2xx();
       if (retriable && attempt < RETRIES) {
-        const wait = BACKOFF * 2 ** attempt + Math.floor(Math.random() * 100);
+        const retryAfter = parseInt(r.headers.get("retry-after") || "0", 10) * 1000;
+        const wait = retryAfter || (BACKOFF * 2 ** attempt + Math.floor(Math.random() * 200));
         await sleep(wait);
         attempt++;
         continue;
@@ -77,6 +128,7 @@ async function httpFetch(url, { method = "GET" } = {}) {
   }
 }
 
+
 async function loadSitemap() {
   const { status, body } = await httpFetch(`${ORIGIN}/sitemap.xml`);
   if (status !== 200) throw new Error(`sitemap.xml → HTTP ${status}`);
@@ -88,8 +140,53 @@ function extractRoot(html) {
   return m ? m[1] : "";
 }
 function stripTags(s) { return s.replace(/<script[\s\S]*?<\/script>/gi, "").replace(/<style[\s\S]*?<\/style>/gi, "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(); }
+// ---------- JSON-LD schema validation ----------
+// Required properties per @type. Route-shape rules pick which schema each
+// URL should contain (e.g. /books/* must include a Book).
+const SCHEMA_RULES = {
+  Book: ["name", "inLanguage", "author"],
+  Article: ["headline", "datePublished", "author"],
+  Organization: ["name", "url"],
+  WebSite: ["name", "url"],
+  BreadcrumbList: ["itemListElement"],
+};
+function routeExpectations(url) {
+  const path = new URL(url).pathname;
+  if (path.startsWith("/books/") && path !== "/books/") return ["Book"];
+  if (path.startsWith("/articles/") && path !== "/articles/") return ["Article"];
+  return []; // homepage / list pages only need sitewide Org/WebSite (in <head>)
+}
+function extractJsonLd(html) {
+  const blocks = Array.from(html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi));
+  const parsed = [];
+  for (const b of blocks) {
+    try {
+      const raw = JSON.parse(b[1].trim());
+      const items = Array.isArray(raw) ? raw : raw["@graph"] ? raw["@graph"] : [raw];
+      for (const it of items) if (it && typeof it === "object") parsed.push(it);
+    } catch { /* malformed block */ }
+  }
+  return parsed;
+}
+function validateJsonLd(url, html) {
+  const problems = [];
+  const blocks = extractJsonLd(html);
+  const foundTypes = new Set(blocks.map((b) => Array.isArray(b["@type"]) ? b["@type"][0] : b["@type"]).filter(Boolean));
+  const expected = routeExpectations(url);
+  for (const t of expected) {
+    const block = blocks.find((b) => (Array.isArray(b["@type"]) ? b["@type"].includes(t) : b["@type"] === t));
+    if (!block) {
+      problems.push(`missing JSON-LD @type=${t}`);
+      continue;
+    }
+    const required = SCHEMA_RULES[t] || [];
+    const missing = required.filter((k) => block[k] === undefined || block[k] === "" || block[k] === null);
+    if (missing.length) problems.push(`JSON-LD ${t} missing: ${missing.join(", ")}`);
+  }
+  return { problems, jsonldTypes: Array.from(foundTypes) };
+}
+
 function selectorPresent(rootHtml, sel) {
-  // Very small CSS matcher: only supports bare tag names or `.class`
   if (sel.startsWith(".")) {
     const cls = sel.slice(1).replace(/[^\w-]/g, "");
     return new RegExp(`class=["'][^"']*\\b${cls}\\b`, "i").test(rootHtml);
@@ -123,26 +220,48 @@ function auditPage(url, html) {
   if (h1Count === 0) problems.push("missing <h1>");
   else if (h1Count > 1) problems.push(`multiple <h1> (${h1Count})`);
 
-  return { url, title, desc, ogImage, twImage, twCard, canonical, h1Count, wordCount, missingSelectors, problems };
+  let jsonldTypes = [];
+  if (!SKIP_JSONLD) {
+    const j = validateJsonLd(url, html);
+    problems.push(...j.problems);
+    jsonldTypes = j.jsonldTypes;
+  }
+
+  return { url, title, desc, ogImage, twImage, twCard, canonical, h1Count, wordCount, missingSelectors, jsonldTypes, problems };
 }
 
 async function checkAssetExists(assetUrl) {
   if (!assetUrl) return { ok: false, status: 0, reason: "missing url" };
   const abs = assetUrl.startsWith("http") ? assetUrl : `${ORIGIN}${assetUrl.startsWith("/") ? "" : "/"}${assetUrl}`;
   let r = await httpFetch(abs, { method: "HEAD" });
-  // Some CDNs reject HEAD → retry as GET (no body kept)
   if (r.status === 405 || r.status === 0) r = await httpFetch(abs, { method: "GET" });
   return { ok: r.status >= 200 && r.status < 400, status: r.status, url: abs };
 }
 
-async function withConcurrency(items, limit, worker) {
+// Adaptive worker pool — reads throttle.current on every task pick so
+// concurrency can grow/shrink mid-run.
+async function withAdaptiveConcurrency(items, worker) {
   const results = new Array(items.length);
   let i = 0;
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (i < items.length) { const idx = i++; results[idx] = await worker(items[idx], idx); }
-  }));
-  return results;
+  let active = 0;
+  return await new Promise((resolveAll) => {
+    const spawn = () => {
+      while (active < throttle.current && i < items.length) {
+        const idx = i++;
+        active++;
+        Promise.resolve(worker(items[idx], idx))
+          .then((v) => { results[idx] = v; })
+          .finally(() => {
+            active--;
+            if (i >= items.length && active === 0) resolveAll(results);
+            else spawn();
+          });
+      }
+    };
+    spawn();
+  });
 }
+
 
 // ---------- HTML report ----------
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -186,7 +305,7 @@ function renderHtmlReport(summary) {
   ul { margin:0; padding-left:18px; color:#991b1b; }
 </style></head><body>
 <h1>SEO Live Report</h1>
-<div class="meta">Origin: <b>${esc(summary.origin)}</b> · Generated ${esc(summary.generatedAt)} · Concurrency ${summary.concurrency} · Min words ${summary.minWords}</div>
+<div class="meta">Origin: <b>${esc(summary.origin)}</b> · Generated ${esc(summary.generatedAt)} · Concurrency ${summary.maxConcurrency} (final ${summary.finalConcurrency}) · Min words ${summary.minWords}</div>
 <div class="stats">
   <div class="stat ok">✓ ${summary.total - summary.failed} passing</div>
   <div class="stat bad">✗ ${summary.failed} failing</div>
@@ -198,9 +317,42 @@ function renderHtmlReport(summary) {
 </body></html>`;
 }
 
+// ---------- GitHub Actions integration ----------
+function emitGitHubAnnotations(results) {
+  // ::error:: annotations show up on the PR "Files changed" / checks view.
+  for (const r of results) {
+    if (!r.problems?.length) continue;
+    const msg = r.problems.join(" | ").replace(/\n/g, " ");
+    console.log(`::error title=SEO failure: ${r.url}::${msg}`);
+  }
+}
+function emitGitHubStepSummary(summary) {
+  const path = process.env.GITHUB_STEP_SUMMARY;
+  if (!path) return;
+  const failing = summary.results.filter((r) => r.problems?.length);
+  const rows = failing.length
+    ? failing.map((r) => `| ${r.url} | ${r.status ?? "-"} | ${r.h1Count ?? "-"} | ${r.wordCount ?? "-"} | ${(r.problems || []).map((p) => p.replace(/\|/g, "\\|")).join("<br>")} |`).join("\n")
+    : "_All routes passing._";
+  const md = [
+    `## SEO Live Report — \`${summary.origin}\``,
+    ``,
+    `**${summary.total - summary.failed}/${summary.total} passing** · concurrency ${summary.maxConcurrency} · min-words ${summary.minWords} · retries ${summary.retries}`,
+    ``,
+    `### ${summary.failed} failing route${summary.failed === 1 ? "" : "s"}`,
+    ``,
+    `| URL | Status | H1 | Words | Problems |`,
+    `|---|---|---|---|---|`,
+    rows,
+    ``,
+    `Full HTML/JSON reports are attached as workflow artifacts (\`seo-live-report\`).`,
+    ``,
+  ].join("\n");
+  appendFileSync(path, md);
+}
+
 // ---------- main ----------
 async function main() {
-  console.log(`→ verifying ${ORIGIN}  (concurrency=${CONCURRENCY} retries=${RETRIES} min-words=${MIN_WORDS})`);
+  console.log(`→ verifying ${ORIGIN}  (max-concurrency=${MAX_CONCURRENCY} min=${MIN_CONCURRENCY} retries=${RETRIES} min-words=${MIN_WORDS})`);
   const urls = await loadSitemap();
   console.log(`  sitemap: ${urls.length} URLs`);
 
@@ -208,7 +360,7 @@ async function main() {
   const seenDescs = new Map();
   let done = 0;
 
-  const results = await withConcurrency(urls, CONCURRENCY, async (url) => {
+  const results = await withAdaptiveConcurrency(urls, async (url) => {
     const { status, body, redirect, attempts } = await httpFetch(url);
     let entry;
     if (status !== 200) {
@@ -226,11 +378,10 @@ async function main() {
     }
     done++;
     const mark = entry.problems?.length ? "✗" : "✓";
-    console.log(`  [${done}/${urls.length}] ${mark} ${url}${entry.problems?.length ? " — " + entry.problems.join("; ") : ""}`);
+    console.log(`  [${done}/${urls.length}] (c=${throttle.current}) ${mark} ${url}${entry.problems?.length ? " — " + entry.problems.join("; ") : ""}`);
     return entry;
   });
 
-  // Uniqueness pass (sequential, deterministic)
   for (const r of results) {
     if (r.title) {
       if (seenTitles.has(r.title) && seenTitles.get(r.title) !== r.url) {
@@ -248,7 +399,9 @@ async function main() {
   const summary = {
     origin: ORIGIN,
     generatedAt: new Date().toISOString(),
-    concurrency: CONCURRENCY,
+    maxConcurrency: MAX_CONCURRENCY,
+    minConcurrency: MIN_CONCURRENCY,
+    finalConcurrency: throttle.current,
     retries: RETRIES,
     minWords: MIN_WORDS,
     selectors: SELECTORS,
@@ -265,8 +418,13 @@ async function main() {
     writeFileSync(HTML_REPORT, renderHtmlReport(summary));
     console.log(`HTML report → ${HTML_REPORT}`);
   }
+  if (GITHUB_SUMMARY) {
+    emitGitHubAnnotations(results);
+    emitGitHubStepSummary(summary);
+  }
   console.log(`${results.length - failed}/${results.length} URLs pass all checks`);
   if (failed) process.exit(1);
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });
+

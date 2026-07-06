@@ -64,11 +64,13 @@ jobs:
           node scripts/verify-live-seo.mjs \
             --origin=http://localhost:4175 \
             --concurrency=8 \
+            --min-concurrency=2 \
             --retries=3 \
             --backoff=500 \
             --min-words=60 \
             --report=dist/seo-live-report.json \
-            --html=dist/seo-live-report.html
+            --html=dist/seo-live-report.html \
+            --github-summary
       - name: Stop preview
         if: always()
         run: kill "$(cat preview.pid)" || true

@@ -7,13 +7,17 @@
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
+    "postbuild": "node scripts/prerender-and-seo-check.mjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "check": "bun run typecheck && bun run lint",
+    "seo:check": "node scripts/prerender-and-seo-check.mjs --check",
+    "perf": "lhci autorun",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"
   },
+
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
     "@lovable.dev/cloud-auth-js": "^1.0.0",

@@ -891,6 +891,25 @@ async function main() {
     }
   }
 
+  // Apply allowlists — suppress specific problem categories without touching
+  // the underlying audit data. Silenced problems are moved to `ignored` for
+  // transparency in reports.
+  for (const r of results) {
+    if (!r.problems?.length) continue;
+    const allowRedirect = matchesAllowlist(r.url, ALLOW_REDIRECT_PATTERNS);
+    const allowCanon = matchesAllowlist(r.url, ALLOW_CANONICAL_MISMATCH_PATTERNS);
+    if (!allowRedirect && !allowCanon) continue;
+    const kept = [], ignored = [];
+    for (const p of r.problems) {
+      if (allowRedirect && p.startsWith("redirect landed off-route")) { ignored.push(p); continue; }
+      if (allowCanon && (p.startsWith("canonical mismatch") || p.startsWith("og:url mismatch"))) { ignored.push(p); continue; }
+      kept.push(p);
+    }
+    r.problems = kept;
+    if (ignored.length) r.ignoredProblems = ignored;
+  }
+
+
   const failed = results.filter((r) => r.problems?.length).length;
   const summary = {
     origin: ORIGIN,

@@ -5,18 +5,22 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "predev": "node scripts/generate-sitemap.mjs",
+    "prebuild": "node scripts/generate-sitemap.mjs",
     "build": "vite build",
     "build:dev": "vite build --mode development",
-    "postbuild": "node scripts/prerender-and-seo-check.mjs",
+    "postbuild": "node scripts/prerender-and-seo-check.mjs && node scripts/crawl-summary.mjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "check": "bun run typecheck && bun run lint",
     "seo:check": "node scripts/prerender-and-seo-check.mjs --check",
+    "seo:crawl": "node scripts/crawl-summary.mjs",
     "perf": "lhci autorun",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"
   },
+
 
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

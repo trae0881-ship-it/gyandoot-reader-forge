@@ -657,6 +657,12 @@ async function main() {
     writeFileSync(HTML_REPORT, renderHtmlReport(summary));
     console.log(`HTML report → ${HTML_REPORT}`);
   }
+  if (CSV_REPORT) {
+    mkdirSync(dirname(CSV_REPORT), { recursive: true });
+    writeFileSync(CSV_REPORT, renderCsv(summary));
+    console.log(`CSV report  → ${CSV_REPORT}`);
+  }
+
   if (GITHUB_SUMMARY) {
     emitGitHubAnnotations(results);
     emitGitHubStepSummary(summary);

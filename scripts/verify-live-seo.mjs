@@ -149,8 +149,85 @@ const DEFAULT_SCHEMA_RULES = [
 ];
 const SCHEMA_RULES_ORDERED = [...USER_SCHEMA_RULES, ...DEFAULT_SCHEMA_RULES];
 
-const MAX_FETCH_MS_RULES = many("max-fetch-ms-rule").map(parseTimingRule).filter(Boolean);
-const MAX_ASSET_MS_RULES = many("max-asset-ms-rule").map(parseTimingRule).filter(Boolean);
+// ---------- config file (--config=<path>) ----------
+// Shape (JSON or YAML):
+//   maxFetchMsRules: [{ pattern: "/books/*", ms: 6000 }]
+//   maxAssetMsRules: [{ pattern: "/articles/*", ms: 4000 }]
+//   allowlist:
+//     redirects:          ["/legacy/*", "/promo/**"]
+//     canonicalMismatch:  ["/campaign/*"]
+async function loadConfig(path) {
+  if (!path) return {};
+  if (!existsSync(path)) { console.warn(`⚠ config: ${path} not found`); return {}; }
+  const raw = readFileSync(path, "utf8");
+  const ext = path.toLowerCase().split(".").pop();
+  if (ext === "json") return JSON.parse(raw);
+  if (ext === "yaml" || ext === "yml") {
+    try {
+      const mod = await import("yaml").catch(() => null);
+      if (mod) return mod.parse(raw);
+      // Minimal fallback parser for the shallow schema we document above.
+      return parseTinyYaml(raw);
+    } catch (e) { console.warn(`⚠ config: YAML parse failed (${e.message})`); return {}; }
+  }
+  console.warn(`⚠ config: unsupported extension .${ext}`);
+  return {};
+}
+function parseTinyYaml(text) {
+  // Handles: key: value | key:\n  - item | key:\n  sub: value
+  // Enough for our documented schema. Not a general YAML parser.
+  const out = {};
+  const stack = [{ indent: -1, obj: out, key: null }];
+  for (const line of text.split(/\r?\n/)) {
+    if (!line.trim() || line.trim().startsWith("#")) continue;
+    const indent = line.match(/^\s*/)[0].length;
+    while (stack.length > 1 && indent <= stack[stack.length - 1].indent) stack.pop();
+    const top = stack[stack.length - 1];
+    const trimmed = line.trim();
+    if (trimmed.startsWith("- ")) {
+      const val = trimmed.slice(2).trim().replace(/^["']|["']$/g, "");
+      const parent = stack[stack.length - 1];
+      if (!Array.isArray(parent.obj[parent.key])) parent.obj[parent.key] = [];
+      // Inline mapping in a list item: "- pattern: /x, ms: 100" is not supported;
+      // require a nested block. So plain scalar list items.
+      parent.obj[parent.key].push(coerce(val));
+    } else {
+      const idx = trimmed.indexOf(":");
+      if (idx < 0) continue;
+      const key = trimmed.slice(0, idx).trim();
+      const val = trimmed.slice(idx + 1).trim();
+      if (val === "") {
+        top.obj[key] = {};
+        stack.push({ indent, obj: top.obj[key], key });
+      } else {
+        top.obj[key] = coerce(val.replace(/^["']|["']$/g, ""));
+      }
+    }
+  }
+  return out;
+  function coerce(v) {
+    if (/^-?\d+$/.test(v)) return parseInt(v, 10);
+    if (v === "true") return true;
+    if (v === "false") return false;
+    return v;
+  }
+}
+const CONFIG = await loadConfig(opt("config", ""));
+
+function mergeTimingRules(cliRules, cfgRules) {
+  const fromCfg = (cfgRules || []).map((r) => (r && r.pattern && r.ms)
+    ? { pattern: r.pattern, ms: parseInt(r.ms, 10), re: globToRegExp(r.pattern) } : null).filter(Boolean);
+  // CLI wins → put CLI first so it matches before config entries.
+  return [...cliRules, ...fromCfg];
+}
+const MAX_FETCH_MS_RULES = mergeTimingRules(
+  many("max-fetch-ms-rule").map(parseTimingRule).filter(Boolean),
+  CONFIG.maxFetchMsRules,
+);
+const MAX_ASSET_MS_RULES = mergeTimingRules(
+  many("max-asset-ms-rule").map(parseTimingRule).filter(Boolean),
+  CONFIG.maxAssetMsRules,
+);
 function timingLimit(url, rules, fallback) {
   try {
     const path = new URL(url).pathname;
@@ -158,6 +235,28 @@ function timingLimit(url, rules, fallback) {
   } catch { /* ignore */ }
   return fallback || 0;
 }
+
+// ---------- allowlists ----------
+const ALLOW_REDIRECT_PATTERNS = [
+  ...many("allow-redirect"),
+  ...(CONFIG.allowlist?.redirects || []),
+].map(globToRegExp);
+const ALLOW_CANONICAL_MISMATCH_PATTERNS = [
+  ...many("allow-canonical-mismatch"),
+  ...(CONFIG.allowlist?.canonicalMismatch || []),
+].map(globToRegExp);
+function matchesAllowlist(url, patterns) {
+  if (!patterns.length) return false;
+  try {
+    const path = new URL(url).pathname;
+    return patterns.some((re) => re.test(path));
+  } catch { return false; }
+}
+
+// ---------- output paths ----------
+const DEBUG_LOG = flag("no-debug-log") ? null : opt("debug-log", "dist/seo-live-debug.ndjson");
+const SARIF_REPORT = flag("no-sarif") ? null : opt("sarif", "dist/seo-live-report.sarif");
+
 
 
 // ---------- resume mode ----------

@@ -378,6 +378,58 @@ function auditPage(url, html) {
   return { url, title, desc, ogImage, ogUrl, twImage, twCard, canonical, h1Count, wordCount, missingSelectors, jsonldTypes, appliedRule, problems };
 }
 
+// Fetch just the first N bytes and identify the image format from its magic
+// signature. Catches spoofed HTML served as image/png, wrong content-types,
+// and truly broken placeholders regardless of Content-Type.
+async function sniffImageBytes(url) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), Math.min(TIMEOUT_MS, 8000));
+  try {
+    const r = await fetch(url, {
+      method: "GET",
+      headers: { ...EXTRA_HEADERS, Range: "bytes=0-63" },
+      redirect: "follow",
+      signal: ctrl.signal,
+    });
+    const buf = new Uint8Array(await r.arrayBuffer());
+    return { bytes: buf, status: r.status };
+  } catch {
+    return { bytes: new Uint8Array(0), status: 0 };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+function detectImageFormat(b) {
+  if (!b || b.length < 4) return null;
+  // PNG
+  if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) return "png";
+  // JPEG
+  if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return "jpeg";
+  // GIF
+  if (b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x38) return "gif";
+  // WebP: RIFF????WEBP
+  if (b.length >= 12 && b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 &&
+      b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50) return "webp";
+  // AVIF / HEIC: 'ftyp' at offset 4, brand at 8..11
+  if (b.length >= 12 && b[4] === 0x66 && b[5] === 0x74 && b[6] === 0x79 && b[7] === 0x70) {
+    const brand = String.fromCharCode(b[8], b[9], b[10], b[11]).toLowerCase();
+    if (["avif", "avis", "heic", "heix", "mif1"].includes(brand)) return brand.startsWith("avi") ? "avif" : "heic";
+  }
+  // BMP
+  if (b[0] === 0x42 && b[1] === 0x4d) return "bmp";
+  // TIFF
+  if ((b[0] === 0x49 && b[1] === 0x49 && b[2] === 0x2a && b[3] === 0x00) ||
+      (b[0] === 0x4d && b[1] === 0x4d && b[2] === 0x00 && b[3] === 0x2a)) return "tiff";
+  // ICO
+  if (b[0] === 0x00 && b[1] === 0x00 && b[2] === 0x01 && b[3] === 0x00) return "ico";
+  // SVG: text starts with "<?xml" or "<svg"
+  const head = new TextDecoder("utf-8", { fatal: false }).decode(b.slice(0, Math.min(b.length, 64))).trim().toLowerCase();
+  if (head.startsWith("<?xml") || head.startsWith("<svg")) return "svg";
+  // Common spoof: HTML doctype/tag
+  if (head.startsWith("<!doctype html") || head.startsWith("<html")) return "html";
+  return null;
+}
+
 async function checkAssetExists(assetUrl) {
   if (!assetUrl) return { ok: false, status: 0, ms: 0, reason: "missing url" };
   const abs = assetUrl.startsWith("http") ? assetUrl : `${ORIGIN}${assetUrl.startsWith("/") ? "" : "/"}${assetUrl}`;
@@ -386,24 +438,36 @@ async function checkAssetExists(assetUrl) {
   if (r.status === 405 || r.status === 0 || !r.contentType) r = await httpFetch(abs, { method: "GET" });
   const status = r.status;
   const contentType = (r.contentType || "").split(";")[0].trim().toLowerCase();
-  const isImage = contentType.startsWith("image/");
+  const isImageType = contentType.startsWith("image/");
   const httpOk = status >= 200 && status < 400;
-  // Broken-placeholder heuristic: HTTP 200 but body is HTML (error page), or tiny/zero payload.
-  const looksLikeErrorPage = httpOk && !isImage && (contentType.includes("html") || contentType === "" || contentType.includes("text/"));
+  const looksLikeErrorPage = httpOk && !isImageType && (contentType.includes("html") || contentType === "" || contentType.includes("text/"));
   const tooSmall = httpOk && r.contentLength > 0 && r.contentLength < 100;
+
+  // Magic-byte sniff: only run for reachable assets; skip if HEAD already
+  // proved it's a Ranged image *and* we care about identifying HTML spoofs.
+  let sniffedFormat = null;
+  if (httpOk) {
+    const sniff = await sniffImageBytes(r.finalUrl || abs);
+    sniffedFormat = detectImageFormat(sniff.bytes);
+  }
+  const isImageMagic = sniffedFormat && sniffedFormat !== "html" && sniffedFormat !== null;
+
   return {
-    ok: httpOk && isImage && !tooSmall,
+    ok: httpOk && (isImageType || isImageMagic) && !tooSmall && sniffedFormat !== "html",
     status,
     ms: Date.now() - t0,
     url: abs,
     contentType: r.contentType || "",
     contentLength: r.contentLength || 0,
     finalUrl: r.finalUrl || abs,
-    isImage,
+    isImage: isImageType,
+    sniffedFormat,           // "png" | "jpeg" | ... | "html" | null
+    magicByteMatch: !!isImageMagic,
     looksLikeErrorPage,
     tooSmall,
   };
 }
+
 
 
 

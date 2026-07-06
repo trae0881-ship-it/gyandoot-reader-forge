@@ -550,7 +550,7 @@ function renderCsv(summary) {
 
 // ---------- main ----------
 async function main() {
-  console.log(`→ verifying ${ORIGIN}  (max-concurrency=${MAX_CONCURRENCY} min=${MIN_CONCURRENCY} retries=${RETRIES} min-words=${MIN_WORDS})`);
+  console.log(`→ verifying ${ORIGIN}  (max-concurrency=${MAX_CONCURRENCY} min=${MIN_CONCURRENCY} retries=${RETRIES} timeout=${TIMEOUT_MS}ms min-words=${MIN_WORDS}${MAX_FETCH_MS ? ` max-fetch=${MAX_FETCH_MS}ms` : ""}${MAX_ASSET_MS ? ` max-asset=${MAX_ASSET_MS}ms` : ""})`);
   const urls = await loadSitemap();
   console.log(`  sitemap: ${urls.length} URLs`);
 

@@ -21,18 +21,28 @@
  *   --cookie=<str>          Add a Cookie header (shortcut for --header="Cookie: ...").
  *   --skip-og-check         Skip the og:image / twitter:image HEAD probe.
  *   --skip-jsonld-check     Skip JSON-LD schema validation.
+ *   --schema-rule=<pat>=<T>:<a,b,c>
+ *                           Override JSON-LD expectations for URL pattern <pat>
+ *                           (glob-like: /books/*). Repeatable. Example:
+ *                             --schema-rule="/books/*=Book:name,inLanguage,author,isbn"
+ *                             --schema-rule="/articles/*=Article:headline,datePublished,author,image"
+ *                             --schema-rule="/faq=FAQPage:mainEntity"
  *   --report=<path>         JSON report path (default: dist/seo-live-report.json).
  *   --html=<path>           HTML report path (default: dist/seo-live-report.html).
  *   --no-html               Do not emit the HTML report.
  *   --github-summary        Append a compact table to $GITHUB_STEP_SUMMARY and
  *                           emit ::error:: annotations for failing routes.
+ *   --resume=<path>         Reuse a previous JSON report; skip URLs that
+ *                           passed there (default: off). Pair with --report to
+ *                           point at the same file.
  *
  * Single-page curl (for spot checks):
  *   curl -sA "Googlebot" https://gyandootnova.in/books/rigved \
  *     | grep -E "<title|og:image|<h1|name=\"description\""
  */
-import { writeFileSync, mkdirSync, appendFileSync } from "node:fs";
+import { writeFileSync, mkdirSync, appendFileSync, readFileSync, existsSync } from "node:fs";
 import { dirname } from "node:path";
+
 
 // ---------- CLI ----------
 const args = process.argv.slice(2);

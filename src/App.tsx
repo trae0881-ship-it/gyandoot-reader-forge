@@ -118,7 +118,9 @@ const AppContent = () => {
                   <Route path="auth-providers" element={<AdminAuthProviders />} />
                   <Route path="enquiries" element={<AdminEnquiries />} />
                   <Route path="lsi" element={<AdminLSI />} />
+                  <Route path="ai-providers" element={<AdminAIProviders />} />
                   <Route path="settings" element={<AdminSettings />} />
+
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>

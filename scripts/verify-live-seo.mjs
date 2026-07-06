@@ -140,8 +140,53 @@ function extractRoot(html) {
   return m ? m[1] : "";
 }
 function stripTags(s) { return s.replace(/<script[\s\S]*?<\/script>/gi, "").replace(/<style[\s\S]*?<\/style>/gi, "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(); }
+// ---------- JSON-LD schema validation ----------
+// Required properties per @type. Route-shape rules pick which schema each
+// URL should contain (e.g. /books/* must include a Book).
+const SCHEMA_RULES = {
+  Book: ["name", "inLanguage", "author"],
+  Article: ["headline", "datePublished", "author"],
+  Organization: ["name", "url"],
+  WebSite: ["name", "url"],
+  BreadcrumbList: ["itemListElement"],
+};
+function routeExpectations(url) {
+  const path = new URL(url).pathname;
+  if (path.startsWith("/books/") && path !== "/books/") return ["Book"];
+  if (path.startsWith("/articles/") && path !== "/articles/") return ["Article"];
+  return []; // homepage / list pages only need sitewide Org/WebSite (in <head>)
+}
+function extractJsonLd(html) {
+  const blocks = Array.from(html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi));
+  const parsed = [];
+  for (const b of blocks) {
+    try {
+      const raw = JSON.parse(b[1].trim());
+      const items = Array.isArray(raw) ? raw : raw["@graph"] ? raw["@graph"] : [raw];
+      for (const it of items) if (it && typeof it === "object") parsed.push(it);
+    } catch { /* malformed block */ }
+  }
+  return parsed;
+}
+function validateJsonLd(url, html) {
+  const problems = [];
+  const blocks = extractJsonLd(html);
+  const foundTypes = new Set(blocks.map((b) => Array.isArray(b["@type"]) ? b["@type"][0] : b["@type"]).filter(Boolean));
+  const expected = routeExpectations(url);
+  for (const t of expected) {
+    const block = blocks.find((b) => (Array.isArray(b["@type"]) ? b["@type"].includes(t) : b["@type"] === t));
+    if (!block) {
+      problems.push(`missing JSON-LD @type=${t}`);
+      continue;
+    }
+    const required = SCHEMA_RULES[t] || [];
+    const missing = required.filter((k) => block[k] === undefined || block[k] === "" || block[k] === null);
+    if (missing.length) problems.push(`JSON-LD ${t} missing: ${missing.join(", ")}`);
+  }
+  return { problems, jsonldTypes: Array.from(foundTypes) };
+}
+
 function selectorPresent(rootHtml, sel) {
-  // Very small CSS matcher: only supports bare tag names or `.class`
   if (sel.startsWith(".")) {
     const cls = sel.slice(1).replace(/[^\w-]/g, "");
     return new RegExp(`class=["'][^"']*\\b${cls}\\b`, "i").test(rootHtml);
@@ -175,26 +220,48 @@ function auditPage(url, html) {
   if (h1Count === 0) problems.push("missing <h1>");
   else if (h1Count > 1) problems.push(`multiple <h1> (${h1Count})`);
 
-  return { url, title, desc, ogImage, twImage, twCard, canonical, h1Count, wordCount, missingSelectors, problems };
+  let jsonldTypes = [];
+  if (!SKIP_JSONLD) {
+    const j = validateJsonLd(url, html);
+    problems.push(...j.problems);
+    jsonldTypes = j.jsonldTypes;
+  }
+
+  return { url, title, desc, ogImage, twImage, twCard, canonical, h1Count, wordCount, missingSelectors, jsonldTypes, problems };
 }
 
 async function checkAssetExists(assetUrl) {
   if (!assetUrl) return { ok: false, status: 0, reason: "missing url" };
   const abs = assetUrl.startsWith("http") ? assetUrl : `${ORIGIN}${assetUrl.startsWith("/") ? "" : "/"}${assetUrl}`;
   let r = await httpFetch(abs, { method: "HEAD" });
-  // Some CDNs reject HEAD → retry as GET (no body kept)
   if (r.status === 405 || r.status === 0) r = await httpFetch(abs, { method: "GET" });
   return { ok: r.status >= 200 && r.status < 400, status: r.status, url: abs };
 }
 
-async function withConcurrency(items, limit, worker) {
+// Adaptive worker pool — reads throttle.current on every task pick so
+// concurrency can grow/shrink mid-run.
+async function withAdaptiveConcurrency(items, worker) {
   const results = new Array(items.length);
   let i = 0;
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (i < items.length) { const idx = i++; results[idx] = await worker(items[idx], idx); }
-  }));
-  return results;
+  let active = 0;
+  return await new Promise((resolveAll) => {
+    const spawn = () => {
+      while (active < throttle.current && i < items.length) {
+        const idx = i++;
+        active++;
+        Promise.resolve(worker(items[idx], idx))
+          .then((v) => { results[idx] = v; })
+          .finally(() => {
+            active--;
+            if (i >= items.length && active === 0) resolveAll(results);
+            else spawn();
+          });
+      }
+    };
+    spawn();
+  });
 }
+
 
 // ---------- HTML report ----------
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));

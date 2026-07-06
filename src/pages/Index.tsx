@@ -375,9 +375,13 @@ const Index = () => {
                         <img
                           src={book.cover_url}
                           alt={book.title}
-                          className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                          width={300}
+                          height={400}
+                          decoding="async"
                           loading="lazy"
+                          className="h-full w-full object-cover transition-transform group-hover:scale-105"
                         />
+
                       ) : (
                         <BookOpen className="h-12 w-12 text-muted-foreground/30" />
                       )}

@@ -171,7 +171,7 @@ const Books = () => {
 
                         <div className="aspect-[3/4] bg-muted flex items-center justify-center overflow-hidden">
                           {book.cover_url ? (
-                            <img src={book.cover_url} alt={book.title} className="h-full w-full object-cover transition-transform group-hover:scale-105" loading="lazy" />
+                            <img src={book.cover_url} alt={book.title} width={300} height={400} decoding="async" loading="lazy" className="h-full w-full object-cover transition-transform group-hover:scale-105" />
                           ) : (
                             <BookOpen className="h-12 w-12 text-muted-foreground/40" />
                           )}

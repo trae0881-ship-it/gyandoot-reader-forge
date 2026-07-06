@@ -109,7 +109,46 @@ const Index = () => {
       "Dharmik granth online padhein — Vishnu Sahasraname, Bhagwat Geeta, Ramayana, Hanuman Chalisa aur anek spiritual books Hindi mein. GyandootNova par padhein.",
     canonical: "/",
     ogImage: "https://gyandootnova.in/og-image.png",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://gyandootnova.in/#website",
+          "url": "https://gyandootnova.in/",
+          "name": "GyandootNova",
+          "inLanguage": "hi-IN",
+          "description":
+            "Dharmik granth online padhein — Geeta, Ramayana, Hanuman Chalisa aur 50+ spiritual books Hindi mein.",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://gyandootnova.in/books?search={search_term_string}",
+            "query-input": "required name=search_term_string",
+          },
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://gyandootnova.in/#organization",
+          "name": "GyandootNova",
+          "url": "https://gyandootnova.in/",
+          "logo": "https://gyandootnova.in/gyandoot-nova-icon.ico",
+        },
+        ...((featuredBooks ?? []).length > 0
+          ? [{
+              "@type": "ItemList",
+              "name": "Featured Dharmik Granth",
+              "itemListElement": (featuredBooks ?? []).map((b, i) => ({
+                "@type": "ListItem",
+                "position": i + 1,
+                "url": `https://gyandootnova.in/books/${b.slug}`,
+                "name": b.title,
+              })),
+            }]
+          : []),
+      ],
+    },
   });
+
 
   return (
     <Layout>

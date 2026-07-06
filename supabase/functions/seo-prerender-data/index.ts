@@ -51,19 +51,22 @@ Deno.serve(async (req) => {
     }
 
 
-    // Build book-detail payloads for prerender (includes first free chapter excerpt + TOC + purchase count).
-    const purchaseCountByBook = new Map();
-    try {
-      const { data: pc } = await supabase
-        .from("books")
-        .select("id,purchase_count");
-      for (const row of pc ?? []) purchaseCountByBook.set(row.id, row.purchase_count ?? 0);
-    } catch (_) {}
-
+    // Build book-detail payloads for prerender (includes first free chapter excerpt + TOC).
     const booksPayload = books.map((book) => {
       const chs = chaptersByBook.get(book.id) ?? [];
       const previewLimit = Number(book.preview_chapters ?? 0);
       const firstChapter = chs.find((c) => c.chapter_number === 1) ?? chs[0];
+      const firstFree = firstChapter
+        ? {
+            title: firstChapter.title,
+            slug: firstChapter.slug,
+            chapter_number: firstChapter.chapter_number,
+            content: book.is_free || firstChapter.is_preview || firstChapter.chapter_number <= previewLimit
+              ? firstChapter.content ?? ""
+              : stripTags(firstChapter.content ?? "").slice(0, 4000),
+          }
+        : null;
+
       const firstFree = firstChapter
         ? {
             title: firstChapter.title,

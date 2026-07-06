@@ -44,18 +44,32 @@
  *                           Example: --max-fetch-ms-rule="/books/*=6000"
  *   --max-asset-ms-rule=<glob>=<ms>
  *                           Per-route override for --max-asset-ms (repeatable).
+ *   --config=<path>         Load defaults from a JSON or YAML config file
+ *                           (see loadConfig() for the shape). CLI flags
+ *                           always override the config file.
+ *   --debug-log=<path>      Emit an NDJSON debug log with per-URL fetch
+ *                           timings, redirect chains, and image-byte details.
+ *                           Default: dist/seo-live-debug.ndjson (unless
+ *                           --no-debug-log is passed).
+ *   --sarif=<path>          Emit a SARIF v2.1.0 report so GitHub can display
+ *                           failing routes inline on pull requests.
+ *                           Default: dist/seo-live-report.sarif.
+ *   --allow-redirect=<glob> Suppress "redirect landed off-route" failures for
+ *                           URLs matching <glob>. Repeatable.
+ *   --allow-canonical-mismatch=<glob>
+ *                           Suppress canonical/og:url mismatch failures for
+ *                           URLs matching <glob>. Repeatable.
  *   --github-summary        Append a compact table to $GITHUB_STEP_SUMMARY and
  *                           emit ::error:: annotations for failing routes.
  *   --resume=<path>         Reuse a previous JSON report; skip URLs that
  *                           passed there (default: off). Pair with --report to
  *                           point at the same file.
-
-
  *
  * Single-page curl (for spot checks):
  *   curl -sA "Googlebot" https://gyandootnova.in/books/rigved \
  *     | grep -E "<title|og:image|<h1|name=\"description\""
  */
+
 import { writeFileSync, mkdirSync, appendFileSync, readFileSync, existsSync } from "node:fs";
 import { dirname } from "node:path";
 

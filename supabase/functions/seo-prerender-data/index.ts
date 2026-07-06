@@ -66,17 +66,6 @@ Deno.serve(async (req) => {
               : stripTags(firstChapter.content ?? "").slice(0, 4000),
           }
         : null;
-
-      const firstFree = firstChapter
-        ? {
-            title: firstChapter.title,
-            slug: firstChapter.slug,
-            chapter_number: firstChapter.chapter_number,
-            content: book.is_free || firstChapter.is_preview || firstChapter.chapter_number <= previewLimit
-              ? firstChapter.content ?? ""
-              : stripTags(firstChapter.content ?? "").slice(0, 4000),
-          }
-        : null;
       return {
         id: book.id,
         title: book.title,
@@ -88,7 +77,8 @@ Deno.serve(async (req) => {
         is_free: book.is_free,
         preview_chapters: previewLimit,
         file_type: book.file_type,
-        purchase_count: purchaseCountByBook.get(book.id) ?? 0,
+        purchase_count: (book as any).purchase_count ?? 0,
+
         created_at: book.created_at,
         updated_at: book.updated_at,
         total_chapters: chs.length,

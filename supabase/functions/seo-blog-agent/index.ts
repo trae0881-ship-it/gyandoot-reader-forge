@@ -350,7 +350,7 @@ Deno.serve(async (req) => {
       const raw = await callLLM([
         { role: "system", content: `You are an SEO strategist for a publisher in the niche: ${NICHE}. Propose ONE high-search-intent English blog topic NOT already covered. Return JSON: {"topic":"...","rationale":"..."}` },
         { role: "user", content: `Existing posts:\n${existingList || "(none)"}\n\nRules:\n- Evergreen or trending in books/spirituality/meditation/self-growth/mindfulness/consciousness.\n- Different angle from anything above.\n- Serve real reader search intent.` },
-      ], true, log, supabase, "topic-discovery");
+      ], true, log, supabase, "topic-discovery", resolveKey);
       topic = JSON.parse(raw).topic;
     }
     log.topic = topic;

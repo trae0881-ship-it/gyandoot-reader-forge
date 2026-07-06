@@ -53,6 +53,7 @@ const AdminScripts = lazy(() => import("./pages/admin/AdminScripts"));
 const AdminAuthProviders = lazy(() => import("./pages/admin/AdminAuthProviders"));
 const AdminEnquiries = lazy(() => import("./pages/admin/AdminEnquiries"));
 const AdminLSI = lazy(() => import("./pages/admin/AdminLSI"));
+const AdminAIProviders = lazy(() => import("./pages/admin/AdminAIProviders"));
 
 // Minimal loading spinner
 const PageLoader = () => (

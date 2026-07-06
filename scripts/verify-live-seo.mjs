@@ -503,6 +503,51 @@ function emitGitHubStepSummary(summary) {
   appendFileSync(path, md);
 }
 
+// ---------- CSV report ----------
+// RFC 4180-ish: wrap every cell in quotes, escape internal quotes as "".
+// Excel/Sheets both open this cleanly with sortable columns.
+function csvCell(v) {
+  const s = v === null || v === undefined ? "" : String(v);
+  return `"${s.replace(/"/g, '""').replace(/\r?\n/g, " ")}"`;
+}
+function renderCsv(summary) {
+  const header = [
+    "url", "status", "final_url", "redirects", "fetch_ms", "attempts",
+    "h1_count", "word_count", "title", "description", "canonical", "og_url",
+    "og_image", "og_image_status", "og_image_ms", "og_image_type",
+    "tw_image", "tw_image_status", "tw_image_ms", "tw_image_type",
+    "jsonld_types", "applied_rule", "problems",
+  ];
+  const rows = summary.results.map((r) => [
+    r.url,
+    r.status ?? "",
+    r.finalUrl ?? "",
+    r.redirectChain ? Math.max(0, r.redirectChain.length - 1) : 0,
+    r.fetchMs ?? "",
+    r.attempts ?? "",
+    r.h1Count ?? "",
+    r.wordCount ?? "",
+    r.title ?? "",
+    r.desc ?? "",
+    r.canonical ?? "",
+    r.ogUrl ?? "",
+    r.ogImage ?? "",
+    r.ogImageCheck?.status ?? "",
+    r.ogImageCheck?.ms ?? "",
+    r.ogImageCheck?.contentType ?? "",
+    r.twImage ?? "",
+    r.twImageCheck?.status ?? "",
+    r.twImageCheck?.ms ?? "",
+    r.twImageCheck?.contentType ?? "",
+    (r.jsonldTypes || []).join("|"),
+    r.appliedRule ?? "",
+    (r.problems || []).join(" | "),
+  ].map(csvCell).join(","));
+  return [header.map(csvCell).join(","), ...rows].join("\n") + "\n";
+}
+
+
+
 // ---------- main ----------
 async function main() {
   console.log(`→ verifying ${ORIGIN}  (max-concurrency=${MAX_CONCURRENCY} min=${MIN_CONCURRENCY} retries=${RETRIES} min-words=${MIN_WORDS})`);

@@ -29,12 +29,22 @@
  *                             --schema-rule="/faq=FAQPage:mainEntity"
  *   --report=<path>         JSON report path (default: dist/seo-live-report.json).
  *   --html=<path>           HTML report path (default: dist/seo-live-report.html).
+ *   --csv=<path>            CSV report path (default: dist/seo-live-report.csv).
+ *                           One row per route, easy to sort/share in spreadsheets.
  *   --no-html               Do not emit the HTML report.
+ *   --no-csv                Do not emit the CSV report.
+ *   --timeout=<ms>          Per-request timeout (default: 15000). Timed-out
+ *                           requests count as retriable errors (like 5xx).
+ *   --max-fetch-ms=<ms>     Fail routes whose page fetch exceeds this
+ *                           duration (default: unlimited).
+ *   --max-asset-ms=<ms>     Fail routes whose og/twitter image probe exceeds
+ *                           this duration (default: unlimited).
  *   --github-summary        Append a compact table to $GITHUB_STEP_SUMMARY and
  *                           emit ::error:: annotations for failing routes.
  *   --resume=<path>         Reuse a previous JSON report; skip URLs that
  *                           passed there (default: off). Pair with --report to
  *                           point at the same file.
+
  *
  * Single-page curl (for spot checks):
  *   curl -sA "Googlebot" https://gyandootnova.in/books/rigved \
@@ -65,10 +75,15 @@ const SKIP_OG = flag("skip-og-check");
 const SKIP_JSONLD = flag("skip-jsonld-check");
 const REPORT = opt("report", "dist/seo-live-report.json");
 const HTML_REPORT = flag("no-html") ? null : opt("html", "dist/seo-live-report.html");
+const CSV_REPORT = flag("no-csv") ? null : opt("csv", "dist/seo-live-report.csv");
 const GITHUB_SUMMARY = flag("github-summary") || !!process.env.GITHUB_STEP_SUMMARY;
 const RESUME = opt("resume", "");
+const TIMEOUT_MS = Math.max(1000, parseInt(opt("timeout", "15000"), 10));
+const MAX_FETCH_MS = parseInt(opt("max-fetch-ms", "0"), 10) || 0;
+const MAX_ASSET_MS = parseInt(opt("max-asset-ms", "0"), 10) || 0;
 const DEFAULT_UA = "Mozilla/5.0 (compatible; GyandootSEOVerifier/1.0; +https://gyandootnova.in)";
 const UA = opt("user-agent", DEFAULT_UA);
+
 
 const EXTRA_HEADERS = { "User-Agent": UA, Accept: "text/html,*/*" };
 for (const h of many("header")) {
@@ -154,12 +169,17 @@ function note2xx() {
   }
 }
 
-async function httpFetch(url, { method = "GET" } = {}) {
+// Single-hop fetch (no redirect following). Adds AbortController-based
+// timeout and treats timeouts as retriable.
+async function httpFetchOnce(url, { method = "GET" } = {}) {
   let attempt = 0;
   const t0 = Date.now();
   while (true) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(new Error(`timeout ${TIMEOUT_MS}ms`)), TIMEOUT_MS);
     try {
-      const r = await fetch(url, { method, headers: EXTRA_HEADERS, redirect: "manual" });
+      const r = await fetch(url, { method, headers: EXTRA_HEADERS, redirect: "manual", signal: ctrl.signal });
+      clearTimeout(timer);
       const retriable = r.status === 429 || (r.status >= 500 && r.status <= 599);
       if (r.status === 429) note429();
       else if (r.status >= 200 && r.status < 400) note2xx();
@@ -171,13 +191,49 @@ async function httpFetch(url, { method = "GET" } = {}) {
         continue;
       }
       const body = method === "HEAD" ? "" : await r.text().catch(() => "");
-      return { status: r.status, body, redirect: r.headers.get("location") || "", attempts: attempt + 1, ms: Date.now() - t0 };
+      return {
+        status: r.status,
+        body,
+        redirect: r.headers.get("location") || "",
+        contentType: r.headers.get("content-type") || "",
+        contentLength: parseInt(r.headers.get("content-length") || "0", 10) || 0,
+        attempts: attempt + 1,
+        ms: Date.now() - t0,
+      };
     } catch (e) {
-      if (attempt < RETRIES) { await sleep(BACKOFF * 2 ** attempt); attempt++; continue; }
-      return { status: 0, body: "", redirect: "", attempts: attempt + 1, ms: Date.now() - t0, error: e.message };
+      clearTimeout(timer);
+      const timedOut = e?.name === "AbortError" || /timeout|aborted/i.test(e?.message || "");
+      if (attempt < RETRIES) {
+        await sleep(BACKOFF * 2 ** attempt + Math.floor(Math.random() * 200));
+        attempt++;
+        continue;
+      }
+      return { status: 0, body: "", redirect: "", contentType: "", contentLength: 0, attempts: attempt + 1, ms: Date.now() - t0, error: timedOut ? `timeout after ${TIMEOUT_MS}ms` : e.message };
     }
   }
 }
+
+// Follows up to 5 redirects, recording the chain. The final response's URL
+// is what audits/canonical checks run against.
+async function httpFetch(url, opts = {}) {
+  const chain = [];
+  let current = url;
+  let totalMs = 0;
+  let attemptsSum = 0;
+  for (let hop = 0; hop < 6; hop++) {
+    const r = await httpFetchOnce(current, opts);
+    totalMs += r.ms;
+    attemptsSum += r.attempts;
+    const isRedirect = r.status >= 300 && r.status < 400 && r.redirect;
+    chain.push({ url: current, status: r.status, location: r.redirect || null, ms: r.ms });
+    if (!isRedirect) {
+      return { ...r, finalUrl: current, chain, ms: totalMs, attempts: attemptsSum };
+    }
+    current = new URL(r.redirect, current).toString();
+  }
+  return { status: 0, body: "", redirect: "", contentType: "", contentLength: 0, finalUrl: current, chain, ms: totalMs, attempts: attemptsSum, error: "too many redirects (>5)" };
+}
+
 
 
 async function loadSitemap() {
@@ -304,9 +360,28 @@ async function checkAssetExists(assetUrl) {
   const abs = assetUrl.startsWith("http") ? assetUrl : `${ORIGIN}${assetUrl.startsWith("/") ? "" : "/"}${assetUrl}`;
   const t0 = Date.now();
   let r = await httpFetch(abs, { method: "HEAD" });
-  if (r.status === 405 || r.status === 0) r = await httpFetch(abs, { method: "GET" });
-  return { ok: r.status >= 200 && r.status < 400, status: r.status, ms: Date.now() - t0, url: abs };
+  if (r.status === 405 || r.status === 0 || !r.contentType) r = await httpFetch(abs, { method: "GET" });
+  const status = r.status;
+  const contentType = (r.contentType || "").split(";")[0].trim().toLowerCase();
+  const isImage = contentType.startsWith("image/");
+  const httpOk = status >= 200 && status < 400;
+  // Broken-placeholder heuristic: HTTP 200 but body is HTML (error page), or tiny/zero payload.
+  const looksLikeErrorPage = httpOk && !isImage && (contentType.includes("html") || contentType === "" || contentType.includes("text/"));
+  const tooSmall = httpOk && r.contentLength > 0 && r.contentLength < 100;
+  return {
+    ok: httpOk && isImage && !tooSmall,
+    status,
+    ms: Date.now() - t0,
+    url: abs,
+    contentType: r.contentType || "",
+    contentLength: r.contentLength || 0,
+    finalUrl: r.finalUrl || abs,
+    isImage,
+    looksLikeErrorPage,
+    tooSmall,
+  };
 }
+
 
 
 // Adaptive worker pool — reads throttle.current on every task pick so
@@ -428,9 +503,54 @@ function emitGitHubStepSummary(summary) {
   appendFileSync(path, md);
 }
 
+// ---------- CSV report ----------
+// RFC 4180-ish: wrap every cell in quotes, escape internal quotes as "".
+// Excel/Sheets both open this cleanly with sortable columns.
+function csvCell(v) {
+  const s = v === null || v === undefined ? "" : String(v);
+  return `"${s.replace(/"/g, '""').replace(/\r?\n/g, " ")}"`;
+}
+function renderCsv(summary) {
+  const header = [
+    "url", "status", "final_url", "redirects", "fetch_ms", "attempts",
+    "h1_count", "word_count", "title", "description", "canonical", "og_url",
+    "og_image", "og_image_status", "og_image_ms", "og_image_type",
+    "tw_image", "tw_image_status", "tw_image_ms", "tw_image_type",
+    "jsonld_types", "applied_rule", "problems",
+  ];
+  const rows = summary.results.map((r) => [
+    r.url,
+    r.status ?? "",
+    r.finalUrl ?? "",
+    r.redirectChain ? Math.max(0, r.redirectChain.length - 1) : 0,
+    r.fetchMs ?? "",
+    r.attempts ?? "",
+    r.h1Count ?? "",
+    r.wordCount ?? "",
+    r.title ?? "",
+    r.desc ?? "",
+    r.canonical ?? "",
+    r.ogUrl ?? "",
+    r.ogImage ?? "",
+    r.ogImageCheck?.status ?? "",
+    r.ogImageCheck?.ms ?? "",
+    r.ogImageCheck?.contentType ?? "",
+    r.twImage ?? "",
+    r.twImageCheck?.status ?? "",
+    r.twImageCheck?.ms ?? "",
+    r.twImageCheck?.contentType ?? "",
+    (r.jsonldTypes || []).join("|"),
+    r.appliedRule ?? "",
+    (r.problems || []).join(" | "),
+  ].map(csvCell).join(","));
+  return [header.map(csvCell).join(","), ...rows].join("\n") + "\n";
+}
+
+
+
 // ---------- main ----------
 async function main() {
-  console.log(`→ verifying ${ORIGIN}  (max-concurrency=${MAX_CONCURRENCY} min=${MIN_CONCURRENCY} retries=${RETRIES} min-words=${MIN_WORDS})`);
+  console.log(`→ verifying ${ORIGIN}  (max-concurrency=${MAX_CONCURRENCY} min=${MIN_CONCURRENCY} retries=${RETRIES} timeout=${TIMEOUT_MS}ms min-words=${MIN_WORDS}${MAX_FETCH_MS ? ` max-fetch=${MAX_FETCH_MS}ms` : ""}${MAX_ASSET_MS ? ` max-asset=${MAX_ASSET_MS}ms` : ""})`);
   const urls = await loadSitemap();
   console.log(`  sitemap: ${urls.length} URLs`);
 
@@ -444,21 +564,51 @@ async function main() {
       console.log(`  [${done}/${urls.length}] ↺ ${url} (skipped — passed in previous run)`);
       return { url, status: 200, skipped: true, problems: [], fetchMs: 0 };
     }
-    const { status, body, redirect, attempts, ms: fetchMs } = await httpFetch(url);
+    const res = await httpFetch(url);
+    const { status, body, attempts, ms: fetchMs, finalUrl, chain, error } = res;
     let entry;
     if (status !== 200) {
-      entry = { url, status, attempts, fetchMs, problems: [`HTTP ${status}${redirect ? ` → ${redirect}` : ""}`] };
+      const trail = (chain || []).map((h) => `${h.status}${h.location ? ` → ${h.location}` : ""}`).join(" ");
+      entry = { url, status, attempts, fetchMs, redirectChain: chain, finalUrl, problems: [`HTTP ${status}${error ? ` (${error})` : ""}${trail ? ` [${trail}]` : ""}`] };
     } else {
       const audit = auditPage(url, body);
-      entry = { status, attempts, fetchMs, ...audit };
+      entry = { status, attempts, fetchMs, redirectChain: chain, finalUrl, ...audit };
+      // Redirect-chain sanity: the final URL must resolve to the same path
+      // we asked for (canonical/og:url are checked separately in auditPage).
+      // Redirect-chain sanity: the final URL must resolve to the same path
+      // we asked for (ignoring trailing slash). Off-route redirects fail;
+      // trailing-slash normalizations are silent.
+      if (finalUrl && finalUrl !== url) {
+        const mm = canonicalMismatch(url, finalUrl);
+        if (mm) entry.problems.push(`redirect landed off-route — ${mm.replace(/^canonical /, "")}`);
+      }
+
+      if (MAX_FETCH_MS && fetchMs > MAX_FETCH_MS) {
+        entry.problems.push(`fetch too slow: ${fetchMs}ms > ${MAX_FETCH_MS}ms`);
+      }
       if (!SKIP_OG) {
         const [og, tw] = await Promise.all([checkAssetExists(audit.ogImage), checkAssetExists(audit.twImage)]);
         entry.ogImageCheck = og;
         entry.twImageCheck = tw;
-        if (audit.ogImage && !og.ok) entry.problems.push(`og:image not reachable (HTTP ${og.status})`);
-        if (audit.twImage && !tw.ok) entry.problems.push(`twitter:image not reachable (HTTP ${tw.status})`);
+        const flagAsset = (label, meta, probe) => {
+          if (!meta) return;
+          if (probe.status < 200 || probe.status >= 400) {
+            entry.problems.push(`${label} not reachable (HTTP ${probe.status})`);
+            return;
+          }
+          if (probe.looksLikeErrorPage) {
+            entry.problems.push(`${label} returned non-image content-type "${probe.contentType || "unknown"}" (likely error page)`);
+          } else if (!probe.isImage) {
+            entry.problems.push(`${label} content-type is "${probe.contentType || "unknown"}", expected image/*`);
+          }
+          if (probe.tooSmall) entry.problems.push(`${label} suspiciously small (${probe.contentLength} bytes — broken placeholder?)`);
+          if (MAX_ASSET_MS && probe.ms > MAX_ASSET_MS) entry.problems.push(`${label} probe too slow: ${probe.ms}ms > ${MAX_ASSET_MS}ms`);
+        };
+        flagAsset("og:image", audit.ogImage, og);
+        flagAsset("twitter:image", audit.twImage, tw);
       }
     }
+
     done++;
     const mark = entry.problems?.length ? "✗" : "✓";
     const timing = entry.fetchMs != null ? ` ${entry.fetchMs}ms` : "";
@@ -488,7 +638,11 @@ async function main() {
     minConcurrency: MIN_CONCURRENCY,
     finalConcurrency: throttle.current,
     retries: RETRIES,
+    timeoutMs: TIMEOUT_MS,
+    maxFetchMs: MAX_FETCH_MS || null,
+    maxAssetMs: MAX_ASSET_MS || null,
     minWords: MIN_WORDS,
+
     selectors: SELECTORS,
     schemaRules: SCHEMA_RULES_ORDERED.map(({ pattern, type, required }) => ({ pattern, type, required })),
     resumed: RESUMED_PASSING.size,
@@ -507,6 +661,12 @@ async function main() {
     writeFileSync(HTML_REPORT, renderHtmlReport(summary));
     console.log(`HTML report → ${HTML_REPORT}`);
   }
+  if (CSV_REPORT) {
+    mkdirSync(dirname(CSV_REPORT), { recursive: true });
+    writeFileSync(CSV_REPORT, renderCsv(summary));
+    console.log(`CSV report  → ${CSV_REPORT}`);
+  }
+
   if (GITHUB_SUMMARY) {
     emitGitHubAnnotations(results);
     emitGitHubStepSummary(summary);

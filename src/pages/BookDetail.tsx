@@ -390,7 +390,7 @@ const BookDetail = () => {
                     {purchasing ? (
                       <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</>
                     ) : (
-                      <><Unlock className="mr-2 h-4 w-4" /> अभी unlock करें — ₹{appliedCoupon ? appliedCoupon.final_amount : book.price} (जीवनभर)</>
+                      <><Unlock className="mr-2 h-4 w-4" /> Buy Now — ₹{appliedCoupon ? appliedCoupon.final_amount : book.price} (जीवनभर)</>
                     )}
                   </Button>
 
@@ -661,7 +661,7 @@ const BookDetail = () => {
             </div>
           </div>
           <Button onClick={handlePurchase} disabled={purchasing} size="lg" className="font-bold shadow-md shrink-0">
-            {purchasing ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Unlock className="mr-1 h-4 w-4" /> अभी unlock करें</>}
+            {purchasing ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Unlock className="mr-1 h-4 w-4" /> Buy Now</>}
           </Button>
         </div>
       )}

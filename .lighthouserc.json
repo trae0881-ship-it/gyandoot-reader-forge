@@ -20,7 +20,17 @@
         "largest-contentful-paint": ["error", { "maxNumericValue": 1500 }],
         "cumulative-layout-shift": ["error", { "maxNumericValue": 0.1 }],
         "total-blocking-time": ["warn", { "maxNumericValue": 300 }],
-        "first-contentful-paint": ["warn", { "maxNumericValue": 1200 }]
+        "first-contentful-paint": ["warn", { "maxNumericValue": 1200 }],
+        "unsized-images": ["error", { "maxLength": 0 }],
+        "uses-responsive-images": ["error", { "maxLength": 0 }],
+        "uses-optimized-images": ["error", { "maxLength": 0 }],
+        "modern-image-formats": ["warn", { "maxLength": 0 }],
+        "efficient-animated-content": ["warn", { "maxLength": 0 }],
+        "preload-lcp-image": ["warn", { "maxLength": 0 }],
+        "image-size-responsive": ["warn"],
+        "meta-description": ["error"],
+        "document-title": ["error"],
+        "canonical": ["error"]
       }
     },
     "upload": {

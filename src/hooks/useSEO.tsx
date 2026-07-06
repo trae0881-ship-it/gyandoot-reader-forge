@@ -10,6 +10,9 @@ interface SEOProps {
 }
 
 const BASE_URL = "https://gyandootnova.in";
+const DEFAULT_OG = "/og-default.jpg";
+const DEFAULT_OG_W = "1216";
+const DEFAULT_OG_H = "640";
 
 const getOrCreateMeta = (attr: string, value: string): HTMLMetaElement => {
   let el = document.querySelector(`meta[${attr}="${value}"]`) as HTMLMetaElement;
@@ -32,6 +35,12 @@ const useSEO = ({ title, description, canonical, ogImage, ogType, jsonLd }: SEOP
       getOrCreateMeta("name", "description").content = description;
     }
 
+    // Resolve og:image — always emit an absolute URL and known dimensions so
+    // social crawlers get a stable placeholder even when cover_url is missing.
+    const rawImage = ogImage && ogImage.trim().length > 0 ? ogImage : DEFAULT_OG;
+    const absImage = rawImage.startsWith("http") ? rawImage : `${BASE_URL}${rawImage}`;
+    const isDefault = rawImage === DEFAULT_OG;
+
     // OG tags
     const setOG = (property: string, content: string) => {
       getOrCreateMeta("property", property).content = content;
@@ -39,7 +48,13 @@ const useSEO = ({ title, description, canonical, ogImage, ogType, jsonLd }: SEOP
     setOG("og:title", document.title);
     if (description) setOG("og:description", description);
     if (ogType) setOG("og:type", ogType);
-    if (ogImage) setOG("og:image", ogImage.startsWith("http") ? ogImage : `${BASE_URL}${ogImage}`);
+    setOG("og:image", absImage);
+    setOG("og:image:alt", title);
+    if (isDefault) {
+      setOG("og:image:width", DEFAULT_OG_W);
+      setOG("og:image:height", DEFAULT_OG_H);
+      setOG("og:image:type", "image/jpeg");
+    }
     if (canonical) setOG("og:url", `${BASE_URL}${canonical}`);
 
     // Twitter
@@ -49,7 +64,8 @@ const useSEO = ({ title, description, canonical, ogImage, ogType, jsonLd }: SEOP
     setTwitter("twitter:card", "summary_large_image");
     setTwitter("twitter:title", document.title);
     if (description) setTwitter("twitter:description", description);
-    if (ogImage) setTwitter("twitter:image", ogImage.startsWith("http") ? ogImage : `${BASE_URL}${ogImage}`);
+    setTwitter("twitter:image", absImage);
+    setTwitter("twitter:image:alt", title);
 
     // Canonical
     if (canonical) {
@@ -78,5 +94,6 @@ const useSEO = ({ title, description, canonical, ogImage, ogType, jsonLd }: SEOP
     };
   }, [title, description, canonical, ogImage, ogType, jsonLd]);
 };
+
 
 export default useSEO;

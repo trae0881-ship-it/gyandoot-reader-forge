@@ -21,18 +21,28 @@
  *   --cookie=<str>          Add a Cookie header (shortcut for --header="Cookie: ...").
  *   --skip-og-check         Skip the og:image / twitter:image HEAD probe.
  *   --skip-jsonld-check     Skip JSON-LD schema validation.
+ *   --schema-rule=<pat>=<T>:<a,b,c>
+ *                           Override JSON-LD expectations for URL pattern <pat>
+ *                           (glob-like: /books/*). Repeatable. Example:
+ *                             --schema-rule="/books/*=Book:name,inLanguage,author,isbn"
+ *                             --schema-rule="/articles/*=Article:headline,datePublished,author,image"
+ *                             --schema-rule="/faq=FAQPage:mainEntity"
  *   --report=<path>         JSON report path (default: dist/seo-live-report.json).
  *   --html=<path>           HTML report path (default: dist/seo-live-report.html).
  *   --no-html               Do not emit the HTML report.
  *   --github-summary        Append a compact table to $GITHUB_STEP_SUMMARY and
  *                           emit ::error:: annotations for failing routes.
+ *   --resume=<path>         Reuse a previous JSON report; skip URLs that
+ *                           passed there (default: off). Pair with --report to
+ *                           point at the same file.
  *
  * Single-page curl (for spot checks):
  *   curl -sA "Googlebot" https://gyandootnova.in/books/rigved \
  *     | grep -E "<title|og:image|<h1|name=\"description\""
  */
-import { writeFileSync, mkdirSync, appendFileSync } from "node:fs";
+import { writeFileSync, mkdirSync, appendFileSync, readFileSync, existsSync } from "node:fs";
 import { dirname } from "node:path";
+
 
 // ---------- CLI ----------
 const args = process.argv.slice(2);
@@ -56,6 +66,7 @@ const SKIP_JSONLD = flag("skip-jsonld-check");
 const REPORT = opt("report", "dist/seo-live-report.json");
 const HTML_REPORT = flag("no-html") ? null : opt("html", "dist/seo-live-report.html");
 const GITHUB_SUMMARY = flag("github-summary") || !!process.env.GITHUB_STEP_SUMMARY;
+const RESUME = opt("resume", "");
 const DEFAULT_UA = "Mozilla/5.0 (compatible; GyandootSEOVerifier/1.0; +https://gyandootnova.in)";
 const UA = opt("user-agent", DEFAULT_UA);
 
@@ -67,10 +78,49 @@ for (const h of many("header")) {
 const cookie = opt("cookie", "");
 if (cookie) EXTRA_HEADERS["Cookie"] = cookie;
 
+// Parse --schema-rule flags into ordered [pattern, {type, required[]}] pairs.
+// First matching pattern wins; user rules take precedence over defaults.
+function parseSchemaRule(raw) {
+  const eq = raw.indexOf("=");
+  if (eq < 0) return null;
+  const pattern = raw.slice(0, eq).trim();
+  const rhs = raw.slice(eq + 1).trim();
+  const colon = rhs.indexOf(":");
+  const type = colon < 0 ? rhs : rhs.slice(0, colon).trim();
+  const required = colon < 0 ? [] : rhs.slice(colon + 1).split(",").map((s) => s.trim()).filter(Boolean);
+  return { pattern, type, required };
+}
+function globToRegExp(glob) {
+  const esc = glob.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*");
+  return new RegExp(`^${esc}$`);
+}
+const USER_SCHEMA_RULES = many("schema-rule").map(parseSchemaRule).filter(Boolean)
+  .map((r) => ({ ...r, re: globToRegExp(r.pattern) }));
+const DEFAULT_SCHEMA_RULES = [
+  { pattern: "/books/*", type: "Book", required: ["name", "inLanguage", "author"], re: globToRegExp("/books/*") },
+  { pattern: "/articles/*", type: "Article", required: ["headline", "datePublished", "author"], re: globToRegExp("/articles/*") },
+];
+const SCHEMA_RULES_ORDERED = [...USER_SCHEMA_RULES, ...DEFAULT_SCHEMA_RULES];
+
+// ---------- resume mode ----------
+const RESUMED_PASSING = new Set();
+if (RESUME && existsSync(RESUME)) {
+  try {
+    const prev = JSON.parse(readFileSync(RESUME, "utf8"));
+    for (const r of prev.results || []) {
+      if (!(r.problems && r.problems.length)) RESUMED_PASSING.add(r.url);
+    }
+    console.log(`↺ resume: ${RESUMED_PASSING.size} URL(s) previously passing will be skipped (${RESUME})`);
+  } catch (e) {
+    console.warn(`⚠ resume: could not parse ${RESUME}: ${e.message}`);
+  }
+}
+
 // ---------- helpers ----------
 const pick = (re, s) => { const m = s.match(re); return m ? m[1].trim() : ""; };
 const countMatches = (re, s) => (s.match(re) || []).length;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
 
 // ---------- adaptive throttle ----------
 // Reduce concurrency when sustained 429s appear; ramp back up after quiet window.
@@ -106,6 +156,7 @@ function note2xx() {
 
 async function httpFetch(url, { method = "GET" } = {}) {
   let attempt = 0;
+  const t0 = Date.now();
   while (true) {
     try {
       const r = await fetch(url, { method, headers: EXTRA_HEADERS, redirect: "manual" });
@@ -120,10 +171,10 @@ async function httpFetch(url, { method = "GET" } = {}) {
         continue;
       }
       const body = method === "HEAD" ? "" : await r.text().catch(() => "");
-      return { status: r.status, body, redirect: r.headers.get("location") || "", attempts: attempt + 1 };
+      return { status: r.status, body, redirect: r.headers.get("location") || "", attempts: attempt + 1, ms: Date.now() - t0 };
     } catch (e) {
       if (attempt < RETRIES) { await sleep(BACKOFF * 2 ** attempt); attempt++; continue; }
-      return { status: 0, body: "", redirect: "", attempts: attempt + 1, error: e.message };
+      return { status: 0, body: "", redirect: "", attempts: attempt + 1, ms: Date.now() - t0, error: e.message };
     }
   }
 }
@@ -140,21 +191,14 @@ function extractRoot(html) {
   return m ? m[1] : "";
 }
 function stripTags(s) { return s.replace(/<script[\s\S]*?<\/script>/gi, "").replace(/<style[\s\S]*?<\/style>/gi, "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(); }
+
 // ---------- JSON-LD schema validation ----------
-// Required properties per @type. Route-shape rules pick which schema each
-// URL should contain (e.g. /books/* must include a Book).
-const SCHEMA_RULES = {
-  Book: ["name", "inLanguage", "author"],
-  Article: ["headline", "datePublished", "author"],
-  Organization: ["name", "url"],
-  WebSite: ["name", "url"],
-  BreadcrumbList: ["itemListElement"],
-};
-function routeExpectations(url) {
+// Resolves the schema expectation for a URL using the ordered rule list
+// (user rules first, then defaults). Returns null if no rule matches.
+function ruleFor(url) {
   const path = new URL(url).pathname;
-  if (path.startsWith("/books/") && path !== "/books/") return ["Book"];
-  if (path.startsWith("/articles/") && path !== "/articles/") return ["Article"];
-  return []; // homepage / list pages only need sitewide Org/WebSite (in <head>)
+  for (const r of SCHEMA_RULES_ORDERED) if (r.re.test(path)) return r;
+  return null;
 }
 function extractJsonLd(html) {
   const blocks = Array.from(html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi));
@@ -172,18 +216,17 @@ function validateJsonLd(url, html) {
   const problems = [];
   const blocks = extractJsonLd(html);
   const foundTypes = new Set(blocks.map((b) => Array.isArray(b["@type"]) ? b["@type"][0] : b["@type"]).filter(Boolean));
-  const expected = routeExpectations(url);
-  for (const t of expected) {
-    const block = blocks.find((b) => (Array.isArray(b["@type"]) ? b["@type"].includes(t) : b["@type"] === t));
+  const rule = ruleFor(url);
+  if (rule) {
+    const block = blocks.find((b) => (Array.isArray(b["@type"]) ? b["@type"].includes(rule.type) : b["@type"] === rule.type));
     if (!block) {
-      problems.push(`missing JSON-LD @type=${t}`);
-      continue;
+      problems.push(`missing JSON-LD @type=${rule.type} (rule: ${rule.pattern})`);
+    } else {
+      const missing = rule.required.filter((k) => block[k] === undefined || block[k] === "" || block[k] === null);
+      if (missing.length) problems.push(`JSON-LD ${rule.type} missing: ${missing.join(", ")}`);
     }
-    const required = SCHEMA_RULES[t] || [];
-    const missing = required.filter((k) => block[k] === undefined || block[k] === "" || block[k] === null);
-    if (missing.length) problems.push(`JSON-LD ${t} missing: ${missing.join(", ")}`);
   }
-  return { problems, jsonldTypes: Array.from(foundTypes) };
+  return { problems, jsonldTypes: Array.from(foundTypes), appliedRule: rule ? rule.pattern : null };
 }
 
 function selectorPresent(rootHtml, sel) {
@@ -195,11 +238,31 @@ function selectorPresent(rootHtml, sel) {
   return new RegExp(`<${tag}\\b`, "i").test(rootHtml);
 }
 
+// Canonical URL must match the URL we fetched (ignoring trailing slash and
+// hash). Both origin-swap and homepage-pointing bugs get caught here.
+function canonicalMismatch(fetchedUrl, canonicalHref) {
+  if (!canonicalHref) return null;
+  const norm = (u) => {
+    try {
+      const x = new URL(u);
+      let p = x.pathname.replace(/\/+$/, "");
+      if (p === "") p = "/";
+      return `${x.origin}${p}`;
+    } catch { return null; }
+  };
+  const a = norm(fetchedUrl);
+  const b = norm(canonicalHref);
+  if (!a || !b) return `canonical URL not parseable (${canonicalHref})`;
+  if (a !== b) return `canonical mismatch — fetched ${a}, canonical ${b}`;
+  return null;
+}
+
 function auditPage(url, html) {
   const problems = [];
   const title = pick(/<title>([^<]+)<\/title>/i, html);
   const desc = pick(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["']/i, html);
   const ogImage = pick(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i, html);
+  const ogUrl = pick(/<meta[^>]+property=["']og:url["'][^>]+content=["']([^"']+)["']/i, html);
   const twImage = pick(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i, html);
   const twCard = pick(/<meta[^>]+name=["']twitter:card["'][^>]+content=["']([^"']+)["']/i, html);
   const canonical = pick(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i, html);
@@ -214,6 +277,10 @@ function auditPage(url, html) {
   if (!ogImage) problems.push("no og:image");
   if (!twCard) problems.push("no twitter:card");
   if (!canonical) problems.push("no canonical");
+  const canonProblem = canonicalMismatch(url, canonical);
+  if (canonProblem) problems.push(canonProblem);
+  const ogUrlProblem = ogUrl ? canonicalMismatch(url, ogUrl) : null;
+  if (ogUrlProblem) problems.push(`og:url ${ogUrlProblem.replace(/^canonical /, "")}`);
   if (rootHtml.length < 200) problems.push(`empty #root (${rootHtml.length} chars)`);
   if (wordCount < MIN_WORDS) problems.push(`only ${wordCount} words in #root (min ${MIN_WORDS})`);
   if (missingSelectors.length) problems.push(`missing content selector(s): ${missingSelectors.join(", ")}`);
@@ -221,22 +288,26 @@ function auditPage(url, html) {
   else if (h1Count > 1) problems.push(`multiple <h1> (${h1Count})`);
 
   let jsonldTypes = [];
+  let appliedRule = null;
   if (!SKIP_JSONLD) {
     const j = validateJsonLd(url, html);
     problems.push(...j.problems);
     jsonldTypes = j.jsonldTypes;
+    appliedRule = j.appliedRule;
   }
 
-  return { url, title, desc, ogImage, twImage, twCard, canonical, h1Count, wordCount, missingSelectors, jsonldTypes, problems };
+  return { url, title, desc, ogImage, ogUrl, twImage, twCard, canonical, h1Count, wordCount, missingSelectors, jsonldTypes, appliedRule, problems };
 }
 
 async function checkAssetExists(assetUrl) {
-  if (!assetUrl) return { ok: false, status: 0, reason: "missing url" };
+  if (!assetUrl) return { ok: false, status: 0, ms: 0, reason: "missing url" };
   const abs = assetUrl.startsWith("http") ? assetUrl : `${ORIGIN}${assetUrl.startsWith("/") ? "" : "/"}${assetUrl}`;
+  const t0 = Date.now();
   let r = await httpFetch(abs, { method: "HEAD" });
   if (r.status === 405 || r.status === 0) r = await httpFetch(abs, { method: "GET" });
-  return { ok: r.status >= 200 && r.status < 400, status: r.status, url: abs };
+  return { ok: r.status >= 200 && r.status < 400, status: r.status, ms: Date.now() - t0, url: abs };
 }
+
 
 // Adaptive worker pool — reads throttle.current on every task pick so
 // concurrency can grow/shrink mid-run.
@@ -270,11 +341,13 @@ function renderHtmlReport(summary) {
   const rows = summary.results.map((r) => {
     const bad = r.problems?.length ? "fail" : "pass";
     const diffs = (r.problems || []).map((p) => `<li>${esc(p)}</li>`).join("");
-    const og = r.ogImageCheck ? `${r.ogImageCheck.status} ${esc(r.ogImageCheck.url || "")}` : "—";
-    const tw = r.twImageCheck ? `${r.twImageCheck.status} ${esc(r.twImageCheck.url || "")}` : "—";
+    const og = r.ogImageCheck ? `${r.ogImageCheck.status} · ${r.ogImageCheck.ms ?? "-"}ms` : "—";
+    const tw = r.twImageCheck ? `${r.twImageCheck.status} · ${r.twImageCheck.ms ?? "-"}ms` : "—";
+    const skipped = r.skipped ? ' <span title="resumed from previous report">↺</span>' : "";
     return `<tr class="${bad}">
-      <td class="url"><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a></td>
+      <td class="url"><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)}</a>${skipped}</td>
       <td>${r.status ?? "-"}</td>
+      <td>${r.fetchMs ?? "-"}</td>
       <td>${r.h1Count ?? "-"}</td>
       <td>${r.wordCount ?? "-"}</td>
       <td class="mono">${esc(r.title || "")}</td>
@@ -284,6 +357,9 @@ function renderHtmlReport(summary) {
     </tr>`;
   }).join("\n");
 
+  const timings = summary.results.map((r) => r.fetchMs).filter((n) => typeof n === "number").sort((a, b) => a - b);
+  const p = (q) => timings.length ? timings[Math.min(timings.length - 1, Math.floor(timings.length * q))] : 0;
+
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8" />
 <title>SEO Live Report — ${esc(summary.origin)}</title>
@@ -291,7 +367,7 @@ function renderHtmlReport(summary) {
   body { font: 14px/1.5 system-ui, sans-serif; margin: 24px; color:#111; background:#fafafa; }
   h1 { margin:0 0 4px; font-size:22px; }
   .meta { color:#666; margin-bottom:16px; font-size:13px; }
-  .stats { display:flex; gap:16px; margin-bottom:16px; }
+  .stats { display:flex; gap:16px; margin-bottom:16px; flex-wrap:wrap; }
   .stat { background:#fff; padding:10px 14px; border-radius:6px; border:1px solid #e5e5e5; }
   .stat.ok { border-color:#16a34a; color:#166534; }
   .stat.bad { border-color:#dc2626; color:#991b1b; }
@@ -305,17 +381,19 @@ function renderHtmlReport(summary) {
   ul { margin:0; padding-left:18px; color:#991b1b; }
 </style></head><body>
 <h1>SEO Live Report</h1>
-<div class="meta">Origin: <b>${esc(summary.origin)}</b> · Generated ${esc(summary.generatedAt)} · Concurrency ${summary.maxConcurrency} (final ${summary.finalConcurrency}) · Min words ${summary.minWords}</div>
+<div class="meta">Origin: <b>${esc(summary.origin)}</b> · Generated ${esc(summary.generatedAt)} · Concurrency ${summary.maxConcurrency} (final ${summary.finalConcurrency}) · Min words ${summary.minWords}${summary.resumed ? ` · resumed ${summary.resumed} URL(s)` : ""}</div>
 <div class="stats">
   <div class="stat ok">✓ ${summary.total - summary.failed} passing</div>
   <div class="stat bad">✗ ${summary.failed} failing</div>
   <div class="stat">Σ ${summary.total} routes</div>
+  <div class="stat">fetch p50 ${p(0.5)}ms · p95 ${p(0.95)}ms · max ${timings[timings.length - 1] || 0}ms</div>
 </div>
 <table>
-<thead><tr><th>URL</th><th>Status</th><th>H1</th><th>Words</th><th>Title</th><th>og:image</th><th>twitter:image</th><th>Problems</th></tr></thead>
+<thead><tr><th>URL</th><th>Status</th><th>Fetch ms</th><th>H1</th><th>Words</th><th>Title</th><th>og:image</th><th>twitter:image</th><th>Problems</th></tr></thead>
 <tbody>${rows}</tbody></table>
 </body></html>`;
 }
+
 
 // ---------- GitHub Actions integration ----------
 function emitGitHubAnnotations(results) {
@@ -361,13 +439,18 @@ async function main() {
   let done = 0;
 
   const results = await withAdaptiveConcurrency(urls, async (url) => {
-    const { status, body, redirect, attempts } = await httpFetch(url);
+    if (RESUMED_PASSING.has(url)) {
+      done++;
+      console.log(`  [${done}/${urls.length}] ↺ ${url} (skipped — passed in previous run)`);
+      return { url, status: 200, skipped: true, problems: [], fetchMs: 0 };
+    }
+    const { status, body, redirect, attempts, ms: fetchMs } = await httpFetch(url);
     let entry;
     if (status !== 200) {
-      entry = { url, status, attempts, problems: [`HTTP ${status}${redirect ? ` → ${redirect}` : ""}`] };
+      entry = { url, status, attempts, fetchMs, problems: [`HTTP ${status}${redirect ? ` → ${redirect}` : ""}`] };
     } else {
       const audit = auditPage(url, body);
-      entry = { status, attempts, ...audit };
+      entry = { status, attempts, fetchMs, ...audit };
       if (!SKIP_OG) {
         const [og, tw] = await Promise.all([checkAssetExists(audit.ogImage), checkAssetExists(audit.twImage)]);
         entry.ogImageCheck = og;
@@ -378,11 +461,13 @@ async function main() {
     }
     done++;
     const mark = entry.problems?.length ? "✗" : "✓";
-    console.log(`  [${done}/${urls.length}] (c=${throttle.current}) ${mark} ${url}${entry.problems?.length ? " — " + entry.problems.join("; ") : ""}`);
+    const timing = entry.fetchMs != null ? ` ${entry.fetchMs}ms` : "";
+    console.log(`  [${done}/${urls.length}] (c=${throttle.current}) ${mark}${timing} ${url}${entry.problems?.length ? " — " + entry.problems.join("; ") : ""}`);
     return entry;
   });
 
   for (const r of results) {
+    if (r.skipped) continue;
     if (r.title) {
       if (seenTitles.has(r.title) && seenTitles.get(r.title) !== r.url) {
         r.problems.push(`duplicate title (also ${seenTitles.get(r.title)})`);
@@ -405,10 +490,14 @@ async function main() {
     retries: RETRIES,
     minWords: MIN_WORDS,
     selectors: SELECTORS,
+    schemaRules: SCHEMA_RULES_ORDERED.map(({ pattern, type, required }) => ({ pattern, type, required })),
+    resumed: RESUMED_PASSING.size,
+    resumeFrom: RESUME || null,
     total: results.length,
     failed,
     results,
   };
+
 
   mkdirSync(dirname(REPORT), { recursive: true });
   writeFileSync(REPORT, JSON.stringify(summary, null, 2));

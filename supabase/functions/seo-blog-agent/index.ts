@@ -369,12 +369,17 @@ Deno.serve(async (req) => {
     log.action = willUpdate ? "updated" : "created";
 
     // 4) Load-balanced multi-provider research (parallel + fallback per task)
-    const sources = await researchTopic(topic!, log);
+    const sources = await researchTopic(topic!, log, supabase);
     if (sources.length === 0) {
       log.status = "error";
       log.error = "All search providers unavailable or returned no results";
       log.execution_ms = Date.now() - started;
       await supabase.from("seo_agent_logs").insert(log);
+      await sendAlert(supabase, {
+        errorType: "All search providers unavailable", step: "research",
+        message: log.error, severity: "high",
+        suggestion: "Check Tavily/Exa/Firecrawl/SerpAPI keys and quotas.",
+      });
       return new Response(JSON.stringify({ success: false, error: log.error, log }), {
         status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

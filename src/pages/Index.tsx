@@ -168,9 +168,9 @@ const Index = () => {
             <Star className="h-3.5 w-3.5 fill-secondary" /> भरोसा — 24,000+ पाठकों की पहली पसंद
           </div>
           <h1 className="font-serif text-3xl font-extrabold leading-tight text-primary-foreground md:text-5xl lg:text-6xl">
-            Geeta, Ramayana aur Hanuman Chalisa —{" "}
-            <span className="text-secondary">Saral Hindi Mein,</span>
-            <br className="hidden md:block" /> Bina Kisi Jhanjhat Ke
+            Dharmik Granth Online India Mein —{" "}
+            <span className="text-secondary">Geeta, Ramayana, Hanuman Chalisa</span>
+            <br className="hidden md:block" /> Saral Hindi Mein, Bina Jhanjhat Ke
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-primary-foreground/90 md:text-lg">
             50+ dharmik granth ab ek hi jagah. Free padhna shuru karein, ya{" "}

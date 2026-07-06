@@ -102,13 +102,42 @@ const REQUIRED = [
   { name: "og:title", check: (h) => /property=["']og:title["']/i.test(h) },
   { name: "og:description", check: (h) => /property=["']og:description["']/i.test(h) },
   { name: "og:url", check: (h) => /property=["']og:url["']/i.test(h) },
+  { name: "og:image", check: (h) => /property=["']og:image["'][^>]+content=["']https?:\/\/[^"']+["']/i.test(h) },
   { name: "twitter:card", check: (h) => /name=["']twitter:card["']/i.test(h) },
+  { name: "twitter:image", check: (h) => /name=["']twitter:image["'][^>]+content=["']https?:\/\/[^"']+["']/i.test(h) },
 ];
 
-function validateHead(route, headHtml) {
+function extract(re, s) {
+  const m = s.match(re);
+  return m ? m[1].trim() : "";
+}
+
+function validateHead(route, headHtml, seen) {
   const missing = REQUIRED.filter((r) => !r.check(headHtml)).map((r) => r.name);
+  const title = extract(/<title>([^<]+)<\/title>/i, headHtml);
+  const desc = extract(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["']/i, headHtml);
+  // Uniqueness — homepage title/desc must not repeat on inner routes.
+  if (title && seen.titles.has(title) && seen.titles.get(title) !== route) {
+    missing.push(`duplicate title (also on ${seen.titles.get(title)})`);
+  } else if (title) seen.titles.set(title, route);
+  if (desc && seen.descs.has(desc) && seen.descs.get(desc) !== route) {
+    missing.push(`duplicate description (also on ${seen.descs.get(desc)})`);
+  } else if (desc) seen.descs.set(desc, route);
   return missing;
 }
+
+function validateBody(route, rootHtml) {
+  const problems = [];
+  if (!rootHtml || rootHtml.length < 200) {
+    problems.push(`empty/tiny #root (${rootHtml?.length ?? 0} chars)`);
+  }
+  const h1Count = (rootHtml.match(/<h1\b/gi) || []).length;
+  if (h1Count === 0) problems.push("missing <h1>");
+  else if (h1Count > 1) problems.push(`multiple <h1> (${h1Count})`);
+  return problems;
+}
+
+
 
 async function snapshotRoute(page, route) {
   const url = `${ORIGIN}${route}`;

@@ -162,7 +162,7 @@ const AdminAIProviders = () => {
                               <div className="font-medium">{meta.label}</div>
                               <div className="text-xs text-muted-foreground">{meta.description}</div>
                             </TableCell>
-                            <TableCell>{statusBadge(p.connection_status)}</TableCell>
+                            <TableCell>{statusBadge(p.connection_status, !!p.key_last4)}</TableCell>
                             <TableCell className="font-mono text-xs">
                               {p.key_last4 ? `••••${p.key_last4}` : <span className="text-muted-foreground">Not set</span>}
                             </TableCell>

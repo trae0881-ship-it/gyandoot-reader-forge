@@ -1,7 +1,12 @@
-// Autonomous SEO Publishing Agent v3
-// - Multi-provider LLM fallback: Anthropic → OpenAI → Gemini → DeepSeek
-// - Multi-provider search fallback: Tavily → Exa → Firecrawl → SerpAPI
-// - Similarity check, revisions, JSON-LD, TOC, internal/external links, logs.
+// Autonomous SEO Publishing Agent v4
+// - LLM chain: Anthropic (primary) → OpenAI → DeepSeek → Gemini
+// - Intelligent per-task search routing with retry-once + auto fallback
+//   • trending  : Tavily → Exa → SerpAPI
+//   • semantic  : Exa → Tavily → SerpAPI
+//   • crawl     : Firecrawl → Exa → Tavily
+//   • google    : SerpAPI → Tavily → Exa
+// - Load-balanced multi-provider research merge (dedup + authority filter)
+// - Similarity check, revisions, JSON-LD, TOC, internal/external links, full logs
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
@@ -32,6 +37,22 @@ function readingTime(text: string) {
 function stripFences(s: string) {
   return s.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
 }
+async function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
+  return await Promise.race([
+    p,
+    new Promise<T>((_, rej) => setTimeout(() => rej(new Error(`timeout ${ms}ms`)), ms)),
+  ]);
+}
+async function retryOnce<T>(fn: () => Promise<T>): Promise<T> {
+  try { return await fn(); }
+  catch (e: any) {
+    const msg = String(e?.message || e).toLowerCase();
+    // Don't retry on hard failures
+    if (msg.includes("no-key") || msg.includes("401") || msg.includes("403")) throw e;
+    await new Promise(r => setTimeout(r, 400));
+    return await fn();
+  }
+}
 
 // ─── LLM providers ───────────────────────────────────────────────────
 type ChatMsg = { role: "system" | "user" | "assistant"; content: string };
@@ -41,7 +62,7 @@ async function llmAnthropic(messages: ChatMsg[], json: boolean): Promise<string>
   if (!key) throw new Error("no-key");
   const sys = messages.filter(m => m.role === "system").map(m => m.content).join("\n\n");
   const rest = messages.filter(m => m.role !== "system");
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
+  const res = await withTimeout(fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
     body: JSON.stringify({
@@ -50,71 +71,55 @@ async function llmAnthropic(messages: ChatMsg[], json: boolean): Promise<string>
       system: sys + (json ? "\n\nReturn ONLY valid JSON. No markdown fences." : ""),
       messages: rest.map(m => ({ role: m.role, content: m.content })),
     }),
-  });
+  }), 90000);
   if (!res.ok) throw new Error(`anthropic ${res.status}: ${(await res.text()).slice(0, 200)}`);
   const data = await res.json();
   return data.content?.[0]?.text ?? "";
 }
-
 async function llmOpenAI(messages: ChatMsg[], json: boolean): Promise<string> {
   const key = Deno.env.get("OPENAI_API_KEY");
   if (!key) throw new Error("no-key");
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+  const res = await withTimeout(fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-    body: JSON.stringify({
-      model: "gpt-4o",
-      messages,
-      ...(json ? { response_format: { type: "json_object" } } : {}),
-    }),
-  });
+    body: JSON.stringify({ model: "gpt-4o", messages, ...(json ? { response_format: { type: "json_object" } } : {}) }),
+  }), 90000);
   if (!res.ok) throw new Error(`openai ${res.status}: ${(await res.text()).slice(0, 200)}`);
   const data = await res.json();
   return data.choices?.[0]?.message?.content ?? "";
 }
-
+async function llmDeepSeek(messages: ChatMsg[], json: boolean): Promise<string> {
+  const key = Deno.env.get("DEEPSEEK_API_KEY");
+  if (!key) throw new Error("no-key");
+  const res = await withTimeout(fetch("https://api.deepseek.com/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+    body: JSON.stringify({ model: "deepseek-chat", messages, ...(json ? { response_format: { type: "json_object" } } : {}) }),
+  }), 90000);
+  if (!res.ok) throw new Error(`deepseek ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content ?? "";
+}
 async function llmGemini(messages: ChatMsg[], json: boolean): Promise<string> {
   const key = Deno.env.get("GEMINI_API_KEY");
   if (!key) throw new Error("no-key");
   const sys = messages.filter(m => m.role === "system").map(m => m.content).join("\n\n");
   const user = messages.filter(m => m.role !== "system").map(m => m.content).join("\n\n");
-  const model = "gemini-2.5-flash";
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+  const res = await withTimeout(fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`, {
+    method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: sys + (json ? "\n\nReturn ONLY valid JSON. No markdown fences." : "") }] },
       contents: [{ role: "user", parts: [{ text: user }] }],
       generationConfig: json ? { responseMimeType: "application/json" } : {},
     }),
-  });
+  }), 90000);
   if (!res.ok) throw new Error(`gemini ${res.status}: ${(await res.text()).slice(0, 200)}`);
   const data = await res.json();
   return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 }
 
-async function llmDeepSeek(messages: ChatMsg[], json: boolean): Promise<string> {
-  const key = Deno.env.get("DEEPSEEK_API_KEY");
-  if (!key) throw new Error("no-key");
-  const res = await fetch("https://api.deepseek.com/chat/completions", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-    body: JSON.stringify({
-      model: "deepseek-chat",
-      messages,
-      ...(json ? { response_format: { type: "json_object" } } : {}),
-    }),
-  });
-  if (!res.ok) throw new Error(`deepseek ${res.status}: ${(await res.text()).slice(0, 200)}`);
-  const data = await res.json();
-  return data.choices?.[0]?.message?.content ?? "";
-}
-
 const LLM_CHAIN: [string, (m: ChatMsg[], j: boolean) => Promise<string>][] = [
-  ["anthropic", llmAnthropic],
-  ["openai", llmOpenAI],
-  ["gemini", llmGemini],
-  ["deepseek", llmDeepSeek],
+  ["anthropic", llmAnthropic], ["openai", llmOpenAI], ["deepseek", llmDeepSeek], ["gemini", llmGemini],
 ];
 
 async function callLLM(messages: ChatMsg[], json: boolean, log: any): Promise<string> {
@@ -122,10 +127,10 @@ async function callLLM(messages: ChatMsg[], json: boolean, log: any): Promise<st
   const errors: string[] = [];
   for (const [name, fn] of LLM_CHAIN) {
     try {
-      const out = await fn(messages, json);
-      if (!out) throw new Error("empty response");
+      const out = await retryOnce(() => fn(messages, json));
+      if (!out) throw new Error("empty");
       log.llm_attempts.push({ provider: name, ok: true });
-      log.llm_used = name;
+      log.llm_used = log.llm_used || name;
       return json ? stripFences(out) : out;
     } catch (e: any) {
       const msg = String(e?.message || e);
@@ -137,87 +142,113 @@ async function callLLM(messages: ChatMsg[], json: boolean, log: any): Promise<st
 }
 
 // ─── Search providers ────────────────────────────────────────────────
-type Source = { url: string; title: string; snippet: string };
+type Source = { url: string; title: string; snippet: string; provider?: string };
 
-async function searchTavily(query: string): Promise<Source[]> {
+async function searchTavily(query: string, opts: { topic?: "news" | "general" } = {}): Promise<Source[]> {
   const key = Deno.env.get("TAVILY_API_KEY");
   if (!key) throw new Error("no-key");
-  const res = await fetch("https://api.tavily.com/search", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ api_key: key, query, max_results: 6, search_depth: "advanced" }),
-  });
+  const res = await withTimeout(fetch("https://api.tavily.com/search", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ api_key: key, query, max_results: 6, search_depth: "advanced", topic: opts.topic || "general" }),
+  }), 30000);
   if (!res.ok) throw new Error(`tavily ${res.status}`);
   const data = await res.json();
-  return (data.results || []).map((r: any) => ({ url: r.url, title: r.title || "", snippet: r.content || "" })).filter((s: Source) => s.url);
+  return (data.results || []).map((r: any) => ({ url: r.url, title: r.title || "", snippet: r.content || "", provider: "tavily" })).filter((s: Source) => s.url);
 }
-
-async function searchExa(query: string): Promise<Source[]> {
+async function searchExa(query: string, opts: { type?: "neural" | "keyword" } = {}): Promise<Source[]> {
   const key = Deno.env.get("EXA_API_KEY");
   if (!key) throw new Error("no-key");
-  const res = await fetch("https://api.exa.ai/search", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "x-api-key": key },
-    body: JSON.stringify({ query, numResults: 6, contents: { text: { maxCharacters: 800 } } }),
-  });
+  const res = await withTimeout(fetch("https://api.exa.ai/search", {
+    method: "POST", headers: { "Content-Type": "application/json", "x-api-key": key },
+    body: JSON.stringify({ query, numResults: 6, type: opts.type || "neural", contents: { text: { maxCharacters: 800 } } }),
+  }), 30000);
   if (!res.ok) throw new Error(`exa ${res.status}`);
   const data = await res.json();
-  return (data.results || []).map((r: any) => ({ url: r.url, title: r.title || "", snippet: r.text || r.snippet || "" })).filter((s: Source) => s.url);
+  return (data.results || []).map((r: any) => ({ url: r.url, title: r.title || "", snippet: r.text || r.snippet || "", provider: "exa" })).filter((s: Source) => s.url);
 }
-
 async function searchFirecrawl(query: string): Promise<Source[]> {
   const key = Deno.env.get("FIRECRAWL_API_KEY");
   if (!key) throw new Error("no-key");
-  const res = await fetch("https://api.firecrawl.dev/v2/search", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+  const res = await withTimeout(fetch("https://api.firecrawl.dev/v2/search", {
+    method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     body: JSON.stringify({ query, limit: 6 }),
-  });
+  }), 30000);
   if (!res.ok) throw new Error(`firecrawl ${res.status}`);
   const data = await res.json();
   const items = data?.data || data?.web?.results || [];
-  return items.map((r: any) => ({ url: r.url || r.link, title: r.title || "", snippet: r.description || r.snippet || "" })).filter((s: Source) => s.url);
+  return items.map((r: any) => ({ url: r.url || r.link, title: r.title || "", snippet: r.description || r.snippet || "", provider: "firecrawl" })).filter((s: Source) => s.url);
 }
-
 async function searchSerpAPI(query: string): Promise<Source[]> {
   const key = Deno.env.get("SERPAPI_API_KEY");
   if (!key) throw new Error("no-key");
   const url = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(query)}&num=6&api_key=${key}`;
-  const res = await fetch(url);
+  const res = await withTimeout(fetch(url), 30000);
   if (!res.ok) throw new Error(`serpapi ${res.status}`);
   const data = await res.json();
-  return (data.organic_results || []).map((r: any) => ({ url: r.link, title: r.title || "", snippet: r.snippet || "" })).filter((s: Source) => s.url);
+  return (data.organic_results || []).map((r: any) => ({ url: r.link, title: r.title || "", snippet: r.snippet || "", provider: "serpapi" })).filter((s: Source) => s.url);
 }
 
-const SEARCH_CHAIN: [string, (q: string) => Promise<Source[]>][] = [
-  ["tavily", searchTavily],
-  ["exa", searchExa],
-  ["firecrawl", searchFirecrawl],
-  ["serpapi", searchSerpAPI],
-];
+type SearchFn = (q: string) => Promise<Source[]>;
+const ROUTES: Record<string, [string, SearchFn][]> = {
+  trending: [["tavily", (q) => searchTavily(q, { topic: "news" })], ["exa", (q) => searchExa(q)], ["serpapi", searchSerpAPI]],
+  semantic: [["exa", (q) => searchExa(q, { type: "neural" })], ["tavily", (q) => searchTavily(q)], ["serpapi", searchSerpAPI]],
+  crawl:    [["firecrawl", searchFirecrawl], ["exa", (q) => searchExa(q)], ["tavily", (q) => searchTavily(q)]],
+  google:   [["serpapi", searchSerpAPI], ["tavily", (q) => searchTavily(q)], ["exa", (q) => searchExa(q)]],
+};
 
-async function runSearch(query: string, log: any): Promise<Source[]> {
+// spam/low-quality domains to drop
+const SPAM_DOMAINS = /(pinterest\.|quora\.|answers\.|.*\.blogspot\.|medium\.com\/@|reddit\.com\/r\/|scribd\.|slideshare\.|ezinearticles\.)/i;
+const AUTHORITY_HINTS = /(\.gov|\.edu|\.ac\.|\.org|wikipedia\.org|britannica\.com|nationalgeographic\.com|bbc\.|nytimes\.|guardian\.|nasa\.|nih\.|who\.int|stanford\.|harvard\.|cambridge\.|oxford\.|jstor\.|springer\.|nature\.|sciencedirect\.|penguin\.|harpercollins\.|randomhouse\.)/i;
+
+function scoreSource(s: Source): number {
+  if (SPAM_DOMAINS.test(s.url)) return -1;
+  let score = 0;
+  if (AUTHORITY_HINTS.test(s.url)) score += 10;
+  if (s.snippet.length > 100) score += 2;
+  if (s.title.length > 10) score += 1;
+  return score;
+}
+
+async function routedSearch(task: keyof typeof ROUTES, query: string, log: any): Promise<Source[]> {
   log.search_attempts = log.search_attempts || [];
-  const combined: Source[] = [];
-  const seen = new Set<string>();
-  let anyOk = false;
-
-  for (const [name, fn] of SEARCH_CHAIN) {
+  log.fallback_sequence = log.fallback_sequence || [];
+  const chain = ROUTES[task];
+  for (const [name, fn] of chain) {
     try {
-      const results = await fn(query);
-      log.search_attempts.push({ provider: name, ok: true, count: results.length });
-      if (!log.search_provider_used) log.search_provider_used = name;
-      anyOk = true;
-      for (const r of results) {
-        if (!seen.has(r.url)) { seen.add(r.url); combined.push(r); }
-      }
-      if (combined.length >= 6) break; // enough
+      const results = await retryOnce(() => fn(query));
+      log.search_attempts.push({ task, provider: name, ok: true, count: results.length });
+      log.fallback_sequence.push(`${task}:${name}`);
+      return results;
     } catch (e: any) {
-      log.search_attempts.push({ provider: name, ok: false, error: String(e?.message || e).slice(0, 150) });
+      log.search_attempts.push({ task, provider: name, ok: false, error: String(e?.message || e).slice(0, 150) });
     }
   }
-  if (!anyOk) throw new Error("All search providers failed or missing keys");
-  return combined.slice(0, 8);
+  return [];
+}
+
+async function researchTopic(topic: string, log: any): Promise<Source[]> {
+  // Load-balanced: run trending + semantic + google in parallel, each with its own fallback chain
+  const [trending, semantic, google] = await Promise.all([
+    routedSearch("trending", topic, log),
+    routedSearch("semantic", topic, log),
+    routedSearch("google", topic, log),
+  ]);
+
+  const merged: Source[] = [];
+  const seen = new Set<string>();
+  for (const s of [...trending, ...semantic, ...google]) {
+    const norm = s.url.replace(/^https?:\/\//, "").replace(/\/$/, "").toLowerCase();
+    if (seen.has(norm)) continue;
+    if (scoreSource(s) < 0) continue;
+    seen.add(norm);
+    merged.push(s);
+  }
+  // sort by authority score, keep top 10
+  merged.sort((a, b) => scoreSource(b) - scoreSource(a));
+  const top = merged.slice(0, 10);
+
+  log.providers_merged = { trending: trending.length, semantic: semantic.length, google: google.length, kept: top.length };
+  return top;
 }
 
 // ─── main ────────────────────────────────────────────────────────────
@@ -225,13 +256,14 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  const started = Date.now();
   const log: any = { status: "ok", sources: [], internal_links: [], external_links: [], action: "created" };
 
   try {
     const body = await req.json().catch(() => ({}));
     const forcedTopic: string | undefined = body?.topic;
 
-    // 1) Scan Posts table
+    // 1) Scan Posts (build internal content map)
     const { data: existing } = await supabase.from("posts")
       .select("id, slug, title, excerpt, meta_description, content, manually_edited, updated_at")
       .eq("post_type", "article").order("created_at", { ascending: false }).limit(500);
@@ -243,73 +275,72 @@ Deno.serve(async (req) => {
     if (!topic) {
       const raw = await callLLM([
         { role: "system", content: `You are an SEO strategist for a publisher in the niche: ${NICHE}. Propose ONE high-search-intent English blog topic NOT already covered. Return JSON: {"topic":"...","rationale":"..."}` },
-        { role: "user", content: `Existing posts:\n${existingList || "(none)"}\n\nRules:\n- Evergreen or trending in books/spirituality/meditation/self-growth/mindfulness/consciousness.\n- Different angle from anything above.\n- Should serve real reader search intent.` },
+        { role: "user", content: `Existing posts:\n${existingList || "(none)"}\n\nRules:\n- Evergreen or trending in books/spirituality/meditation/self-growth/mindfulness/consciousness.\n- Different angle from anything above.\n- Serve real reader search intent.` },
       ], true, log);
       topic = JSON.parse(raw).topic;
     }
     log.topic = topic;
 
-    // 3) Similarity check
+    // 3) Similarity (semantic-ish via jaccard)
     const topicTokens = tokenize(topic!);
     let bestMatch: { post: any; score: number } | null = null;
     for (const p of existing || []) {
       const sc = jaccard(topicTokens, tokenize(`${p.title} ${p.excerpt || ""}`));
       if (!bestMatch || sc > bestMatch.score) bestMatch = { post: p, score: sc };
     }
-    log.similarity_score = bestMatch?.score ?? 0;
+    log.duplicate_score = bestMatch?.score ?? 0;
+    log.similarity_score = log.duplicate_score;
     log.matched_slug = bestMatch && bestMatch.score >= SIMILARITY_THRESHOLD ? bestMatch.post.slug : null;
     const willUpdate = !!log.matched_slug;
     log.action = willUpdate ? "updated" : "created";
 
-    // 4) Multi-provider live web research
-    let sources: Source[] = [];
-    try {
-      sources = await runSearch(topic!, log);
-    } catch (e: any) {
+    // 4) Load-balanced multi-provider research (parallel + fallback per task)
+    const sources = await researchTopic(topic!, log);
+    if (sources.length === 0) {
       log.status = "error";
-      log.error = `No search providers available: ${e?.message || e}`;
+      log.error = "All search providers unavailable or returned no results";
+      log.execution_ms = Date.now() - started;
       await supabase.from("seo_agent_logs").insert(log);
       return new Response(JSON.stringify({ success: false, error: log.error, log }), {
         status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    log.sources = sources.map(s => ({ url: s.url, title: s.title }));
+    log.sources = sources.map(s => ({ url: s.url, title: s.title, provider: s.provider }));
+    log.search_providers_used = [...new Set(sources.map(s => s.provider!))];
 
-    const researchBlock = sources.map((s, i) => `[${i + 1}] ${s.title}\n${s.url}\n${s.snippet}`).join("\n\n");
-
-    // 5) Internal link pool
+    const researchBlock = sources.map((s, i) => `[${i + 1}] (${s.provider}) ${s.title}\n${s.url}\n${s.snippet}`).join("\n\n");
     const internalPool = (existing || []).slice(0, 60).map(p => `/articles/${p.slug} — ${p.title}`).join("\n");
 
-    // 6) Generate article
+    // 5) Generate article
     const genPrompt = `Write a fully original, human-sounding, plagiarism-free English blog article for a ${NICHE} publisher.
 
 TOPIC: ${topic}
 
-RESEARCH NOTES (multiple public sources — REWRITE in your own words, DO NOT COPY sentences):
+RESEARCH NOTES (multi-provider, rewrite in your own words, DO NOT COPY sentences):
 ${researchBlock}
 
-INTERNAL LINK POOL (use 3–6 contextual links as <a href="/articles/slug">natural anchor</a>):
+INTERNAL LINK POOL (use 3–6 contextual links as <a href="/articles/slug">natural anchor</a> — only use slugs from this list, never invent):
 ${internalPool || "(none)"}
 
 REQUIREMENTS
-- 1800–2500 words in the body (excluding TOC/FAQ/conclusion).
-- Google Helpful Content compliant, EEAT, natural human tone, no AI clichés.
-- Prefer authoritative sources: government, .edu, scientific, books, reputable news.
-- One H1, several H2s, H3 subsections; short paragraphs; sentence variety.
-- Include TOC (linked H2s), FAQ (6 Qs), Conclusion.
-- Add 2–4 external links only to authoritative sources from research.
+- 1800–2500 words body (excluding TOC/FAQ/conclusion).
+- Google Helpful Content + EEAT, natural human tone, no AI clichés or repetition.
+- Prefer authoritative citations (gov, .edu, scientific, books, reputable news).
+- One H1, several H2/H3; short paragraphs; sentence variety; include Conclusion and a CTA paragraph.
+- TOC (linked H2s) + FAQ (6 Qs).
+- 2–4 external links only to authoritative sources from research.
 - Output valid HTML body (h1,h2,h3,p,ul,ol,li,a,strong,em,blockquote).
 
 Return STRICT JSON (no markdown fences):
 {
-  "seo_title": "≤60 chars", "meta_title": "≤60 chars", "meta_description": "≤160 chars",
-  "slug": "kebab-case-english", "focus_keyword": "...", "related_keywords": ["...","..."],
-  "tags": ["..."], "category": "...",
-  "h1": "...", "excerpt": "≤200 chars", "body_html": "<h1>...</h1>...",
-  "faq": [{"q":"...","a":"..."}, ...6],
-  "featured_image_prompt": "...", "featured_image_alt": "≤120 chars with focus keyword",
-  "og_title": "...", "og_description": "...", "twitter_title": "...", "twitter_description": "...",
-  "external_links": [{"url":"...","anchor":"..."}]
+  "seo_title":"≤60","meta_title":"≤60","meta_description":"≤160",
+  "slug":"kebab-case","focus_keyword":"...","secondary_keywords":["..."],
+  "tags":["..."],"category":"...",
+  "h1":"...","excerpt":"≤200","body_html":"<h1>...</h1>...","cta":"...",
+  "faq":[{"q":"...","a":"..."}, ...6],
+  "featured_image_prompt":"...","featured_image_alt":"≤120 chars with focus keyword",
+  "og_title":"...","og_description":"...","twitter_title":"...","twitter_description":"...",
+  "external_links":[{"url":"...","anchor":"..."}]
 }`;
 
     const raw = await callLLM([
@@ -318,16 +349,21 @@ Return STRICT JSON (no markdown fences):
     ], true, log);
     const article = JSON.parse(raw);
 
-    // 7) Assemble
+    // 6) Assemble final HTML
     const h2s = [...String(article.body_html).matchAll(/<h2[^>]*>(.*?)<\/h2>/gi)].map(m => m[1].replace(/<[^>]+>/g, ""));
     const toc = h2s.length ? `<nav class="toc"><strong>Table of Contents</strong><ol>${h2s.map(t => `<li>${t}</li>`).join("")}</ol></nav>` : "";
     const rt = readingTime(String(article.body_html).replace(/<[^>]+>/g, " "));
     log.word_count = rt.words;
     log.reading_time_min = rt.minutes;
-    log.content_score = Math.min(100, Math.round((rt.words / 2000) * 60) + Math.min(20, h2s.length * 3) + (article.faq?.length ? 15 : 0) + (sources.length ? 5 : 0));
 
     const slugFinal = slugify(article.slug || article.seo_title);
     const canonical = `${SITE}/articles/${log.matched_slug || slugFinal}`;
+
+    // Sanitize internal links: drop any that don't match existing slugs
+    const validSlugs = new Set((existing || []).map(p => p.slug));
+    let bodyHtml = String(article.body_html).replace(/<a\s+href="\/articles\/([^"#?]+)"[^>]*>([^<]+)<\/a>/gi, (m, slug, anchor) => {
+      return validSlugs.has(slug) ? m : anchor;
+    });
 
     const faqSchema = {
       "@context": "https://schema.org", "@type": "FAQPage",
@@ -339,7 +375,7 @@ Return STRICT JSON (no markdown fences):
       author: { "@type": "Organization", name: AUTHOR },
       datePublished: new Date().toISOString(),
       description: article.meta_description, mainEntityOfPage: canonical,
-      keywords: [article.focus_keyword, ...(article.related_keywords || [])].join(", "),
+      keywords: [article.focus_keyword, ...(article.secondary_keywords || [])].join(", "),
     };
     const meta = `<p class="post-meta"><em>${AUTHOR} • ${new Date().toLocaleDateString("en-IN")} • ${rt.minutes} min read • Focus: ${article.focus_keyword}</em></p>`;
     const ogBlock = `
@@ -353,20 +389,36 @@ Return STRICT JSON (no markdown fences):
 <link rel="canonical" href="${canonical}" />`;
 
     const finalHtml =
-      `<!-- SEO_AGENT_META focus_keyword="${article.focus_keyword}" related="${(article.related_keywords || []).join("|")}" tags="${(article.tags || []).join("|")}" category="${article.category || ""}" alt="${(article.featured_image_alt || "").replace(/"/g, "'")}" -->\n` +
-      meta + toc + article.body_html +
+      `<!-- SEO_AGENT_META focus_keyword="${article.focus_keyword}" secondary="${(article.secondary_keywords || []).join("|")}" tags="${(article.tags || []).join("|")}" category="${article.category || ""}" alt="${(article.featured_image_alt || "").replace(/"/g, "'")}" -->\n` +
+      meta + toc + bodyHtml +
+      (article.cta ? `\n<p class="cta"><strong>${article.cta}</strong></p>` : "") +
       `\n<script type="application/ld+json">${JSON.stringify(faqSchema)}</script>` +
       `\n<script type="application/ld+json">${JSON.stringify(articleSchema)}</script>` +
       `\n${ogBlock}`;
 
     const linkRe = /<a[^>]+href="([^"]+)"[^>]*>([^<]+)<\/a>/gi;
-    for (const m of article.body_html.matchAll(linkRe)) {
+    for (const m of bodyHtml.matchAll(linkRe)) {
       if (m[1].startsWith("/")) log.internal_links.push({ url: m[1], anchor: m[2] });
       else if (m[1].startsWith("http")) log.external_links.push({ url: m[1], anchor: m[2] });
     }
     for (const el of article.external_links || []) log.external_links.push(el);
 
-    // 8) Save (always Draft)
+    // Simple content + SEO scores
+    log.content_score = Math.min(100,
+      Math.round((rt.words / 2000) * 50) +
+      Math.min(20, h2s.length * 3) +
+      (article.faq?.length >= 6 ? 15 : 5) +
+      (log.internal_links.length >= 3 ? 10 : 0) +
+      (log.external_links.length >= 2 ? 5 : 0));
+    log.seo_score = Math.min(100,
+      (article.meta_title?.length <= 60 ? 20 : 10) +
+      (article.meta_description?.length <= 160 ? 20 : 10) +
+      (article.focus_keyword ? 15 : 0) +
+      ((article.secondary_keywords || []).length >= 3 ? 15 : 5) +
+      (h2s.length >= 4 ? 15 : 5) +
+      15);
+
+    // 7) Save (Draft always)
     let postId: string | null = null;
     let finalSlug = slugFinal;
 
@@ -405,12 +457,14 @@ Return STRICT JSON (no markdown fences):
     log.post_id = postId;
     log.slug = finalSlug;
     log.focus_keyword = article.focus_keyword;
+    log.keywords = [article.focus_keyword, ...(article.secondary_keywords || [])];
     log.meta = {
       featured_image_prompt: article.featured_image_prompt,
       featured_image_alt: article.featured_image_alt,
-      related_keywords: article.related_keywords,
-      tags: article.tags, category: article.category, canonical,
+      secondary_keywords: article.secondary_keywords,
+      tags: article.tags, category: article.category, canonical, cta: article.cta,
     };
+    log.execution_ms = Date.now() - started;
 
     await supabase.from("seo_agent_logs").insert(log);
     return new Response(JSON.stringify({ success: true, ...log }), {
@@ -420,6 +474,7 @@ Return STRICT JSON (no markdown fences):
     console.error("seo-blog-agent error", e);
     log.status = "error";
     log.error = String(e?.message || e).slice(0, 1000);
+    log.execution_ms = Date.now() - started;
     try { await supabase.from("seo_agent_logs").insert(log); } catch {}
     return new Response(JSON.stringify({ success: false, error: log.error, log }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },

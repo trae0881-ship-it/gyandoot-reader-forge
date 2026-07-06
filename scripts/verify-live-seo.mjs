@@ -317,9 +317,42 @@ function renderHtmlReport(summary) {
 </body></html>`;
 }
 
+// ---------- GitHub Actions integration ----------
+function emitGitHubAnnotations(results) {
+  // ::error:: annotations show up on the PR "Files changed" / checks view.
+  for (const r of results) {
+    if (!r.problems?.length) continue;
+    const msg = r.problems.join(" | ").replace(/\n/g, " ");
+    console.log(`::error title=SEO failure: ${r.url}::${msg}`);
+  }
+}
+function emitGitHubStepSummary(summary) {
+  const path = process.env.GITHUB_STEP_SUMMARY;
+  if (!path) return;
+  const failing = summary.results.filter((r) => r.problems?.length);
+  const rows = failing.length
+    ? failing.map((r) => `| ${r.url} | ${r.status ?? "-"} | ${r.h1Count ?? "-"} | ${r.wordCount ?? "-"} | ${(r.problems || []).map((p) => p.replace(/\|/g, "\\|")).join("<br>")} |`).join("\n")
+    : "_All routes passing._";
+  const md = [
+    `## SEO Live Report — \`${summary.origin}\``,
+    ``,
+    `**${summary.total - summary.failed}/${summary.total} passing** · concurrency ${summary.maxConcurrency} · min-words ${summary.minWords} · retries ${summary.retries}`,
+    ``,
+    `### ${summary.failed} failing route${summary.failed === 1 ? "" : "s"}`,
+    ``,
+    `| URL | Status | H1 | Words | Problems |`,
+    `|---|---|---|---|---|`,
+    rows,
+    ``,
+    `Full HTML/JSON reports are attached as workflow artifacts (\`seo-live-report\`).`,
+    ``,
+  ].join("\n");
+  appendFileSync(path, md);
+}
+
 // ---------- main ----------
 async function main() {
-  console.log(`→ verifying ${ORIGIN}  (concurrency=${CONCURRENCY} retries=${RETRIES} min-words=${MIN_WORDS})`);
+  console.log(`→ verifying ${ORIGIN}  (max-concurrency=${MAX_CONCURRENCY} min=${MIN_CONCURRENCY} retries=${RETRIES} min-words=${MIN_WORDS})`);
   const urls = await loadSitemap();
   console.log(`  sitemap: ${urls.length} URLs`);
 
@@ -327,7 +360,7 @@ async function main() {
   const seenDescs = new Map();
   let done = 0;
 
-  const results = await withConcurrency(urls, CONCURRENCY, async (url) => {
+  const results = await withAdaptiveConcurrency(urls, async (url) => {
     const { status, body, redirect, attempts } = await httpFetch(url);
     let entry;
     if (status !== 200) {
@@ -345,11 +378,10 @@ async function main() {
     }
     done++;
     const mark = entry.problems?.length ? "✗" : "✓";
-    console.log(`  [${done}/${urls.length}] ${mark} ${url}${entry.problems?.length ? " — " + entry.problems.join("; ") : ""}`);
+    console.log(`  [${done}/${urls.length}] (c=${throttle.current}) ${mark} ${url}${entry.problems?.length ? " — " + entry.problems.join("; ") : ""}`);
     return entry;
   });
 
-  // Uniqueness pass (sequential, deterministic)
   for (const r of results) {
     if (r.title) {
       if (seenTitles.has(r.title) && seenTitles.get(r.title) !== r.url) {
@@ -367,7 +399,9 @@ async function main() {
   const summary = {
     origin: ORIGIN,
     generatedAt: new Date().toISOString(),
-    concurrency: CONCURRENCY,
+    maxConcurrency: MAX_CONCURRENCY,
+    minConcurrency: MIN_CONCURRENCY,
+    finalConcurrency: throttle.current,
     retries: RETRIES,
     minWords: MIN_WORDS,
     selectors: SELECTORS,
@@ -384,8 +418,13 @@ async function main() {
     writeFileSync(HTML_REPORT, renderHtmlReport(summary));
     console.log(`HTML report → ${HTML_REPORT}`);
   }
+  if (GITHUB_SUMMARY) {
+    emitGitHubAnnotations(results);
+    emitGitHubStepSummary(summary);
+  }
   console.log(`${results.length - failed}/${results.length} URLs pass all checks`);
   if (failed) process.exit(1);
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });
+

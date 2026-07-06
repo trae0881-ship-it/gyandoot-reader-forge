@@ -375,6 +375,27 @@ const AdminPosts = () => {
             <Download className="mr-1 h-4 w-4" /> Download All
           </Button>
           <UploadCsvButton table="posts" size="default" label="Upload CSV" onDone={() => qc.invalidateQueries({ queryKey: ["admin-posts"] })} />
+          <Button
+            variant="secondary"
+            disabled={aiRunning}
+            onClick={async () => {
+              setAiRunning(true);
+              try {
+                const { data, error } = await supabase.functions.invoke("seo-blog-agent", { body: {} });
+                if (error) throw error;
+                if (!data?.success) throw new Error(data?.error || "Agent failed");
+                toast({ title: `AI ${data.action}: ${data.slug}`, description: `Focus: ${data.focus_keyword}` });
+                qc.invalidateQueries({ queryKey: ["admin-posts"] });
+              } catch (e: any) {
+                toast({ title: "Agent error", description: e.message, variant: "destructive" });
+              } finally {
+                setAiRunning(false);
+              }
+            }}
+          >
+            {aiRunning ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Plus className="mr-1 h-4 w-4" />}
+            Run SEO Agent
+          </Button>
           <Button onClick={() => setView("form")}><Plus className="mr-1 h-4 w-4" /> Add Post</Button>
         </div>
       </div>

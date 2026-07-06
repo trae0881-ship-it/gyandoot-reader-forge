@@ -40,9 +40,63 @@ Deno.serve(async (req) => {
     if (booksRes.error) throw booksRes.error;
     if (chaptersRes.error) throw chaptersRes.error;
 
-    const books = booksRes.data ?? [];
-    const bookById = new Map(books.map((book) => [book.id, book]));
+    // Group chapters by book, ordered by chapter_number.
+    const chaptersByBook = new Map();
+    for (const ch of chaptersRes.data ?? []) {
+      if (!chaptersByBook.has(ch.book_id)) chaptersByBook.set(ch.book_id, []);
+      chaptersByBook.get(ch.book_id).push(ch);
+    }
+
+    // Build book-detail payloads for prerender (includes first free chapter excerpt + TOC + purchase count).
+    const purchaseCountByBook = new Map();
+    try {
+      const { data: pc } = await supabase
+        .from("books")
+        .select("id,purchase_count");
+      for (const row of pc ?? []) purchaseCountByBook.set(row.id, row.purchase_count ?? 0);
+    } catch (_) {}
+
+    const booksPayload = books.map((book) => {
+      const chs = chaptersByBook.get(book.id) ?? [];
+      const previewLimit = Number(book.preview_chapters ?? 0);
+      const firstChapter = chs.find((c) => c.chapter_number === 1) ?? chs[0];
+      const firstFree = firstChapter
+        ? {
+            title: firstChapter.title,
+            slug: firstChapter.slug,
+            chapter_number: firstChapter.chapter_number,
+            content: book.is_free || firstChapter.is_preview || firstChapter.chapter_number <= previewLimit
+              ? firstChapter.content ?? ""
+              : stripTags(firstChapter.content ?? "").slice(0, 4000),
+          }
+        : null;
+      return {
+        id: book.id,
+        title: book.title,
+        slug: book.slug,
+        author: book.author,
+        cover_url: book.cover_url,
+        description: book.description,
+        price: (book as any).price ?? null,
+        is_free: book.is_free,
+        preview_chapters: previewLimit,
+        file_type: book.file_type,
+        purchase_count: purchaseCountByBook.get(book.id) ?? 0,
+        created_at: book.created_at,
+        updated_at: book.updated_at,
+        total_chapters: chs.length,
+        toc: chs.slice(0, 40).map((c) => ({
+          title: c.title,
+          slug: c.slug,
+          chapter_number: c.chapter_number,
+          is_preview: c.is_preview,
+        })),
+        first_free_chapter: firstFree,
+      };
+    });
+
     const chapters = (chaptersRes.data ?? [])
+
       .map((chapter) => {
         const book = bookById.get(chapter.book_id);
         if (!book?.slug || !chapter.slug) return null;

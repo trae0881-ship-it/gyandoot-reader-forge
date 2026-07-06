@@ -41,10 +41,12 @@ const invoke = async (payload: any) => {
   return data as any;
 };
 
-const statusBadge = (s?: string | null) => {
-  if (!s) return <Badge variant="secondary">Never tested</Badge>;
+const statusBadge = (s?: string | null, hasKey?: boolean) => {
+  if (!s) return hasKey
+    ? <Badge variant="secondary">Not tested yet</Badge>
+    : <Badge variant="outline" className="text-muted-foreground">No key</Badge>;
   const map: Record<string, { cls: string; label: string; Icon: any }> = {
-    connected: { cls: "bg-green-500/10 text-green-700 border-green-200", label: "Connected", Icon: ShieldCheck },
+    connected: { cls: "bg-green-500/10 text-green-700 border-green-200", label: "Live", Icon: ShieldCheck },
     invalid_key: { cls: "bg-red-500/10 text-red-700 border-red-200", label: "Invalid Key", Icon: ShieldX },
     quota_exceeded: { cls: "bg-red-500/10 text-red-700 border-red-200", label: "Quota Exceeded", Icon: ShieldX },
     rate_limited: { cls: "bg-amber-500/10 text-amber-700 border-amber-200", label: "Rate Limited", Icon: ShieldAlert },

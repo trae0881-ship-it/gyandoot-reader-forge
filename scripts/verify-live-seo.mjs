@@ -439,13 +439,18 @@ async function main() {
   let done = 0;
 
   const results = await withAdaptiveConcurrency(urls, async (url) => {
-    const { status, body, redirect, attempts } = await httpFetch(url);
+    if (RESUMED_PASSING.has(url)) {
+      done++;
+      console.log(`  [${done}/${urls.length}] ↺ ${url} (skipped — passed in previous run)`);
+      return { url, status: 200, skipped: true, problems: [], fetchMs: 0 };
+    }
+    const { status, body, redirect, attempts, ms: fetchMs } = await httpFetch(url);
     let entry;
     if (status !== 200) {
-      entry = { url, status, attempts, problems: [`HTTP ${status}${redirect ? ` → ${redirect}` : ""}`] };
+      entry = { url, status, attempts, fetchMs, problems: [`HTTP ${status}${redirect ? ` → ${redirect}` : ""}`] };
     } else {
       const audit = auditPage(url, body);
-      entry = { status, attempts, ...audit };
+      entry = { status, attempts, fetchMs, ...audit };
       if (!SKIP_OG) {
         const [og, tw] = await Promise.all([checkAssetExists(audit.ogImage), checkAssetExists(audit.twImage)]);
         entry.ogImageCheck = og;
@@ -456,11 +461,13 @@ async function main() {
     }
     done++;
     const mark = entry.problems?.length ? "✗" : "✓";
-    console.log(`  [${done}/${urls.length}] (c=${throttle.current}) ${mark} ${url}${entry.problems?.length ? " — " + entry.problems.join("; ") : ""}`);
+    const timing = entry.fetchMs != null ? ` ${entry.fetchMs}ms` : "";
+    console.log(`  [${done}/${urls.length}] (c=${throttle.current}) ${mark}${timing} ${url}${entry.problems?.length ? " — " + entry.problems.join("; ") : ""}`);
     return entry;
   });
 
   for (const r of results) {
+    if (r.skipped) continue;
     if (r.title) {
       if (seenTitles.has(r.title) && seenTitles.get(r.title) !== r.url) {
         r.problems.push(`duplicate title (also ${seenTitles.get(r.title)})`);
@@ -483,10 +490,14 @@ async function main() {
     retries: RETRIES,
     minWords: MIN_WORDS,
     selectors: SELECTORS,
+    schemaRules: SCHEMA_RULES_ORDERED.map(({ pattern, type, required }) => ({ pattern, type, required })),
+    resumed: RESUMED_PASSING.size,
+    resumeFrom: RESUME || null,
     total: results.length,
     failed,
     results,
   };
+
 
   mkdirSync(dirname(REPORT), { recursive: true });
   writeFileSync(REPORT, JSON.stringify(summary, null, 2));

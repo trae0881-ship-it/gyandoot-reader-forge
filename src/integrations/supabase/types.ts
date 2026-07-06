@@ -147,6 +147,90 @@ export type Database = {
           },
         ]
       }
+      ai_provider_audit_logs: {
+        Row: {
+          action: string
+          admin_email: string | null
+          admin_user_id: string | null
+          created_at: string
+          details: Json | null
+          id: string
+          ip_address: string | null
+          provider: string | null
+          status: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          admin_email?: string | null
+          admin_user_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          provider?: string | null
+          status?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          admin_email?: string | null
+          admin_user_id?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          provider?: string | null
+          status?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      ai_provider_settings: {
+        Row: {
+          connection_status: string | null
+          enabled: boolean
+          encrypted_key: string | null
+          health_status: string | null
+          key_last4: string | null
+          last_error: string | null
+          last_tested_at: string | null
+          priority: number
+          provider: string
+          remaining_credits: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          connection_status?: string | null
+          enabled?: boolean
+          encrypted_key?: string | null
+          health_status?: string | null
+          key_last4?: string | null
+          last_error?: string | null
+          last_tested_at?: string | null
+          priority?: number
+          provider: string
+          remaining_credits?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          connection_status?: string | null
+          enabled?: boolean
+          encrypted_key?: string | null
+          health_status?: string | null
+          key_last4?: string | null
+          last_error?: string | null
+          last_tested_at?: string | null
+          priority?: number
+          provider?: string
+          remaining_credits?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       ai_settings: {
         Row: {
           api_key_encrypted: string

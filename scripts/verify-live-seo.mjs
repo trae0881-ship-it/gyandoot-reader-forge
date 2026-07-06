@@ -174,44 +174,92 @@ async function loadConfig(path) {
   return {};
 }
 function parseTinyYaml(text) {
-  // Handles: key: value | key:\n  - item | key:\n  sub: value
-  // Enough for our documented schema. Not a general YAML parser.
-  const out = {};
-  const stack = [{ indent: -1, obj: out, key: null }];
-  for (const line of text.split(/\r?\n/)) {
+  // Handles the documented shape only:
+  //   key: value
+  //   key:
+  //     nested: value
+  //     - scalar
+  //     - key: val      <- introduces a map inside a list; subsequent
+  //       key2: val       indented "key:" lines add to that same map
+  const root = {};
+  // ctx items are either { indent, kind: "map", obj }  (a nested object)
+  //                     or { indent, kind: "list", arr, itemIndent }
+  const ctx = [{ indent: -1, kind: "map", obj: root }];
+  const coerce = (v) => {
+    v = v.replace(/^["']|["']$/g, "");
+    if (/^-?\d+$/.test(v)) return parseInt(v, 10);
+    if (/^-?\d+\.\d+$/.test(v)) return parseFloat(v);
+    if (v === "true") return true;
+    if (v === "false") return false;
+    if (v === "null" || v === "~") return null;
+    return v;
+  };
+  const attachContainer = (indent, container) => {
+    // Attach a new object/array under the current innermost container.
+    const top = ctx[ctx.length - 1];
+    if (top.kind === "list") top.arr.push(container);
+    else top.obj[top.pendingKey] = container;
+  };
+  for (const rawLine of text.split(/\r?\n/)) {
+    const line = rawLine.replace(/\t/g, "  ");
     if (!line.trim() || line.trim().startsWith("#")) continue;
     const indent = line.match(/^\s*/)[0].length;
-    while (stack.length > 1 && indent <= stack[stack.length - 1].indent) stack.pop();
-    const top = stack[stack.length - 1];
     const trimmed = line.trim();
+    // Pop contexts we've dedented out of.
+    while (ctx.length > 1 && indent <= ctx[ctx.length - 1].indent) ctx.pop();
+    const top = ctx[ctx.length - 1];
     if (trimmed.startsWith("- ")) {
-      const val = trimmed.slice(2).trim().replace(/^["']|["']$/g, "");
-      const parent = stack[stack.length - 1];
-      if (!Array.isArray(parent.obj[parent.key])) parent.obj[parent.key] = [];
-      // Inline mapping in a list item: "- pattern: /x, ms: 100" is not supported;
-      // require a nested block. So plain scalar list items.
-      parent.obj[parent.key].push(coerce(val));
-    } else {
-      const idx = trimmed.indexOf(":");
-      if (idx < 0) continue;
-      const key = trimmed.slice(0, idx).trim();
-      const val = trimmed.slice(idx + 1).trim();
-      if (val === "") {
-        top.obj[key] = {};
-        stack.push({ indent, obj: top.obj[key], key });
+      // Ensure we're inside a list. If parent map has a pendingKey with no
+      // container yet, create the list under it.
+      if (top.kind !== "list") {
+        if (top.kind === "map" && top.pendingKey) {
+          const arr = [];
+          top.obj[top.pendingKey] = arr;
+          ctx.push({ indent, kind: "list", arr });
+          top.pendingKey = null;
+        }
+      }
+      const listCtx = ctx[ctx.length - 1];
+      const rest = trimmed.slice(2).trim();
+      const colon = rest.indexOf(":");
+      if (colon > 0 && rest.slice(colon + 1).trim() !== "") {
+        // "- key: value" — start a new map in the list with that key/value.
+        const obj = {};
+        obj[rest.slice(0, colon).trim()] = coerce(rest.slice(colon + 1).trim());
+        listCtx.arr.push(obj);
+        // Push a map context so sibling indented "key: val" lines attach here.
+        ctx.push({ indent: indent + 2, kind: "map", obj });
+      } else if (colon > 0) {
+        // "- key:" — nested container follows.
+        const obj = {};
+        listCtx.arr.push(obj);
+        const mapCtx = { indent: indent + 2, kind: "map", obj, pendingKey: rest.slice(0, colon).trim() };
+        ctx.push(mapCtx);
       } else {
-        top.obj[key] = coerce(val.replace(/^["']|["']$/g, ""));
+        listCtx.arr.push(coerce(rest));
+      }
+    } else {
+      const colon = trimmed.indexOf(":");
+      if (colon < 0) continue;
+      const key = trimmed.slice(0, colon).trim();
+      const val = trimmed.slice(colon + 1).trim();
+      if (top.kind !== "map") continue;
+      if (val === "" || val === "[]" || val === "{}") {
+        if (val === "[]") { top.obj[key] = []; continue; }
+        if (val === "{}") { top.obj[key] = {}; continue; }
+        // Empty value: next indented line decides list vs map.
+        top.pendingKey = key;
+        // Provisional map that gets replaced with a list if a "- " appears.
+        top.obj[key] = {};
+        ctx.push({ indent, kind: "map", obj: top.obj[key] });
+      } else {
+        top.obj[key] = coerce(val);
       }
     }
   }
-  return out;
-  function coerce(v) {
-    if (/^-?\d+$/.test(v)) return parseInt(v, 10);
-    if (v === "true") return true;
-    if (v === "false") return false;
-    return v;
-  }
+  return root;
 }
+
 const CONFIG = await loadConfig(opt("config", ""));
 
 function mergeTimingRules(cliRules, cfgRules) {

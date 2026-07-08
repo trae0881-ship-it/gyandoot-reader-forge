@@ -587,10 +587,18 @@ const AdminPosts = () => {
                   <TableCell className="text-xs text-muted-foreground max-w-[150px] truncate">{p.slug}</TableCell>
                   <TableCell className="capitalize">{p.post_type}</TableCell>
                   <TableCell>
-                    {p.is_published
-                      ? <span className="text-green-600 font-medium">Published</span>
-                      : <span className="text-muted-foreground">Draft</span>}
+                    {(() => {
+                      const status = p.publish_status ?? (p.is_published ? "published" : "draft");
+                      if (status === "published") return <span className="text-green-600 font-medium">Published</span>;
+                      if (status === "scheduled") return (
+                        <span className="text-blue-600 font-medium">
+                          Scheduled{p.scheduled_at ? ` · ${new Date(p.scheduled_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}` : ""}
+                        </span>
+                      );
+                      return <span className="text-muted-foreground">Draft</span>;
+                    })()}
                   </TableCell>
+
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => openEdit(p)}><Pencil className="h-4 w-4" /></Button>
                     <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(p.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>

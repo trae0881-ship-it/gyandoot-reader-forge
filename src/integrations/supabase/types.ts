@@ -822,49 +822,106 @@ export type Database = {
       }
       posts: {
         Row: {
+          author: string | null
+          canonical_url: string | null
+          category: string | null
           content: string | null
           cover_url: string | null
           created_at: string
           excerpt: string | null
+          external_references: Json
+          featured_image_alt: string | null
+          featured_image_caption: string | null
+          featured_image_title: string | null
           id: string
+          internal_links: Json
           is_published: boolean
           manually_edited: boolean
           meta_description: string | null
           meta_title: string | null
           post_type: string
+          primary_keyword: string | null
+          publish_status: string
+          reading_time_min: number | null
+          scheduled_at: string | null
+          schema_type: string
+          secondary_keywords: string[]
           slug: string
+          social_caption: string | null
+          social_excerpt: string | null
+          tags: string[]
+          timezone: string
           title: string
           updated_at: string
+          word_count: number | null
         }
         Insert: {
+          author?: string | null
+          canonical_url?: string | null
+          category?: string | null
           content?: string | null
           cover_url?: string | null
           created_at?: string
           excerpt?: string | null
+          external_references?: Json
+          featured_image_alt?: string | null
+          featured_image_caption?: string | null
+          featured_image_title?: string | null
           id?: string
+          internal_links?: Json
           is_published?: boolean
           manually_edited?: boolean
           meta_description?: string | null
           meta_title?: string | null
           post_type?: string
+          primary_keyword?: string | null
+          publish_status?: string
+          reading_time_min?: number | null
+          scheduled_at?: string | null
+          schema_type?: string
+          secondary_keywords?: string[]
           slug: string
+          social_caption?: string | null
+          social_excerpt?: string | null
+          tags?: string[]
+          timezone?: string
           title: string
           updated_at?: string
+          word_count?: number | null
         }
         Update: {
+          author?: string | null
+          canonical_url?: string | null
+          category?: string | null
           content?: string | null
           cover_url?: string | null
           created_at?: string
           excerpt?: string | null
+          external_references?: Json
+          featured_image_alt?: string | null
+          featured_image_caption?: string | null
+          featured_image_title?: string | null
           id?: string
+          internal_links?: Json
           is_published?: boolean
           manually_edited?: boolean
           meta_description?: string | null
           meta_title?: string | null
           post_type?: string
+          primary_keyword?: string | null
+          publish_status?: string
+          reading_time_min?: number | null
+          scheduled_at?: string | null
+          schema_type?: string
+          secondary_keywords?: string[]
           slug?: string
+          social_caption?: string | null
+          social_excerpt?: string | null
+          tags?: string[]
+          timezone?: string
           title?: string
           updated_at?: string
+          word_count?: number | null
         }
         Relationships: []
       }

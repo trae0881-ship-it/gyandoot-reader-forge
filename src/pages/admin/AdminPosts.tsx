@@ -406,19 +406,127 @@ const AdminPosts = () => {
             </div>
           </div>
 
+          {/* Publishing & Scheduling */}
+          <div className="border-t border-border pt-4 space-y-4">
+            <p className="text-sm font-medium">Publishing & Scheduling</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label>Status</Label>
+                <Select
+                  value={form.publish_status}
+                  onValueChange={(v: any) => setForm({ ...form, publish_status: v })}
+                >
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="scheduled">Scheduled</SelectItem>
+                    <SelectItem value="published">Published</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Scheduled date & time</Label>
+                <Input
+                  type="datetime-local"
+                  value={form.scheduled_at}
+                  onChange={(e) => setForm({ ...form, scheduled_at: e.target.value })}
+                  className="mt-1"
+                  disabled={form.publish_status !== "scheduled"}
+                />
+              </div>
+              <div>
+                <Label>Timezone</Label>
+                <Input value={form.timezone} onChange={(e) => setForm({ ...form, timezone: e.target.value })} className="mt-1" placeholder="Asia/Kolkata" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label>Category</Label>
+                <Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="mt-1" placeholder="e.g. Spirituality" />
+              </div>
+              <div>
+                <Label>Author</Label>
+                <Input value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} className="mt-1" placeholder="Author name" />
+              </div>
+              <div>
+                <Label>Schema type</Label>
+                <Select value={form.schema_type} onValueChange={(v) => setForm({ ...form, schema_type: v })}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="BlogPosting">BlogPosting</SelectItem>
+                    <SelectItem value="Article">Article</SelectItem>
+                    <SelectItem value="NewsArticle">NewsArticle</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>Primary keyword</Label>
+                <Input value={form.primary_keyword} onChange={(e) => setForm({ ...form, primary_keyword: e.target.value })} className="mt-1" />
+              </div>
+              <div>
+                <Label>Secondary keywords <span className="text-xs text-muted-foreground">(comma-separated)</span></Label>
+                <Input value={form.secondary_keywords} onChange={(e) => setForm({ ...form, secondary_keywords: e.target.value })} className="mt-1" />
+              </div>
+            </div>
+
+            <div>
+              <Label>Tags <span className="text-xs text-muted-foreground">(5-10, comma-separated)</span></Label>
+              <Input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} className="mt-1" placeholder="tag1, tag2, tag3" />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label>Featured image title</Label>
+                <Input value={form.featured_image_title} onChange={(e) => setForm({ ...form, featured_image_title: e.target.value })} className="mt-1" />
+              </div>
+              <div>
+                <Label>Featured image alt</Label>
+                <Input value={form.featured_image_alt} onChange={(e) => setForm({ ...form, featured_image_alt: e.target.value })} className="mt-1" />
+              </div>
+              <div>
+                <Label>Featured image caption</Label>
+                <Input value={form.featured_image_caption} onChange={(e) => setForm({ ...form, featured_image_caption: e.target.value })} className="mt-1" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>Social caption</Label>
+                <Textarea value={form.social_caption} onChange={(e) => setForm({ ...form, social_caption: e.target.value })} className="mt-1" rows={2} placeholder="≤280 chars, incl. hashtags" />
+              </div>
+              <div>
+                <Label>Social excerpt</Label>
+                <Textarea value={form.social_excerpt} onChange={(e) => setForm({ ...form, social_excerpt: e.target.value })} className="mt-1" rows={2} />
+              </div>
+            </div>
+
+            <div>
+              <Label>Canonical URL</Label>
+              <Input value={form.canonical_url} onChange={(e) => setForm({ ...form, canonical_url: e.target.value })} className="mt-1" placeholder="https://…" />
+            </div>
+          </div>
+
           {/* Actions */}
           <div className="flex items-center justify-between pt-2">
-            <div className="flex items-center gap-2">
-              <Switch checked={form.is_published} onCheckedChange={(v) => setForm({ ...form, is_published: v })} />
-              <Label>{form.is_published ? "Published" : "Draft"}</Label>
+            <div className="text-xs text-muted-foreground">
+              {form.publish_status === "scheduled" && form.scheduled_at
+                ? `Will auto-publish at ${new Date(form.scheduled_at).toLocaleString("en-IN")}`
+                : form.publish_status === "published"
+                  ? "Live on site"
+                  : "Saved as draft"}
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={resetForm}>Cancel</Button>
-              <Button onClick={() => saveMutation.mutate()} disabled={!form.title || saveMutation.isPending}>
-                {saveMutation.isPending ? "Saving…" : editing ? "Update Post" : "Publish Post"}
+              <Button onClick={() => saveMutation.mutate()} disabled={!form.title || saveMutation.isPending || (form.publish_status === "scheduled" && !form.scheduled_at)}>
+                {saveMutation.isPending ? "Saving…" : editing ? "Update Post" : "Save Post"}
               </Button>
             </div>
           </div>
+
         </div>
       </div>
     );

@@ -355,11 +355,17 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json().catch(() => ({}));
     const forcedTopic: string | undefined = body?.topic;
+    const requestedTz: string = typeof body?.timezone === "string" && body.timezone ? body.timezone : DEFAULT_TZ;
+    const requestedAuthor: string = typeof body?.author === "string" && body.author ? body.author : AUTHOR;
+    const requestedScheduledAt: string | null = typeof body?.scheduled_at === "string" ? body.scheduled_at : null;
+    const confirmPublish: boolean = body?.confirm_publish === true;
+    const batchIndex: number = Number.isInteger(body?.batch_index) ? body.batch_index : 0;
 
     // 1) Scan Posts (build internal content map)
     const { data: existing } = await supabase.from("posts")
       .select("id, slug, title, excerpt, meta_description, content, manually_edited, updated_at")
       .eq("post_type", "article").order("created_at", { ascending: false }).limit(500);
+
 
     const existingList = (existing || []).map(p => `- ${p.title} (/${p.slug})`).join("\n");
 

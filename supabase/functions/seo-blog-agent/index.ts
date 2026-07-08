@@ -439,13 +439,19 @@ Return STRICT JSON (no markdown fences):
 {
   "seo_title":"≤60","meta_title":"≤60","meta_description":"≤160",
   "slug":"kebab-case","focus_keyword":"...","secondary_keywords":["..."],
-  "tags":["..."],"category":"...",
+  "tags":["5-10 short tags"],"category":"single category name",
   "h1":"...","excerpt":"≤200","body_html":"<h1>...</h1>...","cta":"...",
   "faq":[{"q":"...","a":"..."}, ...6],
-  "featured_image_prompt":"...","featured_image_alt":"≤120 chars with focus keyword",
+  "featured_image_prompt":"...","featured_image_title":"short title for the featured image",
+  "featured_image_alt":"≤120 chars with focus keyword",
+  "featured_image_caption":"1-sentence caption shown under the image",
   "og_title":"...","og_description":"...","twitter_title":"...","twitter_description":"...",
+  "social_caption":"engaging social post caption ≤280 chars with 2-3 relevant hashtags",
+  "social_excerpt":"1-2 sentence teaser for social share",
+  "external_references":[{"title":"...","url":"https://..."}],
   "external_links":[{"url":"...","anchor":"..."}]
 }`;
+
 
     const raw = await callLLM([
       { role: "system", content: "You are a senior SEO editor and domain writer. Follow Google Helpful Content. Output ONLY valid JSON, no code fences." },

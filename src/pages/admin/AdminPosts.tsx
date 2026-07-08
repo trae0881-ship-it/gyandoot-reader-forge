@@ -30,7 +30,19 @@ const slugify = (t: string) => {
 const emptyForm = {
   title: "", slug: "", content: "", excerpt: "", post_type: "article" as string,
   is_published: false, meta_title: "", meta_description: "", cover_url: "",
+  publish_status: "draft" as "draft" | "scheduled" | "published",
+  scheduled_at: "" as string, // datetime-local value
+  timezone: "Asia/Kolkata",
+  category: "", primary_keyword: "",
+  secondary_keywords: "" as string, // comma-separated in the form
+  tags: "" as string,
+  author: "",
+  featured_image_title: "", featured_image_alt: "", featured_image_caption: "",
+  social_caption: "", social_excerpt: "",
+  canonical_url: "",
+  schema_type: "BlogPosting",
 };
+
 
 /* ── SEO Score helpers ──────────────────────────────────────── */
 const getSeoScore = (form: typeof emptyForm) => {

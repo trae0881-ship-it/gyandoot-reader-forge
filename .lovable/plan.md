@@ -1,76 +1,74 @@
-# Multi-Channel OTP Authentication
+## Blog Publishing & Scheduling — Implementation Plan
 
-User ke liye 3 channels se OTP login: **SMS**, **WhatsApp**, **Email**. Admin har channel ke liye apna provider (MSG91 / Twilio / Fast2SMS / Gupshup / WhatsApp Cloud API) admin panel se add kar sakega.
+Add full publishing metadata and scheduling to the AI blog agent (`seo-blog-agent`) and the Admin Posts UI.
 
----
+### 1. Database (migration)
 
-## 1. Database (new tables)
+Extend `public.posts` with scheduling + SEO fields:
 
-**`otp_providers`** (admin-managed)
-- `channel`: `'sms' | 'whatsapp' | 'email'`
-- `provider_name`: `'twilio' | 'msg91' | 'fast2sms' | 'gupshup' | 'whatsapp_cloud' | 'resend'`
-- `config_json` (jsonb) — API key, sender ID, template ID, from-number etc.
-- `is_active` (only one active per channel)
+- `publish_status` text default `'draft'` — check in (`draft`,`scheduled`,`published`)
+- `scheduled_at` timestamptz (combined date+time in UTC)
+- `timezone` text default `'Asia/Kolkata'`
+- `reading_time_min` int
+- `word_count` int
+- `category` text
+- `primary_keyword` text
+- `secondary_keywords` text[]
+- `tags` text[]
+- `author` text
+- `featured_image_title` text
+- `featured_image_alt` text
+- `featured_image_caption` text
+- `social_caption` text
+- `social_excerpt` text
+- `internal_links` jsonb  (array of `{anchor,url}`)
+- `external_references` jsonb (array of `{title,url}`)
+- `canonical_url` text
+- `schema_type` text default `'BlogPosting'`
 
-**`phone_otps`** (replace/extend `admin_otps` pattern)
-- `phone` (E.164), `code_hash`, `channel`, `expires_at`, `attempts`, `used`
+Backfill `publish_status` from existing `is_published`. Keep `is_published` for backward compatibility (mirror it via trigger on publish_status change).
 
-**`profiles`** add `phone` column (unique, nullable).
+### 2. `seo-blog-agent` edge function
 
-RLS: only admins read/write `otp_providers`; `phone_otps` only via service-role from edge functions.
+Update the AI generation prompt + Zod schema to return a structured object with two top-level sections:
 
----
+```
+{
+  article: { title, slug, meta_title, meta_description, content, excerpt, ... },
+  publishing: { publish_status, scheduled_publish_date, scheduled_publish_time,
+                timezone, reading_time, word_count, category, primary_keyword,
+                secondary_keywords, tags, author, featured_image_prompt,
+                featured_image_title, featured_image_alt, featured_image_caption,
+                social_caption, social_excerpt, internal_links,
+                external_references, canonical_url, schema_type }
+}
+```
 
-## 2. Edge Functions
+Rules implemented server-side:
+- If caller passes `scheduled_at` → use it, status = `scheduled`.
+- Else → default `publish_status = 'draft'`, but AI still returns a suggested date/time based on target audience (Hindi spiritual readers → morning IST slots: 6–8 AM, 7–9 PM).
+- Never auto-flip to `published` without explicit `confirm_publish: true` in the request.
+- For batch requests (`count > 1`): stagger suggested times across days (one per day, alternating morning/evening slots) to build a publishing calendar.
+- Auto-compute `word_count` and `reading_time_min` server-side (200 wpm) as a safety net over AI output.
 
-| Function | Purpose |
-|---|---|
-| `phone-otp-send` | Input: `{phone, channel}` → picks active provider → sends OTP via SMS/WhatsApp → stores hash |
-| `phone-otp-verify` | Input: `{phone, code}` → verifies → creates/links Supabase user (using admin API + `signInWithOtp` magic link OR custom token) → returns session |
+### 3. Admin UI (`AdminPosts.tsx` + `AdminAI.tsx`)
 
-Provider adapters inside one function file (`providers/twilio.ts`, `msg91.ts`, etc.) — switch by `provider_name`.
+- Post editor: add Publishing panel with status dropdown (Draft/Scheduled/Published), date+time pickers, timezone, category, tags chips, keywords, author, featured-image alt/caption, social caption/excerpt, canonical URL, schema type.
+- List view: show status badge and scheduled time.
+- AdminAI "Generate blog" flow: after generation, show the returned publishing plan next to the article body; user clicks Save Draft / Schedule / Publish (explicit confirmation).
+- Batch generation: render the staggered calendar preview before saving.
 
-**Auth integration:** Use Supabase Admin API: `admin.createUser({phone, phone_confirm: true})` if not exists, then `admin.generateLink({type: 'magiclink'})` → frontend uses returned token to set session. (Custom flow because Supabase native phone auth requires Twilio configured in dashboard, which we are replacing with our own multi-provider system.)
+### 4. Scheduled publishing
 
----
+Add a lightweight `pg_cron` job (5-min cadence) that flips `publish_status='scheduled'` rows whose `scheduled_at <= now()` to `published` and sets `is_published=true`. Job created via `supabase--insert` (per scheduling knowledge), not migration.
 
-## 3. Admin UI — `/admin/auth-providers`
+### 5. Response contract
 
-New page in admin sidebar:
-- Channel selector (SMS / WhatsApp / Email)
-- Provider dropdown per channel
-- Dynamic form fields per provider (Twilio → SID/Token/From; MSG91 → AuthKey/TemplateID/Sender; etc.)
-- Test button (sends OTP to admin's own number)
-- Toggle active
+The edge function returns the exact CMS-ready shape listed in the request, so any external API consumer gets the same object the admin UI saves.
 
-Secrets stored encrypted in `config_json` (server-side only, never exposed to client — admin UI shows masked values).
+### Out of scope
 
----
+- Building a public "author profile" system (reuses free-text `author`).
+- Social auto-posting — we only generate captions.
 
-## 4. User UI — `/auth` redesign
-
-Tabs: **Email/Password** | **Phone OTP** | **WhatsApp OTP** | **Google**
-- Phone tab: country code + number → "Send OTP" → 6-digit input → verify → redirect `/profile`
-- Same flow for WhatsApp tab (different channel param)
-- Email tab unchanged
-
----
-
-## 5. Implementation order
-
-1. Migration: `otp_providers`, `phone_otps`, profile.phone
-2. Edge function: `phone-otp-send` + `phone-otp-verify` with Twilio + MSG91 + WhatsApp Cloud adapters
-3. Admin page `/admin/auth-providers` + sidebar link
-4. User `/auth` page — add Phone/WhatsApp tabs
-5. Test end-to-end
-
----
-
-## Technical notes
-
-- Providers ke API keys **`otp_providers.config_json`** me store honge (not in Supabase secrets) — kyunki admin runtime pe add karega, har provider ke alag fields hain.
-- WhatsApp Cloud API (Meta) free hai for low volume; Twilio WhatsApp paid hai but easier setup. Admin choose karega.
-- Rate limit: max 3 OTP requests per phone per 10 min (in edge function).
-- "Chapter not found" issue ke liye — alag se book slug bhejiye, baad me fix karenge.
-
-**Approve karein to implementation start karta hu.**
+Confirm and I'll implement in this order: migration → edge function → cron job → admin UI.

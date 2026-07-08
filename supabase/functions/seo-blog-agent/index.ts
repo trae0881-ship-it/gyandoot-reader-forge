@@ -19,8 +19,27 @@ import { buildKeyResolver, KeyResolver } from "../_shared/ai-key-resolver.ts";
 const NICHE = "Books, Spirituality, Meditation, Self Growth, Mindfulness, Consciousness";
 const SITE = "https://gyandootnova.in";
 const AUTHOR = "GyandootNova Editorial";
+const DEFAULT_TZ = "Asia/Kolkata";
 const SIMILARITY_THRESHOLD = 0.7;
 const CONTENT_SCORE_THRESHOLD = Number(Deno.env.get("SEO_CONTENT_SCORE_MIN") || "55");
+
+// Suggested IST publishing slots for a Hindi spiritual audience.
+// Alternates a morning devotion slot and an evening reading slot.
+const IST_SLOTS: [number, number][] = [[7, 0], [19, 30]]; // 07:00 and 19:30 IST
+function suggestSchedule(batchIndex: number): { date: string; time: string; iso: string } {
+  const slot = IST_SLOTS[batchIndex % IST_SLOTS.length];
+  const dayOffset = Math.floor(batchIndex / IST_SLOTS.length) + 1; // start tomorrow
+  // IST = UTC+5:30 → UTC hour = slot.hour - 5, minute = slot.minute - 30 (mod)
+  const now = new Date();
+  const utc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + dayOffset, slot[0] - 5, slot[1] - 30, 0));
+  const iso = utc.toISOString();
+  // Format date/time as seen in the target tz (IST) for display fields.
+  const istDate = new Date(utc.getTime() + 5.5 * 3600 * 1000);
+  const date = istDate.toISOString().slice(0, 10);
+  const time = `${String(slot[0]).padStart(2, "0")}:${String(slot[1]).padStart(2, "0")}`;
+  return { date, time, iso };
+}
+
 
 
 
@@ -336,11 +355,17 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json().catch(() => ({}));
     const forcedTopic: string | undefined = body?.topic;
+    const requestedTz: string = typeof body?.timezone === "string" && body.timezone ? body.timezone : DEFAULT_TZ;
+    const requestedAuthor: string = typeof body?.author === "string" && body.author ? body.author : AUTHOR;
+    const requestedScheduledAt: string | null = typeof body?.scheduled_at === "string" ? body.scheduled_at : null;
+    const confirmPublish: boolean = body?.confirm_publish === true;
+    const batchIndex: number = Number.isInteger(body?.batch_index) ? body.batch_index : 0;
 
     // 1) Scan Posts (build internal content map)
     const { data: existing } = await supabase.from("posts")
       .select("id, slug, title, excerpt, meta_description, content, manually_edited, updated_at")
       .eq("post_type", "article").order("created_at", { ascending: false }).limit(500);
+
 
     const existingList = (existing || []).map(p => `- ${p.title} (/${p.slug})`).join("\n");
 
@@ -414,13 +439,19 @@ Return STRICT JSON (no markdown fences):
 {
   "seo_title":"≤60","meta_title":"≤60","meta_description":"≤160",
   "slug":"kebab-case","focus_keyword":"...","secondary_keywords":["..."],
-  "tags":["..."],"category":"...",
+  "tags":["5-10 short tags"],"category":"single category name",
   "h1":"...","excerpt":"≤200","body_html":"<h1>...</h1>...","cta":"...",
   "faq":[{"q":"...","a":"..."}, ...6],
-  "featured_image_prompt":"...","featured_image_alt":"≤120 chars with focus keyword",
+  "featured_image_prompt":"...","featured_image_title":"short title for the featured image",
+  "featured_image_alt":"≤120 chars with focus keyword",
+  "featured_image_caption":"1-sentence caption shown under the image",
   "og_title":"...","og_description":"...","twitter_title":"...","twitter_description":"...",
+  "social_caption":"engaging social post caption ≤280 chars with 2-3 relevant hashtags",
+  "social_excerpt":"1-2 sentence teaser for social share",
+  "external_references":[{"title":"...","url":"https://..."}],
   "external_links":[{"url":"...","anchor":"..."}]
 }`;
+
 
     const raw = await callLLM([
       { role: "system", content: "You are a senior SEO editor and domain writer. Follow Google Helpful Content. Output ONLY valid JSON, no code fences." },
@@ -523,9 +554,60 @@ Return STRICT JSON (no markdown fences):
       });
     }
 
-    // 7) Save (Draft always)
+    // 6b) Compute Publishing Plan
+    const suggested = suggestSchedule(batchIndex);
+    let scheduledAtIso: string | null = null;
+    let publishStatus: "draft" | "scheduled" | "published" = "draft";
+    let scheduledDate: string = suggested.date;
+    let scheduledTime: string = suggested.time;
+
+    if (requestedScheduledAt) {
+      const d = new Date(requestedScheduledAt);
+      if (!isNaN(d.getTime())) {
+        scheduledAtIso = d.toISOString();
+        publishStatus = "scheduled";
+        const ist = new Date(d.getTime() + 5.5 * 3600 * 1000);
+        scheduledDate = ist.toISOString().slice(0, 10);
+        scheduledTime = ist.toISOString().slice(11, 16);
+      }
+    }
+    if (confirmPublish && !requestedScheduledAt) {
+      publishStatus = "published";
+      scheduledAtIso = new Date().toISOString();
+    }
+
+    const secondaryKw: string[] = Array.isArray(article.secondary_keywords) ? article.secondary_keywords.map(String) : [];
+    const tagsArr: string[] = Array.isArray(article.tags) ? article.tags.map(String).slice(0, 10) : [];
+    const internalLinksArr = log.internal_links.slice(0, 20);
+    const externalRefsArr = Array.isArray(article.external_references) && article.external_references.length
+      ? article.external_references
+      : (log.external_links || []).map((e: any) => ({ title: e.anchor || e.url, url: e.url }));
+
+    // 7) Save (Draft by default; scheduled/published only when explicitly requested)
     let postId: string | null = null;
     let finalSlug = slugFinal;
+
+    const savePayloadCommon = {
+      publish_status: publishStatus,
+      scheduled_at: scheduledAtIso,
+      timezone: requestedTz,
+      reading_time_min: rt.minutes,
+      word_count: rt.words,
+      category: article.category ?? null,
+      primary_keyword: article.focus_keyword ?? null,
+      secondary_keywords: secondaryKw,
+      tags: tagsArr,
+      author: requestedAuthor,
+      featured_image_title: article.featured_image_title ?? null,
+      featured_image_alt: article.featured_image_alt ?? null,
+      featured_image_caption: article.featured_image_caption ?? null,
+      social_caption: article.social_caption ?? null,
+      social_excerpt: article.social_excerpt ?? null,
+      internal_links: internalLinksArr,
+      external_references: externalRefsArr,
+      canonical_url: canonical,
+      schema_type: "BlogPosting",
+    };
 
     try {
       if (willUpdate && bestMatch) {
@@ -539,7 +621,8 @@ Return STRICT JSON (no markdown fences):
         const { error } = await supabase.from("posts").update({
           title: article.h1 || article.seo_title, content: finalHtml, excerpt: article.excerpt,
           meta_title: article.meta_title, meta_description: article.meta_description,
-          manually_edited: false, is_published: false,
+          manually_edited: false,
+          ...savePayloadCommon,
         }).eq("id", post.id);
         if (error) throw error;
         postId = post.id;
@@ -554,7 +637,8 @@ Return STRICT JSON (no markdown fences):
         const { data: ins, error } = await supabase.from("posts").insert({
           title: article.h1 || article.seo_title, slug: finalSlug, content: finalHtml,
           excerpt: article.excerpt, meta_title: article.meta_title, meta_description: article.meta_description,
-          post_type: "article", is_published: false,
+          post_type: "article",
+          ...savePayloadCommon,
         }).select("id").single();
         if (error) throw error;
         postId = ins.id;
@@ -572,19 +656,62 @@ Return STRICT JSON (no markdown fences):
     log.post_id = postId;
     log.slug = finalSlug;
     log.focus_keyword = article.focus_keyword;
-    log.keywords = [article.focus_keyword, ...(article.secondary_keywords || [])];
+    log.keywords = [article.focus_keyword, ...secondaryKw];
+    log.publish_status = publishStatus;
+    log.scheduled_at = scheduledAtIso;
     log.meta = {
       featured_image_prompt: article.featured_image_prompt,
       featured_image_alt: article.featured_image_alt,
-      secondary_keywords: article.secondary_keywords,
-      tags: article.tags, category: article.category, canonical, cta: article.cta,
+      secondary_keywords: secondaryKw,
+      tags: tagsArr, category: article.category, canonical, cta: article.cta,
     };
     log.execution_ms = Date.now() - started;
 
     await supabase.from("seo_agent_logs").insert(log);
-    return new Response(JSON.stringify({ success: true, ...log }), {
+
+    const cms = {
+      article: {
+        title: article.h1 || article.seo_title,
+        slug: finalSlug,
+        meta_title: article.meta_title,
+        meta_description: article.meta_description,
+        content: finalHtml,
+        excerpt: article.excerpt,
+        body_html: article.body_html,
+        h1: article.h1 || article.seo_title,
+        cta: article.cta,
+        faq: article.faq || [],
+      },
+      publishing: {
+        publish_status: publishStatus,
+        scheduled_publish_date: scheduledDate,
+        scheduled_publish_time: scheduledTime,
+        scheduled_at: scheduledAtIso,
+        timezone: requestedTz,
+        reading_time: rt.minutes,
+        word_count: rt.words,
+        category: article.category,
+        primary_keyword: article.focus_keyword,
+        secondary_keywords: secondaryKw,
+        tags: tagsArr,
+        author: requestedAuthor,
+        featured_image_prompt: article.featured_image_prompt,
+        featured_image_title: article.featured_image_title,
+        featured_image_alt: article.featured_image_alt,
+        featured_image_caption: article.featured_image_caption,
+        social_caption: article.social_caption,
+        social_excerpt: article.social_excerpt,
+        internal_links: internalLinksArr,
+        external_references: externalRefsArr,
+        canonical_url: canonical,
+        schema_type: "BlogPosting",
+      },
+    };
+
+    return new Response(JSON.stringify({ success: true, ...log, cms }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+
   } catch (e: any) {
     console.error("seo-blog-agent error", e);
     log.status = "error";

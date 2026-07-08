@@ -30,7 +30,19 @@ const slugify = (t: string) => {
 const emptyForm = {
   title: "", slug: "", content: "", excerpt: "", post_type: "article" as string,
   is_published: false, meta_title: "", meta_description: "", cover_url: "",
+  publish_status: "draft" as "draft" | "scheduled" | "published",
+  scheduled_at: "" as string, // datetime-local value
+  timezone: "Asia/Kolkata",
+  category: "", primary_keyword: "",
+  secondary_keywords: "" as string, // comma-separated in the form
+  tags: "" as string,
+  author: "",
+  featured_image_title: "", featured_image_alt: "", featured_image_caption: "",
+  social_caption: "", social_excerpt: "",
+  canonical_url: "",
+  schema_type: "BlogPosting",
 };
+
 
 /* ── SEO Score helpers ──────────────────────────────────────── */
 const getSeoScore = (form: typeof emptyForm) => {
@@ -105,20 +117,40 @@ const AdminPosts = () => {
     },
   });
 
+  const parseList = (s: string): string[] =>
+    s.split(",").map((t) => t.trim()).filter(Boolean);
+
   const saveMutation = useMutation({
     mutationFn: async () => {
       const finalSlug = form.slug.trim() || slugify(form.title);
-      const payload = {
+      const scheduledIso = form.publish_status === "scheduled" && form.scheduled_at
+        ? new Date(form.scheduled_at).toISOString()
+        : null;
+      const payload: any = {
         title: form.title,
         slug: finalSlug,
         content: form.content,
         excerpt: form.excerpt,
         post_type: form.post_type,
-        is_published: form.is_published,
         meta_title: form.meta_title,
         meta_description: form.meta_description,
         cover_url: form.cover_url || null,
         manually_edited: true,
+        publish_status: form.publish_status,
+        scheduled_at: scheduledIso,
+        timezone: form.timezone || "Asia/Kolkata",
+        category: form.category || null,
+        primary_keyword: form.primary_keyword || null,
+        secondary_keywords: parseList(form.secondary_keywords),
+        tags: parseList(form.tags),
+        author: form.author || null,
+        featured_image_title: form.featured_image_title || null,
+        featured_image_alt: form.featured_image_alt || null,
+        featured_image_caption: form.featured_image_caption || null,
+        social_caption: form.social_caption || null,
+        social_excerpt: form.social_excerpt || null,
+        canonical_url: form.canonical_url || null,
+        schema_type: form.schema_type || "BlogPosting",
       };
       if (editing) {
         const { error } = await supabase.from("posts").update(payload).eq("id", editing.id);
@@ -146,16 +178,40 @@ const AdminPosts = () => {
 
   const resetForm = () => { setForm({ ...emptyForm }); setEditing(null); setView("list"); };
 
+  const toDatetimeLocal = (iso: string | null): string => {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
   const openEdit = (p: any) => {
     setEditing(p);
     setForm({
       title: p.title, slug: p.slug ?? "", content: p.content ?? "", excerpt: p.excerpt ?? "",
-      post_type: p.post_type, is_published: p.is_published,
+      post_type: p.post_type, is_published: !!p.is_published,
       meta_title: p.meta_title ?? "", meta_description: p.meta_description ?? "",
       cover_url: p.cover_url ?? "",
+      publish_status: (p.publish_status ?? (p.is_published ? "published" : "draft")) as any,
+      scheduled_at: toDatetimeLocal(p.scheduled_at ?? null),
+      timezone: p.timezone ?? "Asia/Kolkata",
+      category: p.category ?? "",
+      primary_keyword: p.primary_keyword ?? "",
+      secondary_keywords: Array.isArray(p.secondary_keywords) ? p.secondary_keywords.join(", ") : "",
+      tags: Array.isArray(p.tags) ? p.tags.join(", ") : "",
+      author: p.author ?? "",
+      featured_image_title: p.featured_image_title ?? "",
+      featured_image_alt: p.featured_image_alt ?? "",
+      featured_image_caption: p.featured_image_caption ?? "",
+      social_caption: p.social_caption ?? "",
+      social_excerpt: p.social_excerpt ?? "",
+      canonical_url: p.canonical_url ?? "",
+      schema_type: p.schema_type ?? "BlogPosting",
     });
     setView("form");
   };
+
 
   const seo = getSeoScore(form);
   const previewTitle = form.meta_title || form.title || "Post Title";
@@ -350,19 +406,127 @@ const AdminPosts = () => {
             </div>
           </div>
 
+          {/* Publishing & Scheduling */}
+          <div className="border-t border-border pt-4 space-y-4">
+            <p className="text-sm font-medium">Publishing & Scheduling</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label>Status</Label>
+                <Select
+                  value={form.publish_status}
+                  onValueChange={(v: any) => setForm({ ...form, publish_status: v })}
+                >
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="scheduled">Scheduled</SelectItem>
+                    <SelectItem value="published">Published</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Scheduled date & time</Label>
+                <Input
+                  type="datetime-local"
+                  value={form.scheduled_at}
+                  onChange={(e) => setForm({ ...form, scheduled_at: e.target.value })}
+                  className="mt-1"
+                  disabled={form.publish_status !== "scheduled"}
+                />
+              </div>
+              <div>
+                <Label>Timezone</Label>
+                <Input value={form.timezone} onChange={(e) => setForm({ ...form, timezone: e.target.value })} className="mt-1" placeholder="Asia/Kolkata" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label>Category</Label>
+                <Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="mt-1" placeholder="e.g. Spirituality" />
+              </div>
+              <div>
+                <Label>Author</Label>
+                <Input value={form.author} onChange={(e) => setForm({ ...form, author: e.target.value })} className="mt-1" placeholder="Author name" />
+              </div>
+              <div>
+                <Label>Schema type</Label>
+                <Select value={form.schema_type} onValueChange={(v) => setForm({ ...form, schema_type: v })}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="BlogPosting">BlogPosting</SelectItem>
+                    <SelectItem value="Article">Article</SelectItem>
+                    <SelectItem value="NewsArticle">NewsArticle</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>Primary keyword</Label>
+                <Input value={form.primary_keyword} onChange={(e) => setForm({ ...form, primary_keyword: e.target.value })} className="mt-1" />
+              </div>
+              <div>
+                <Label>Secondary keywords <span className="text-xs text-muted-foreground">(comma-separated)</span></Label>
+                <Input value={form.secondary_keywords} onChange={(e) => setForm({ ...form, secondary_keywords: e.target.value })} className="mt-1" />
+              </div>
+            </div>
+
+            <div>
+              <Label>Tags <span className="text-xs text-muted-foreground">(5-10, comma-separated)</span></Label>
+              <Input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} className="mt-1" placeholder="tag1, tag2, tag3" />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label>Featured image title</Label>
+                <Input value={form.featured_image_title} onChange={(e) => setForm({ ...form, featured_image_title: e.target.value })} className="mt-1" />
+              </div>
+              <div>
+                <Label>Featured image alt</Label>
+                <Input value={form.featured_image_alt} onChange={(e) => setForm({ ...form, featured_image_alt: e.target.value })} className="mt-1" />
+              </div>
+              <div>
+                <Label>Featured image caption</Label>
+                <Input value={form.featured_image_caption} onChange={(e) => setForm({ ...form, featured_image_caption: e.target.value })} className="mt-1" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>Social caption</Label>
+                <Textarea value={form.social_caption} onChange={(e) => setForm({ ...form, social_caption: e.target.value })} className="mt-1" rows={2} placeholder="≤280 chars, incl. hashtags" />
+              </div>
+              <div>
+                <Label>Social excerpt</Label>
+                <Textarea value={form.social_excerpt} onChange={(e) => setForm({ ...form, social_excerpt: e.target.value })} className="mt-1" rows={2} />
+              </div>
+            </div>
+
+            <div>
+              <Label>Canonical URL</Label>
+              <Input value={form.canonical_url} onChange={(e) => setForm({ ...form, canonical_url: e.target.value })} className="mt-1" placeholder="https://…" />
+            </div>
+          </div>
+
           {/* Actions */}
           <div className="flex items-center justify-between pt-2">
-            <div className="flex items-center gap-2">
-              <Switch checked={form.is_published} onCheckedChange={(v) => setForm({ ...form, is_published: v })} />
-              <Label>{form.is_published ? "Published" : "Draft"}</Label>
+            <div className="text-xs text-muted-foreground">
+              {form.publish_status === "scheduled" && form.scheduled_at
+                ? `Will auto-publish at ${new Date(form.scheduled_at).toLocaleString("en-IN")}`
+                : form.publish_status === "published"
+                  ? "Live on site"
+                  : "Saved as draft"}
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={resetForm}>Cancel</Button>
-              <Button onClick={() => saveMutation.mutate()} disabled={!form.title || saveMutation.isPending}>
-                {saveMutation.isPending ? "Saving…" : editing ? "Update Post" : "Publish Post"}
+              <Button onClick={() => saveMutation.mutate()} disabled={!form.title || saveMutation.isPending || (form.publish_status === "scheduled" && !form.scheduled_at)}>
+                {saveMutation.isPending ? "Saving…" : editing ? "Update Post" : "Save Post"}
               </Button>
             </div>
           </div>
+
         </div>
       </div>
     );
@@ -423,10 +587,18 @@ const AdminPosts = () => {
                   <TableCell className="text-xs text-muted-foreground max-w-[150px] truncate">{p.slug}</TableCell>
                   <TableCell className="capitalize">{p.post_type}</TableCell>
                   <TableCell>
-                    {p.is_published
-                      ? <span className="text-green-600 font-medium">Published</span>
-                      : <span className="text-muted-foreground">Draft</span>}
+                    {(() => {
+                      const status = p.publish_status ?? (p.is_published ? "published" : "draft");
+                      if (status === "published") return <span className="text-green-600 font-medium">Published</span>;
+                      if (status === "scheduled") return (
+                        <span className="text-blue-600 font-medium">
+                          Scheduled{p.scheduled_at ? ` · ${new Date(p.scheduled_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}` : ""}
+                        </span>
+                      );
+                      return <span className="text-muted-foreground">Draft</span>;
+                    })()}
                   </TableCell>
+
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => openEdit(p)}><Pencil className="h-4 w-4" /></Button>
                     <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(p.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>

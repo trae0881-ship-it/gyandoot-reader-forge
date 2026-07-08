@@ -19,8 +19,27 @@ import { buildKeyResolver, KeyResolver } from "../_shared/ai-key-resolver.ts";
 const NICHE = "Books, Spirituality, Meditation, Self Growth, Mindfulness, Consciousness";
 const SITE = "https://gyandootnova.in";
 const AUTHOR = "GyandootNova Editorial";
+const DEFAULT_TZ = "Asia/Kolkata";
 const SIMILARITY_THRESHOLD = 0.7;
 const CONTENT_SCORE_THRESHOLD = Number(Deno.env.get("SEO_CONTENT_SCORE_MIN") || "55");
+
+// Suggested IST publishing slots for a Hindi spiritual audience.
+// Alternates a morning devotion slot and an evening reading slot.
+const IST_SLOTS: [number, number][] = [[7, 0], [19, 30]]; // 07:00 and 19:30 IST
+function suggestSchedule(batchIndex: number): { date: string; time: string; iso: string } {
+  const slot = IST_SLOTS[batchIndex % IST_SLOTS.length];
+  const dayOffset = Math.floor(batchIndex / IST_SLOTS.length) + 1; // start tomorrow
+  // IST = UTC+5:30 → UTC hour = slot.hour - 5, minute = slot.minute - 30 (mod)
+  const now = new Date();
+  const utc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + dayOffset, slot[0] - 5, slot[1] - 30, 0));
+  const iso = utc.toISOString();
+  // Format date/time as seen in the target tz (IST) for display fields.
+  const istDate = new Date(utc.getTime() + 5.5 * 3600 * 1000);
+  const date = istDate.toISOString().slice(0, 10);
+  const time = `${String(slot[0]).padStart(2, "0")}:${String(slot[1]).padStart(2, "0")}`;
+  return { date, time, iso };
+}
+
 
 
 

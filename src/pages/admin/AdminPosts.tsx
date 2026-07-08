@@ -117,20 +117,40 @@ const AdminPosts = () => {
     },
   });
 
+  const parseList = (s: string): string[] =>
+    s.split(",").map((t) => t.trim()).filter(Boolean);
+
   const saveMutation = useMutation({
     mutationFn: async () => {
       const finalSlug = form.slug.trim() || slugify(form.title);
-      const payload = {
+      const scheduledIso = form.publish_status === "scheduled" && form.scheduled_at
+        ? new Date(form.scheduled_at).toISOString()
+        : null;
+      const payload: any = {
         title: form.title,
         slug: finalSlug,
         content: form.content,
         excerpt: form.excerpt,
         post_type: form.post_type,
-        is_published: form.is_published,
         meta_title: form.meta_title,
         meta_description: form.meta_description,
         cover_url: form.cover_url || null,
         manually_edited: true,
+        publish_status: form.publish_status,
+        scheduled_at: scheduledIso,
+        timezone: form.timezone || "Asia/Kolkata",
+        category: form.category || null,
+        primary_keyword: form.primary_keyword || null,
+        secondary_keywords: parseList(form.secondary_keywords),
+        tags: parseList(form.tags),
+        author: form.author || null,
+        featured_image_title: form.featured_image_title || null,
+        featured_image_alt: form.featured_image_alt || null,
+        featured_image_caption: form.featured_image_caption || null,
+        social_caption: form.social_caption || null,
+        social_excerpt: form.social_excerpt || null,
+        canonical_url: form.canonical_url || null,
+        schema_type: form.schema_type || "BlogPosting",
       };
       if (editing) {
         const { error } = await supabase.from("posts").update(payload).eq("id", editing.id);
@@ -158,16 +178,40 @@ const AdminPosts = () => {
 
   const resetForm = () => { setForm({ ...emptyForm }); setEditing(null); setView("list"); };
 
+  const toDatetimeLocal = (iso: string | null): string => {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
   const openEdit = (p: any) => {
     setEditing(p);
     setForm({
       title: p.title, slug: p.slug ?? "", content: p.content ?? "", excerpt: p.excerpt ?? "",
-      post_type: p.post_type, is_published: p.is_published,
+      post_type: p.post_type, is_published: !!p.is_published,
       meta_title: p.meta_title ?? "", meta_description: p.meta_description ?? "",
       cover_url: p.cover_url ?? "",
+      publish_status: (p.publish_status ?? (p.is_published ? "published" : "draft")) as any,
+      scheduled_at: toDatetimeLocal(p.scheduled_at ?? null),
+      timezone: p.timezone ?? "Asia/Kolkata",
+      category: p.category ?? "",
+      primary_keyword: p.primary_keyword ?? "",
+      secondary_keywords: Array.isArray(p.secondary_keywords) ? p.secondary_keywords.join(", ") : "",
+      tags: Array.isArray(p.tags) ? p.tags.join(", ") : "",
+      author: p.author ?? "",
+      featured_image_title: p.featured_image_title ?? "",
+      featured_image_alt: p.featured_image_alt ?? "",
+      featured_image_caption: p.featured_image_caption ?? "",
+      social_caption: p.social_caption ?? "",
+      social_excerpt: p.social_excerpt ?? "",
+      canonical_url: p.canonical_url ?? "",
+      schema_type: p.schema_type ?? "BlogPosting",
     });
     setView("form");
   };
+
 
   const seo = getSeoScore(form);
   const previewTitle = form.meta_title || form.title || "Post Title";

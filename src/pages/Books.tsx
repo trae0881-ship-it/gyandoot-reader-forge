@@ -24,8 +24,11 @@ const PAGE_SIZE = 8;
 const Books = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialSearch = searchParams.get("search") ?? "";
+  const filterParam = searchParams.get("filter");
+  const initialFilter: "all" | "free" | "paid" =
+    filterParam === "free" || filterParam === "paid" ? filterParam : "all";
 
-  const [filter, setFilter] = useState<"all" | "free" | "paid">("all");
+  const [filter, setFilter] = useState<"all" | "free" | "paid">(initialFilter);
   const [category, setCategory] = useState("all");
   const [search, setSearch] = useState(initialSearch);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);

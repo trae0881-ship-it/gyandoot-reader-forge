@@ -37,8 +37,9 @@ const CURRENCY_SYMBOL: Record<Currency, string> = {
 };
 
 // Country → default currency + language
+// English-first globally. Only non-English speaking regions auto-switch language.
 const COUNTRY_MAP: Record<string, { currency: Currency; language: Language }> = {
-  IN: { currency: "INR", language: "hi" },
+  IN: { currency: "INR", language: "en" },
   US: { currency: "USD", language: "en" },
   GB: { currency: "GBP", language: "en" },
   CA: { currency: "CAD", language: "en" },
@@ -181,7 +182,7 @@ function injectGoogleTranslate() {
     if (g?.translate?.TranslateElement) {
       new g.translate.TranslateElement(
         {
-          pageLanguage: "hi",
+          pageLanguage: "en",
           includedLanguages: "hi,en,es,fr,de,ar,zh-CN,ja,ru,pt",
           autoDisplay: false,
         },
@@ -207,7 +208,7 @@ function triggerGoogleTranslate(lang: Language, attempt = 0) {
     }
   };
 
-  const cookieVal = lang === "hi" ? "/hi/hi" : `/hi/${lang}`;
+  const cookieVal = lang === "en" ? "/en/en" : `/en/${lang}`;
   setCookie(cookieVal);
 
   // Retry until the Google Translate combo box mounts (script loads async)

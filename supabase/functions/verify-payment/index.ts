@@ -172,7 +172,7 @@ async function sendReceipt(
         Authorization: `Bearer ${resendKey}`,
       },
       body: JSON.stringify({
-        from: "GyandootNova <onboarding@resend.dev>",
+        from: "GyandootNova <info@gyandootnova.in>",
         to: [recipientEmail],
         subject,
         html,

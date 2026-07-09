@@ -108,7 +108,7 @@ serve(async (req) => {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${RESEND_API_KEY}` },
       body: JSON.stringify({
-        from: "GyandootNova <onboarding@resend.dev>",
+        from: "GyandootNova <info@gyandootnova.in>",
         to: [ADMIN_EMAIL],
         reply_to: email,
         subject: `Contact: ${subject}`.slice(0, 200),

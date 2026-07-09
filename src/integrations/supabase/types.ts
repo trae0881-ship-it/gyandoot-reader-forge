@@ -1336,6 +1336,20 @@ export type Database = {
     }
     Functions: {
       admin_get_book_file_url: { Args: { _book_id: string }; Returns: string }
+      admin_get_chapter_full: {
+        Args: { _chapter_id: string }
+        Returns: {
+          book_id: string
+          chapter_number: number
+          content: string
+          created_at: string
+          id: string
+          is_preview: boolean
+          slug: string
+          title: string
+          updated_at: string
+        }[]
+      }
       admin_set_book_file_url: {
         Args: { _book_id: string; _file_url: string }
         Returns: undefined
@@ -1392,6 +1406,7 @@ export type Database = {
         Returns: undefined
       }
       is_admin_otp_verified: { Args: { _user_id: string }; Returns: boolean }
+      publish_scheduled_posts: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "user"

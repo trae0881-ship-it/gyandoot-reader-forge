@@ -7,7 +7,7 @@ import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-
 export const SITE_NAME = "GyandootNova";
 export const ADMIN_EMAIL = Deno.env.get("SEO_ADMIN_EMAIL") || "contact@gyandootnova.com";
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
-const FROM = "SEO Agent <onboarding@resend.dev>";
+const FROM = "SEO Agent <info@gyandootnova.in>";
 const PAUSE_MINUTES = 60;
 const CONSECUTIVE_THRESHOLD = 3;
 

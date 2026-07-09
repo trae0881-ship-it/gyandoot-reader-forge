@@ -7,7 +7,7 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { SITE_NAME, ADMIN_EMAIL, istNow, sendAlert } from "../_shared/seo-alerts.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
-const FROM = "SEO Agent <onboarding@resend.dev>";
+const FROM = "SEO Agent <info@gyandootnova.in>";
 
 type Probe = { provider: string; ok: boolean; status?: number; error?: string; hasKey: boolean };
 

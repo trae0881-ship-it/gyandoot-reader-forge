@@ -75,7 +75,7 @@ async function sendAccountStatusEmail(email: string, displayName: string | null,
 
   try {
     await resend.emails.send({
-      from: "GyandootNova <onboarding@resend.dev>",
+      from: "GyandootNova <info@gyandootnova.in>",
       to: [email],
       subject,
       html,

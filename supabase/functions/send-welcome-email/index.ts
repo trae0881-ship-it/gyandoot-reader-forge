@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
     `;
 
     await resend.emails.send({
-      from: "GyandootNova <onboarding@resend.dev>",
+      from: "GyandootNova <info@gyandootnova.in>",
       to: [target],
       subject: `Welcome to GyandootNova, ${displayName || target.split("@")[0]}! 🎉`,
       html,

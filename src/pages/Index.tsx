@@ -615,7 +615,7 @@ const Index = () => {
                     <p className="text-xs text-muted-foreground">{t.role}</p>
                   </div>
                   <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
-                    <CheckCircle2 className="h-3.5 w-3.5" /> प्रामाणिक पाठक
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Verified Reader
                   </span>
 
                 </div>

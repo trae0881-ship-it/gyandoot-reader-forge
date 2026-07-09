@@ -191,7 +191,7 @@ const Books = () => {
                             <Star className="h-3 w-3 fill-secondary text-secondary" />
                             <span className="font-medium text-foreground">4.8</span>
                             <span>•</span>
-                            <span>{readers.toLocaleString()}+ पाठक</span>
+                            <span>{readers.toLocaleString()}+ readers</span>
                           </div>
 
                           {/* Price + CTA (C.3) */}

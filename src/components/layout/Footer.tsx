@@ -64,12 +64,21 @@ const Footer = () => {
                       <Icon className="h-4 w-4" />
                     </a>
                   ))
-                : [Facebook, Linkedin, Instagram, Youtube, MessageCircle].map((Icon, i) => (
+                : [
+                    { Icon: Facebook, label: "Facebook" },
+                    { Icon: Linkedin, label: "LinkedIn" },
+                    { Icon: Instagram, label: "Instagram" },
+                    { Icon: Youtube, label: "YouTube" },
+                    { Icon: MessageCircle, label: "WhatsApp" },
+                  ].map(({ Icon, label }) => (
                     <span
-                      key={i}
+                      key={label}
+                      role="img"
+                      aria-label={`${label} (coming soon)`}
                       className="flex h-9 w-9 items-center justify-center rounded-full bg-background/10 text-background/20"
                     >
-                      <Icon className="h-4 w-4" />
+                      <Icon className="h-4 w-4" aria-hidden="true" />
+                      <span className="sr-only">{label} (coming soon)</span>
                     </span>
                   ))}
             </div>

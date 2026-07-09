@@ -13,10 +13,17 @@ import {
   BookOpen, Heart, User, Calendar, IndianRupee, PlayCircle,
   Bookmark, StickyNote, Highlighter, Download, FileText, Share2, Copy
 } from "lucide-react";
+import useSEO from "@/hooks/useSEO";
 
 const Profile = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+
+  useSEO({
+    title: "My Profile — Purchased Books & Reading | GyandootNova",
+    description: "Aapka GyandootNova profile — purchased books, reading progress, highlights, notes aur downloads ek jagah.",
+    canonical: "/profile",
+  });
 
   useEffect(() => {
     if (!loading && !user) navigate("/auth");

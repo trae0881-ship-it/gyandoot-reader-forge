@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PhoneOtpLogin from "@/components/auth/PhoneOtpLogin";
 import logoImg from "@/assets/logo.jpeg";
+import useSEO from "@/hooks/useSEO";
 
 const ForgotPasswordLink = ({ email }: { email: string }) => {
   const { toast } = useToast();
@@ -51,6 +52,12 @@ const Auth = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+
+  useSEO({
+    title: "Sign In or Create Account | GyandootNova",
+    description: "Sign in to your GyandootNova account ya naya account banayein — Hindu dharmik granth, Bhagavad Gita aur Vedas online reader ke liye.",
+    canonical: "/auth",
+  });
 
   useEffect(() => {
     if (!authLoading && user) {

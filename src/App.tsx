@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { LocaleProvider } from "@/hooks/useLocale";
 import PriceAutoConvert from "@/components/PriceAutoConvert";
@@ -130,7 +130,7 @@ const AppContent = () => {
                 <Route path="/texts/vedas" element={<VedasHub />} />
                 <Route path="/texts/upanishads" element={<UpanishadsHub />} />
                 <Route path="/texts/rig-veda" element={<RigVedaHub />} />
-                <Route path="/texts/rigveda" element={<RigVedaHub />} />
+                <Route path="/texts/rigveda" element={<Navigate to="/texts/rig-veda" replace />} />
                 <Route path="/hindi/upanishad-meaning-in-hindi" element={<UpanishadMeaningHindi />} />
                 <Route path="/hindi/vedas-meaning-in-hindi" element={<VedasMeaningHindi />} />
                 <Route path="/hindi/dhyan-kaise-karein" element={<DhyanKaiseKarein />} />

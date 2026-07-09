@@ -220,6 +220,16 @@ const Profile = () => {
                           <Calendar className="h-3 w-3" />
                           {new Date(p.created_at).toLocaleDateString("en-IN")}
                         </p>
+                        {(() => {
+                          // Show the amount actually paid (frozen at purchase time), not the current book price.
+                          const paid = p.amount != null ? Number(p.amount) : (p.book?.price != null ? Number(p.book.price) : null);
+                          if (paid == null || paid === 0) return null;
+                          const currency = p.currency || "INR";
+                          const symbol = currency === "USD" ? "$" : currency === "INR" ? "₹" : `${currency} `;
+                          return (
+                            <p className="text-xs font-medium mt-1">Paid: {symbol}{paid.toLocaleString()}</p>
+                          );
+                        })()}
                       </div>
                     </div>
 

@@ -396,7 +396,7 @@ const AdminBooks = () => {
             <DialogTrigger asChild>
               <Button size="sm"><Plus className="mr-1 h-4 w-4" /> Add Book</Button>
             </DialogTrigger>
-          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="font-serif">{editing ? "Edit Book" : "New Book"}</DialogTitle>
             </DialogHeader>

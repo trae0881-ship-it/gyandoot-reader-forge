@@ -87,6 +87,20 @@ const BookDetail = () => {
     enabled: !!book?.id && !!user?.id,
   });
 
+  const { data: siteSettings } = useQuery({
+    queryKey: ["site-settings"],
+    queryFn: async () => {
+      const { data } = await supabase.from("settings").select("key, value");
+      const map: Record<string, string> = {};
+      data?.forEach((s) => { map[s.key] = s.value ?? ""; });
+      return map;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+  const freeChapterNote = siteSettings?.book_free_chapter_note ?? "पहला अध्याय 100% मुफ़्त है — Login कीजिए और पढ़कर देखिए, पसंद आए तभी खरीदिए।";
+
+
+
   const applyCoupon = async () => {
     if (!couponCode.trim() || !book) return;
     setCouponLoading(true);

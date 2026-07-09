@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { amount, type, book_id, name, email, gateway = "razorpay", coupon_id, referrer_id } = await req.json();
+    const { amount, type, book_id, name, email, gateway = "razorpay", coupon_id, referrer_id, buyer_currency, buyer_fx_rate } = await req.json();
 
     // For purchases, auth is required. For donations, auth is optional.
     let user: any = null;

@@ -167,16 +167,16 @@ const Index = () => {
         />
         <div className="container relative text-center">
           <div className="inline-flex items-center gap-2 rounded-full bg-secondary/20 px-4 py-1.5 text-xs font-semibold text-secondary mb-5">
-            <Star className="h-3.5 w-3.5 fill-secondary" /> भरोसा — 24,000+ पाठकों की पहली पसंद
+            <Star className="h-3.5 w-3.5 fill-secondary" /> Trusted by 24,000+ readers worldwide
           </div>
           <h1 className="font-serif text-3xl font-extrabold leading-tight text-primary-foreground md:text-5xl lg:text-6xl">
-            Dharmik Granth Online India Mein —{" "}
-            <span className="text-secondary">Geeta, Ramayana, Hanuman Chalisa</span>
-            <br className="hidden md:block" /> Saral Hindi Mein, Bina Jhanjhat Ke
+            Ancient Indian Scriptures, Online —{" "}
+            <span className="text-secondary">Bhagavad Gita, Ramayana, Hanuman Chalisa</span>
+            <br className="hidden md:block" /> in Clear English & Hindi
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-primary-foreground/90 md:text-lg">
-            50+ dharmik granth ab ek hi jagah. Free padhna shuru karein, ya{" "}
-            <strong className="text-secondary">premium granth unlock karke sampurna gyaan paayein.</strong>
+            50+ sacred texts in one library. Start reading free, or{" "}
+            <strong className="text-secondary">unlock premium editions for lifetime access to timeless wisdom.</strong>
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button
@@ -185,7 +185,7 @@ const Index = () => {
               asChild
             >
               <Link to="/books?filter=free">
-                <BookOpen className="mr-2 h-5 w-5" /> Free Mein Padhna Shuru Karein →
+                <BookOpen className="mr-2 h-5 w-5" /> Start Reading Free →
               </Link>
             </Button>
             <Button
@@ -195,15 +195,15 @@ const Index = () => {
               asChild
             >
               <Link to="/books?filter=paid">
-                Premium Granth Dekhein
+                Explore Premium Editions
               </Link>
             </Button>
           </div>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs md:text-sm text-primary-foreground/80">
-            <span className="inline-flex items-center gap-1.5"><Lock className="h-3.5 w-3.5 text-secondary" /> निजी और सुरक्षित</span>
-            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-secondary" /> पसंद नहीं आया? 7 दिन में पूरा वापस</span>
-            <span className="inline-flex items-center gap-1.5"><InfinityIcon className="h-3.5 w-3.5 text-secondary" /> जब तक जिएँ, तब तक पढ़ें</span>
-            <span className="inline-flex items-center gap-1.5"><RefreshCw className="h-3.5 w-3.5 text-secondary" /> नए संस्करण मुफ़्त</span>
+            <span className="inline-flex items-center gap-1.5"><Lock className="h-3.5 w-3.5 text-secondary" /> Private & Secure</span>
+            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-secondary" /> 7-day full refund guarantee</span>
+            <span className="inline-flex items-center gap-1.5"><InfinityIcon className="h-3.5 w-3.5 text-secondary" /> Lifetime access, read forever</span>
+            <span className="inline-flex items-center gap-1.5"><RefreshCw className="h-3.5 w-3.5 text-secondary" /> Free updates & new editions</span>
           </div>
 
         </div>

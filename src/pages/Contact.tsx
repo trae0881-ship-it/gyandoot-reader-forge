@@ -53,10 +53,10 @@ const Contact = () => {
         body: form,
       });
       if (error) throw error;
-      toast({ title: "संदेश पहुँच गया ✅", description: "बहुत जल्द जवाब मिलेगा।" });
+      toast({ title: "Message received", description: "We'll get back to you very soon." });
       setForm({ name: "", email: "", subject: "", message: "" });
     } catch {
-      toast({ title: "भेजने में दिक़्क़त हुई", description: "थोड़ी देर बाद कोशिश कीजिए या सीधे email कीजिए।", variant: "destructive" });
+      toast({ title: "Couldn't send", description: "Please try again in a moment, or email us directly.", variant: "destructive" });
     } finally {
 
       setSending(false);

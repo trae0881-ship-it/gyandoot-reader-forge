@@ -7,10 +7,19 @@ const AdminPurchases = () => {
   const { data: purchases } = useQuery({
     queryKey: ["admin-purchases"],
     queryFn: async () => {
-      const { data } = await supabase.from("purchases").select("id, book_id, user_id, status, razorpay_payment_id, created_at, books(title)").order("created_at", { ascending: false });
+      const { data } = await supabase.from("purchases").select("id, book_id, user_id, status, razorpay_payment_id, created_at, amount, currency, books(title, price)").order("created_at", { ascending: false });
       return data ?? [];
     },
   });
+
+  const formatAmount = (p: any) => {
+    // Prefer the frozen amount stored at time of purchase; fall back to current book price for legacy rows.
+    const value = p.amount != null ? Number(p.amount) : (p.books?.price != null ? Number(p.books.price) : null);
+    if (value == null) return "—";
+    const currency = p.currency || "INR";
+    const symbol = currency === "USD" ? "$" : currency === "INR" ? "₹" : `${currency} `;
+    return `${symbol}${value.toLocaleString()}`;
+  };
 
   return (
     <div>
@@ -21,6 +30,7 @@ const AdminPurchases = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Book</TableHead>
+                <TableHead>Amount</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Payment ID</TableHead>
                 <TableHead>Date</TableHead>
@@ -30,6 +40,7 @@ const AdminPurchases = () => {
               {purchases?.map((p: any) => (
                 <TableRow key={p.id}>
                   <TableCell className="font-medium">{p.books?.title ?? "—"}</TableCell>
+                  <TableCell className="text-sm">{formatAmount(p)}</TableCell>
                   <TableCell>
                     <span className={`text-xs font-medium ${p.status === "completed" ? "text-green-600" : "text-muted-foreground"}`}>
                       {p.status}
@@ -40,7 +51,7 @@ const AdminPurchases = () => {
                 </TableRow>
               ))}
               {(!purchases || purchases.length === 0) && (
-                <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-8">No purchases yet.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">No purchases yet.</TableCell></TableRow>
               )}
             </TableBody>
           </Table>

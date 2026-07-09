@@ -957,10 +957,12 @@ export type Database = {
       }
       purchases: {
         Row: {
+          amount: number | null
           book_id: string
           coupon_id: string | null
           coupon_redeemed_at: string | null
           created_at: string
+          currency: string
           id: string
           razorpay_order_id: string | null
           razorpay_payment_id: string | null
@@ -970,10 +972,12 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          amount?: number | null
           book_id: string
           coupon_id?: string | null
           coupon_redeemed_at?: string | null
           created_at?: string
+          currency?: string
           id?: string
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
@@ -983,10 +987,12 @@ export type Database = {
           user_id: string
         }
         Update: {
+          amount?: number | null
           book_id?: string
           coupon_id?: string | null
           coupon_redeemed_at?: string | null
           created_at?: string
+          currency?: string
           id?: string
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
@@ -1380,8 +1386,10 @@ export type Database = {
       get_user_purchases: {
         Args: { _user_id: string }
         Returns: {
+          amount: number
           book_id: string
           created_at: string
+          currency: string
           id: string
           status: string
         }[]

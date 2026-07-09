@@ -5,6 +5,7 @@ import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { decryptKey } from "./ai-crypto.ts";
 
 const ENV_MAP: Record<string, string> = {
+  lovable: "LOVABLE_API_KEY",
   anthropic: "ANTHROPIC_API_KEY",
   openai: "OPENAI_API_KEY",
   gemini: "GEMINI_API_KEY",

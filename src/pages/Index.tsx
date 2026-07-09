@@ -479,7 +479,7 @@ const Index = () => {
                   to="/articles"
                   className="mt-4 inline-flex items-center text-sm font-medium text-primary hover:underline"
                 >
-                  विवरण देखिए <ArrowRight className="ml-1 h-3 w-3" />
+                  View details <ArrowRight className="ml-1 h-3 w-3" />
                 </Link>
               </Card>
             ))}

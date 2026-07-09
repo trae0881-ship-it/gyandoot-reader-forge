@@ -55,6 +55,18 @@ const AdminEnquiries = lazy(() => import("./pages/admin/AdminEnquiries"));
 const AdminLSI = lazy(() => import("./pages/admin/AdminLSI"));
 const AdminAIProviders = lazy(() => import("./pages/admin/AdminAIProviders"));
 
+// SEO content — sacred text hubs, Hindi meaning pages, meditation guides
+const BhagavadGitaHub = lazy(() => import("./pages/texts/BhagavadGita"));
+const VedasHub = lazy(() => import("./pages/texts/Vedas"));
+const UpanishadsHub = lazy(() => import("./pages/texts/Upanishads"));
+const UpanishadMeaningHindi = lazy(() => import("./pages/hindi/UpanishadMeaningHindi"));
+const VedasMeaningHindi = lazy(() => import("./pages/hindi/VedasMeaningHindi"));
+const DhyanKaiseKarein = lazy(() => import("./pages/hindi/DhyanKaiseKarein"));
+const HowToReadBhagavadGita = lazy(() => import("./pages/how-to-read/HowToReadBhagavadGita"));
+const TechniquesCompared = lazy(() => import("./pages/meditation/TechniquesCompared"));
+const MeditationForAnxiety = lazy(() => import("./pages/meditation/MeditationForAnxiety"));
+const MeditationForStress = lazy(() => import("./pages/meditation/MeditationForStress"));
+
 // Minimal loading spinner
 const PageLoader = () => (
   <div className="flex min-h-screen items-center justify-center bg-background">
@@ -104,6 +116,18 @@ const AppContent = () => {
                 <Route path="/shipping-policy" element={<ShippingPolicy />} />
                 <Route path="/sitemap" element={<SitemapPage />} />
                 <Route path="/keywords" element={<Keywords />} />
+
+                {/* SEO content pages */}
+                <Route path="/texts/bhagavad-gita" element={<BhagavadGitaHub />} />
+                <Route path="/texts/vedas" element={<VedasHub />} />
+                <Route path="/texts/upanishads" element={<UpanishadsHub />} />
+                <Route path="/hindi/upanishad-meaning-in-hindi" element={<UpanishadMeaningHindi />} />
+                <Route path="/hindi/vedas-meaning-in-hindi" element={<VedasMeaningHindi />} />
+                <Route path="/hindi/dhyan-kaise-karein" element={<DhyanKaiseKarein />} />
+                <Route path="/how-to-read/bhagavad-gita" element={<HowToReadBhagavadGita />} />
+                <Route path="/meditation/techniques-compared" element={<TechniquesCompared />} />
+                <Route path="/meditation/for-anxiety" element={<MeditationForAnxiety />} />
+                <Route path="/meditation/for-stress" element={<MeditationForStress />} />
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<AdminDashboard />} />
                   <Route path="users" element={<AdminUsers />} />

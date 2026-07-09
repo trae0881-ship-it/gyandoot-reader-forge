@@ -140,6 +140,35 @@ const AdminSettings = () => {
           </CardContent>
         </Card>
 
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-primary" /> Book Detail — Free Chapter Note
+            </CardTitle>
+            <CardDescription>
+              Paid books के Table of Contents के ऊपर दिखने वाला promo message। खाली छोड़ने पर hide हो जाएगा।
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            {isLoading ? (
+              <p className="text-sm text-muted-foreground">Loading...</p>
+            ) : (
+              BOOK_KEYS.map(({ key, label, placeholder, hint }) => (
+                <div key={key} className="space-y-1.5">
+                  <Label>{label}</Label>
+                  <Textarea
+                    value={values[key] ?? ""}
+                    onChange={(e) => setValues((prev) => ({ ...prev, [key]: e.target.value }))}
+                    placeholder={placeholder}
+                    rows={3}
+                  />
+                  <p className="text-xs text-muted-foreground">{hint}</p>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
         <Button
           className="w-full sm:w-auto"
           onClick={handleSave}

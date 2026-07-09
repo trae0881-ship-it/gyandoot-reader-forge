@@ -112,10 +112,14 @@ const ChapterEditor = ({ book, onBack }: { book: any; onBack: () => void }) => {
 
   const resetChapterForm = () => { setForm({ title: "", content: "", chapter_number: (chapters?.length ?? 0) + 1, is_preview: true }); setEditing(null); setView("list"); };
 
-  const openEdit = (ch: any) => {
+  const openEdit = async (ch: any) => {
     setEditing(ch);
-    setForm({ title: ch.title, content: ch.content ?? "", chapter_number: ch.chapter_number, is_preview: ch.is_preview });
+    setForm({ title: ch.title, content: "", chapter_number: ch.chapter_number, is_preview: ch.is_preview });
     setView("form");
+    const { data, error } = await supabase.rpc("admin_get_chapter_full", { _chapter_id: ch.id });
+    if (error) { toast({ title: "Failed to load chapter content", description: error.message, variant: "destructive" }); return; }
+    const content = Array.isArray(data) ? (data[0]?.content ?? "") : (data as any)?.content ?? "";
+    setForm((f) => ({ ...f, content }));
   };
 
   const openNew = () => {

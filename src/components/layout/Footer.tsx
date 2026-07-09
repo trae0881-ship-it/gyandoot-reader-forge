@@ -47,7 +47,7 @@ const Footer = () => {
               <span className="font-serif text-lg font-bold text-secondary">GyandootNova</span>
             </Link>
             <p className="text-sm text-background/70 leading-relaxed">
-              प्राचीन ग्रंथों को नए दौर के पाठक तक पहुँचाने की एक ईमानदार कोशिश — शुद्ध पाठ, सरल भाषा, शांत reader।
+              GyandootNova (Gyandoot Nova) — प्राचीन ग्रंथों को नए दौर के पाठक तक पहुँचाने की एक ईमानदार कोशिश — शुद्ध पाठ, सरल भाषा, शांत reader।
             </p>
 
             <div className="mt-5 flex flex-wrap gap-3">

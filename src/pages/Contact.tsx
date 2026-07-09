@@ -10,23 +10,23 @@ import useSEO from "@/hooks/useSEO";
 
 const Contact = () => {
   useSEO({
-    title: "हमसे बात करें — GyandootNova से जुड़िए",
+    title: "Contact Us — Get in Touch with GyandootNova",
     description:
-      "ग्रंथ, order, सुझाव या साझेदारी — जो भी बात हो, WhatsApp, email या form से पहुँचिए। जवाब उसी दिन।",
+      "Books, orders, suggestions or partnerships — reach us via WhatsApp, email or the contact form. We reply the same day.",
     canonical: "/contact",
     jsonLd: {
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
       name: "GyandootNova",
       description:
-        "आध्यात्मिक प्रकाशन एवं डिजिटल पुस्तकालय — वेद, उपनिषद, गीता, रामायण, महाभारत तथा सनातन धर्म ग्रंथों का प्रामाणिक स्रोत।",
+        "Spiritual publisher and digital library — an authoritative source for the Vedas, Upanishads, Gita, Ramayana, Mahabharata and other Sanatana Dharma scriptures.",
       url: "https://gyandootnova.in/contact",
       telephone: "+91 91615 33353",
       email: "amrendra8765@gmail.com",
       address: {
         "@type": "PostalAddress",
-        addressLocality: "उन्नाव",
-        addressRegion: "उत्तर प्रदेश",
+        addressLocality: "Unnao",
+        addressRegion: "Uttar Pradesh",
         addressCountry: "IN",
       },
       openingHoursSpecification: [

@@ -647,10 +647,10 @@ const BookDetail = () => {
           {chapters && chapters.length > 0 && (
             <div className="mt-12">
               <h2 className="font-serif text-2xl font-bold mb-4">Table of Contents</h2>
-              {!canRead && !book.is_free && (
+              {!canRead && !book.is_free && freeChapterNote.trim() && (
                 <div className="mb-4 rounded-lg border-2 border-green-600/40 bg-green-50 dark:bg-green-950/20 p-3 text-sm flex items-start gap-2">
                   <Gift className="h-4 w-4 text-green-700 mt-0.5 shrink-0" />
-                  <span><strong>पहला अध्याय 100% मुफ़्त है</strong> — Login कीजिए और पढ़कर देखिए, पसंद आए तभी खरीदिए।</span>
+                  <span>{freeChapterNote}</span>
                 </div>
               )}
               <div className="space-y-2">

@@ -4,22 +4,48 @@
 
 GyandootNova (gyandootnova.in) एक आध्यात्मिक प्रकाशन और डिजिटल रीडर प्लेटफ़ॉर्म है जो हिंदी और संस्कृत में प्रामाणिक हिंदू ग्रंथ, लेख, और AI सहायक प्रदान करता है। उपयोगकर्ता ऑनलाइन सुरक्षित रीडर में पुस्तकें पढ़ सकते हैं, धर्म-संबंधी प्रश्न पूछ सकते हैं, और आध्यात्मिक लेख देख सकते हैं।
 
-Key topics: Sanatan Dharma, Vedas, Upanishads, Bhagavad Gita, Ramayana, Mahabharata, Hindu philosophy, spirituality, dharma, yoga, meditation, Sanskrit scriptures, हिंदू धर्म ग्रंथ.
+Key topics: Sanatan Dharma, Vedas, Upanishads, Bhagavad Gita, Ramayana, Mahabharata, Hindu philosophy, spirituality, dharma, yoga, meditation, Sanskrit scriptures, हिंदू धर्म ग्रंथ, ध्यान, भक्ति, कर्म, मोक्ष, आत्मा, ब्रह्म.
+
+## Scriptures & Texts (Top Searched)
+- [Bhagavad Gita](/texts/bhagavad-gita): भगवद्गीता — 18 अध्याय, 700 श्लोक, कृष्ण-अर्जुन संवाद, कर्मयोग, भक्तियोग, ज्ञानयोग
+- [Vedas](/texts/vedas): चार वेद — ऋग्वेद, यजुर्वेद, सामवेद, अथर्ववेद का परिचय
+- [Rig Veda](/texts/rig-veda): ऋग्वेद — सबसे प्राचीन वेद, 10 मंडल, 1028 सूक्त
+- [Upanishads](/texts/upanishads): उपनिषद — वेदांत दर्शन, आत्मा और ब्रह्म का ज्ञान
+
+## Common Questions (Q&A)
+- [Who wrote the Bhagavad Gita?](/qa/who-wrote-bhagavad-gita): भगवद्गीता के रचयिता — वेदव्यास
+- [Who wrote the Vedas?](/qa/who-wrote-vedas): वेदों की रचना — ऋषि परंपरा और श्रुति
+- [How many slokas in Bhagavad Gita?](/qa/how-many-slokas-in-bhagavad-gita): कुल 700 श्लोक, 18 अध्याय
+- [How many Vedas are there?](/qa/how-many-vedas): चार वेद और उनका महत्व
+- [How many Upanishads?](/qa/how-many-upanishads): 108 मुख्य उपनिषद, 10 प्रमुख
+
+## How-to Guides
+- [How to read Bhagavad Gita](/how-to-read/bhagavad-gita): गीता पढ़ने का सही तरीका, क्रम, और समझ
+
+## Meditation & Yoga
+- [Meditation for Anxiety](/meditation/for-anxiety): चिंता दूर करने के लिए ध्यान तकनीक
+- [Meditation for Stress](/meditation/for-stress): तनाव मुक्ति के लिए ध्यान
+- [Meditation Techniques Compared](/meditation/techniques-compared): विभिन्न ध्यान पद्धतियों की तुलना
+
+## Hindi Content
+- [ध्यान कैसे करें](/hindi/dhyan-kaise-karein): ध्यान की विधि, आसन, और लाभ
+- [उपनिषद का अर्थ](/hindi/upanishad-meaning-hindi): उपनिषद शब्द का अर्थ और महत्व
+- [वेद का अर्थ](/hindi/vedas-meaning-hindi): वेदों का अर्थ, प्रकार, और शिक्षा
 
 ## Pages
 - [Home](/): GyandootNova introduction and featured scriptures
 - [Books Library](/books): All available Hindu scriptures and spiritual books
 - [Articles](/articles): Spiritual articles on dharma, philosophy, and Hindu culture
+- [Keywords Hub](/keywords): Complete LSI keyword & topic index (DefinedTermSet JSON-LD)
 - [About Us](/about): Mission and vision of GyandootNova
 - [Testimonials](/testimonials): Reader experiences and reviews
 - [Contact](/contact): Get in touch with the GyandootNova team
 - [FAQ](/faq): Frequently asked questions
 - [Support](/support): Help and customer support
 - [Donate](/donate): Support the mission of preserving Sanatan Dharma
-- [Careers](/careers): Join the GyandootNova team
 - [Services](/services): Publishing and digital reading services
 - [Portfolio](/portfolio): Our published works
-- [Keywords Hub](/keywords): Complete LSI keyword & topic index — Sanatan Dharma, Vedas, Gita, Ramayana, Mahabharata, Upanishads, Yoga, Bhakti terminology (structured DefinedTermSet JSON-LD)
+- [Careers](/careers): Join the GyandootNova team
 
 ## Policies
 - [Privacy Policy](/privacy-policy): How we handle user data

@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useState, useMemo, useEffect } from "react";
 
 import { initiatePayment, type PaymentGateway } from "@/lib/payment";
+import { useLocale } from "@/hooks/useLocale";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import AskScripture from "@/components/AskScripture";
@@ -30,7 +31,15 @@ const BookDetail = () => {
   const queryClient = useQueryClient();
   const [purchasing, setPurchasing] = useState(false);
   const [claimingFree, setClaimingFree] = useState(false);
+  const { country, currency, rates, formatPrice } = useLocale();
+  const isIndia = (country ?? "").toUpperCase() === "IN";
   const [gateway, setGateway] = useState<PaymentGateway>("razorpay");
+  const [gatewayTouched, setGatewayTouched] = useState(false);
+  // Auto-select PayPal for non-India visitors, Razorpay for India — unless user manually chose.
+  useEffect(() => {
+    if (gatewayTouched || !country) return;
+    setGateway(isIndia ? "razorpay" : "paypal");
+  }, [country, isIndia, gatewayTouched]);
   const [couponCode, setCouponCode] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<{
@@ -188,6 +197,8 @@ const BookDetail = () => {
         book_id: book!.id,
         coupon_id: appliedCoupon?.coupon_id,
         referrer_id: referrerId || undefined,
+        buyer_currency: currency,
+        buyer_fx_rate: rates[currency],
       } as any,
       () => {
         toast({ title: "Purchase Successful!", description: "You can now read the full book." });
@@ -372,9 +383,16 @@ const BookDetail = () => {
                     </ul>
                   </div>
 
-                  <div className="flex gap-2">
-                    <Button type="button" variant={gateway === "razorpay" ? "default" : "outline"} size="sm" onClick={() => setGateway("razorpay")}>Razorpay</Button>
-                    <Button type="button" variant={gateway === "paypal" ? "default" : "outline"} size="sm" onClick={() => setGateway("paypal")}>PayPal</Button>
+                  <div>
+                    <div className="flex gap-2">
+                      <Button type="button" variant={gateway === "razorpay" ? "default" : "outline"} size="sm" onClick={() => { setGateway("razorpay"); setGatewayTouched(true); }}>Razorpay (India)</Button>
+                      <Button type="button" variant={gateway === "paypal" ? "default" : "outline"} size="sm" onClick={() => { setGateway("paypal"); setGatewayTouched(true); }}>PayPal (International)</Button>
+                    </div>
+                    <p className="mt-1.5 text-[11px] text-muted-foreground">
+                      {gateway === "paypal"
+                        ? <>You'll be charged {formatPrice(appliedCoupon ? appliedCoupon.final_amount : book.price)} via PayPal in your local currency.</>
+                        : <>Cards, UPI, netbanking · charged in INR.</>}
+                    </p>
                   </div>
 
                   {!appliedCoupon ? (

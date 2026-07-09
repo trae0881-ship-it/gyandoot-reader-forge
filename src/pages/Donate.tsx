@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, CheckCircle, Loader2, User, Mail, LogIn } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { initiatePayment, type PaymentGateway } from "@/lib/payment";
+import { useLocale } from "@/hooks/useLocale";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import useSEO from "@/hooks/useSEO";
@@ -27,7 +28,14 @@ const Donate = () => {
   const [email, setEmail] = useState(user?.email ?? "");
   const [donated, setDonated] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { country, currency, rates, formatPrice } = useLocale();
+  const isIndia = (country ?? "").toUpperCase() === "IN";
   const [gateway, setGateway] = useState<PaymentGateway>("razorpay");
+  const [gatewayTouched, setGatewayTouched] = useState(false);
+  useEffect(() => {
+    if (gatewayTouched || !country) return;
+    setGateway(isIndia ? "razorpay" : "paypal");
+  }, [country, isIndia, gatewayTouched]);
 
   const handleDonate = async () => {
     if (!amount || amount < 1) {
@@ -44,7 +52,7 @@ const Donate = () => {
     }
     setLoading(true);
     await initiatePayment(
-      { amount, type: "donation", gateway, name: name.trim(), email: email.trim() },
+      { amount, type: "donation", gateway, name: name.trim(), email: email.trim(), buyer_currency: currency, buyer_fx_rate: rates[currency] } as any,
       () => {
         setDonated(true);
         setLoading(false);
@@ -168,20 +176,25 @@ const Donate = () => {
                   <Button
                     type="button"
                     variant={gateway === "razorpay" ? "default" : "outline"}
-                    onClick={() => setGateway("razorpay")}
+                    onClick={() => { setGateway("razorpay"); setGatewayTouched(true); }}
                     className="flex-1"
                   >
-                    Razorpay
+                    Razorpay <span className="ml-1 opacity-70 text-xs">(India)</span>
                   </Button>
                   <Button
                     type="button"
                     variant={gateway === "paypal" ? "default" : "outline"}
-                    onClick={() => setGateway("paypal")}
+                    onClick={() => { setGateway("paypal"); setGatewayTouched(true); }}
                     className="flex-1"
                   >
-                    PayPal
+                    PayPal <span className="ml-1 opacity-70 text-xs">(Global)</span>
                   </Button>
                 </div>
+                <p className="mt-1.5 text-[11px] text-muted-foreground">
+                  {gateway === "paypal"
+                    ? <>You'll be charged {formatPrice(amount)} via PayPal in your local currency.</>
+                    : <>Cards, UPI, netbanking — charged in INR.</>}
+                </p>
               </div>
 
               <Button
@@ -193,7 +206,7 @@ const Donate = () => {
                 {loading ? (
                   <><Loader2 className="h-4 w-4 animate-spin" /> Processing...</>
                 ) : (
-                  <><Heart className="h-4 w-4" /> ₹{amount.toLocaleString("en-IN")} Daan Karein</>
+                  <><Heart className="h-4 w-4" /> {gateway === "paypal" ? formatPrice(amount) : `₹${amount.toLocaleString("en-IN")}`} Daan Karein</>
                 )}
               </Button>
 

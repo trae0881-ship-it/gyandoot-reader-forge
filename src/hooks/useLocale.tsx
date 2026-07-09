@@ -182,7 +182,7 @@ function injectGoogleTranslate() {
     if (g?.translate?.TranslateElement) {
       new g.translate.TranslateElement(
         {
-          pageLanguage: "hi",
+          pageLanguage: "en",
           includedLanguages: "hi,en,es,fr,de,ar,zh-CN,ja,ru,pt",
           autoDisplay: false,
         },

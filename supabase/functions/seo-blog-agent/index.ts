@@ -458,14 +458,40 @@ Return STRICT JSON (no markdown fences):
       { role: "user", content: genPrompt },
     ], true, log, supabase, "draft-generation", resolveKey);
     let article: any;
-    try { article = JSON.parse(raw); }
-    catch (e: any) {
+    const tryParse = (s: string) => { try { return JSON.parse(s); } catch { return null; } };
+    // 1) direct parse
+    article = tryParse(raw);
+    if (!article) {
+      // 2) strip code fences / language hints
+      let cleaned = raw.replace(/^\uFEFF/, "").trim()
+        .replace(/^```(?:json)?\s*/i, "")
+        .replace(/```\s*$/i, "")
+        .trim();
+      article = tryParse(cleaned);
+      // 3) extract widest {...} slice
+      if (!article) {
+        const first = cleaned.indexOf("{");
+        const last = cleaned.lastIndexOf("}");
+        if (first !== -1 && last > first) {
+          const slice = cleaned.slice(first, last + 1);
+          article = tryParse(slice);
+          // 4) repair common issues: trailing commas, bad control chars
+          if (!article) {
+            const repaired = slice
+              .replace(/,\s*([}\]])/g, "$1")
+              .replace(/[\u0000-\u001F]+/g, (m) => m.replace(/[\r\n\t]/g, " "));
+            article = tryParse(repaired);
+          }
+        }
+      }
+    }
+    if (!article || typeof article !== "object") {
       await sendAlert(supabase, {
         errorType: "Draft generation failed", step: "draft-generation",
-        message: `LLM returned unparseable JSON: ${String(e?.message || e)}`,
+        message: `LLM returned unparseable JSON (raw length ${raw?.length ?? 0})`,
         severity: "high", suggestion: "Inspect llm_attempts in seo_agent_logs and consider prompt tightening.",
       });
-      throw new Error(`Draft JSON parse failed: ${e?.message || e}`);
+      throw new Error(`Draft JSON parse failed after repair attempts`);
     }
 
     // 6) Assemble final HTML

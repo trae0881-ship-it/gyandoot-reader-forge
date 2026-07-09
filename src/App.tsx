@@ -130,7 +130,7 @@ const AppContent = () => {
                 <Route path="/texts/vedas" element={<VedasHub />} />
                 <Route path="/texts/upanishads" element={<UpanishadsHub />} />
                 <Route path="/texts/rig-veda" element={<RigVedaHub />} />
-                <Route path="/texts/rigveda" element={<RigVedaHub />} />
+                <Route path="/texts/rigveda" element={<Navigate to="/texts/rig-veda" replace />} />
                 <Route path="/hindi/upanishad-meaning-in-hindi" element={<UpanishadMeaningHindi />} />
                 <Route path="/hindi/vedas-meaning-in-hindi" element={<VedasMeaningHindi />} />
                 <Route path="/hindi/dhyan-kaise-karein" element={<DhyanKaiseKarein />} />

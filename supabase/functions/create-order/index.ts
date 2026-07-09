@@ -271,6 +271,8 @@ async function handlePaypal(
       book_id,
       razorpay_order_id: ppOrder.id,
       status: "pending",
+      amount: Number(usdAmount), // freeze USD amount charged at time of order
+      currency: "USD",
     };
     if (referrer_id && referrer_id !== user.id) {
       purchaseData.referrer_id = referrer_id;

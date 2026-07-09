@@ -92,17 +92,17 @@ const Books = () => {
     <Layout>
       <section className="py-8 md:py-12">
         <div className="container">
-          <h1 className="font-serif text-3xl md:text-4xl font-bold">हमारी पूरी Library</h1>
+          <h1 className="font-serif text-3xl md:text-4xl font-bold">Our Full Library</h1>
           <p className="mt-2 text-sm md:text-base text-muted-foreground">
-            एक बार खरीदिए, जीवनभर पढ़िए — हर book mobile, tablet aur laptop par padh sakte hain.
+            Buy once, read for life — every book works on mobile, tablet and laptop.
           </p>
 
           {/* Trust strip */}
           <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs md:text-sm text-foreground/80">
-            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-primary" /> 7-दिन पैसा वापसी</span>
-            <span className="inline-flex items-center gap-1.5"><InfinityIcon className="h-4 w-4 text-primary" /> जीवनभर access</span>
+            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-primary" /> 7-day money back</span>
+            <span className="inline-flex items-center gap-1.5"><InfinityIcon className="h-4 w-4 text-primary" /> Lifetime access</span>
             <span className="inline-flex items-center gap-1.5"><Lock className="h-4 w-4 text-primary" /> Secure payment</span>
-            <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4 text-primary" /> 24,000+ पाठक</span>
+            <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4 text-primary" /> 24,000+ readers</span>
           </div>
 
           {/* Search */}

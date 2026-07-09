@@ -77,7 +77,7 @@ const ChapterEditor = ({ book, onBack }: { book: any; onBack: () => void }) => {
   const { data: chapters } = useQuery({
     queryKey: ["admin-chapters", book.id],
     queryFn: async () => {
-      const { data } = await supabase.from("book_chapters").select("*").eq("book_id", book.id).order("chapter_number");
+      const { data } = await supabase.from("book_chapters").select("id, book_id, title, slug, chapter_number, is_preview, created_at, updated_at").eq("book_id", book.id).order("chapter_number");
       return data ?? [];
     },
   });

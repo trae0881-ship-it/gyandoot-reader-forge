@@ -59,6 +59,7 @@ const AdminAIProviders = lazy(() => import("./pages/admin/AdminAIProviders"));
 const BhagavadGitaHub = lazy(() => import("./pages/texts/BhagavadGita"));
 const VedasHub = lazy(() => import("./pages/texts/Vedas"));
 const UpanishadsHub = lazy(() => import("./pages/texts/Upanishads"));
+const RigVedaHub = lazy(() => import("./pages/texts/RigVeda"));
 const UpanishadMeaningHindi = lazy(() => import("./pages/hindi/UpanishadMeaningHindi"));
 const VedasMeaningHindi = lazy(() => import("./pages/hindi/VedasMeaningHindi"));
 const DhyanKaiseKarein = lazy(() => import("./pages/hindi/DhyanKaiseKarein"));
@@ -66,6 +67,13 @@ const HowToReadBhagavadGita = lazy(() => import("./pages/how-to-read/HowToReadBh
 const TechniquesCompared = lazy(() => import("./pages/meditation/TechniquesCompared"));
 const MeditationForAnxiety = lazy(() => import("./pages/meditation/MeditationForAnxiety"));
 const MeditationForStress = lazy(() => import("./pages/meditation/MeditationForStress"));
+
+// Q&A pages (high-volume long-tail search targets)
+const QAWhoWroteBhagavadGita = lazy(() => import("./pages/qa/WhoWroteBhagavadGita"));
+const QAWhoWroteVedas = lazy(() => import("./pages/qa/WhoWroteVedas"));
+const QAHowManyVedas = lazy(() => import("./pages/qa/HowManyVedas"));
+const QAHowManyUpanishads = lazy(() => import("./pages/qa/HowManyUpanishads"));
+const QAHowManySlokas = lazy(() => import("./pages/qa/HowManySlokasInBhagavadGita"));
 
 // Minimal loading spinner
 const PageLoader = () => (
@@ -121,6 +129,8 @@ const AppContent = () => {
                 <Route path="/texts/bhagavad-gita" element={<BhagavadGitaHub />} />
                 <Route path="/texts/vedas" element={<VedasHub />} />
                 <Route path="/texts/upanishads" element={<UpanishadsHub />} />
+                <Route path="/texts/rig-veda" element={<RigVedaHub />} />
+                <Route path="/texts/rigveda" element={<RigVedaHub />} />
                 <Route path="/hindi/upanishad-meaning-in-hindi" element={<UpanishadMeaningHindi />} />
                 <Route path="/hindi/vedas-meaning-in-hindi" element={<VedasMeaningHindi />} />
                 <Route path="/hindi/dhyan-kaise-karein" element={<DhyanKaiseKarein />} />
@@ -128,6 +138,13 @@ const AppContent = () => {
                 <Route path="/meditation/techniques-compared" element={<TechniquesCompared />} />
                 <Route path="/meditation/for-anxiety" element={<MeditationForAnxiety />} />
                 <Route path="/meditation/for-stress" element={<MeditationForStress />} />
+
+                {/* Q&A long-tail pages */}
+                <Route path="/qa/who-wrote-bhagavad-gita" element={<QAWhoWroteBhagavadGita />} />
+                <Route path="/qa/who-wrote-vedas" element={<QAWhoWroteVedas />} />
+                <Route path="/qa/how-many-vedas" element={<QAHowManyVedas />} />
+                <Route path="/qa/how-many-upanishads" element={<QAHowManyUpanishads />} />
+                <Route path="/qa/how-many-slokas-in-bhagavad-gita" element={<QAHowManySlokas />} />
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<AdminDashboard />} />
                   <Route path="users" element={<AdminUsers />} />

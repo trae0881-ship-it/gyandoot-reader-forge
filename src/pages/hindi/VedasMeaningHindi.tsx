@@ -118,12 +118,29 @@ const VedasMeaningHindi = () => {
           </section>
         </div>
 
+        <div className="mt-10 rounded-lg border-2 border-primary/20 bg-primary/5 p-5 md:p-6">
+          <p className="text-sm font-semibold uppercase tracking-wider text-primary/80">
+            वेद ऑनलाइन पढ़ें
+          </p>
+          <p className="mt-1 text-base md:text-lg leading-relaxed">
+            चारों वेदों और उपनिषदों की हिंदी टीका — निःशुल्क पहला अध्याय, कोई साइन-अप आवश्यक नहीं।
+          </p>
+          <Link
+            to="/books"
+            className="mt-3 inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+          >
+            पुस्तकें देखें →
+          </Link>
+        </div>
+
         <FaqAccordion items={faqs} title="अक्सर पूछे जाने वाले प्रश्न" />
 
         <section className="mt-12">
           <h2 className="font-serif text-2xl font-bold text-primary mb-4">आगे पढ़ें</h2>
           <ul className="space-y-2">
             <li><Link to="/texts/vedas" className="text-primary hover:underline">The Four Vedas — full English guide →</Link></li>
+            <li><Link to="/texts/rig-veda" className="text-primary hover:underline">Rig Veda — the oldest Veda →</Link></li>
+            <li><Link to="/qa/who-wrote-vedas" className="text-primary hover:underline">Who wrote the Vedas? →</Link></li>
             <li><Link to="/hindi/upanishad-meaning-in-hindi" className="text-primary hover:underline">उपनिषद का अर्थ हिंदी में →</Link></li>
             <li><Link to="/texts/bhagavad-gita" className="text-primary hover:underline">Bhagavad Gita — meaning and chapters →</Link></li>
           </ul>

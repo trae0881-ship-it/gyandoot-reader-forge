@@ -126,6 +126,21 @@ const UpanishadMeaningHindi = () => {
           </section>
         </div>
 
+        <div className="mt-10 rounded-lg border-2 border-primary/20 bg-primary/5 p-5 md:p-6">
+          <p className="text-sm font-semibold uppercase tracking-wider text-primary/80">
+            उपनिषद ऑनलाइन पढ़ें
+          </p>
+          <p className="mt-1 text-base md:text-lg leading-relaxed">
+            प्रमुख उपनिषदों की हिंदी टीका — मंत्र, अर्थ और भावार्थ के साथ। पहला अध्याय निःशुल्क पढ़ें।
+          </p>
+          <Link
+            to="/books"
+            className="mt-3 inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+          >
+            पुस्तकें देखें →
+          </Link>
+        </div>
+
         <FaqAccordion items={faqs} title="अक्सर पूछे जाने वाले प्रश्न" />
 
         <section className="mt-12">
@@ -139,6 +154,11 @@ const UpanishadMeaningHindi = () => {
             <li>
               <Link to="/texts/vedas" className="text-primary hover:underline">
                 चारों वेद — Rig, Sama, Yajur, Atharva →
+              </Link>
+            </li>
+            <li>
+              <Link to="/qa/how-many-upanishads" className="text-primary hover:underline">
+                How many Upanishads are there? →
               </Link>
             </li>
             <li>

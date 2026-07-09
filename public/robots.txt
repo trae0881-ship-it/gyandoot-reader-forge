@@ -102,13 +102,58 @@ Allow: /
 User-agent: CCBot
 Allow: /
 
+# Moonshot / Kimi AI
+User-agent: Kimi-Bot
+Allow: /
 
+User-agent: MoonshotBot
+Allow: /
+
+# Microsoft Copilot (uses Bingbot + these)
+User-agent: CopilotBot
+Allow: /
+
+User-agent: MSNBot
+Allow: /
+
+# Amazon (Alexa / Amazon Q / Rufus)
+User-agent: Amazonbot
+Allow: /
+
+# Huawei Petal (Chinese AI search)
+User-agent: PetalBot
+Allow: /
+
+# Diffbot (feeds many enterprise LLMs)
+User-agent: Diffbot
+Allow: /
+
+# Timpi (decentralized AI index)
+User-agent: TimpiBot
+Allow: /
+
+# NeevaBot / Andi / Phind / Komo / iAsk
+User-agent: NeevaBot
+Allow: /
+
+User-agent: PhindBot
+Allow: /
+
+User-agent: Andibot
+Allow: /
+
+User-agent: KomoBot
+Allow: /
+
+User-agent: iAskBot
+Allow: /
 
 User-agent: DuckDuckBot
 Allow: /
 
 User-agent: YandexBot
 Allow: /
+
 
 # Default - allow everything except private areas
 User-agent: *

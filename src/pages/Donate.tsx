@@ -52,7 +52,7 @@ const Donate = () => {
     }
     setLoading(true);
     await initiatePayment(
-      { amount, type: "donation", gateway, name: name.trim(), email: email.trim(), buyer_currency: currency, buyer_fx_rate: rates[currency] } as any,
+      { amount, type: "donation", gateway, name: name.trim(), email: email.trim(), buyer_currency: currency, buyer_fx_rate: 1 } as any,
       () => {
         setDonated(true);
         setLoading(false);

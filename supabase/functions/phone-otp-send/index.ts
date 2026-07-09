@@ -1,5 +1,20 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { decryptKey } from "../_shared/ai-crypto.ts";
+
+const SECRET_FIELDS = new Set(["auth_token", "auth_key", "api_key", "access_token"]);
+
+async function decryptConfig(cfg: Record<string, unknown>): Promise<Record<string, unknown>> {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(cfg || {})) {
+    if (SECRET_FIELDS.has(k) && typeof v === "string" && v.startsWith("v1.")) {
+      try { out[k] = await decryptKey(v); } catch { out[k] = ""; }
+    } else {
+      out[k] = v;
+    }
+  }
+  return out;
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -179,7 +194,8 @@ serve(async (req) => {
     const { error: insErr } = await admin.from("phone_otps").insert({ phone: normalized, channel, code_hash, expires_at });
     if (insErr) throw insErr;
 
-    await dispatch(prov.provider_name, channel, prov.config_json || {}, normalized, code);
+    const cfg = await decryptConfig((prov.config_json || {}) as Record<string, unknown>);
+    await dispatch(prov.provider_name, channel, cfg, normalized, code);
 
     return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {

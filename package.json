@@ -14,8 +14,6 @@
     "check": "bun run typecheck && bun run lint",
     "seo:check": "node scripts/prerender-and-seo-check.mjs --check",
     "seo:crawl": "node scripts/crawl-summary.mjs",
-    "seo:verify": "node scripts/verify-live-seo.mjs",
-    "perf": "lhci autorun",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"

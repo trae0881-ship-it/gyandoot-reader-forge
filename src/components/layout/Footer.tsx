@@ -136,7 +136,7 @@ const Footer = () => {
             <nav aria-label="Footer legal links" className="flex flex-col gap-2.5 text-sm text-background/70">
               <Link to="/privacy-policy" className="hover:text-secondary transition-colors">गोपनीयता नीति</Link>
               <Link to="/terms-conditions" className="hover:text-secondary transition-colors">उपयोग की शर्तें</Link>
-              <Link to="/refund-policy" className="hover:text-secondary transition-colors">refund व रद्दीकरण</Link>
+              <Link to="/refund-policy" className="hover:text-secondary transition-colors">Refund व रद्दीकरण</Link>
               <Link to="/shipping-policy" className="hover:text-secondary transition-colors">डिलीवरी</Link>
             </nav>
           </div>

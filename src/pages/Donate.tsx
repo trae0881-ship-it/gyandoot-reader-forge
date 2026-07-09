@@ -176,20 +176,25 @@ const Donate = () => {
                   <Button
                     type="button"
                     variant={gateway === "razorpay" ? "default" : "outline"}
-                    onClick={() => setGateway("razorpay")}
+                    onClick={() => { setGateway("razorpay"); setGatewayTouched(true); }}
                     className="flex-1"
                   >
-                    Razorpay
+                    Razorpay <span className="ml-1 opacity-70 text-xs">(India)</span>
                   </Button>
                   <Button
                     type="button"
                     variant={gateway === "paypal" ? "default" : "outline"}
-                    onClick={() => setGateway("paypal")}
+                    onClick={() => { setGateway("paypal"); setGatewayTouched(true); }}
                     className="flex-1"
                   >
-                    PayPal
+                    PayPal <span className="ml-1 opacity-70 text-xs">(Global)</span>
                   </Button>
                 </div>
+                <p className="mt-1.5 text-[11px] text-muted-foreground">
+                  {gateway === "paypal"
+                    ? <>You'll be charged {formatPrice(amount)} via PayPal in your local currency.</>
+                    : <>Cards, UPI, netbanking — charged in INR.</>}
+                </p>
               </div>
 
               <Button
@@ -201,7 +206,7 @@ const Donate = () => {
                 {loading ? (
                   <><Loader2 className="h-4 w-4 animate-spin" /> Processing...</>
                 ) : (
-                  <><Heart className="h-4 w-4" /> ₹{amount.toLocaleString("en-IN")} Daan Karein</>
+                  <><Heart className="h-4 w-4" /> {gateway === "paypal" ? formatPrice(amount) : `₹${amount.toLocaleString("en-IN")}`} Daan Karein</>
                 )}
               </Button>
 

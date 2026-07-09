@@ -185,14 +185,15 @@ const Header = () => {
                 {link.label}
               </Link>
             ))}
-            <form onSubmit={handleSearch} className="flex items-center gap-2">
+            <form onSubmit={handleSearch} className="flex items-center gap-2" role="search" aria-label="Site search (mobile)">
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search books..."
+                aria-label="Search books"
                 className="h-9 flex-1"
               />
-              <Button type="submit" size="sm" variant="outline">
+              <Button type="submit" size="sm" variant="outline" aria-label="Submit search">
                 <Search className="h-4 w-4" />
               </Button>
             </form>

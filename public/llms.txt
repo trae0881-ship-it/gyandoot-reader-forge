@@ -18,11 +18,11 @@ Gyandoot (brand: GyandootNova, domain: gyandootnova.in) is a spiritual publicati
 
 **Common Questions:** who wrote bhagavad gita, who wrote vedas, how many slokas in bhagavad gita, how many vedas are there, how many upanishads, oldest veda, oldest upanishad, meaning of om, what is atman, what is brahman, what is moksha.
 
-**Primary (High Intent):** bhagavad gita online, ramayana in hindi, hanuman chalisa pdf, vishnu sahasranama meaning, rigveda simplified.
+**Primary (High Intent, India monthly search volume):** bhagavad gita in hindi (~60K), ramayana in hindi (~45K), hanuman chalisa pdf (~80K), vishnu sahasranama (~25K), rigveda hindi translation (~12K), shrimad bhagwatam stories (~18K), sundarkand path online (~20K), bhagavad gita online.
 
-**LSI / Topical:** hindu dharmik granth, spiritual books hindi, bhakti path online, shrimad bhagwatam stories, sundarkand path.
+**LSI / Supportive (India MSV):** dharmik granth online (~10K), spiritual books hindi (~8K), daily gita quotes (~15K), hanuman chalisa benefits / hanuman chalisa ke fayde (~22K), hindu dharmik granth, bhakti path online.
 
-**Voice Search:** what is bhagavad gita in hindi, how to read ramayana online, hanuman chalisa benefits, daily gita quotes, best site for vishnu sahasranama.
+**Voice Search / Conversational (India MSV):** what is bhagavad gita in hindi (~5K), how to read ramayana online (~7K), hanuman chalisa with meaning (~9K), hanuman chalisa ke fayde kya hain, best site for vishnu sahasranama.
 
 **Long-Tail (High Conversion):** bhagavad gita simplified hindi translation free, read ramayana sundarkand online in hindi, hanuman chalisa with meaning in english, rigveda part 1 and 2 hindi pdf, shrimad bhagwatam stories for kids.
 

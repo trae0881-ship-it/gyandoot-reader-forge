@@ -11,12 +11,12 @@ import { BookOpen, Loader2, Search, ShieldCheck, Infinity as InfinityIcon, Lock,
 
 const CATEGORIES = [
   { value: "all", label: "All" },
-  { value: "devi", label: "देवी" },
-  { value: "devta", label: "देवता" },
-  { value: "adhyatm", label: "अध्यात्म" },
-  { value: "puran", label: "पुराण" },
-  { value: "katha", label: "कथा" },
-  { value: "other", label: "अन्य" },
+  { value: "devi", label: "Devi" },
+  { value: "devta", label: "Devta" },
+  { value: "adhyatm", label: "Spirituality" },
+  { value: "puran", label: "Puranas" },
+  { value: "katha", label: "Katha" },
+  { value: "other", label: "Other" },
 ];
 
 const PAGE_SIZE = 8;

@@ -13,8 +13,8 @@ const Articles = () => {
   const [search, setSearch] = useState("");
 
   useSEO({
-    title: "Spiritual Articles & Insights — GyandootNova",
-    description: "Read spiritual articles, discourses, and insights on Vishnu Sahasraname, Bhagwat Geeta, meditation & more at GyandootNova.",
+    title: "Spiritual Articles & Insights — GyandootNova (Gyandoot Nova)",
+    description: "GyandootNova (Gyandoot Nova) — Read spiritual articles, discourses, and insights on Vishnu Sahasraname, Bhagwat Geeta, meditation & more.",
     canonical: "/articles",
   });
 

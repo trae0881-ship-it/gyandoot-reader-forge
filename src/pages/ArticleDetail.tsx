@@ -47,6 +47,24 @@ const ArticleDetail = () => {
     enabled: !!post,
   });
 
+  // Related posts (same post_type, excluding current)
+  const { data: relatedPosts } = useQuery({
+    queryKey: ["post-related", post?.id, post?.post_type],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("posts")
+        .select("title, slug, cover_url, excerpt")
+        .eq("is_published", true)
+        .eq("post_type", post!.post_type)
+        .neq("id", post!.id)
+        .order("created_at", { ascending: false })
+        .limit(4);
+      return data ?? [];
+    },
+    enabled: !!post,
+  });
+
+
   const rawDesc = (post?.meta_description || post?.excerpt?.replace(/<[^>]*>/g, "").trim() || "").slice(0, 155);
   const articleDesc = (rawDesc && rawDesc.length >= 20)
     ? rawDesc

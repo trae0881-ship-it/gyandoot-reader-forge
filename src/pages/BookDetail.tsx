@@ -383,9 +383,16 @@ const BookDetail = () => {
                     </ul>
                   </div>
 
-                  <div className="flex gap-2">
-                    <Button type="button" variant={gateway === "razorpay" ? "default" : "outline"} size="sm" onClick={() => setGateway("razorpay")}>Razorpay</Button>
-                    <Button type="button" variant={gateway === "paypal" ? "default" : "outline"} size="sm" onClick={() => setGateway("paypal")}>PayPal</Button>
+                  <div>
+                    <div className="flex gap-2">
+                      <Button type="button" variant={gateway === "razorpay" ? "default" : "outline"} size="sm" onClick={() => { setGateway("razorpay"); setGatewayTouched(true); }}>Razorpay (India)</Button>
+                      <Button type="button" variant={gateway === "paypal" ? "default" : "outline"} size="sm" onClick={() => { setGateway("paypal"); setGatewayTouched(true); }}>PayPal (International)</Button>
+                    </div>
+                    <p className="mt-1.5 text-[11px] text-muted-foreground">
+                      {gateway === "paypal"
+                        ? <>You'll be charged {formatPrice(appliedCoupon ? appliedCoupon.final_amount : book.price)} via PayPal in your local currency.</>
+                        : <>Cards, UPI, netbanking · charged in INR.</>}
+                    </p>
                   </div>
 
                   {!appliedCoupon ? (

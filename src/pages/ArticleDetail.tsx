@@ -59,13 +59,27 @@ const ArticleDetail = () => {
     "headline": post.title,
     "description": articleDesc,
     "url": `https://gyandootnova.in/articles/${post.slug}`,
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `https://gyandootnova.in/articles/${post.slug}`,
+    },
     "datePublished": post.created_at,
     "dateModified": post.updated_at,
+    "inLanguage": "hi-IN",
     ...(post.cover_url && { "image": post.cover_url }),
+    "author": {
+      "@type": "Organization",
+      "name": "GyandootNova",
+      "url": "https://gyandootnova.in",
+    },
     "publisher": {
       "@type": "Organization",
       "name": "GyandootNova",
       "url": "https://gyandootnova.in",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://gyandootnova.in/favicon.ico",
+      },
     },
   } : undefined;
 

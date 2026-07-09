@@ -145,7 +145,7 @@ const Header = () => {
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs">
+                <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs" aria-label="Open user menu">
                   <User className="h-4 w-4" />
                   <span className="hidden lg:inline max-w-[80px] truncate">{user.email?.split("@")[0]}</span>
                 </Button>

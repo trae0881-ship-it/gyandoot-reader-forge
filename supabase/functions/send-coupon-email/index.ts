@@ -147,7 +147,7 @@ Deno.serve(async (req) => {
         batch.map(async (email: string) => {
           try {
             await resend.emails.send({
-              from: "GyandootNova <onboarding@resend.dev>",
+              from: "GyandootNova <info@gyandootnova.in>",
               to: [email.trim()],
               subject: `🎁 Your Exclusive Coupon: ${coupon_code} — ${discount_label} OFF`,
               html,

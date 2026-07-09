@@ -409,7 +409,7 @@ const Index = () => {
                           </div>
                         )}
                         <span className="text-[11px] font-bold text-primary group-hover:underline">
-                          {book.is_free ? "पढ़ें →" : "Buy Now →"}
+                          {book.is_free ? "Read →" : "Buy Now →"}
                         </span>
 
                       </div>

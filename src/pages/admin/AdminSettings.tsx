@@ -71,7 +71,7 @@ const AdminSettings = () => {
   });
 
   const handleSave = () => {
-    const updates = [...SOCIAL_KEYS, ...URGENCY_KEYS].map(({ key }) => ({ key, value: values[key] ?? "" }));
+    const updates = [...SOCIAL_KEYS, ...URGENCY_KEYS, ...BOOK_KEYS].map(({ key }) => ({ key, value: values[key] ?? "" }));
     mutation.mutate(updates);
   };
 

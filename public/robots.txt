@@ -65,6 +65,45 @@ Allow: /
 User-agent: Bytespider
 Allow: /
 
+# DeepSeek AI crawler
+User-agent: DeepSeekBot
+Allow: /
+
+User-agent: Deepseek-Bot
+Allow: /
+
+# xAI (Grok) crawlers
+User-agent: xAI-Bot
+Allow: /
+
+User-agent: Grok
+Allow: /
+
+# Meta AI crawler
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: FacebookBot
+Allow: /
+
+# Mistral AI
+User-agent: MistralAI-User
+Allow: /
+
+# You.com AI search
+User-agent: YouBot
+Allow: /
+
+# Cohere AI
+User-agent: cohere-ai
+Allow: /
+
+# Common Crawl (feeds most LLM training data)
+User-agent: CCBot
+Allow: /
+
+
+
 User-agent: DuckDuckBot
 Allow: /
 

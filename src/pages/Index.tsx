@@ -491,8 +491,8 @@ const Index = () => {
       <section className="bg-muted/30 py-20">
         <div className="container">
           <div className="mb-10 text-center">
-            <h2 className="font-serif text-3xl font-bold md:text-4xl">नई सोच, नए लेख</h2>
-            <p className="mt-2 text-muted-foreground">रोज़मर्रा के सवालों पर शास्त्रों की सरल राय</p>
+            <h2 className="font-serif text-3xl font-bold md:text-4xl">Fresh Thinking, New Articles</h2>
+            <p className="mt-2 text-muted-foreground">Simple, scripture-rooted takes on everyday questions</p>
 
           </div>
           {latestPosts && latestPosts.length > 0 ? (

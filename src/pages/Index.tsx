@@ -747,11 +747,11 @@ const Index = () => {
             <div className="relative">
               <Heart className="mx-auto h-12 w-12 text-secondary" />
               <h2 className="mt-5 font-serif text-3xl font-bold text-primary-foreground md:text-4xl">
-                एक छोटा हाथ, बहुत बड़ी सेवा
+                A small hand, a great service
               </h2>
               <p className="mx-auto mt-4 max-w-lg text-primary-foreground/90 leading-relaxed">
-                आपका एक-एक योगदान किसी छूट रहे ग्रंथ को फिर से जीवित करता है, किसी नए पाठक तक
-                पहुँचाता है। इस यज्ञ में साथ जुड़िए — जितना बन पड़े, उतना दीजिए।
+                Every contribution helps revive a scripture that was slipping away and puts
+                it in the hands of a new reader. Join this effort — give whatever you can.
               </p>
               <Button
                 size="lg"
@@ -759,7 +759,7 @@ const Index = () => {
                 asChild
               >
                 <Link to="/support-us">
-                  सहयोग दीजिए <Heart className="ml-2 h-4 w-4" />
+                  Contribute <Heart className="ml-2 h-4 w-4" />
 
                 </Link>
               </Button>

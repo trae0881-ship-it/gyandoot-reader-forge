@@ -176,9 +176,9 @@ const Contact = () => {
 
         <section className="mt-16 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]">
           <div className="text-center mb-4 px-4">
-            <h2 className="font-serif text-2xl font-bold text-foreground">हमारा स्थान</h2>
+            <h2 className="font-serif text-2xl font-bold text-foreground">Our location</h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Bhagwan Khera, उत्तर प्रदेश 209863 · 26.1780° N, 80.6534° E
+              Bhagwan Khera, Uttar Pradesh 209863 · 26.1780° N, 80.6534° E
             </p>
             <a
               href="https://www.google.com/maps/search/?api=1&query=Bhagwan+Khera,+Uttar+Pradesh+209863"
@@ -192,7 +192,7 @@ const Contact = () => {
           <div className="w-full">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3580.5738718627367!2d80.65342424352151!3d26.178004032415163!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x399c7ce90fa1954f%3A0x511f55a5c90a8bbd!2sBhagwan%20Khera%2C%20Uttar%20Pradesh%20209863!5e0!3m2!1sen!2sin!4v1783592023814!5m2!1sen!2sin"
-              title="GyandootNova स्थान — Bhagwan Khera, उत्तर प्रदेश"
+              title="GyandootNova location — Bhagwan Khera, Uttar Pradesh"
               width="100%"
               height="280"
               className="block w-full h-[280px] border-0"

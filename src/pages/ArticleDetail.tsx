@@ -182,7 +182,7 @@ const ArticleDetail = () => {
           </nav>
 
           <span className="text-xs font-medium uppercase tracking-wider text-primary">{post.post_type}</span>
-          <h1 className="mt-2 font-serif text-3xl font-bold md:text-4xl">{post.title}</h1>
+          <h1 className="mt-2 font-serif text-3xl font-bold md:text-4xl notranslate" translate="no">{post.title}</h1>
           <p className="mt-2 text-muted-foreground">
             {new Date(post.created_at).toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" })}
           </p>
@@ -192,7 +192,8 @@ const ArticleDetail = () => {
             </div>
           )}
           <div
-            className="prose prose-lg mt-8 max-w-none leading-relaxed"
+            className="prose prose-lg mt-8 max-w-none leading-relaxed notranslate"
+            translate="no"
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content ?? "") }}
           />
 

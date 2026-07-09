@@ -104,7 +104,7 @@ const Index = () => {
   });
 
   useSEO({
-    title: "GyandootNova (Gyandoot Nova) — Bhagavad Gita Hindi PDF, Vedas & Ramayana Online",
+    title: "GyandootNova (Gyandoot Nova) — Gita, Vedas, Ramayana Online",
     description:
       "GyandootNova (Gyandoot Nova) — Bhagwat Geeta Hindi PDF, Geeta shlok, Vedas, Upanishads, Ramayana aur Hindu religious books online padhein. Dhyan kaise kare, meditation ke fayde aur spiritual gyan Hindi mein — Gyandoot Nova par.",
     canonical: "/",

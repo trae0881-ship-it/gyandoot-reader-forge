@@ -4,7 +4,7 @@ import useSEO from "@/hooks/useSEO";
 
 const About = () => {
   useSEO({
-    title: "हमारे बारे में — GyandootNova (Gyandoot Nova) | प्राचीन ग्रंथों का डिजिटल घर",
+    title: "हमारे बारे में — प्राचीन ग्रंथों का डिजिटल घर",
     description:
       "GyandootNova (Gyandoot Nova) की शुरुआत, सोच और वो टीम जो पुरानी पांडुलिपियों को आज के पाठक तक पहुँचा रही है — जानिए हमारी कहानी।",
     canonical: "/about",

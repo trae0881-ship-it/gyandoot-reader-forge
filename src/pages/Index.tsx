@@ -557,10 +557,10 @@ const Index = () => {
         <div className="container">
           <div className="grid gap-8 text-center sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { target: 500, suffix: "+", label: "प्रकाशित ग्रंथ" },
-              { target: 10000, suffix: "+", label: "जुड़े हुए पाठक" },
-              { target: 200, suffix: "+", label: "लेख और सूत्र" },
-              { target: 50, suffix: "+", label: "सत्संग-कार्यक्रम" },
+              { target: 500, suffix: "+", label: "Published titles" },
+              { target: 10000, suffix: "+", label: "Readers joined" },
+              { target: 200, suffix: "+", label: "Articles & sutras" },
+              { target: 50, suffix: "+", label: "Discourse events" },
 
             ].map((stat) => (
               <div key={stat.label}>

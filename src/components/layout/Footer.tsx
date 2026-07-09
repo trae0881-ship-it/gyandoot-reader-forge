@@ -185,7 +185,7 @@ const Footer = () => {
           <div className="flex gap-4">
             <Link to="/privacy-policy" className="hover:text-secondary transition-colors">गोपनीयता</Link>
             <Link to="/terms-conditions" className="hover:text-secondary transition-colors">शर्तें</Link>
-            <Link to="/refund-policy" className="hover:text-secondary transition-colors">refund</Link>
+            <Link to="/refund-policy" className="hover:text-secondary transition-colors">Refund</Link>
           </div>
 
         </div>

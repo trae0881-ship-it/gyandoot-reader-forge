@@ -11,12 +11,12 @@ import { BookOpen, Loader2, Search, ShieldCheck, Infinity as InfinityIcon, Lock,
 
 const CATEGORIES = [
   { value: "all", label: "All" },
-  { value: "devi", label: "देवी" },
-  { value: "devta", label: "देवता" },
-  { value: "adhyatm", label: "अध्यात्म" },
-  { value: "puran", label: "पुराण" },
-  { value: "katha", label: "कथा" },
-  { value: "other", label: "अन्य" },
+  { value: "devi", label: "Devi" },
+  { value: "devta", label: "Devta" },
+  { value: "adhyatm", label: "Spirituality" },
+  { value: "puran", label: "Puranas" },
+  { value: "katha", label: "Katha" },
+  { value: "other", label: "Other" },
 ];
 
 const PAGE_SIZE = 8;
@@ -92,17 +92,17 @@ const Books = () => {
     <Layout>
       <section className="py-8 md:py-12">
         <div className="container">
-          <h1 className="font-serif text-3xl md:text-4xl font-bold">हमारी पूरी Library</h1>
+          <h1 className="font-serif text-3xl md:text-4xl font-bold">Our Full Library</h1>
           <p className="mt-2 text-sm md:text-base text-muted-foreground">
-            एक बार खरीदिए, जीवनभर पढ़िए — हर book mobile, tablet aur laptop par padh sakte hain.
+            Buy once, read for life — every book works on mobile, tablet and laptop.
           </p>
 
           {/* Trust strip */}
           <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs md:text-sm text-foreground/80">
-            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-primary" /> 7-दिन पैसा वापसी</span>
-            <span className="inline-flex items-center gap-1.5"><InfinityIcon className="h-4 w-4 text-primary" /> जीवनभर access</span>
+            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-primary" /> 7-day money back</span>
+            <span className="inline-flex items-center gap-1.5"><InfinityIcon className="h-4 w-4 text-primary" /> Lifetime access</span>
             <span className="inline-flex items-center gap-1.5"><Lock className="h-4 w-4 text-primary" /> Secure payment</span>
-            <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4 text-primary" /> 24,000+ पाठक</span>
+            <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4 text-primary" /> 24,000+ readers</span>
           </div>
 
           {/* Search */}
@@ -169,7 +169,7 @@ const Books = () => {
                         </div>
                         {!book.is_free && (
                           <div className="absolute top-2 right-2 z-10">
-                            <span className="inline-block rounded-md bg-primary/95 text-primary-foreground px-2 py-0.5 text-[10px] font-bold shadow">जीवनभर</span>
+                            <span className="inline-block rounded-md bg-primary/95 text-primary-foreground px-2 py-0.5 text-[10px] font-bold shadow">LIFETIME</span>
                           </div>
                         )}
 
@@ -191,7 +191,7 @@ const Books = () => {
                             <Star className="h-3 w-3 fill-secondary text-secondary" />
                             <span className="font-medium text-foreground">4.8</span>
                             <span>•</span>
-                            <span>{readers.toLocaleString()}+ पाठक</span>
+                            <span>{readers.toLocaleString()}+ readers</span>
                           </div>
 
                           {/* Price + CTA (C.3) */}
@@ -207,13 +207,13 @@ const Books = () => {
                               )}
                             </div>
                             <span className="text-[11px] font-bold text-primary group-hover:underline">
-                              {book.is_free ? "पढ़ें →" : "Buy Now →"}
+                              {book.is_free ? "Read →" : "Buy Now →"}
                             </span>
 
                           </div>
                           {!book.is_free && (
                             <p className="mt-1.5 text-[10px] text-muted-foreground">
-                              Poora granth chahiye? <span className="font-semibold text-primary">→ Premium Lein</span>
+                              Want the full text? <span className="font-semibold text-primary">→ Get Premium</span>
                             </p>
                           )}
                         </CardContent>

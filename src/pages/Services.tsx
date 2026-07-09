@@ -5,47 +5,47 @@ import useSEO from "@/hooks/useSEO";
 const services = [
   {
     icon: BookOpen,
-    title: "Browser में सीधा पाठ",
+    title: "Read directly in the browser",
     description:
-      "कोई app नहीं, कोई download नहीं। जो mobile या laptop पास है, उसी पर login कीजिए और अगली पंक्ति वहीं से पढ़िए जहाँ कल छोड़ी थी। Font, रंग, bookmark — सब आपकी पसंद के अनुसार।",
+      "No app, no download. Log in on whichever phone or laptop is closest and pick up the next line right where you left off yesterday. Font, colour, bookmarks — all tuned to your taste.",
   },
   {
     icon: FileText,
-    title: "जीवन-सूत्र लेख",
+    title: "Life-Sutra articles",
     description:
-      "गुस्सा, चिंता, रिश्तों की उलझन — शास्त्रों में इनका क्या हल है, वो सरल भाषा में लेखों की शक्ल में। हर हफ़्ते कुछ नया, बिना विज्ञापन।",
+      "Anger, anxiety, tangled relationships — what the scriptures actually say about them, in plain language. Something new every week, with no advertising.",
   },
   {
     icon: Headphones,
-    title: "सुनने वाले सत्संग",
+    title: "Discourses you can listen to",
     description:
-      "पढ़ने का समय नहीं मिलता? कोई बात नहीं — गाड़ी में, टहलते वक़्त, या रसोई में काम करते हुए भी सुन लीजिए। छोटी-छोटी बैठकें, बड़ा असर।",
+      "No time to read? No problem — listen while driving, walking, or cooking. Short sessions, deep impact.",
   },
   {
     icon: Monitor,
-    title: "प्रकाशकों के लिए मंच",
+    title: "A platform for publishers",
     description:
-      "आपके पास कोई अनमोल पांडुलिपि है और उसे लोगों तक पहुँचाना चाहते हैं? हमारी संपादकीय टीम मदद करेगी — proofread से लेकर publish तक।",
+      "Have a precious manuscript you want to share with the world? Our editorial team helps end-to-end — from proofreading to publishing.",
   },
   {
     icon: Heart,
-    title: "दान से चलता एक हिस्सा",
+    title: "Partly run on donations",
     description:
-      "बहुत सारे ग्रंथ हम मुफ़्त रखते हैं ताकि पैसा किसी के भी आड़े न आए। यह संभव आपके योगदान से होता है — जितना बन पड़े, उतना।",
+      "A large part of our library is kept free so money is never a barrier. This is possible only because of your contributions — whatever you can spare.",
   },
   {
     icon: Users,
-    title: "पाठकों का अपना गोल",
+    title: "A readers' circle of your own",
     description:
-      "WhatsApp, email — जहाँ भी सुविधा हो, जुड़िए। कोई नया ग्रंथ चाहिए तो बताइए, कोई शब्द अटक गया तो पूछिए। जवाब उसी दिन।",
+      "WhatsApp, email — join wherever it suits you. Ask for a new text, ask about a word you got stuck on. We reply the same day.",
   },
 ];
 
 const Services = () => {
   useSEO({
-    title: "हमारी सेवाएँ — Online ग्रंथ, लेख और सत्संग | GyandootNova",
+    title: "Our Services — Online Scriptures, Articles & Discourses | GyandootNova",
     description:
-      "GyandootNova क्या-क्या देती है — online reader, लेख, सत्संग, प्रकाशन सहायता और पाठक-समुदाय। सब कुछ एक जगह।",
+      "Everything GyandootNova offers — online reader, articles, discourses, publishing support and a reader community. All in one place.",
     canonical: "/services",
   });
 
@@ -54,10 +54,11 @@ const Services = () => {
       <main className="container py-16">
         <section className="text-center mb-16">
           <h1 className="font-serif text-4xl md:text-5xl font-bold text-primary mb-4">
-            क्या-क्या मिलता है यहाँ
+            What you get here
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            केवल किताबें नहीं — पढ़ने, सुनने, समझने और पूछने की पूरी सुविधा एक ही जगह।
+            More than just books — the full experience of reading, listening, understanding
+            and asking, all in one place.
           </p>
         </section>
 

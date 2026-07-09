@@ -245,25 +245,25 @@ const Index = () => {
         <div className="container max-w-5xl">
           <div className="text-center mb-10">
             <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-wider">
-              सोच-समझकर बनाया गया
+              Designed with care
             </span>
             <h2 className="mt-3 font-serif text-2xl md:text-3xl font-bold">
-              हमने PDF क्यों नहीं दी? <span className="text-primary">आपकी शांति सोच-कर।</span>
+              Why we don't hand out PDFs? <span className="text-primary">For your peace of mind.</span>
             </h2>
-            <p className="mt-2 text-sm text-muted-foreground">पुरानी e-book वाली परेशानी अब बीते समय की बात है।</p>
+            <p className="mt-2 text-sm text-muted-foreground">The old e-book headaches are a thing of the past.</p>
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-5">
               <h3 className="font-semibold text-destructive mb-3 flex items-center gap-2">
-                <XCircle className="h-5 w-5" /> पुरानी PDF वाली दुनिया
+                <XCircle className="h-5 w-5" /> The old PDF world
               </h3>
               <ul className="space-y-2 text-sm text-foreground/80">
                 {[
-                  { Icon: Smartphone, text: "फ़ोन गुम — साथ में पूरी pothi गायब" },
-                  { Icon: HardDrive, text: "GB भर जाते हैं, नई apps नहीं आतीं" },
-                  { Icon: FileWarning, text: "अक्षर बिखर जाते हैं, पन्ने खुलते नहीं" },
-                  { Icon: Unlock, text: "कोई भी WhatsApp पर share कर दे" },
-                  { Icon: Ban, text: "सुधार आया तो भी आप तक नहीं पहुँचता" },
+                  { Icon: Smartphone, text: "Phone lost — your whole library gone with it" },
+                  { Icon: HardDrive, text: "GBs fill up, new apps can't be installed" },
+                  { Icon: FileWarning, text: "Text breaks, pages refuse to open" },
+                  { Icon: Unlock, text: "Anyone can forward it on WhatsApp" },
+                  { Icon: Ban, text: "Fixes and updates never reach you" },
                 ].map(({ Icon, text }) => (
                   <li key={text} className="flex items-start gap-2">
                     <Icon className="h-4 w-4 mt-0.5 text-destructive/70 shrink-0" />
@@ -274,15 +274,15 @@ const Index = () => {
             </div>
             <div className="rounded-xl border-2 border-primary/30 bg-primary/5 p-5 shadow-md">
               <h3 className="font-semibold text-primary mb-3 flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5" /> GyandootNova की सुविधा
+                <CheckCircle2 className="h-5 w-5" /> The GyandootNova way
               </h3>
               <ul className="space-y-2 text-sm text-foreground/90 font-medium">
                 {[
-                  { Icon: Lock, text: "एक ID से हर device पर आपका पुस्तकालय" },
-                  { Icon: Cloud, text: "फ़ोन की memory पर एक byte भी बोझ नहीं" },
-                  { Icon: BookOpen, text: "हर बार वैसा ही साफ़, HD और पढ़ने योग्य" },
-                  { Icon: ShieldCheck, text: "केवल आपकी नज़र के लिए — कोई और नहीं" },
-                  { Icon: Gift, text: "लेखक का हर नया सुधार आप तक बिना पैसे" },
+                  { Icon: Lock, text: "One ID — your library on every device" },
+                  { Icon: Cloud, text: "Zero bytes taken from your phone's memory" },
+                  { Icon: BookOpen, text: "Always crisp, HD and easy to read" },
+                  { Icon: ShieldCheck, text: "For your eyes only — nobody else's" },
+                  { Icon: Gift, text: "Every author update reaches you, free" },
                 ].map(({ Icon, text }) => (
                   <li key={text} className="flex items-start gap-2">
                     <Icon className="h-4 w-4 mt-0.5 text-primary shrink-0" />
@@ -446,24 +446,24 @@ const Index = () => {
       <section className="py-20">
         <div className="container">
           <div className="mb-10 text-center">
-            <h2 className="font-serif text-3xl font-bold md:text-4xl">कार्यक्रम और सत्संग</h2>
-            <p className="mt-2 text-muted-foreground">पढ़ने से आगे — सुनने और अनुभव करने की बारी</p>
+            <h2 className="font-serif text-3xl font-bold md:text-4xl">Programs & Discourses</h2>
+            <p className="mt-2 text-muted-foreground">Beyond reading — a chance to listen and experience</p>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {[
               {
-                title: "मौन शिविर",
-                desc: "थकी हुई मन को कुछ दिन विश्राम दीजिए — साँस, ध्यान, और भीतर उतरने की सरल विधि।",
+                title: "Silence Retreat",
+                desc: "Give a tired mind a few days of rest — breath, meditation and a simple practice for turning inward.",
                 icon: Sparkles,
               },
               {
-                title: "श्लोक-सत्संग",
-                desc: "उपनिषद और गीता के चुने हुए सूत्रों पर छोटी-छोटी बैठकें — एक श्लोक, एक जीवन-दिशा।",
+                title: "Shloka Discourse",
+                desc: "Short sessions on chosen sutras from the Upanishads and the Gita — one verse, one direction for life.",
                 icon: BookOpen,
               },
               {
-                title: "स्व-जागरण कार्यशाला",
-                desc: "रोज़ की उलझनों में शास्त्र कैसे काम आते हैं — बातचीत, अभ्यास और असली अनुभव।",
+                title: "Self-Awakening Workshop",
+                desc: "How the scriptures help with everyday knots — conversation, practice and real experience.",
                 icon: TrendingUp,
               },
 
@@ -479,7 +479,7 @@ const Index = () => {
                   to="/articles"
                   className="mt-4 inline-flex items-center text-sm font-medium text-primary hover:underline"
                 >
-                  विवरण देखिए <ArrowRight className="ml-1 h-3 w-3" />
+                  View details <ArrowRight className="ml-1 h-3 w-3" />
                 </Link>
               </Card>
             ))}
@@ -491,8 +491,8 @@ const Index = () => {
       <section className="bg-muted/30 py-20">
         <div className="container">
           <div className="mb-10 text-center">
-            <h2 className="font-serif text-3xl font-bold md:text-4xl">नई सोच, नए लेख</h2>
-            <p className="mt-2 text-muted-foreground">रोज़मर्रा के सवालों पर शास्त्रों की सरल राय</p>
+            <h2 className="font-serif text-3xl font-bold md:text-4xl">Fresh Thinking, New Articles</h2>
+            <p className="mt-2 text-muted-foreground">Simple, scripture-rooted takes on everyday questions</p>
 
           </div>
           {latestPosts && latestPosts.length > 0 ? (
@@ -522,7 +522,7 @@ const Index = () => {
                           <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>
                         )}
                         <span className="mt-3 inline-flex items-center text-sm font-medium text-primary">
-                          पूरा लेख पढ़िए <ArrowRight className="ml-1 h-3 w-3" />
+                          Read full article <ArrowRight className="ml-1 h-3 w-3" />
 
                         </span>
                       </CardContent>
@@ -534,7 +534,7 @@ const Index = () => {
           ) : (
             <div className="text-center py-12">
               <FileText className="mx-auto h-10 w-10 text-muted-foreground/30" />
-              <p className="mt-3 text-muted-foreground">जल्द ही नए लेख आ रहे हैं।</p>
+              <p className="mt-3 text-muted-foreground">New articles are on the way.</p>
             </div>
           )}
           <div className="mt-10 text-center">
@@ -544,7 +544,7 @@ const Index = () => {
               asChild
             >
               <Link to="/articles">
-                सारे लेख देखिए <ArrowRight className="ml-2 h-4 w-4" />
+                See all articles <ArrowRight className="ml-2 h-4 w-4" />
 
               </Link>
             </Button>
@@ -557,10 +557,10 @@ const Index = () => {
         <div className="container">
           <div className="grid gap-8 text-center sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { target: 500, suffix: "+", label: "प्रकाशित ग्रंथ" },
-              { target: 10000, suffix: "+", label: "जुड़े हुए पाठक" },
-              { target: 200, suffix: "+", label: "लेख और सूत्र" },
-              { target: 50, suffix: "+", label: "सत्संग-कार्यक्रम" },
+              { target: 500, suffix: "+", label: "Published titles" },
+              { target: 10000, suffix: "+", label: "Readers joined" },
+              { target: 200, suffix: "+", label: "Articles & sutras" },
+              { target: 50, suffix: "+", label: "Discourse events" },
 
             ].map((stat) => (
               <div key={stat.label}>
@@ -747,11 +747,11 @@ const Index = () => {
             <div className="relative">
               <Heart className="mx-auto h-12 w-12 text-secondary" />
               <h2 className="mt-5 font-serif text-3xl font-bold text-primary-foreground md:text-4xl">
-                एक छोटा हाथ, बहुत बड़ी सेवा
+                A small hand, a great service
               </h2>
               <p className="mx-auto mt-4 max-w-lg text-primary-foreground/90 leading-relaxed">
-                आपका एक-एक योगदान किसी छूट रहे ग्रंथ को फिर से जीवित करता है, किसी नए पाठक तक
-                पहुँचाता है। इस यज्ञ में साथ जुड़िए — जितना बन पड़े, उतना दीजिए।
+                Every contribution helps revive a scripture that was slipping away and puts
+                it in the hands of a new reader. Join this effort — give whatever you can.
               </p>
               <Button
                 size="lg"
@@ -759,7 +759,7 @@ const Index = () => {
                 asChild
               >
                 <Link to="/support-us">
-                  सहयोग दीजिए <Heart className="ml-2 h-4 w-4" />
+                  Contribute <Heart className="ml-2 h-4 w-4" />
 
                 </Link>
               </Button>

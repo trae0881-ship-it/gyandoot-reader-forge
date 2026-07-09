@@ -10,23 +10,23 @@ import useSEO from "@/hooks/useSEO";
 
 const Contact = () => {
   useSEO({
-    title: "हमसे बात करें — GyandootNova से जुड़िए",
+    title: "Contact Us — Get in Touch with GyandootNova",
     description:
-      "ग्रंथ, order, सुझाव या साझेदारी — जो भी बात हो, WhatsApp, email या form से पहुँचिए। जवाब उसी दिन।",
+      "Books, orders, suggestions or partnerships — reach us via WhatsApp, email or the contact form. We reply the same day.",
     canonical: "/contact",
     jsonLd: {
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
       name: "GyandootNova",
       description:
-        "आध्यात्मिक प्रकाशन एवं डिजिटल पुस्तकालय — वेद, उपनिषद, गीता, रामायण, महाभारत तथा सनातन धर्म ग्रंथों का प्रामाणिक स्रोत।",
+        "Spiritual publisher and digital library — an authoritative source for the Vedas, Upanishads, Gita, Ramayana, Mahabharata and other Sanatana Dharma scriptures.",
       url: "https://gyandootnova.in/contact",
       telephone: "+91 91615 33353",
       email: "amrendra8765@gmail.com",
       address: {
         "@type": "PostalAddress",
-        addressLocality: "उन्नाव",
-        addressRegion: "उत्तर प्रदेश",
+        addressLocality: "Unnao",
+        addressRegion: "Uttar Pradesh",
         addressCountry: "IN",
       },
       openingHoursSpecification: [
@@ -53,10 +53,10 @@ const Contact = () => {
         body: form,
       });
       if (error) throw error;
-      toast({ title: "संदेश पहुँच गया ✅", description: "बहुत जल्द जवाब मिलेगा।" });
+      toast({ title: "Message received", description: "We'll get back to you very soon." });
       setForm({ name: "", email: "", subject: "", message: "" });
     } catch {
-      toast({ title: "भेजने में दिक़्क़त हुई", description: "थोड़ी देर बाद कोशिश कीजिए या सीधे email कीजिए।", variant: "destructive" });
+      toast({ title: "Couldn't send", description: "Please try again in a moment, or email us directly.", variant: "destructive" });
     } finally {
 
       setSending(false);
@@ -67,9 +67,9 @@ const Contact = () => {
     <Layout>
       <main className="container py-16">
         <section className="text-center mb-16">
-          <h1 className="font-serif text-4xl md:text-5xl font-bold text-primary mb-4">एक बात कहनी है?</h1>
+          <h1 className="font-serif text-4xl md:text-5xl font-bold text-primary mb-4">Have something to say?</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            शिकायत, सुझाव, या बस हाल-चाल — जो भी हो, लिख भेजिए। हम पढ़ते हैं, और उसी दिन जवाब देते हैं।
+            A complaint, a suggestion, or just a hello — whatever it is, write in. We read every message and reply the same day.
           </p>
         </section>
 
@@ -77,27 +77,27 @@ const Contact = () => {
         <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
           {/* Contact Info */}
           <div>
-            <h2 className="font-serif text-2xl font-bold text-foreground mb-6">सीधा सम्पर्क</h2>
+            <h2 className="font-serif text-2xl font-bold text-foreground mb-6">Direct contact</h2>
             <div className="space-y-6">
               <div className="flex items-start gap-4">
                 <Mail className="h-6 w-6 text-primary mt-1" />
                 <div>
-                  <p className="font-semibold text-foreground">ईमेल</p>
+                  <p className="font-semibold text-foreground">Email</p>
                   <p className="text-muted-foreground">amrendra8765@gmail.com</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
                 <Phone className="h-6 w-6 text-primary mt-1" />
                 <div>
-                  <p className="font-semibold text-foreground">फ़ोन / WhatsApp</p>
+                  <p className="font-semibold text-foreground">Phone / WhatsApp</p>
                   <p className="text-muted-foreground">+91 91615 33353</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
                 <MapPin className="h-6 w-6 text-primary mt-1" />
                 <div>
-                  <p className="font-semibold text-foreground">पता</p>
-                  <p className="text-muted-foreground">Bhagwan Khera, उन्नाव, उत्तर प्रदेश 209863 — भारत</p>
+                  <p className="font-semibold text-foreground">Address</p>
+                  <p className="text-muted-foreground">Bhagwan Khera, Unnao, Uttar Pradesh 209863 — India</p>
                   <p className="text-xs text-muted-foreground mt-1">26.1780° N, 80.6534° E</p>
                   <a
                     href="https://www.google.com/maps/search/?api=1&query=Bhagwan+Khera,+Uttar+Pradesh+209863&query_place_id=ChIJT5WhD-l8nDkRvYsKyaVVH1E"
@@ -112,21 +112,21 @@ const Contact = () => {
             </div>
 
             <div className="mt-8 p-6 bg-muted/50 rounded-xl">
-              <h3 className="font-serif font-semibold text-foreground mb-2">कब पहुँचें</h3>
-              <p className="text-sm text-muted-foreground">सोम से शनि: सुबह 10 से शाम 6 (भारतीय समय)</p>
-              <p className="text-sm text-muted-foreground">रविवार: विश्राम दिवस</p>
+              <h3 className="font-serif font-semibold text-foreground mb-2">When to reach us</h3>
+              <p className="text-sm text-muted-foreground">Mon–Sat: 10 AM to 6 PM (India time)</p>
+              <p className="text-sm text-muted-foreground">Sunday: closed</p>
             </div>
           </div>
 
           <div>
-            <h2 className="font-serif text-2xl font-bold text-foreground mb-6">फ़ॉर्म भरिए</h2>
+            <h2 className="font-serif text-2xl font-bold text-foreground mb-6">Fill in the form</h2>
 
-            <form onSubmit={handleSubmit} className="space-y-4" aria-label="संपर्क फ़ॉर्म">
+            <form onSubmit={handleSubmit} className="space-y-4" aria-label="Contact form">
               <Input
                 id="contact-name"
                 name="name"
-                aria-label="आपका नाम"
-                placeholder="आपका नाम"
+                aria-label="Your name"
+                placeholder="Your name"
                 required
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -135,8 +135,8 @@ const Contact = () => {
                 id="contact-email"
                 name="email"
                 type="email"
-                aria-label="ईमेल पता"
-                placeholder="ईमेल पता"
+                aria-label="Email address"
+                placeholder="Email address"
                 required
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -144,8 +144,8 @@ const Contact = () => {
               <Input
                 id="contact-subject"
                 name="subject"
-                aria-label="विषय"
-                placeholder="विषय"
+                aria-label="Subject"
+                placeholder="Subject"
                 required
                 value={form.subject}
                 onChange={(e) => setForm({ ...form, subject: e.target.value })}
@@ -153,8 +153,8 @@ const Contact = () => {
               <Textarea
                 id="contact-message"
                 name="message"
-                aria-label="संदेश"
-                placeholder="अपनी बात लिखिए…"
+                aria-label="Message"
+                placeholder="Write your message…"
                 required
                 rows={5}
                 value={form.message}
@@ -163,10 +163,10 @@ const Contact = () => {
               <Button type="submit" className="w-full" disabled={sending}>
                 {sending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> भेज रहे हैं…
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending…
                   </>
                 ) : (
-                  "संदेश भेजें"
+                  "Send message"
                 )}
               </Button>
 
@@ -176,9 +176,9 @@ const Contact = () => {
 
         <section className="mt-16 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]">
           <div className="text-center mb-4 px-4">
-            <h2 className="font-serif text-2xl font-bold text-foreground">हमारा स्थान</h2>
+            <h2 className="font-serif text-2xl font-bold text-foreground">Our location</h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Bhagwan Khera, उत्तर प्रदेश 209863 · 26.1780° N, 80.6534° E
+              Bhagwan Khera, Uttar Pradesh 209863 · 26.1780° N, 80.6534° E
             </p>
             <a
               href="https://www.google.com/maps/search/?api=1&query=Bhagwan+Khera,+Uttar+Pradesh+209863"
@@ -192,7 +192,7 @@ const Contact = () => {
           <div className="w-full">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3580.5738718627367!2d80.65342424352151!3d26.178004032415163!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x399c7ce90fa1954f%3A0x511f55a5c90a8bbd!2sBhagwan%20Khera%2C%20Uttar%20Pradesh%20209863!5e0!3m2!1sen!2sin!4v1783592023814!5m2!1sen!2sin"
-              title="GyandootNova स्थान — Bhagwan Khera, उत्तर प्रदेश"
+              title="GyandootNova location — Bhagwan Khera, Uttar Pradesh"
               width="100%"
               height="280"
               className="block w-full h-[280px] border-0"

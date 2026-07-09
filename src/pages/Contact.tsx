@@ -112,27 +112,39 @@ const Contact = () => {
           <div>
             <h2 className="font-serif text-2xl font-bold text-foreground mb-6">फ़ॉर्म भरिए</h2>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4" aria-label="संपर्क फ़ॉर्म">
               <Input
+                id="contact-name"
+                name="name"
+                aria-label="आपका नाम"
                 placeholder="आपका नाम"
                 required
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
               <Input
+                id="contact-email"
+                name="email"
                 type="email"
+                aria-label="ईमेल पता"
                 placeholder="ईमेल पता"
                 required
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
               />
               <Input
+                id="contact-subject"
+                name="subject"
+                aria-label="विषय"
                 placeholder="विषय"
                 required
                 value={form.subject}
                 onChange={(e) => setForm({ ...form, subject: e.target.value })}
               />
               <Textarea
+                id="contact-message"
+                name="message"
+                aria-label="संदेश"
                 placeholder="अपनी बात लिखिए…"
                 required
                 rows={5}

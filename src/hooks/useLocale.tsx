@@ -208,7 +208,7 @@ function triggerGoogleTranslate(lang: Language, attempt = 0) {
     }
   };
 
-  const cookieVal = lang === "hi" ? "/hi/hi" : `/hi/${lang}`;
+  const cookieVal = lang === "en" ? "/en/en" : `/en/${lang}`;
   setCookie(cookieVal);
 
   // Retry until the Google Translate combo box mounts (script loads async)

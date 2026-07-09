@@ -34,8 +34,8 @@ const Books = () => {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   useSEO({
-    title: "Hindu Religious Books Online — Bhagavad Gita, Vedas, Upanishads, Ramayana PDF | GyandootNova",
-    description: "Hindu religious books online — Bhagavad Gita Hindi PDF, Geeta shlok, 4 Vedas, Upanishads, Ramayana, Hanuman Chalisa, Vishnu Sahasranama aur 50+ dharmik granth free reader ke saath.",
+    title: "Hindu Religious Books Online — Bhagavad Gita, Vedas, Upanishads, Ramayana PDF | GyandootNova (Gyandoot Nova)",
+    description: "GyandootNova (Gyandoot Nova) — Hindu religious books online: Bhagavad Gita Hindi PDF, Geeta shlok, 4 Vedas, Upanishads, Ramayana, Hanuman Chalisa, Vishnu Sahasranama aur 50+ dharmik granth free reader ke saath.",
     canonical: "/books",
   });
 

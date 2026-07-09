@@ -522,7 +522,7 @@ const Index = () => {
                           <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>
                         )}
                         <span className="mt-3 inline-flex items-center text-sm font-medium text-primary">
-                          पूरा लेख पढ़िए <ArrowRight className="ml-1 h-3 w-3" />
+                          Read full article <ArrowRight className="ml-1 h-3 w-3" />
 
                         </span>
                       </CardContent>

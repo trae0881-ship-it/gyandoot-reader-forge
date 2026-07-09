@@ -28,7 +28,14 @@ const Donate = () => {
   const [email, setEmail] = useState(user?.email ?? "");
   const [donated, setDonated] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { country, currency, rates, formatPrice } = useLocale();
+  const isIndia = (country ?? "").toUpperCase() === "IN";
   const [gateway, setGateway] = useState<PaymentGateway>("razorpay");
+  const [gatewayTouched, setGatewayTouched] = useState(false);
+  useEffect(() => {
+    if (gatewayTouched || !country) return;
+    setGateway(isIndia ? "razorpay" : "paypal");
+  }, [country, isIndia, gatewayTouched]);
 
   const handleDonate = async () => {
     if (!amount || amount < 1) {

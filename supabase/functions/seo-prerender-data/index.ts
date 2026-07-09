@@ -7,7 +7,11 @@ const headers = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const MAX_LOCKED_EXCERPT_CHARS = 12000;
+// Locked (non-preview / non-free) chapters MUST NOT leak substantial content
+// through this unauthenticated prerender endpoint. Cap at a short snippet
+// sufficient for search engines only. Purchase-gated body stays server-side
+// and is served via the get_chapter_content RPC.
+const MAX_LOCKED_EXCERPT_CHARS = 400;
 
 function stripTags(input: string) {
   return (input ?? "")
@@ -61,9 +65,9 @@ Deno.serve(async (req) => {
             title: firstChapter.title,
             slug: firstChapter.slug,
             chapter_number: firstChapter.chapter_number,
-            content: book.is_free || firstChapter.is_preview || firstChapter.chapter_number <= previewLimit
+          content: book.is_free || firstChapter.is_preview || firstChapter.chapter_number <= previewLimit
               ? firstChapter.content ?? ""
-              : stripTags(firstChapter.content ?? "").slice(0, 4000),
+              : stripTags(firstChapter.content ?? "").slice(0, MAX_LOCKED_EXCERPT_CHARS),
           }
         : null;
       return {

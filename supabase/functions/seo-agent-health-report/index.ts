@@ -67,6 +67,39 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
+  // Authorization: require the shared cron secret OR an admin JWT.
+  // Without this, any anonymous caller could burn paid API quotas by
+  // repeatedly triggering the live provider probes.
+  const cronSecret = Deno.env.get("SEO_AGENT_CRON_SECRET") || "";
+  const providedSecret = req.headers.get("x-cron-secret") || "";
+  let authorized = cronSecret.length > 0 && providedSecret === cronSecret;
+  if (!authorized) {
+    const authHeader = req.headers.get("Authorization") || "";
+    if (authHeader.startsWith("Bearer ")) {
+      try {
+        const token = authHeader.slice(7);
+        const anon = createClient(
+          Deno.env.get("SUPABASE_URL")!,
+          Deno.env.get("SUPABASE_ANON_KEY")!,
+        );
+        const { data, error } = await anon.auth.getUser(token);
+        if (!error && data?.user) {
+          const { data: isAdmin } = await sb.rpc("has_role", {
+            _user_id: data.user.id,
+            _role: "admin",
+          });
+          if (isAdmin === true) authorized = true;
+        }
+      } catch { /* fall through to 401 */ }
+    }
+  }
+  if (!authorized) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const probes = await probeAll();
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();

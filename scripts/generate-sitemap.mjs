@@ -35,6 +35,24 @@ const STATIC = [
   { path: "/refund-policy", changefreq: "yearly", priority: "0.3" },
   { path: "/shipping-policy", changefreq: "yearly", priority: "0.3" },
   { path: "/sitemap", changefreq: "monthly", priority: "0.3" },
+
+  // SEO content — sacred text hubs
+  { path: "/texts/bhagavad-gita", changefreq: "monthly", priority: "0.9" },
+  { path: "/texts/vedas", changefreq: "monthly", priority: "0.9" },
+  { path: "/texts/upanishads", changefreq: "monthly", priority: "0.9" },
+
+  // Hindi meaning + pillar
+  { path: "/hindi/upanishad-meaning-in-hindi", changefreq: "monthly", priority: "0.85" },
+  { path: "/hindi/vedas-meaning-in-hindi", changefreq: "monthly", priority: "0.85" },
+  { path: "/hindi/dhyan-kaise-karein", changefreq: "monthly", priority: "0.9" },
+
+  // How to read
+  { path: "/how-to-read/bhagavad-gita", changefreq: "monthly", priority: "0.8" },
+
+  // Meditation
+  { path: "/meditation/techniques-compared", changefreq: "monthly", priority: "0.85" },
+  { path: "/meditation/for-anxiety", changefreq: "monthly", priority: "0.8" },
+  { path: "/meditation/for-stress", changefreq: "monthly", priority: "0.8" },
 ];
 
 async function fetchRows(table, select) {

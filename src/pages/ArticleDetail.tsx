@@ -1,10 +1,34 @@
 import DOMPurify from "dompurify";
+import { useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import useSEO from "@/hooks/useSEO";
 import Layout from "@/components/layout/Layout";
-import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, Home } from "lucide-react";
+
+// Hindi + English stopwords to strip when building keyword set
+const STOPWORDS = new Set([
+  "the","a","an","and","or","of","to","in","on","for","with","is","are","was","were","be","by","at","from","as","that","this","it","its","how","what","why","who","when","where","which",
+  "ka","ke","ki","ko","se","me","mein","hai","hain","tha","the","aur","ya","par","bhi","kya","kaise","kyun","kaun","kab","kahan","ek","do","yeh","ye","vo","wo",
+]);
+
+function extractKeywords(post: { title?: string; meta_title?: string; excerpt?: string } | null | undefined): string[] {
+  if (!post) return [];
+  const text = `${post.meta_title ?? ""} ${post.title ?? ""} ${(post.excerpt ?? "").replace(/<[^>]*>/g, "")}`;
+  const tokens = text
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .split(/\s+/)
+    .filter((t) => t.length >= 4 && !STOPWORDS.has(t));
+  // Dedupe preserving order, keep top 6 by frequency
+  const freq = new Map<string, number>();
+  tokens.forEach((t) => freq.set(t, (freq.get(t) ?? 0) + 1));
+  return [...freq.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+    .map(([t]) => t);
+}
 
 const ArticleDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -16,60 +40,90 @@ const ArticleDetail = () => {
       return data;
     },
     enabled: !!slug,
+    staleTime: 5 * 60 * 1000, // 5m
+    gcTime: 30 * 60 * 1000,
   });
 
-  // Fetch older and newer posts for navigation
+  const keywords = useMemo(() => extractKeywords(post), [post]);
+
+  // Prev / Next Navigation
   const { data: navPosts } = useQuery({
-    queryKey: ["post-nav", post?.created_at],
+    queryKey: ["post-nav", post?.id],
     queryFn: async () => {
       const createdAt = post!.created_at;
       const [olderRes, newerRes] = await Promise.all([
-        supabase
-          .from("posts")
-          .select("title, slug")
-          .eq("is_published", true)
-          .lt("created_at", createdAt)
-          .order("created_at", { ascending: false })
-          .limit(1),
-        supabase
-          .from("posts")
-          .select("title, slug")
-          .eq("is_published", true)
-          .gt("created_at", createdAt)
-          .order("created_at", { ascending: true })
-          .limit(1),
+        supabase.from("posts").select("title, slug").eq("is_published", true).lt("created_at", createdAt).order("created_at", { ascending: false }).limit(1),
+        supabase.from("posts").select("title, slug").eq("is_published", true).gt("created_at", createdAt).order("created_at", { ascending: true }).limit(1),
       ]);
-      return {
-        older: olderRes.data?.[0] ?? null,
-        newer: newerRes.data?.[0] ?? null,
-      };
+      return { older: olderRes.data?.[0] ?? null, newer: newerRes.data?.[0] ?? null };
     },
     enabled: !!post,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 
-  // Related posts (same post_type, excluding current)
+  // Related posts — keyword-matching first, category fallback. Aggressively cached.
   const { data: relatedPosts } = useQuery({
-    queryKey: ["post-related", post?.id, post?.post_type],
+    queryKey: ["post-related-v2", post?.id, keywords.join("|")],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("posts")
-        .select("title, slug, cover_url, excerpt")
-        .eq("is_published", true)
-        .eq("post_type", post!.post_type)
-        .neq("id", post!.id)
-        .order("created_at", { ascending: false })
-        .limit(4);
-      return data ?? [];
+      const results = new Map<string, { title: string; slug: string; cover_url: string | null; excerpt: string | null; score: number }>();
+
+      // 1) Keyword ilike OR match across title + excerpt (limited to 12 candidates)
+      if (keywords.length) {
+        const orExpr = keywords
+          .flatMap((k) => [`title.ilike.%${k}%`, `excerpt.ilike.%${k}%`])
+          .join(",");
+        const { data } = await supabase
+          .from("posts")
+          .select("id, title, slug, cover_url, excerpt, post_type")
+          .eq("is_published", true)
+          .neq("id", post!.id)
+          .or(orExpr)
+          .limit(12);
+        (data ?? []).forEach((r) => {
+          const hay = `${r.title} ${r.excerpt ?? ""}`.toLowerCase();
+          const score = keywords.reduce((s, k) => (hay.includes(k) ? s + 1 : s), 0)
+            + (r.post_type === post!.post_type ? 0.5 : 0);
+          results.set(r.id, { title: r.title, slug: r.slug, cover_url: r.cover_url, excerpt: r.excerpt, score });
+        });
+      }
+
+      // 2) Category fallback to guarantee at least 4
+      if (results.size < 4) {
+        const { data } = await supabase
+          .from("posts")
+          .select("id, title, slug, cover_url, excerpt")
+          .eq("is_published", true)
+          .eq("post_type", post!.post_type)
+          .neq("id", post!.id)
+          .order("created_at", { ascending: false })
+          .limit(8);
+        (data ?? []).forEach((r) => {
+          if (!results.has(r.id)) results.set(r.id, { title: r.title, slug: r.slug, cover_url: r.cover_url, excerpt: r.excerpt, score: 0.25 });
+        });
+      }
+
+      return [...results.values()].sort((a, b) => b.score - a.score).slice(0, 4);
     },
     enabled: !!post,
+    staleTime: 10 * 60 * 1000, // 10m — matches feel stable
+    gcTime: 60 * 60 * 1000,
   });
-
 
   const rawDesc = (post?.meta_description || post?.excerpt?.replace(/<[^>]*>/g, "").trim() || "").slice(0, 155);
   const articleDesc = (rawDesc && rawDesc.length >= 20)
     ? rawDesc
     : (post ? `${post.title} — GyandootNova पर आध्यात्मिक लेख, विचार और ज्ञान पढ़ें।` : "Spiritual articles and insights at GyandootNova.");
 
+  const breadcrumbJsonLd = post ? {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://gyandootnova.in/" },
+      { "@type": "ListItem", "position": 2, "name": "Articles", "item": "https://gyandootnova.in/articles" },
+      { "@type": "ListItem", "position": 3, "name": post.title, "item": `https://gyandootnova.in/articles/${post.slug}` },
+    ],
+  } : undefined;
 
   const articleJsonLd = post ? {
     "@context": "https://schema.org",
@@ -77,27 +131,15 @@ const ArticleDetail = () => {
     "headline": post.title,
     "description": articleDesc,
     "url": `https://gyandootnova.in/articles/${post.slug}`,
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": `https://gyandootnova.in/articles/${post.slug}`,
-    },
+    "mainEntityOfPage": { "@type": "WebPage", "@id": `https://gyandootnova.in/articles/${post.slug}` },
     "datePublished": post.created_at,
     "dateModified": post.updated_at,
     "inLanguage": "hi-IN",
     ...(post.cover_url && { "image": post.cover_url }),
-    "author": {
-      "@type": "Organization",
-      "name": "GyandootNova",
-      "url": "https://gyandootnova.in",
-    },
+    "author": { "@type": "Organization", "name": "GyandootNova", "url": "https://gyandootnova.in" },
     "publisher": {
-      "@type": "Organization",
-      "name": "GyandootNova",
-      "url": "https://gyandootnova.in",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://gyandootnova.in/favicon.ico",
-      },
+      "@type": "Organization", "name": "GyandootNova", "url": "https://gyandootnova.in",
+      "logo": { "@type": "ImageObject", "url": "https://gyandootnova.in/favicon.ico" },
     },
   } : undefined;
 
@@ -107,7 +149,7 @@ const ArticleDetail = () => {
     canonical: post ? `/articles/${post.slug}` : undefined,
     ogImage: post?.cover_url ?? undefined,
     ogType: "article",
-    jsonLd: articleJsonLd,
+    jsonLd: post ? [articleJsonLd, breadcrumbJsonLd] : undefined,
   });
 
   if (isLoading) {
@@ -122,6 +164,23 @@ const ArticleDetail = () => {
     <Layout>
       <article className="py-12">
         <div className="container max-w-3xl">
+          {/* Breadcrumb — SEO-friendly navigation */}
+          <nav aria-label="Breadcrumb" className="mb-6">
+            <ol className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+              <li>
+                <Link to="/" className="inline-flex items-center gap-1 hover:text-primary transition-colors">
+                  <Home className="h-3.5 w-3.5" /> Home
+                </Link>
+              </li>
+              <li aria-hidden="true"><ChevronRight className="h-3.5 w-3.5" /></li>
+              <li>
+                <Link to="/articles" className="hover:text-primary transition-colors">Articles</Link>
+              </li>
+              <li aria-hidden="true"><ChevronRight className="h-3.5 w-3.5" /></li>
+              <li className="text-foreground line-clamp-1" aria-current="page">{post.title}</li>
+            </ol>
+          </nav>
+
           <span className="text-xs font-medium uppercase tracking-wider text-primary">{post.post_type}</span>
           <h1 className="mt-2 font-serif text-3xl font-bold md:text-4xl">{post.title}</h1>
           <p className="mt-2 text-muted-foreground">
@@ -137,34 +196,22 @@ const ArticleDetail = () => {
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content ?? "") }}
           />
 
-          {/* Prev / Next Navigation */}
           {navPosts && (navPosts.older || navPosts.newer) && (
             <nav className="mt-12 border-t border-border pt-8 grid grid-cols-2 gap-4">
               {navPosts.older ? (
-                <Link
-                  to={`/articles/${navPosts.older.slug}`}
-                  className="group flex items-start gap-2 text-left"
-                >
+                <Link to={`/articles/${navPosts.older.slug}`} className="group flex items-start gap-2 text-left">
                   <ChevronLeft className="mt-1 h-5 w-5 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
                   <div>
                     <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Previous</span>
-                    <p className="mt-1 text-sm font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
-                      {navPosts.older.title}
-                    </p>
+                    <p className="mt-1 text-sm font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">{navPosts.older.title}</p>
                   </div>
                 </Link>
               ) : <div />}
-
               {navPosts.newer ? (
-                <Link
-                  to={`/articles/${navPosts.newer.slug}`}
-                  className="group flex items-start gap-2 text-right justify-end"
-                >
+                <Link to={`/articles/${navPosts.newer.slug}`} className="group flex items-start gap-2 text-right justify-end">
                   <div>
                     <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Next</span>
-                    <p className="mt-1 text-sm font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
-                      {navPosts.newer.title}
-                    </p>
+                    <p className="mt-1 text-sm font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">{navPosts.newer.title}</p>
                   </div>
                   <ChevronRight className="mt-1 h-5 w-5 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
                 </Link>
@@ -172,19 +219,14 @@ const ArticleDetail = () => {
             </nav>
           )}
 
-          {/* Related Articles */}
           {relatedPosts && relatedPosts.length > 0 && (
             <section className="mt-16 border-t border-border pt-10">
               <h2 className="font-serif text-2xl font-bold">Related Articles</h2>
               <div className="mt-6 grid gap-6 sm:grid-cols-2">
                 {relatedPosts.map((rp) => (
-                  <Link
-                    key={rp.slug}
-                    to={`/articles/${rp.slug}`}
-                    className="group flex gap-4 rounded-lg border border-border p-4 transition-colors hover:border-primary"
-                  >
+                  <Link key={rp.slug} to={`/articles/${rp.slug}`} className="group flex gap-4 rounded-lg border border-border p-4 transition-colors hover:border-primary">
                     {rp.cover_url && (
-                      <img src={rp.cover_url} alt={rp.title} loading="lazy" className="h-20 w-20 shrink-0 rounded object-cover" />
+                      <img src={rp.cover_url} alt={rp.title} loading="lazy" width={80} height={80} className="h-20 w-20 shrink-0 rounded object-cover" />
                     )}
                     <div className="min-w-0">
                       <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">{rp.title}</h3>
@@ -200,7 +242,6 @@ const ArticleDetail = () => {
             </section>
           )}
 
-          {/* Explore More — internal linking hub */}
           <section className="mt-12 border-t border-border pt-10">
             <h2 className="font-serif text-2xl font-bold">Explore More on GyandootNova</h2>
             <div className="mt-6 grid gap-6 sm:grid-cols-2 md:grid-cols-3 text-sm">
@@ -238,6 +279,5 @@ const ArticleDetail = () => {
     </Layout>
   );
 };
-
 
 export default ArticleDetail;

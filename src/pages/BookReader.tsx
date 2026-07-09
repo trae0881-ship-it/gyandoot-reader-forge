@@ -160,10 +160,16 @@ const BookReader = () => {
     "@type": "Book",
     "name": book.title,
     "inLanguage": "hi-IN",
+    "bookFormat": "https://schema.org/EBook",
     "author": { "@type": "Person", "name": book.author },
     "description": (book.description ?? readerDescription).replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim(),
     "url": `https://gyandootnova.in/books/${book.slug}`,
     ...(book.cover_url && { "image": book.cover_url }),
+    "publisher": {
+      "@type": "Organization",
+      "name": "GyandootNova",
+      "url": "https://gyandootnova.in",
+    },
     ...(chapter && {
       "workExample": {
         "@type": "Chapter",

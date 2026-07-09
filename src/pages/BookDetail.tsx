@@ -197,6 +197,8 @@ const BookDetail = () => {
         book_id: book!.id,
         coupon_id: appliedCoupon?.coupon_id,
         referrer_id: referrerId || undefined,
+        buyer_currency: currency,
+        buyer_fx_rate: rates[currency],
       } as any,
       () => {
         toast({ title: "Purchase Successful!", description: "You can now read the full book." });

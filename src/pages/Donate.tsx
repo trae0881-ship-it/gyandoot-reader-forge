@@ -52,7 +52,7 @@ const Donate = () => {
     }
     setLoading(true);
     await initiatePayment(
-      { amount, type: "donation", gateway, name: name.trim(), email: email.trim(), buyer_currency: currency, buyer_fx_rate: rates[currency] } as any,
+      { amount, type: "donation", gateway, name: name.trim(), email: email.trim(), buyer_currency: currency, buyer_fx_rate: 1 } as any,
       () => {
         setDonated(true);
         setLoading(false);
@@ -192,10 +192,22 @@ const Donate = () => {
                 </div>
                 <p className="mt-1.5 text-[11px] text-muted-foreground">
                   {gateway === "paypal"
-                    ? <>You'll be charged {formatPrice(amount)} via PayPal in your local currency.</>
+                    ? <>Charged in your local currency at the same number as the INR amount.</>
                     : <>Cards, UPI, netbanking — charged in INR.</>}
                 </p>
               </div>
+
+              {/* Localized price breakdown */}
+              <div className="rounded-xl border border-border bg-muted/30 p-4 text-sm">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Donation breakdown</p>
+                <div className="space-y-1.5">
+                  <div className="flex justify-between"><span className="text-muted-foreground">Base amount</span><span className="font-medium">₹{amount.toLocaleString("en-IN")} INR</span></div>
+                  {country && <div className="flex justify-between"><span className="text-muted-foreground">Your region</span><span className="font-medium">{country} · {currency}</span></div>}
+                  <div className="flex justify-between"><span className="text-muted-foreground">Pricing model</span><span className="font-medium">1:1 parity (no FX)</span></div>
+                  <div className="flex justify-between border-t border-border pt-1.5 mt-1.5"><span className="font-semibold">You'll be charged</span><span className="font-bold text-primary">{gateway === "paypal" ? `${formatPrice(amount)} ${currency}` : `₹${amount.toLocaleString("en-IN")} INR`}</span></div>
+                </div>
+              </div>
+
 
               <Button
                 size="lg"

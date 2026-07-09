@@ -119,14 +119,15 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
     triggerGoogleTranslate(l);
   }, []);
 
+  // 1:1 parity: ₹100 base → $100 in USA, €100 in EU, £100 in UK, etc.
+  // No FX conversion. Only the currency symbol changes.
   const formatPrice = useCallback(
-    (inrAmount: number) => {
-      const converted = inrAmount * (rates[currency] || 1);
+    (baseAmount: number) => {
       const sym = CURRENCY_SYMBOL[currency];
-      if (currency === "INR") return `${sym}${Math.round(converted).toLocaleString("en-IN")}`;
-      return `${sym}${converted.toFixed(2)}`;
+      if (currency === "INR") return `${sym}${Math.round(baseAmount).toLocaleString("en-IN")}`;
+      return `${sym}${Math.round(baseAmount).toLocaleString("en-US")}`;
     },
-    [currency, rates]
+    [currency]
   );
 
   // Apply language on mount / change (Google Translate)

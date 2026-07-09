@@ -97,7 +97,16 @@ const Contact = () => {
                 <MapPin className="h-6 w-6 text-primary mt-1" />
                 <div>
                   <p className="font-semibold text-foreground">पता</p>
-                  <p className="text-muted-foreground">उन्नाव, उत्तर प्रदेश — भारत</p>
+                  <p className="text-muted-foreground">Bhagwan Khera, उन्नाव, उत्तर प्रदेश 209863 — भारत</p>
+                  <p className="text-xs text-muted-foreground mt-1">26.1780° N, 80.6534° E</p>
+                  <a
+                    href="https://www.google.com/maps/search/?api=1&query=Bhagwan+Khera,+Uttar+Pradesh+209863&query_place_id=ChIJT5WhD-l8nDkRvYsKyaVVH1E"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 mt-2 text-sm font-medium text-primary hover:underline"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" /> Open in Google Maps
+                  </a>
                 </div>
               </div>
             </div>

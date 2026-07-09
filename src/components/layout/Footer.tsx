@@ -86,7 +86,7 @@ const Footer = () => {
 
           {/* Explore */}
           <div>
-            <h3 className="font-serif font-semibold mb-4 text-secondary">घूमिए</h3>
+            <h3 className="font-serif font-semibold mb-4 text-secondary">मुख्य पन्ने</h3>
             <nav aria-label="Footer explore links" className="flex flex-col gap-2.5 text-sm text-background/70">
               <Link to="/" className="hover:text-secondary transition-colors">मुख्य पृष्ठ</Link>
               <Link to="/about" className="hover:text-secondary transition-colors">हमारी कहानी</Link>
@@ -136,7 +136,7 @@ const Footer = () => {
             <nav aria-label="Footer legal links" className="flex flex-col gap-2.5 text-sm text-background/70">
               <Link to="/privacy-policy" className="hover:text-secondary transition-colors">गोपनीयता नीति</Link>
               <Link to="/terms-conditions" className="hover:text-secondary transition-colors">उपयोग की शर्तें</Link>
-              <Link to="/refund-policy" className="hover:text-secondary transition-colors">refund व रद्दीकरण</Link>
+              <Link to="/refund-policy" className="hover:text-secondary transition-colors">Refund व रद्दीकरण</Link>
               <Link to="/shipping-policy" className="hover:text-secondary transition-colors">डिलीवरी</Link>
             </nav>
           </div>
@@ -185,7 +185,7 @@ const Footer = () => {
           <div className="flex gap-4">
             <Link to="/privacy-policy" className="hover:text-secondary transition-colors">गोपनीयता</Link>
             <Link to="/terms-conditions" className="hover:text-secondary transition-colors">शर्तें</Link>
-            <Link to="/refund-policy" className="hover:text-secondary transition-colors">refund</Link>
+            <Link to="/refund-policy" className="hover:text-secondary transition-colors">Refund</Link>
           </div>
 
         </div>

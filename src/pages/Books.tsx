@@ -207,13 +207,13 @@ const Books = () => {
                               )}
                             </div>
                             <span className="text-[11px] font-bold text-primary group-hover:underline">
-                              {book.is_free ? "पढ़ें →" : "Buy Now →"}
+                              {book.is_free ? "Read →" : "Buy Now →"}
                             </span>
 
                           </div>
                           {!book.is_free && (
                             <p className="mt-1.5 text-[10px] text-muted-foreground">
-                              Poora granth chahiye? <span className="font-semibold text-primary">→ Premium Lein</span>
+                              Want the full text? <span className="font-semibold text-primary">→ Get Premium</span>
                             </p>
                           )}
                         </CardContent>

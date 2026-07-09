@@ -198,7 +198,7 @@ const BookDetail = () => {
         coupon_id: appliedCoupon?.coupon_id,
         referrer_id: referrerId || undefined,
         buyer_currency: currency,
-        buyer_fx_rate: rates[currency],
+        buyer_fx_rate: 1, // 1:1 parity — ₹100 base = $100/€100/£100 etc.
       } as any,
       () => {
         toast({ title: "Purchase Successful!", description: "You can now read the full book." });

@@ -202,19 +202,27 @@ const BookDetail = () => {
     : "Loading... | GyandootNova";
 
 
+  const priceValidUntil = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
   const bookJsonLd = book ? {
     "@context": "https://schema.org",
     "@type": "Book",
     "name": book.title,
     "inLanguage": "hi-IN",
+    "bookFormat": "https://schema.org/EBook",
     "author": { "@type": "Person", "name": book.author },
     "description": bookDescription,
     "url": `https://gyandootnova.in/books/${book.slug}`,
     ...(book.cover_url && { "image": book.cover_url }),
+    "publisher": {
+      "@type": "Organization",
+      "name": "GyandootNova",
+      "url": "https://gyandootnova.in",
+    },
     "offers": {
       "@type": "Offer",
       "price": book.is_free ? "0" : String(book.price),
       "priceCurrency": "INR",
+      "priceValidUntil": priceValidUntil,
       "availability": "https://schema.org/InStock",
       "url": `https://gyandootnova.in/books/${book.slug}`,
       "deliveryLeadTime": { "@type": "QuantitativeValue", "minValue": 0, "maxValue": 1, "unitCode": "MIN" },

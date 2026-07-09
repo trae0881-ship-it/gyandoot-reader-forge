@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, CheckCircle, Loader2, User, Mail, LogIn } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { initiatePayment, type PaymentGateway } from "@/lib/payment";
+import { useLocale } from "@/hooks/useLocale";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import useSEO from "@/hooks/useSEO";

@@ -18,6 +18,10 @@ verify_jwt = false
 [functions.ai-providers-manage]
 verify_jwt = false
 
+[functions.otp-providers-manage]
+verify_jwt = false
+
+
 
 
 

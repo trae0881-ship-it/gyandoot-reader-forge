@@ -14,6 +14,31 @@ const Contact = () => {
     description:
       "ग्रंथ, order, सुझाव या साझेदारी — जो भी बात हो, WhatsApp, email या form से पहुँचिए। जवाब उसी दिन।",
     canonical: "/contact",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      name: "GyandootNova",
+      description:
+        "आध्यात्मिक प्रकाशन एवं डिजिटल पुस्तकालय — वेद, उपनिषद, गीता, रामायण, महाभारत तथा सनातन धर्म ग्रंथों का प्रामाणिक स्रोत।",
+      url: "https://gyandootnova.in/contact",
+      telephone: "+91 91615 33353",
+      email: "amrendra8765@gmail.com",
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "उन्नाव",
+        addressRegion: "उत्तर प्रदेश",
+        addressCountry: "IN",
+      },
+      openingHoursSpecification: [
+        {
+          "@type": "OpeningHoursSpecification",
+          dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+          opens: "10:00",
+          closes: "18:00",
+        },
+      ],
+      areaServed: "IN",
+    },
   });
 
   const { toast } = useToast();

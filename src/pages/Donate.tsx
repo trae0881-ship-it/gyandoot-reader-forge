@@ -206,6 +206,8 @@ const Donate = () => {
                   <div className="flex justify-between"><span className="text-muted-foreground">Pricing model</span><span className="font-medium">1:1 parity (no FX)</span></div>
                   <div className="flex justify-between border-t border-border pt-1.5 mt-1.5"><span className="font-semibold">You'll be charged</span><span className="font-bold text-primary">{gateway === "paypal" ? `${formatPrice(amount)} ${currency}` : `₹${amount.toLocaleString("en-IN")} INR`}</span></div>
                 </div>
+              </div>
+
 
               <Button
                 size="lg"

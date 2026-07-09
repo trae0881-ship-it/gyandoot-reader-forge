@@ -173,6 +173,8 @@ async function handleRazorpay(
       book_id,
       razorpay_order_id: order.id,
       status: "pending",
+      amount, // freeze the amount paid at time of order (post-coupon)
+      currency: "INR",
     };
     if (referrer_id && referrer_id !== user.id) {
       purchaseData.referrer_id = referrer_id;

@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PhoneOtpLogin from "@/components/auth/PhoneOtpLogin";
 import logoImg from "@/assets/logo.jpeg";
+import useSEO from "@/hooks/useSEO";
 
 const ForgotPasswordLink = ({ email }: { email: string }) => {
   const { toast } = useToast();

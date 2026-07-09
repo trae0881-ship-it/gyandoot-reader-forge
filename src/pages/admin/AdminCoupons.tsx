@@ -441,7 +441,7 @@ const AdminCoupons = () => {
 
       {/* Create / Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) { setEditCoupon(null); setForm(defaultForm); setSelectedBookIds([]); } }}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editCoupon ? "Edit Coupon" : "Create Coupon"}</DialogTitle>
           </DialogHeader>

@@ -53,6 +53,12 @@ const Auth = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
 
+  useSEO({
+    title: "Sign In or Create Account | GyandootNova",
+    description: "Sign in to your GyandootNova account ya naya account banayein — Hindu dharmik granth, Bhagavad Gita aur Vedas online reader ke liye.",
+    canonical: "/auth",
+  });
+
   useEffect(() => {
     if (!authLoading && user) {
       navigate("/profile", { replace: true });

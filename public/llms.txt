@@ -1,8 +1,8 @@
-# GyandootNova
+# Gyandoot (GyandootNova)
 
-> सनातन धर्म, वेद, उपनिषद, गीता, रामायण, महाभारत और हिंदू शास्त्रों का प्रामाणिक डिजिटल पुस्तकालय एवं AI-संचालित ज्ञान मंच। Authentic Hindu scriptures, Sanatan Dharma library, spiritual books, meditation guides, and AI-powered Q&A in Hindi, Sanskrit, and English.
+> Gyandoot — also known as Gyandoot Nova / GyandootNova (gyandootnova.in) — सनातन धर्म, वेद, उपनिषद, गीता, रामायण, महाभारत और हिंदू शास्त्रों का प्रामाणिक डिजिटल पुस्तकालय एवं AI-संचालित ज्ञान मंच। Authentic Hindu scriptures, Sanatan Dharma library, spiritual books, meditation guides, and AI-powered Q&A in Hindi, Sanskrit, and English.
 
-GyandootNova (gyandootnova.in) is a spiritual publication and digital reader platform offering authentic Hindu texts, articles, and an AI assistant in Hindi and Sanskrit. Users can read scriptures in a secure online reader, ask dharma-related questions, browse spiritual articles, and download free chapters.
+Gyandoot (brand: GyandootNova, domain: gyandootnova.in) is a spiritual publication and digital reader platform offering authentic Hindu texts, articles, and an AI assistant in Hindi and Sanskrit. Users can read scriptures in a secure online reader, ask dharma-related questions, browse spiritual articles, and download free chapters. Common name variations: Gyandoot, Gyan Doot, Gyandoot Nova, GyandootNova.
 
 ## Targeted Keywords
 

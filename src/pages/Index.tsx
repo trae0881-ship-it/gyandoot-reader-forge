@@ -370,7 +370,7 @@ const Index = () => {
                     </div>
                     {!book.is_free && (
                       <div className="absolute top-2 right-2 z-10">
-                        <span className="inline-block rounded-md bg-primary/95 text-primary-foreground px-2 py-0.5 text-[10px] font-bold shadow">जीवनभर</span>
+                        <span className="inline-block rounded-md bg-primary/95 text-primary-foreground px-2 py-0.5 text-[10px] font-bold shadow">LIFETIME</span>
                       </div>
                     )}
                     <div className="aspect-[3/4] bg-muted flex items-center justify-center overflow-hidden">

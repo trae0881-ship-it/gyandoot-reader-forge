@@ -446,24 +446,24 @@ const Index = () => {
       <section className="py-20">
         <div className="container">
           <div className="mb-10 text-center">
-            <h2 className="font-serif text-3xl font-bold md:text-4xl">कार्यक्रम और सत्संग</h2>
-            <p className="mt-2 text-muted-foreground">पढ़ने से आगे — सुनने और अनुभव करने की बारी</p>
+            <h2 className="font-serif text-3xl font-bold md:text-4xl">Programs & Discourses</h2>
+            <p className="mt-2 text-muted-foreground">Beyond reading — a chance to listen and experience</p>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {[
               {
-                title: "मौन शिविर",
-                desc: "थकी हुई मन को कुछ दिन विश्राम दीजिए — साँस, ध्यान, और भीतर उतरने की सरल विधि।",
+                title: "Silence Retreat",
+                desc: "Give a tired mind a few days of rest — breath, meditation and a simple practice for turning inward.",
                 icon: Sparkles,
               },
               {
-                title: "श्लोक-सत्संग",
-                desc: "उपनिषद और गीता के चुने हुए सूत्रों पर छोटी-छोटी बैठकें — एक श्लोक, एक जीवन-दिशा।",
+                title: "Shloka Discourse",
+                desc: "Short sessions on chosen sutras from the Upanishads and the Gita — one verse, one direction for life.",
                 icon: BookOpen,
               },
               {
-                title: "स्व-जागरण कार्यशाला",
-                desc: "रोज़ की उलझनों में शास्त्र कैसे काम आते हैं — बातचीत, अभ्यास और असली अनुभव।",
+                title: "Self-Awakening Workshop",
+                desc: "How the scriptures help with everyday knots — conversation, practice and real experience.",
                 icon: TrendingUp,
               },
 

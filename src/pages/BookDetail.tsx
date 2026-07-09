@@ -31,7 +31,15 @@ const BookDetail = () => {
   const queryClient = useQueryClient();
   const [purchasing, setPurchasing] = useState(false);
   const [claimingFree, setClaimingFree] = useState(false);
+  const { country, currency, rates, formatPrice } = useLocale();
+  const isIndia = (country ?? "").toUpperCase() === "IN";
   const [gateway, setGateway] = useState<PaymentGateway>("razorpay");
+  const [gatewayTouched, setGatewayTouched] = useState(false);
+  // Auto-select PayPal for non-India visitors, Razorpay for India — unless user manually chose.
+  useEffect(() => {
+    if (gatewayTouched || !country) return;
+    setGateway(isIndia ? "razorpay" : "paypal");
+  }, [country, isIndia, gatewayTouched]);
   const [couponCode, setCouponCode] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<{

@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, MessageCircle, Facebook, Instagram, Youtube, Linkedin, Flame } from "lucide-react";
+import { Settings, MessageCircle, Facebook, Instagram, Youtube, Linkedin, Flame, BookOpen } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect } from "react";
 
 const SOCIAL_KEYS = [
@@ -22,6 +23,10 @@ const URGENCY_KEYS = [
   { key: "urgency_discount_label", label: "Discount Label", placeholder: "20% off", hint: "जैसे: 20% off / ₹100 off" },
   { key: "urgency_ends_at", label: "Ends At (ISO)", placeholder: "2026-07-05T23:59:59+05:30", hint: "खाली छोड़ें = आज रात 11:59 तक auto" },
   { key: "urgency_link", label: "Link", placeholder: "/books", hint: "Coupon पर click करने पर कहाँ ले जाए" },
+];
+
+const BOOK_KEYS = [
+  { key: "book_free_chapter_note", label: "Free Chapter Note (Book Detail)", placeholder: "पहला अध्याय 100% मुफ़्त है — Login कीजिए और पढ़कर देखिए, पसंद आए तभी खरीदिए।", hint: "Paid book के Table of Contents के ऊपर दिखता है। खाली = hide.", multiline: true },
 ];
 
 const AdminSettings = () => {

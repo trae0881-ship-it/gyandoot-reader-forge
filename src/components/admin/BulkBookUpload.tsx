@@ -187,17 +187,25 @@ const BulkBookUpload = () => {
         }
 
         const slug = slugify(item.title);
-        const { error } = await supabase.from("books").insert({
+        const { data: inserted, error } = await supabase.from("books").insert({
           title: item.title,
           author: item.author,
           slug,
           price: item.is_free ? 0 : item.price,
           is_free: item.is_free,
           cover_url,
-          file_url,
           file_type,
-        });
+        }).select("id").single();
         if (error) throw error;
+
+        if (file_url && inserted?.id) {
+          const { error: fileErr } = await supabase.rpc("admin_set_book_file_url", {
+            _book_id: inserted.id,
+            _file_url: file_url,
+          });
+          if (fileErr) throw fileErr;
+        }
+
 
         done++;
         setProgress(Math.round((done / total) * 100));

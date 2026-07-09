@@ -213,17 +213,17 @@ const Index = () => {
       <section className="border-b border-border bg-background py-10 md:py-14">
         <div className="container max-w-5xl text-center">
           <h2 className="font-serif text-2xl md:text-3xl font-bold">
-            Kyun <span className="text-primary">Lakhon Log</span> GyandootNova Par Bharosa Karte Hain
+            Why <span className="text-primary">Thousands of Readers</span> Trust GyandootNova
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm md:text-base text-muted-foreground leading-relaxed">
-            Har granth Sanskrit se saral Hindi mein, vidwano ki dekh-rekh mein taiyar kiya gaya hai. Koi hidden charges nahi, koi app download nahi — seedha browser mein padhein.
+            Every scripture is translated from original Sanskrit into clear English and Hindi, curated by scholars. No hidden charges, no app downloads — read instantly in your browser.
           </p>
           <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             {[
-              { icon: Lock, label: "Safe & Secure Payment" },
-              { icon: CheckCircle2, label: "Vidwano dwara verified content" },
-              { icon: BookOpen, label: "Kisi bhi device par padhein" },
-              { icon: ShieldCheck, label: "7-din refund guarantee" },
+              { icon: Lock, label: "Safe & Secure Payments" },
+              { icon: CheckCircle2, label: "Scholar-verified content" },
+              { icon: BookOpen, label: "Read on any device" },
+              { icon: ShieldCheck, label: "7-day refund guarantee" },
             ].map((b) => (
               <div
                 key={b.label}

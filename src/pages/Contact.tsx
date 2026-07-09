@@ -67,9 +67,9 @@ const Contact = () => {
     <Layout>
       <main className="container py-16">
         <section className="text-center mb-16">
-          <h1 className="font-serif text-4xl md:text-5xl font-bold text-primary mb-4">एक बात कहनी है?</h1>
+          <h1 className="font-serif text-4xl md:text-5xl font-bold text-primary mb-4">Have something to say?</h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            शिकायत, सुझाव, या बस हाल-चाल — जो भी हो, लिख भेजिए। हम पढ़ते हैं, और उसी दिन जवाब देते हैं।
+            A complaint, a suggestion, or just a hello — whatever it is, write in. We read every message and reply the same day.
           </p>
         </section>
 

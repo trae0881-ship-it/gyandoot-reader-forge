@@ -77,27 +77,27 @@ const Contact = () => {
         <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
           {/* Contact Info */}
           <div>
-            <h2 className="font-serif text-2xl font-bold text-foreground mb-6">सीधा सम्पर्क</h2>
+            <h2 className="font-serif text-2xl font-bold text-foreground mb-6">Direct contact</h2>
             <div className="space-y-6">
               <div className="flex items-start gap-4">
                 <Mail className="h-6 w-6 text-primary mt-1" />
                 <div>
-                  <p className="font-semibold text-foreground">ईमेल</p>
+                  <p className="font-semibold text-foreground">Email</p>
                   <p className="text-muted-foreground">amrendra8765@gmail.com</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
                 <Phone className="h-6 w-6 text-primary mt-1" />
                 <div>
-                  <p className="font-semibold text-foreground">फ़ोन / WhatsApp</p>
+                  <p className="font-semibold text-foreground">Phone / WhatsApp</p>
                   <p className="text-muted-foreground">+91 91615 33353</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
                 <MapPin className="h-6 w-6 text-primary mt-1" />
                 <div>
-                  <p className="font-semibold text-foreground">पता</p>
-                  <p className="text-muted-foreground">Bhagwan Khera, उन्नाव, उत्तर प्रदेश 209863 — भारत</p>
+                  <p className="font-semibold text-foreground">Address</p>
+                  <p className="text-muted-foreground">Bhagwan Khera, Unnao, Uttar Pradesh 209863 — India</p>
                   <p className="text-xs text-muted-foreground mt-1">26.1780° N, 80.6534° E</p>
                   <a
                     href="https://www.google.com/maps/search/?api=1&query=Bhagwan+Khera,+Uttar+Pradesh+209863&query_place_id=ChIJT5WhD-l8nDkRvYsKyaVVH1E"
@@ -112,9 +112,9 @@ const Contact = () => {
             </div>
 
             <div className="mt-8 p-6 bg-muted/50 rounded-xl">
-              <h3 className="font-serif font-semibold text-foreground mb-2">कब पहुँचें</h3>
-              <p className="text-sm text-muted-foreground">सोम से शनि: सुबह 10 से शाम 6 (भारतीय समय)</p>
-              <p className="text-sm text-muted-foreground">रविवार: विश्राम दिवस</p>
+              <h3 className="font-serif font-semibold text-foreground mb-2">When to reach us</h3>
+              <p className="text-sm text-muted-foreground">Mon–Sat: 10 AM to 6 PM (India time)</p>
+              <p className="text-sm text-muted-foreground">Sunday: closed</p>
             </div>
           </div>
 

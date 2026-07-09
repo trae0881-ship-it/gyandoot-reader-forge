@@ -69,6 +69,12 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const action = String(body?.action || "");
 
+    // Enforce admin 2FA (server-side) for mutating actions.
+    if (action !== "list") {
+      const { data: otpOk } = await admin.rpc("is_admin_otp_verified", { _user_id: userData.user.id });
+      if (!otpOk) return json({ error: "Admin 2FA verification required" }, 403);
+    }
+
     if (action === "list") {
       const channel = String(body?.channel || "");
       let q = admin.from("otp_providers").select("id, channel, provider_name, config_json, is_active, created_at").order("created_at");

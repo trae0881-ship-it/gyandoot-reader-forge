@@ -34,8 +34,8 @@ const Books = () => {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   useSEO({
-    title: "Dharmik Granth & Spiritual Books Online — GyandootNova",
-    description: "Browse and buy spiritual books — Vishnu Sahasraname, Bhagwat Geeta, Ramayana, Hanuman Chalisa & more dharmik granth online.",
+    title: "Hindu Religious Books Online — Bhagavad Gita, Vedas, Upanishads, Ramayana PDF | GyandootNova",
+    description: "Hindu religious books online — Bhagavad Gita Hindi PDF, Geeta shlok, 4 Vedas, Upanishads, Ramayana, Hanuman Chalisa, Vishnu Sahasranama aur 50+ dharmik granth free reader ke saath.",
     canonical: "/books",
   });
 

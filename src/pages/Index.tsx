@@ -104,9 +104,9 @@ const Index = () => {
   });
 
   useSEO({
-    title: "Dharmik Granth Online — Geeta, Ramayana | GyandootNova",
+    title: "Bhagavad Gita Hindi PDF, Geeta Shlok, Vedas & Upanishads Online | GyandootNova",
     description:
-      "Dharmik granth online padhein — Vishnu Sahasraname, Bhagwat Geeta, Ramayana, Hanuman Chalisa aur anek spiritual books Hindi mein. GyandootNova par padhein.",
+      "Bhagwat Geeta Hindi PDF, Geeta shlok, Vedas, Upanishads, Ramayana aur Hindu religious books online padhein. Dhyan kaise kare, meditation ke fayde aur spiritual gyan Hindi mein — GyandootNova par.",
     canonical: "/",
     ogImage: "https://gyandootnova.in/og-image.png",
     jsonLd: {

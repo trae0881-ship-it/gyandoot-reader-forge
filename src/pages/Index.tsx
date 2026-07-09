@@ -303,17 +303,18 @@ const Index = () => {
           <div className="grid items-center gap-12 md:grid-cols-2">
             <div>
               <h2 className="font-serif text-3xl font-bold md:text-4xl">
-                जहाँ ग्रंथ मिलते हैं <span className="text-primary">जिज्ञासु मन से</span>
+                Where scriptures meet <span className="text-primary">curious minds</span>
               </h2>
               <div className="mt-3 h-1 w-16 rounded-full bg-primary" />
               <p className="mt-6 text-muted-foreground leading-relaxed">
-                GyandootNova एक छोटी-सी कोशिश है — दादी-नानी की अलमारी में बंद रह गए ग्रंथों को
-                फिर से आपके हाथ में रखने की। हम पुरानी पांडुलिपियों को खोजते हैं, विद्वानों से
-                मिलाते हैं, फिर सरल भाषा में आप तक पहुँचाते हैं।
+                GyandootNova is a small effort to bring the sacred texts once locked in
+                grandmothers' cupboards back into your hands. We track down old manuscripts,
+                work with Sanskrit scholars, and deliver them to you in language that
+                actually reads well today.
               </p>
               <p className="mt-4 text-muted-foreground leading-relaxed">
-                पढ़ना कोई घर के काम-सा बोझ न लगे — इसीलिए reader इतना हल्का बनाया है कि 5 मिनट
-                का ब्रेक भी एक श्लोक और उसका अर्थ पाने के लिए काफ़ी है।
+                Reading a scripture shouldn't feel like homework. Our reader is designed
+                so a five-minute break is enough for a shloka and its meaning to land.
               </p>
               <Button
                 variant="outline"
@@ -321,16 +322,16 @@ const Index = () => {
                 asChild
               >
                 <Link to="/articles">
-                  हमारे लेख पढ़िए <ArrowRight className="ml-2 h-4 w-4" />
+                  Read Our Articles <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
             </div>
             <div className="grid grid-cols-2 gap-4">
               {[
-                { icon: BookMarked, label: "प्राचीन ग्रंथ", desc: "मूल पाठ, सत्यापित अनुवाद" },
-                { icon: FileText, label: "जीवन-सूत्र लेख", desc: "आज के प्रश्न, शास्त्र के उत्तर" },
-                { icon: Users, label: "जुड़ा हुआ परिवार", desc: "दुनिया भर के पाठक साथ" },
-                { icon: Globe, label: "हर कोने में", desc: "जहाँ नेट, वहाँ आपकी pothi" },
+                { icon: BookMarked, label: "Ancient Scriptures", desc: "Original text, verified translations" },
+                { icon: FileText, label: "Life-Sutra Articles", desc: "Today's questions, timeless answers" },
+                { icon: Users, label: "Global Community", desc: "Readers from across the world" },
+                { icon: Globe, label: "Anywhere You Are", desc: "Wherever there's internet, your library follows" },
               ].map((item) => (
                 <div
                   key={item.label}

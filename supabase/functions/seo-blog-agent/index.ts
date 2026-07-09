@@ -84,6 +84,27 @@ async function retryOnce<T>(fn: () => Promise<T>): Promise<T> {
 // ─── LLM providers ───────────────────────────────────────────────────
 type ChatMsg = { role: "system" | "user" | "assistant"; content: string };
 
+// Lovable AI Gateway (primary) — uses auto-provisioned LOVABLE_API_KEY.
+// No user-supplied key, no quota alerts, no invalid-key errors.
+async function llmLovable(messages: ChatMsg[], json: boolean, key: string): Promise<string> {
+  const sysExtra = json ? "\n\nReturn ONLY valid JSON. No markdown fences, no commentary." : "";
+  const patchedMessages = messages.map((m, i) =>
+    i === 0 && m.role === "system" ? { ...m, content: m.content + sysExtra } : m
+  );
+  const res = await withTimeout(fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      messages: patchedMessages,
+      ...(json ? { response_format: { type: "json_object" } } : {}),
+    }),
+  }), 90000);
+  if (!res.ok) throw new Error(`lovable ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content ?? "";
+}
+
 async function llmAnthropic(messages: ChatMsg[], json: boolean, key: string): Promise<string> {
   const sys = messages.filter(m => m.role === "system").map(m => m.content).join("\n\n");
   const rest = messages.filter(m => m.role !== "system");
@@ -137,7 +158,11 @@ async function llmGemini(messages: ChatMsg[], json: boolean, key: string): Promi
 }
 
 type LLMFn = (m: ChatMsg[], j: boolean, key: string) => Promise<string>;
+// Lovable AI Gateway is tried first — LOVABLE_API_KEY is auto-provisioned and
+// covered by workspace credits, so no quota / invalid-key alerts.
+// External providers remain as fallback only if their keys are configured.
 const LLM_CHAIN: [string, LLMFn][] = [
+  ["lovable", llmLovable],
   ["anthropic", llmAnthropic], ["openai", llmOpenAI], ["deepseek", llmDeepSeek], ["gemini", llmGemini],
 ];
 
@@ -510,12 +535,27 @@ Return STRICT JSON (no markdown fences):
         if (first !== -1 && last > first) {
           const slice = cleaned.slice(first, last + 1);
           article = tryParse(slice);
-          // 4) repair common issues: trailing commas, bad control chars
+          // 4) repair common issues: trailing commas, bad control chars, unescaped quotes in HTML strings
           if (!article) {
             const repaired = slice
               .replace(/,\s*([}\]])/g, "$1")
               .replace(/[\u0000-\u001F]+/g, (m) => m.replace(/[\r\n\t]/g, " "));
             article = tryParse(repaired);
+          }
+          // 5) truncate to last complete field before error position — recover partial article
+          if (!article) {
+            for (let end = slice.length - 1; end > 100; end -= 1) {
+              if (slice[end] === "}" && slice[end - 1] !== "\\") {
+                const candidate = slice.slice(0, end + 1)
+                  .replace(/,\s*([}\]])/g, "$1")
+                  .replace(/[\u0000-\u001F]+/g, " ");
+                const parsed = tryParse(candidate);
+                if (parsed && typeof parsed === "object" && parsed.title && parsed.body_html) {
+                  article = parsed;
+                  break;
+                }
+              }
+            }
           }
         }
       }

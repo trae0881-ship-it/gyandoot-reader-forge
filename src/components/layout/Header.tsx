@@ -57,49 +57,40 @@ const Header = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="w-full max-w-screen-2xl mx-auto flex h-14 items-center justify-between px-3 md:px-6">
+    <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+      <div className="pointer-events-none absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-transparent via-gold/50 to-transparent" />
+      <div className="w-full max-w-screen-2xl mx-auto flex h-16 items-center justify-between px-3 md:px-6">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 shrink-0" aria-label="Go to homepage">
-          <div className="relative h-10 w-10 shrink-0" style={{ perspective: '200px' }}>
+        <Link to="/" className="group flex items-center gap-2.5 shrink-0" aria-label="Go to homepage">
+          <div className="relative h-10 w-10 shrink-0">
+            <div className="absolute inset-0 rounded-full bg-gradient-gold opacity-70 blur-md transition-opacity group-hover:opacity-100" />
             <img
               src={logoImg}
               alt="GyandootNova logo"
               width={40}
               height={40}
               {...({ fetchpriority: "high" } as any)}
-              className="h-10 w-10 rounded-full object-cover shadow-lg ring-2 ring-primary/30"
-              style={{
-                transform: 'rotateY(-12deg) rotateX(5deg)',
-                boxShadow: '4px 4px 12px rgba(0,0,0,0.3), -1px -1px 4px rgba(255,255,255,0.1), inset 0 -2px 6px rgba(0,0,0,0.2)',
-                transition: 'transform 0.3s ease',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = 'rotateY(12deg) rotateX(-5deg) scale(1.1)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = 'rotateY(-12deg) rotateX(5deg)'; }}
-            />
-            <div
-              className="absolute inset-0 rounded-full pointer-events-none"
-              style={{
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.35) 0%, transparent 50%, rgba(0,0,0,0.15) 100%)',
-              }}
+              className="relative h-10 w-10 rounded-full object-cover shadow-elegant ring-2 ring-gold/60 transition-transform duration-500 group-hover:scale-105 group-hover:rotate-3"
             />
           </div>
-          <span className="font-serif text-lg font-bold text-primary hidden sm:inline">GyandootNova</span>
+          <span className="font-serif text-xl leading-none tracking-tight text-foreground hidden sm:inline">
+            Gyandoot<span className="gradient-text-gold">Nova</span>
+          </span>
         </Link>
 
         {/* Desktop nav */}
-        <nav aria-label="Main navigation" className="hidden md:flex items-center gap-1 lg:gap-2 xl:gap-3">
+        <nav aria-label="Main navigation" className="hidden md:flex items-center gap-0.5 lg:gap-1">
           {navLinks.map((link) => (
             <Link
               key={link.to}
               to={link.to}
-              className="text-xs lg:text-sm font-medium text-foreground/70 transition-colors hover:text-primary px-1.5 py-1 whitespace-nowrap"
+              className="link-underline text-[13px] lg:text-sm font-medium text-foreground/75 transition-colors hover:text-primary px-2 py-1.5 whitespace-nowrap"
             >
               {link.label}
             </Link>
           ))}
           {isAdmin && (
-            <Link to="/admin" className="flex items-center gap-1 text-xs lg:text-sm font-medium text-primary px-1.5">
+            <Link to="/admin" className="link-underline flex items-center gap-1 text-[13px] lg:text-sm font-medium text-primary px-2 py-1.5">
               <Shield className="h-3.5 w-3.5" /> Admin
             </Link>
           )}

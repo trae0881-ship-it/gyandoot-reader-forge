@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useState, useMemo, useEffect } from "react";
 
 import { initiatePayment, type PaymentGateway } from "@/lib/payment";
+import { useLocale } from "@/hooks/useLocale";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import AskScripture from "@/components/AskScripture";

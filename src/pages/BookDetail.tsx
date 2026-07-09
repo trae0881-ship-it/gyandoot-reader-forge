@@ -283,7 +283,7 @@ const BookDetail = () => {
                     width={600}
                     height={800}
                     decoding="async"
-                    fetchPriority="high"
+                    {...({ fetchpriority: "high" } as any)}
                     className="h-full w-full object-cover"
                   />
                 ) : (

@@ -92,8 +92,11 @@ const ChannelPanel = ({ channel }: { channel: Channel }) => {
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase.from("otp_providers").select("*").eq("channel", channel).order("created_at");
-    setRows((data || []) as any);
+    const { data, error } = await supabase.functions.invoke("otp-providers-manage", {
+      body: { action: "list", channel },
+    });
+    if (error) toast({ title: "Load failed", description: error.message, variant: "destructive" });
+    setRows(((data as any)?.rows || []) as any);
     setLoading(false);
   };
   useEffect(() => { load(); }, [channel]);
@@ -102,29 +105,32 @@ const ChannelPanel = ({ channel }: { channel: Channel }) => {
 
   const save = async () => {
     setSaving(true);
-    const { error } = await supabase.from("otp_providers").insert({
-      channel, provider_name: providerName, config_json: cfg, is_active: false,
+    const { data, error } = await supabase.functions.invoke("otp-providers-manage", {
+      body: { action: "create", channel, provider_name: providerName, config_json: cfg },
     });
     setSaving(false);
-    if (error) { toast({ title: "Save failed", description: error.message, variant: "destructive" }); return; }
+    if (error || (data as any)?.error) {
+      toast({ title: "Save failed", description: (data as any)?.error || error?.message, variant: "destructive" });
+      return;
+    }
     toast({ title: "Saved" });
     setCfg({});
     load();
   };
 
   const toggleActive = async (row: ProviderRow) => {
-    if (!row.is_active) {
-      // deactivate others first
-      await supabase.from("otp_providers").update({ is_active: false }).eq("channel", channel);
+    const { data, error } = await supabase.functions.invoke("otp-providers-manage", {
+      body: { action: "toggle", id: row.id, channel, activate: !row.is_active },
+    });
+    if (error || (data as any)?.error) {
+      toast({ title: "Failed", description: (data as any)?.error || error?.message, variant: "destructive" });
     }
-    const { error } = await supabase.from("otp_providers").update({ is_active: !row.is_active }).eq("id", row.id);
-    if (error) toast({ title: "Failed", description: error.message, variant: "destructive" });
     load();
   };
 
   const remove = async (id: string) => {
     if (!confirm("Delete this provider config?")) return;
-    await supabase.from("otp_providers").delete().eq("id", id);
+    await supabase.functions.invoke("otp-providers-manage", { body: { action: "delete", id } });
     load();
   };
 

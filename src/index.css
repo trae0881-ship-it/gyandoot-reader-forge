@@ -306,16 +306,17 @@
 
   body {
     @apply bg-background text-foreground font-sans;
-    font-family: 'Work Sans', 'Noto Serif Devanagari', 'Inter', system-ui, sans-serif;
+    font-family: 'Noto Serif Devanagari', 'Work Sans', Georgia, serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Instrument Serif', 'Playfair Display', 'Noto Serif Devanagari', Georgia, serif;
+    font-family: 'Noto Serif Devanagari', 'Instrument Serif', 'Playfair Display', Georgia, serif;
     letter-spacing: -0.01em;
-    font-weight: 400;
+    font-weight: 600;
   }
+
 
   ::selection {
     background: hsl(var(--gold) / 0.35);

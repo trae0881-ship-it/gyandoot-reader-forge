@@ -167,16 +167,16 @@ const Index = () => {
         />
         <div className="container relative text-center">
           <div className="inline-flex items-center gap-2 rounded-full bg-secondary/20 px-4 py-1.5 text-xs font-semibold text-secondary mb-5">
-            <Star className="h-3.5 w-3.5 fill-secondary" /> भरोसा — 24,000+ पाठकों की पहली पसंद
+            <Star className="h-3.5 w-3.5 fill-secondary" /> Trusted by 24,000+ readers worldwide
           </div>
           <h1 className="font-serif text-3xl font-extrabold leading-tight text-primary-foreground md:text-5xl lg:text-6xl">
-            Dharmik Granth Online India Mein —{" "}
-            <span className="text-secondary">Geeta, Ramayana, Hanuman Chalisa</span>
-            <br className="hidden md:block" /> Saral Hindi Mein, Bina Jhanjhat Ke
+            Ancient Indian Scriptures, Online —{" "}
+            <span className="text-secondary">Bhagavad Gita, Ramayana, Hanuman Chalisa</span>
+            <br className="hidden md:block" /> in Clear English & Hindi
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-primary-foreground/90 md:text-lg">
-            50+ dharmik granth ab ek hi jagah. Free padhna shuru karein, ya{" "}
-            <strong className="text-secondary">premium granth unlock karke sampurna gyaan paayein.</strong>
+            50+ sacred texts in one library. Start reading free, or{" "}
+            <strong className="text-secondary">unlock premium editions for lifetime access to timeless wisdom.</strong>
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button
@@ -185,7 +185,7 @@ const Index = () => {
               asChild
             >
               <Link to="/books?filter=free">
-                <BookOpen className="mr-2 h-5 w-5" /> Free Mein Padhna Shuru Karein →
+                <BookOpen className="mr-2 h-5 w-5" /> Start Reading Free →
               </Link>
             </Button>
             <Button
@@ -195,15 +195,15 @@ const Index = () => {
               asChild
             >
               <Link to="/books?filter=paid">
-                Premium Granth Dekhein
+                Explore Premium Editions
               </Link>
             </Button>
           </div>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs md:text-sm text-primary-foreground/80">
-            <span className="inline-flex items-center gap-1.5"><Lock className="h-3.5 w-3.5 text-secondary" /> निजी और सुरक्षित</span>
-            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-secondary" /> पसंद नहीं आया? 7 दिन में पूरा वापस</span>
-            <span className="inline-flex items-center gap-1.5"><InfinityIcon className="h-3.5 w-3.5 text-secondary" /> जब तक जिएँ, तब तक पढ़ें</span>
-            <span className="inline-flex items-center gap-1.5"><RefreshCw className="h-3.5 w-3.5 text-secondary" /> नए संस्करण मुफ़्त</span>
+            <span className="inline-flex items-center gap-1.5"><Lock className="h-3.5 w-3.5 text-secondary" /> Private & Secure</span>
+            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-secondary" /> 7-day full refund guarantee</span>
+            <span className="inline-flex items-center gap-1.5"><InfinityIcon className="h-3.5 w-3.5 text-secondary" /> Lifetime access, read forever</span>
+            <span className="inline-flex items-center gap-1.5"><RefreshCw className="h-3.5 w-3.5 text-secondary" /> Free updates & new editions</span>
           </div>
 
         </div>
@@ -213,17 +213,17 @@ const Index = () => {
       <section className="border-b border-border bg-background py-10 md:py-14">
         <div className="container max-w-5xl text-center">
           <h2 className="font-serif text-2xl md:text-3xl font-bold">
-            Kyun <span className="text-primary">Lakhon Log</span> GyandootNova Par Bharosa Karte Hain
+            Why <span className="text-primary">Thousands of Readers</span> Trust GyandootNova
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm md:text-base text-muted-foreground leading-relaxed">
-            Har granth Sanskrit se saral Hindi mein, vidwano ki dekh-rekh mein taiyar kiya gaya hai. Koi hidden charges nahi, koi app download nahi — seedha browser mein padhein.
+            Every scripture is translated from original Sanskrit into clear English and Hindi, curated by scholars. No hidden charges, no app downloads — read instantly in your browser.
           </p>
           <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             {[
-              { icon: Lock, label: "Safe & Secure Payment" },
-              { icon: CheckCircle2, label: "Vidwano dwara verified content" },
-              { icon: BookOpen, label: "Kisi bhi device par padhein" },
-              { icon: ShieldCheck, label: "7-din refund guarantee" },
+              { icon: Lock, label: "Safe & Secure Payments" },
+              { icon: CheckCircle2, label: "Scholar-verified content" },
+              { icon: BookOpen, label: "Read on any device" },
+              { icon: ShieldCheck, label: "7-day refund guarantee" },
             ].map((b) => (
               <div
                 key={b.label}
@@ -303,17 +303,18 @@ const Index = () => {
           <div className="grid items-center gap-12 md:grid-cols-2">
             <div>
               <h2 className="font-serif text-3xl font-bold md:text-4xl">
-                जहाँ ग्रंथ मिलते हैं <span className="text-primary">जिज्ञासु मन से</span>
+                Where scriptures meet <span className="text-primary">curious minds</span>
               </h2>
               <div className="mt-3 h-1 w-16 rounded-full bg-primary" />
               <p className="mt-6 text-muted-foreground leading-relaxed">
-                GyandootNova एक छोटी-सी कोशिश है — दादी-नानी की अलमारी में बंद रह गए ग्रंथों को
-                फिर से आपके हाथ में रखने की। हम पुरानी पांडुलिपियों को खोजते हैं, विद्वानों से
-                मिलाते हैं, फिर सरल भाषा में आप तक पहुँचाते हैं।
+                GyandootNova is a small effort to bring the sacred texts once locked in
+                grandmothers' cupboards back into your hands. We track down old manuscripts,
+                work with Sanskrit scholars, and deliver them to you in language that
+                actually reads well today.
               </p>
               <p className="mt-4 text-muted-foreground leading-relaxed">
-                पढ़ना कोई घर के काम-सा बोझ न लगे — इसीलिए reader इतना हल्का बनाया है कि 5 मिनट
-                का ब्रेक भी एक श्लोक और उसका अर्थ पाने के लिए काफ़ी है।
+                Reading a scripture shouldn't feel like homework. Our reader is designed
+                so a five-minute break is enough for a shloka and its meaning to land.
               </p>
               <Button
                 variant="outline"
@@ -321,16 +322,16 @@ const Index = () => {
                 asChild
               >
                 <Link to="/articles">
-                  हमारे लेख पढ़िए <ArrowRight className="ml-2 h-4 w-4" />
+                  Read Our Articles <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
             </div>
             <div className="grid grid-cols-2 gap-4">
               {[
-                { icon: BookMarked, label: "प्राचीन ग्रंथ", desc: "मूल पाठ, सत्यापित अनुवाद" },
-                { icon: FileText, label: "जीवन-सूत्र लेख", desc: "आज के प्रश्न, शास्त्र के उत्तर" },
-                { icon: Users, label: "जुड़ा हुआ परिवार", desc: "दुनिया भर के पाठक साथ" },
-                { icon: Globe, label: "हर कोने में", desc: "जहाँ नेट, वहाँ आपकी pothi" },
+                { icon: BookMarked, label: "Ancient Scriptures", desc: "Original text, verified translations" },
+                { icon: FileText, label: "Life-Sutra Articles", desc: "Today's questions, timeless answers" },
+                { icon: Users, label: "Global Community", desc: "Readers from across the world" },
+                { icon: Globe, label: "Anywhere You Are", desc: "Wherever there's internet, your library follows" },
               ].map((item) => (
                 <div
                   key={item.label}
@@ -351,8 +352,8 @@ const Index = () => {
       <section className="bg-muted/40 py-20">
         <div className="container">
           <div className="mb-10 text-center">
-            <h2 className="font-serif text-3xl font-bold md:text-4xl">पाठकों की पहली पसंद</h2>
-            <p className="mt-2 text-muted-foreground">जो सबसे ज़्यादा पढ़े और सराहे गए</p>
+            <h2 className="font-serif text-3xl font-bold md:text-4xl">Readers' Favourites</h2>
+            <p className="mt-2 text-muted-foreground">The most-read and most-loved editions in our library</p>
 
           </div>
           {featuredBooks && featuredBooks.length > 0 ? (
@@ -369,7 +370,7 @@ const Index = () => {
                     </div>
                     {!book.is_free && (
                       <div className="absolute top-2 right-2 z-10">
-                        <span className="inline-block rounded-md bg-primary/95 text-primary-foreground px-2 py-0.5 text-[10px] font-bold shadow">जीवनभर</span>
+                        <span className="inline-block rounded-md bg-primary/95 text-primary-foreground px-2 py-0.5 text-[10px] font-bold shadow">LIFETIME</span>
                       </div>
                     )}
                     <div className="aspect-[3/4] bg-muted flex items-center justify-center overflow-hidden">
@@ -408,7 +409,7 @@ const Index = () => {
                           </div>
                         )}
                         <span className="text-[11px] font-bold text-primary group-hover:underline">
-                          {book.is_free ? "पढ़ें →" : "Buy Now →"}
+                          {book.is_free ? "Read →" : "Buy Now →"}
                         </span>
 
                       </div>
@@ -430,7 +431,7 @@ const Index = () => {
               asChild
             >
               <Link to="/books">
-                पूरा पुस्तकालय देखिए <ArrowRight className="ml-2 h-4 w-4" />
+                Browse the Full Library <ArrowRight className="ml-2 h-4 w-4" />
 
               </Link>
             </Button>
@@ -575,27 +576,27 @@ const Index = () => {
       <section className="py-20">
         <div className="container">
           <div className="mb-10 text-center">
-            <h2 className="font-serif text-3xl font-bold md:text-4xl">पाठकों के अपने शब्दों में</h2>
-            <p className="mt-2 text-muted-foreground">जिन्होंने आज़माया, उन्हीं की सुनिए</p>
+            <h2 className="font-serif text-3xl font-bold md:text-4xl">In Our Readers' Own Words</h2>
+            <p className="mt-2 text-muted-foreground">Hear from the people who actually read here every day</p>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {[
               {
-                quote: "ऑफ़िस से लौटते वक़्त मेट्रो में गीता का एक अध्याय — बस इतना ही किया, पर मन का शोर आधा रह गया। किताब हमेशा पास है यही सबसे अच्छा है।",
-                name: "अनिल तिवारी",
-                role: "सॉफ़्टवेयर इंजीनियर, बेंगलुरु",
+                quote: "One chapter of the Gita on my metro ride home — that's all I do, and the noise in my head is already half gone. Knowing the book is always with me is the best part.",
+                name: "Anil Tiwari",
+                role: "Software Engineer, Bengaluru",
                 rating: 5,
               },
               {
-                quote: "पहले सोचा — डाउनलोड नहीं मिलेगी तो कैसे चलेगा? अब समझ आया, नए फ़ोन पर सिर्फ़ login किया और सब कुछ जहाँ छोड़ा था वहीं मिल गया। सच में सुविधा।",
-                name: "सीमा अग्रवाल",
-                role: "गृहिणी और शिक्षिका, इंदौर",
+                quote: "At first I worried — no download, how will this work? Then I logged in on my new phone and everything was exactly where I left it. Genuinely effortless.",
+                name: "Seema Agarwal",
+                role: "Teacher & Homemaker, Indore",
                 rating: 5,
               },
               {
-                quote: "पिताजी को आँख से पढ़ने में दिक़्क़त होती थी। Font बड़ा किया, रात वाला mode चलाया — अब वे रोज़ आधा घंटा हनुमान चालीसा पढ़ते हैं। धन्यवाद इस टीम को।",
-                name: "गौरव मिश्रा",
-                role: "व्यापारी, वाराणसी",
+                quote: "My father struggled to read fine print. We enlarged the font, turned on night mode, and now he reads the Hanuman Chalisa for half an hour every evening. Thank you to this team.",
+                name: "Gaurav Mishra",
+                role: "Business Owner, Varanasi",
                 rating: 5,
               },
 
@@ -614,7 +615,7 @@ const Index = () => {
                     <p className="text-xs text-muted-foreground">{t.role}</p>
                   </div>
                   <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
-                    <CheckCircle2 className="h-3.5 w-3.5" /> प्रामाणिक पाठक
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Verified Reader
                   </span>
 
                 </div>

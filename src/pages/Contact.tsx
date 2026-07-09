@@ -14,6 +14,31 @@ const Contact = () => {
     description:
       "ग्रंथ, order, सुझाव या साझेदारी — जो भी बात हो, WhatsApp, email या form से पहुँचिए। जवाब उसी दिन।",
     canonical: "/contact",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      name: "GyandootNova",
+      description:
+        "आध्यात्मिक प्रकाशन एवं डिजिटल पुस्तकालय — वेद, उपनिषद, गीता, रामायण, महाभारत तथा सनातन धर्म ग्रंथों का प्रामाणिक स्रोत।",
+      url: "https://gyandootnova.in/contact",
+      telephone: "+91 91615 33353",
+      email: "amrendra8765@gmail.com",
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "उन्नाव",
+        addressRegion: "उत्तर प्रदेश",
+        addressCountry: "IN",
+      },
+      openingHoursSpecification: [
+        {
+          "@type": "OpeningHoursSpecification",
+          dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+          opens: "10:00",
+          closes: "18:00",
+        },
+      ],
+      areaServed: "IN",
+    },
   });
 
   const { toast } = useToast();
@@ -87,27 +112,39 @@ const Contact = () => {
           <div>
             <h2 className="font-serif text-2xl font-bold text-foreground mb-6">फ़ॉर्म भरिए</h2>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4" aria-label="संपर्क फ़ॉर्म">
               <Input
+                id="contact-name"
+                name="name"
+                aria-label="आपका नाम"
                 placeholder="आपका नाम"
                 required
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
               <Input
+                id="contact-email"
+                name="email"
                 type="email"
+                aria-label="ईमेल पता"
                 placeholder="ईमेल पता"
                 required
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
               />
               <Input
+                id="contact-subject"
+                name="subject"
+                aria-label="विषय"
                 placeholder="विषय"
                 required
                 value={form.subject}
                 onChange={(e) => setForm({ ...form, subject: e.target.value })}
               />
               <Textarea
+                id="contact-message"
+                name="message"
+                aria-label="संदेश"
                 placeholder="अपनी बात लिखिए…"
                 required
                 rows={5}

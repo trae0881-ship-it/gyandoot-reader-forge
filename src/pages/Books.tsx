@@ -115,6 +115,7 @@ const Books = () => {
                 setVisibleCount(PAGE_SIZE);
               }}
               placeholder="Search books by title, author..."
+              aria-label="Search books by title or author"
               className="pl-10"
             />
           </div>

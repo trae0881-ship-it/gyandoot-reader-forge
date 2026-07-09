@@ -109,18 +109,19 @@ const Header = () => {
         <div className="hidden md:flex items-center gap-1">
           {/* Search */}
           {searchOpen ? (
-            <form onSubmit={handleSearch} className="flex items-center gap-1">
+            <form onSubmit={handleSearch} className="flex items-center gap-1" role="search" aria-label="Site search">
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search..."
+                aria-label="Search books"
                 className="h-8 w-32 lg:w-40"
                 autoFocus
               />
-              <Button type="submit" size="icon" variant="ghost" className="h-8 w-8">
+              <Button type="submit" size="icon" variant="ghost" className="h-8 w-8" aria-label="Submit search">
                 <Search className="h-4 w-4" />
               </Button>
-              <Button type="button" size="icon" variant="ghost" className="h-8 w-8" onClick={() => setSearchOpen(false)}>
+              <Button type="button" size="icon" variant="ghost" className="h-8 w-8" onClick={() => setSearchOpen(false)} aria-label="Close search">
                 <X className="h-4 w-4" />
               </Button>
             </form>
@@ -184,14 +185,15 @@ const Header = () => {
                 {link.label}
               </Link>
             ))}
-            <form onSubmit={handleSearch} className="flex items-center gap-2">
+            <form onSubmit={handleSearch} className="flex items-center gap-2" role="search" aria-label="Site search (mobile)">
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search books..."
+                aria-label="Search books"
                 className="h-9 flex-1"
               />
-              <Button type="submit" size="sm" variant="outline">
+              <Button type="submit" size="sm" variant="outline" aria-label="Submit search">
                 <Search className="h-4 w-4" />
               </Button>
             </form>

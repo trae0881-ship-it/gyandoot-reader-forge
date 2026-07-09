@@ -35,6 +35,7 @@ const STATIC = [
   { path: "/refund-policy", changefreq: "yearly", priority: "0.3" },
   { path: "/shipping-policy", changefreq: "yearly", priority: "0.3" },
   { path: "/sitemap", changefreq: "monthly", priority: "0.3" },
+  { path: "/keywords", changefreq: "monthly", priority: "0.6" },
 
   // SEO content — sacred text hubs
   { path: "/texts/bhagavad-gita", changefreq: "monthly", priority: "0.9" },

@@ -119,14 +119,14 @@ const Contact = () => {
           </div>
 
           <div>
-            <h2 className="font-serif text-2xl font-bold text-foreground mb-6">फ़ॉर्म भरिए</h2>
+            <h2 className="font-serif text-2xl font-bold text-foreground mb-6">Fill in the form</h2>
 
-            <form onSubmit={handleSubmit} className="space-y-4" aria-label="संपर्क फ़ॉर्म">
+            <form onSubmit={handleSubmit} className="space-y-4" aria-label="Contact form">
               <Input
                 id="contact-name"
                 name="name"
-                aria-label="आपका नाम"
-                placeholder="आपका नाम"
+                aria-label="Your name"
+                placeholder="Your name"
                 required
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -135,8 +135,8 @@ const Contact = () => {
                 id="contact-email"
                 name="email"
                 type="email"
-                aria-label="ईमेल पता"
-                placeholder="ईमेल पता"
+                aria-label="Email address"
+                placeholder="Email address"
                 required
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -144,8 +144,8 @@ const Contact = () => {
               <Input
                 id="contact-subject"
                 name="subject"
-                aria-label="विषय"
-                placeholder="विषय"
+                aria-label="Subject"
+                placeholder="Subject"
                 required
                 value={form.subject}
                 onChange={(e) => setForm({ ...form, subject: e.target.value })}
@@ -153,8 +153,8 @@ const Contact = () => {
               <Textarea
                 id="contact-message"
                 name="message"
-                aria-label="संदेश"
-                placeholder="अपनी बात लिखिए…"
+                aria-label="Message"
+                placeholder="Write your message…"
                 required
                 rows={5}
                 value={form.message}
@@ -163,10 +163,10 @@ const Contact = () => {
               <Button type="submit" className="w-full" disabled={sending}>
                 {sending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> भेज रहे हैं…
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending…
                   </>
                 ) : (
-                  "संदेश भेजें"
+                  "Send message"
                 )}
               </Button>
 

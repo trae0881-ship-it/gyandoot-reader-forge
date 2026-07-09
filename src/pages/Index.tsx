@@ -576,27 +576,27 @@ const Index = () => {
       <section className="py-20">
         <div className="container">
           <div className="mb-10 text-center">
-            <h2 className="font-serif text-3xl font-bold md:text-4xl">पाठकों के अपने शब्दों में</h2>
-            <p className="mt-2 text-muted-foreground">जिन्होंने आज़माया, उन्हीं की सुनिए</p>
+            <h2 className="font-serif text-3xl font-bold md:text-4xl">In Our Readers' Own Words</h2>
+            <p className="mt-2 text-muted-foreground">Hear from the people who actually read here every day</p>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {[
               {
-                quote: "ऑफ़िस से लौटते वक़्त मेट्रो में गीता का एक अध्याय — बस इतना ही किया, पर मन का शोर आधा रह गया। किताब हमेशा पास है यही सबसे अच्छा है।",
-                name: "अनिल तिवारी",
-                role: "सॉफ़्टवेयर इंजीनियर, बेंगलुरु",
+                quote: "One chapter of the Gita on my metro ride home — that's all I do, and the noise in my head is already half gone. Knowing the book is always with me is the best part.",
+                name: "Anil Tiwari",
+                role: "Software Engineer, Bengaluru",
                 rating: 5,
               },
               {
-                quote: "पहले सोचा — डाउनलोड नहीं मिलेगी तो कैसे चलेगा? अब समझ आया, नए फ़ोन पर सिर्फ़ login किया और सब कुछ जहाँ छोड़ा था वहीं मिल गया। सच में सुविधा।",
-                name: "सीमा अग्रवाल",
-                role: "गृहिणी और शिक्षिका, इंदौर",
+                quote: "At first I worried — no download, how will this work? Then I logged in on my new phone and everything was exactly where I left it. Genuinely effortless.",
+                name: "Seema Agarwal",
+                role: "Teacher & Homemaker, Indore",
                 rating: 5,
               },
               {
-                quote: "पिताजी को आँख से पढ़ने में दिक़्क़त होती थी। Font बड़ा किया, रात वाला mode चलाया — अब वे रोज़ आधा घंटा हनुमान चालीसा पढ़ते हैं। धन्यवाद इस टीम को।",
-                name: "गौरव मिश्रा",
-                role: "व्यापारी, वाराणसी",
+                quote: "My father struggled to read fine print. We enlarged the font, turned on night mode, and now he reads the Hanuman Chalisa for half an hour every evening. Thank you to this team.",
+                name: "Gaurav Mishra",
+                role: "Business Owner, Varanasi",
                 rating: 5,
               },
 

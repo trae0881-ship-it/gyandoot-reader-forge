@@ -104,9 +104,9 @@ const Index = () => {
   });
 
   useSEO({
-    title: "Bhagavad Gita Hindi PDF, Geeta Shlok, Vedas & Upanishads Online | GyandootNova",
+    title: "GyandootNova (Gyandoot Nova) — Bhagavad Gita Hindi PDF, Vedas & Ramayana Online",
     description:
-      "Bhagwat Geeta Hindi PDF, Geeta shlok, Vedas, Upanishads, Ramayana aur Hindu religious books online padhein. Dhyan kaise kare, meditation ke fayde aur spiritual gyan Hindi mein — GyandootNova par.",
+      "GyandootNova (Gyandoot Nova) — Bhagwat Geeta Hindi PDF, Geeta shlok, Vedas, Upanishads, Ramayana aur Hindu religious books online padhein. Dhyan kaise kare, meditation ke fayde aur spiritual gyan Hindi mein — Gyandoot Nova par.",
     canonical: "/",
     ogImage: "https://gyandootnova.in/og-image.png",
     jsonLd: {
@@ -117,9 +117,10 @@ const Index = () => {
           "@id": "https://gyandootnova.in/#website",
           "url": "https://gyandootnova.in/",
           "name": "GyandootNova",
+          "alternateName": ["Gyandoot Nova", "Gyandoot", "Gyan Doot", "gyandootnova.in"],
           "inLanguage": "hi-IN",
           "description":
-            "Dharmik granth online padhein — Geeta, Ramayana, Hanuman Chalisa aur 50+ spiritual books Hindi mein.",
+            "GyandootNova (Gyandoot Nova) — dharmik granth online padhein: Geeta, Ramayana, Hanuman Chalisa aur 50+ spiritual books Hindi mein.",
           "potentialAction": {
             "@type": "SearchAction",
             "target": "https://gyandootnova.in/books?search={search_term_string}",
@@ -130,6 +131,7 @@ const Index = () => {
           "@type": "Organization",
           "@id": "https://gyandootnova.in/#organization",
           "name": "GyandootNova",
+          "alternateName": ["Gyandoot Nova", "Gyandoot", "Gyan Doot"],
           "url": "https://gyandootnova.in/",
           "logo": "https://gyandootnova.in/gyandoot-nova-icon.ico",
         },

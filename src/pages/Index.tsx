@@ -431,7 +431,7 @@ const Index = () => {
               asChild
             >
               <Link to="/books">
-                पूरा पुस्तकालय देखिए <ArrowRight className="ml-2 h-4 w-4" />
+                Browse the Full Library <ArrowRight className="ml-2 h-4 w-4" />
 
               </Link>
             </Button>

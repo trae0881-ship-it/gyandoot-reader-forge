@@ -71,9 +71,17 @@ const Vedas = () => (
       author: "Rishis (revealed); compiled by Veda Vyasa",
       language: "sa",
     }}
+    readerCta={{
+      label: "Read Vedic literature online",
+      description: "Explore Hindi editions of the Vedas, Upanishads and related scriptures — free preview chapters, verse-by-verse commentary.",
+      to: "/books",
+    }}
     related={[
+      { label: "Rig Veda — the oldest Veda, in detail", to: "/texts/rig-veda" },
       { label: "Upanishads — the philosophical crown of the Vedas", to: "/texts/upanishads" },
       { label: "Bhagavad Gita — meaning, chapters and how to read", to: "/texts/bhagavad-gita" },
+      { label: "How many Vedas are there?", to: "/qa/how-many-vedas" },
+      { label: "Who wrote the Vedas?", to: "/qa/who-wrote-vedas" },
       { label: "उपनिषद का अर्थ (Upanishad meaning in Hindi)", to: "/hindi/upanishad-meaning-in-hindi" },
       { label: "वेद का अर्थ (Vedas meaning in Hindi)", to: "/hindi/vedas-meaning-in-hindi" },
     ]}

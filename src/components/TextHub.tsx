@@ -39,6 +39,11 @@ interface Props {
     numberOfPages?: number;
   };
   related?: RelatedLink[];
+  readerCta?: {
+    label: string;
+    description: string;
+    to: string;
+  };
 }
 
 const TextHub = ({
@@ -54,6 +59,7 @@ const TextHub = ({
   faqs,
   bookMeta,
   related,
+  readerCta,
 }: Props) => {
   const path = `/texts/${slug}`;
 
@@ -115,6 +121,21 @@ const TextHub = ({
           <p className="lead text-base md:text-lg leading-relaxed">{intro}</p>
         </div>
 
+        {readerCta && (
+          <div className="mt-8 rounded-lg border-2 border-primary/20 bg-primary/5 p-5 md:p-6">
+            <p className="text-sm font-semibold uppercase tracking-wider text-primary/80">
+              Read online — free preview
+            </p>
+            <p className="mt-1 text-base md:text-lg text-foreground/90">{readerCta.description}</p>
+            <Link
+              to={readerCta.to}
+              className="mt-3 inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+            >
+              {readerCta.label} →
+            </Link>
+          </div>
+        )}
+
         <div className="mt-10 space-y-8">
           {sections.map((s, i) => (
             <section key={i} aria-labelledby={`sec-${i}`}>
@@ -127,6 +148,18 @@ const TextHub = ({
             </section>
           ))}
         </div>
+
+        {readerCta && (
+          <div className="mt-10 rounded-lg border bg-muted/30 p-5 md:p-6 text-center">
+            <p className="text-base md:text-lg font-medium">{readerCta.description}</p>
+            <Link
+              to={readerCta.to}
+              className="mt-3 inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+            >
+              {readerCta.label} →
+            </Link>
+          </div>
+        )}
 
         <FaqAccordion items={faqs} />
 

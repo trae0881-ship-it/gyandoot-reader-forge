@@ -71,9 +71,16 @@ const Upanishads = () => (
       author: "Multiple rishis including Yajnavalkya, Uddalaka Aruni",
       language: "sa",
     }}
+    readerCta={{
+      label: "Read Upanishad commentaries",
+      description: "Study the principal Upanishads in Hindi — verse-by-verse commentary with free preview chapters.",
+      to: "/books",
+    }}
     related={[
       { label: "The four Vedas — Rig, Sama, Yajur, Atharva", to: "/texts/vedas" },
+      { label: "Rig Veda — the oldest Veda in detail", to: "/texts/rig-veda" },
       { label: "Bhagavad Gita — companion text of Vedanta", to: "/texts/bhagavad-gita" },
+      { label: "How many Upanishads are there?", to: "/qa/how-many-upanishads" },
       { label: "उपनिषद का अर्थ हिंदी में", to: "/hindi/upanishad-meaning-in-hindi" },
     ]}
   />

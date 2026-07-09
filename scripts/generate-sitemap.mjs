@@ -40,6 +40,7 @@ const STATIC = [
   { path: "/texts/bhagavad-gita", changefreq: "monthly", priority: "0.9" },
   { path: "/texts/vedas", changefreq: "monthly", priority: "0.9" },
   { path: "/texts/upanishads", changefreq: "monthly", priority: "0.9" },
+  { path: "/texts/rig-veda", changefreq: "monthly", priority: "0.9" },
 
   // Hindi meaning + pillar
   { path: "/hindi/upanishad-meaning-in-hindi", changefreq: "monthly", priority: "0.85" },
@@ -53,6 +54,13 @@ const STATIC = [
   { path: "/meditation/techniques-compared", changefreq: "monthly", priority: "0.85" },
   { path: "/meditation/for-anxiety", changefreq: "monthly", priority: "0.8" },
   { path: "/meditation/for-stress", changefreq: "monthly", priority: "0.8" },
+
+  // Q&A long-tail
+  { path: "/qa/who-wrote-bhagavad-gita", changefreq: "monthly", priority: "0.85" },
+  { path: "/qa/who-wrote-vedas", changefreq: "monthly", priority: "0.8" },
+  { path: "/qa/how-many-vedas", changefreq: "monthly", priority: "0.8" },
+  { path: "/qa/how-many-upanishads", changefreq: "monthly", priority: "0.8" },
+  { path: "/qa/how-many-slokas-in-bhagavad-gita", changefreq: "monthly", priority: "0.8" },
 ];
 
 async function fetchRows(table, select) {

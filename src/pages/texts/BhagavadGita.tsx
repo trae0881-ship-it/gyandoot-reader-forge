@@ -72,8 +72,15 @@ const BhagavadGita = () => (
       language: "sa",
       numberOfPages: 700,
     }}
+    readerCta={{
+      label: "Read the Bhagavad Gita online",
+      description: "Study Hindi commentaries on the Bhagavad Gita — verse-by-verse, with free preview chapters. Perfect for a first-time reader.",
+      to: "/books",
+    }}
     related={[
       { label: "How to read the Bhagavad Gita — a beginner's guide", to: "/how-to-read/bhagavad-gita" },
+      { label: "Who wrote the Bhagavad Gita?", to: "/qa/who-wrote-bhagavad-gita" },
+      { label: "How many slokas are in the Bhagavad Gita?", to: "/qa/how-many-slokas-in-bhagavad-gita" },
       { label: "The four Vedas — an overview", to: "/texts/vedas" },
       { label: "Upanishads — the philosophical core of the Vedas", to: "/texts/upanishads" },
       { label: "ध्यान कैसे करें — शुरुआती लोगों के लिए गाइड", to: "/hindi/dhyan-kaise-karein" },

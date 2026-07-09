@@ -141,12 +141,30 @@ const HowToReadBhagavadGita = () => {
           </section>
         </div>
 
+        <div className="mt-10 rounded-lg border-2 border-primary/20 bg-primary/5 p-5 md:p-6">
+          <p className="text-sm font-semibold uppercase tracking-wider text-primary/80">
+            Start reading today
+          </p>
+          <p className="mt-1 text-base md:text-lg leading-relaxed">
+            Open the Bhagavad Gita on GyandootNova — Chapter 2 (the philosophical core) is free to
+            read online, no signup required.
+          </p>
+          <Link
+            to="/books"
+            className="mt-3 inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+          >
+            Browse the reader →
+          </Link>
+        </div>
+
         <FaqAccordion items={faqs} />
 
         <section className="mt-12">
           <h2 className="font-serif text-2xl font-bold text-primary mb-4">Related reading</h2>
           <ul className="space-y-2">
             <li><Link to="/texts/bhagavad-gita" className="text-primary hover:underline">Bhagavad Gita — full guide, chapters and author →</Link></li>
+            <li><Link to="/qa/who-wrote-bhagavad-gita" className="text-primary hover:underline">Who wrote the Bhagavad Gita? →</Link></li>
+            <li><Link to="/qa/how-many-slokas-in-bhagavad-gita" className="text-primary hover:underline">How many slokas are in the Bhagavad Gita? →</Link></li>
             <li><Link to="/texts/upanishads" className="text-primary hover:underline">The Upanishads — the philosophical foundation of the Gita →</Link></li>
             <li><Link to="/hindi/dhyan-kaise-karein" className="text-primary hover:underline">ध्यान कैसे करें — Meditation guide in Hindi →</Link></li>
           </ul>

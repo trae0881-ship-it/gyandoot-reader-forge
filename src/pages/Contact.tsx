@@ -2,7 +2,7 @@ import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, MapPin, Phone, Loader2 } from "lucide-react";
+import { Mail, MapPin, Phone, Loader2, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -97,7 +97,16 @@ const Contact = () => {
                 <MapPin className="h-6 w-6 text-primary mt-1" />
                 <div>
                   <p className="font-semibold text-foreground">पता</p>
-                  <p className="text-muted-foreground">उन्नाव, उत्तर प्रदेश — भारत</p>
+                  <p className="text-muted-foreground">Bhagwan Khera, उन्नाव, उत्तर प्रदेश 209863 — भारत</p>
+                  <p className="text-xs text-muted-foreground mt-1">26.1780° N, 80.6534° E</p>
+                  <a
+                    href="https://www.google.com/maps/search/?api=1&query=Bhagwan+Khera,+Uttar+Pradesh+209863&query_place_id=ChIJT5WhD-l8nDkRvYsKyaVVH1E"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 mt-2 text-sm font-medium text-primary hover:underline"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" /> Open in Google Maps
+                  </a>
                 </div>
               </div>
             </div>
@@ -166,16 +175,32 @@ const Contact = () => {
         </div>
 
         <section className="mt-16 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]">
-          <h2 className="font-serif text-2xl font-bold text-foreground mb-4 text-center">हमारा स्थान</h2>
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3580.5738718627367!2d80.65342424352151!3d26.178004032415163!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x399c7ce90fa1954f%3A0x511f55a5c90a8bbd!2sBhagwan%20Khera%2C%20Uttar%20Pradesh%20209863!5e0!3m2!1sen!2sin!4v1783592023814!5m2!1sen!2sin"
-            title="GyandootNova स्थान — Bhagwan Khera, उत्तर प्रदेश"
-            className="w-full block"
-            style={{ border: 0, height: "280px" }}
-            allowFullScreen
-            loading="lazy"
-            referrerPolicy="strict-origin-when-cross-origin"
-          />
+          <div className="text-center mb-4 px-4">
+            <h2 className="font-serif text-2xl font-bold text-foreground">हमारा स्थान</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Bhagwan Khera, उत्तर प्रदेश 209863 · 26.1780° N, 80.6534° E
+            </p>
+            <a
+              href="https://www.google.com/maps/search/?api=1&query=Bhagwan+Khera,+Uttar+Pradesh+209863"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 mt-2 text-sm font-medium text-primary hover:underline"
+            >
+              <ExternalLink className="h-3.5 w-3.5" /> Open in Google Maps
+            </a>
+          </div>
+          <div className="w-full">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3580.5738718627367!2d80.65342424352151!3d26.178004032415163!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x399c7ce90fa1954f%3A0x511f55a5c90a8bbd!2sBhagwan%20Khera%2C%20Uttar%20Pradesh%20209863!5e0!3m2!1sen!2sin!4v1783592023814!5m2!1sen!2sin"
+              title="GyandootNova स्थान — Bhagwan Khera, उत्तर प्रदेश"
+              width="100%"
+              height="280"
+              className="block w-full h-[280px] border-0"
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="strict-origin-when-cross-origin"
+            />
+          </div>
         </section>
       </main>
     </Layout>

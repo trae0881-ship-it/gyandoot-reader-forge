@@ -47,6 +47,24 @@ const ArticleDetail = () => {
     enabled: !!post,
   });
 
+  // Related posts (same post_type, excluding current)
+  const { data: relatedPosts } = useQuery({
+    queryKey: ["post-related", post?.id, post?.post_type],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("posts")
+        .select("title, slug, cover_url, excerpt")
+        .eq("is_published", true)
+        .eq("post_type", post!.post_type)
+        .neq("id", post!.id)
+        .order("created_at", { ascending: false })
+        .limit(4);
+      return data ?? [];
+    },
+    enabled: !!post,
+  });
+
+
   const rawDesc = (post?.meta_description || post?.excerpt?.replace(/<[^>]*>/g, "").trim() || "").slice(0, 155);
   const articleDesc = (rawDesc && rawDesc.length >= 20)
     ? rawDesc
@@ -153,10 +171,73 @@ const ArticleDetail = () => {
               ) : <div />}
             </nav>
           )}
+
+          {/* Related Articles */}
+          {relatedPosts && relatedPosts.length > 0 && (
+            <section className="mt-16 border-t border-border pt-10">
+              <h2 className="font-serif text-2xl font-bold">Related Articles</h2>
+              <div className="mt-6 grid gap-6 sm:grid-cols-2">
+                {relatedPosts.map((rp) => (
+                  <Link
+                    key={rp.slug}
+                    to={`/articles/${rp.slug}`}
+                    className="group flex gap-4 rounded-lg border border-border p-4 transition-colors hover:border-primary"
+                  >
+                    {rp.cover_url && (
+                      <img src={rp.cover_url} alt={rp.title} loading="lazy" className="h-20 w-20 shrink-0 rounded object-cover" />
+                    )}
+                    <div className="min-w-0">
+                      <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">{rp.title}</h3>
+                      {rp.excerpt && (
+                        <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
+                          {rp.excerpt.replace(/<[^>]*>/g, "").slice(0, 120)}
+                        </p>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Explore More — internal linking hub */}
+          <section className="mt-12 border-t border-border pt-10">
+            <h2 className="font-serif text-2xl font-bold">Explore More on GyandootNova</h2>
+            <div className="mt-6 grid gap-6 sm:grid-cols-2 md:grid-cols-3 text-sm">
+              <div>
+                <h3 className="font-semibold text-foreground">Sacred Texts</h3>
+                <ul className="mt-2 space-y-1.5">
+                  <li><Link to="/texts/bhagavad-gita" className="text-muted-foreground hover:text-primary">Bhagavad Gita — full guide</Link></li>
+                  <li><Link to="/texts/vedas" className="text-muted-foreground hover:text-primary">The four Vedas</Link></li>
+                  <li><Link to="/texts/rig-veda" className="text-muted-foreground hover:text-primary">Rig Veda</Link></li>
+                  <li><Link to="/texts/upanishads" className="text-muted-foreground hover:text-primary">Upanishads</Link></li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">Popular Questions</h3>
+                <ul className="mt-2 space-y-1.5">
+                  <li><Link to="/qa/who-wrote-bhagavad-gita" className="text-muted-foreground hover:text-primary">Who wrote the Bhagavad Gita?</Link></li>
+                  <li><Link to="/qa/how-many-slokas-in-bhagavad-gita" className="text-muted-foreground hover:text-primary">How many slokas in the Gita?</Link></li>
+                  <li><Link to="/qa/how-many-vedas" className="text-muted-foreground hover:text-primary">How many Vedas are there?</Link></li>
+                  <li><Link to="/qa/how-many-upanishads" className="text-muted-foreground hover:text-primary">How many Upanishads?</Link></li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground">Practice & Reading</h3>
+                <ul className="mt-2 space-y-1.5">
+                  <li><Link to="/how-to-read/bhagavad-gita" className="text-muted-foreground hover:text-primary">How to read the Bhagavad Gita</Link></li>
+                  <li><Link to="/hindi/dhyan-kaise-karein" className="text-muted-foreground hover:text-primary">ध्यान कैसे करें</Link></li>
+                  <li><Link to="/meditation/for-stress" className="text-muted-foreground hover:text-primary">Meditation for stress</Link></li>
+                  <li><Link to="/books" className="text-muted-foreground hover:text-primary">Browse all books</Link></li>
+                </ul>
+              </div>
+            </div>
+          </section>
         </div>
       </article>
     </Layout>
   );
 };
+
 
 export default ArticleDetail;

@@ -118,6 +118,17 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    // Enforce admin 2FA (server-side): mutating actions require a live OTP session.
+    const preAction = ((await req.clone().json().catch(() => ({}))) as any)?.action as string | undefined;
+    const readOnly = preAction === "list" || preAction === "logs";
+    if (!readOnly) {
+      const { data: otpOk } = await admin.rpc("is_admin_otp_verified", { _user_id: user.id });
+      if (!otpOk) {
+        await audit(admin, { action: "otp_required", admin_user_id: user.id, admin_email: user.email, ip, ua, status: "denied" });
+        return new Response(JSON.stringify({ error: "Admin 2FA verification required" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+    }
+
     const body = await req.json().catch(() => ({}));
     const action = body?.action as string;
 

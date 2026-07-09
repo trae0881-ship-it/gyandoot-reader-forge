@@ -201,9 +201,18 @@ async function handleRazorpay(
   );
 }
 
+// PayPal-supported presentment currencies (safe subset). If buyer currency isn't listed → fall back to USD.
+const PAYPAL_SUPPORTED = new Set(["USD", "EUR", "GBP", "AUD", "CAD", "SGD", "HKD", "JPY", "NZD", "CHF", "SEK", "NOK", "DKK", "PLN", "CZK", "HUF", "ILS", "MXN", "PHP", "THB", "TWD", "BRL"]);
+
+// Fallback FX rates (1 INR = X currency) — used only when client didn't send a live rate.
+const FALLBACK_FX: Record<string, number> = {
+  USD: 0.012, EUR: 0.011, GBP: 0.0095, AUD: 0.018, CAD: 0.016, SGD: 0.016, HKD: 0.094, JPY: 1.8,
+};
+
 async function handlePaypal(
   supabase: any, user: any, amount: number, type: string,
-  book_id?: string, name?: string, email?: string, coupon_id?: string, referrer_id?: string
+  book_id?: string, name?: string, email?: string, coupon_id?: string, referrer_id?: string,
+  buyer_currency?: string, buyer_fx_rate?: number,
 ) {
   const clientId = Deno.env.get("PAYPAL_CLIENT_ID");
   const clientSecret = Deno.env.get("PAYPAL_CLIENT_SECRET");
@@ -234,8 +243,16 @@ async function handlePaypal(
 
   const { access_token } = await tokenRes.json();
 
-  // Convert INR to USD (approximate)
-  const usdAmount = (amount / 83).toFixed(2);
+  // Pick presentment currency: buyer's own if PayPal supports it, else USD.
+  const requested = (buyer_currency || "USD").toUpperCase();
+  const currency = PAYPAL_SUPPORTED.has(requested) ? requested : "USD";
+  // Live rate from client (from exchangerate-api on frontend); fall back if missing.
+  const rate = (buyer_fx_rate && buyer_fx_rate > 0)
+    ? buyer_fx_rate
+    : (FALLBACK_FX[currency] ?? FALLBACK_FX.USD);
+  const zeroDecimal = currency === "JPY";
+  const converted = amount * rate;
+  const paypalValue = zeroDecimal ? Math.round(converted).toString() : converted.toFixed(2);
 
   const orderRes = await fetch("https://api-m.paypal.com/v2/checkout/orders", {
     method: "POST",
@@ -247,7 +264,7 @@ async function handlePaypal(
       intent: "CAPTURE",
       purchase_units: [
         {
-          amount: { currency_code: "USD", value: usdAmount },
+          amount: { currency_code: currency, value: paypalValue },
           description: type === "purchase" ? "Book Purchase" : "Donation",
         },
       ],
@@ -264,15 +281,15 @@ async function handlePaypal(
 
   const ppOrder = await orderRes.json();
 
-  // Store pending record
+  // Store pending record — persist the actual charged amount + currency for accurate reconciliation
   if (type === "purchase") {
     const purchaseData: any = {
       user_id: user.id,
       book_id,
       razorpay_order_id: ppOrder.id,
       status: "pending",
-      amount: Number(usdAmount), // freeze USD amount charged at time of order
-      currency: "USD",
+      amount: Number(paypalValue),
+      currency,
     };
     if (referrer_id && referrer_id !== user.id) {
       purchaseData.referrer_id = referrer_id;
@@ -293,7 +310,7 @@ async function handlePaypal(
   const approveLink = ppOrder.links?.find((l: any) => l.rel === "approve")?.href;
 
   return new Response(
-    JSON.stringify({ gateway: "paypal", order_id: ppOrder.id, approve_url: approveLink }),
+    JSON.stringify({ gateway: "paypal", order_id: ppOrder.id, approve_url: approveLink, currency, amount: paypalValue }),
     { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
 }

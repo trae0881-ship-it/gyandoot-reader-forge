@@ -534,7 +534,7 @@ const Index = () => {
           ) : (
             <div className="text-center py-12">
               <FileText className="mx-auto h-10 w-10 text-muted-foreground/30" />
-              <p className="mt-3 text-muted-foreground">जल्द ही नए लेख आ रहे हैं।</p>
+              <p className="mt-3 text-muted-foreground">New articles are on the way.</p>
             </div>
           )}
           <div className="mt-10 text-center">

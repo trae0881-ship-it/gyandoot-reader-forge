@@ -15,11 +15,12 @@ export default {
     },
     extend: {
       fontFamily: {
-        serif: ["'Instrument Serif'", "'Playfair Display'", "'Noto Serif Devanagari'", "Georgia", "serif"],
-        display: ["'Instrument Serif'", "'Playfair Display'", "Georgia", "serif"],
-        sans: ["'Work Sans'", "'Noto Serif Devanagari'", "'Inter'", "system-ui", "sans-serif"],
+        serif: ["'Noto Serif Devanagari'", "'Instrument Serif'", "'Playfair Display'", "Georgia", "serif"],
+        display: ["'Noto Serif Devanagari'", "'Instrument Serif'", "'Playfair Display'", "Georgia", "serif"],
+        sans: ["'Noto Serif Devanagari'", "'Work Sans'", "'Inter'", "system-ui", "sans-serif"],
         devanagari: ["'Noto Serif Devanagari'", "'Tiro Devanagari Hindi'", "serif"],
       },
+
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

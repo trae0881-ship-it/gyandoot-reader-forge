@@ -195,7 +195,7 @@ function injectGoogleTranslate() {
   document.head.appendChild(s);
 }
 
-function triggerGoogleTranslate(lang: Language) {
+function triggerGoogleTranslate(lang: Language, attempt = 0) {
   const setCookie = (val: string) => {
     document.cookie = `googtrans=${val};path=/`;
     const host = window.location.hostname;
@@ -206,16 +206,19 @@ function triggerGoogleTranslate(lang: Language) {
     }
   };
 
-  if (lang === "hi") {
-    setCookie("/hi/hi");
-  } else {
-    setCookie(`/hi/${lang}`);
-  }
+  const cookieVal = lang === "hi" ? "/hi/hi" : `/hi/${lang}`;
+  setCookie(cookieVal);
 
-  // Use combo box if present
+  // Retry until the Google Translate combo box mounts (script loads async)
   const select = document.querySelector<HTMLSelectElement>(".goog-te-combo");
   if (select) {
-    select.value = lang;
-    select.dispatchEvent(new Event("change"));
+    if (select.value !== lang) {
+      select.value = lang;
+      select.dispatchEvent(new Event("change"));
+    }
+    return;
+  }
+  if (attempt < 40) {
+    setTimeout(() => triggerGoogleTranslate(lang, attempt + 1), 300);
   }
 }

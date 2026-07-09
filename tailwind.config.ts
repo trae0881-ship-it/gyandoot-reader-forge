@@ -15,8 +15,10 @@ export default {
     },
     extend: {
       fontFamily: {
-        serif: ["'Playfair Display'", "serif"],
-        sans: ["'Inter'", "sans-serif"],
+        serif: ["'Instrument Serif'", "'Playfair Display'", "'Noto Serif Devanagari'", "Georgia", "serif"],
+        display: ["'Instrument Serif'", "'Playfair Display'", "Georgia", "serif"],
+        sans: ["'Work Sans'", "'Noto Serif Devanagari'", "'Inter'", "system-ui", "sans-serif"],
+        devanagari: ["'Noto Serif Devanagari'", "'Tiro Devanagari Hindi'", "serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -27,6 +29,7 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          glow: "hsl(var(--primary-glow))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -52,6 +55,14 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        gold: {
+          DEFAULT: "hsl(var(--gold))",
+          glow: "hsl(var(--gold-glow))",
+          deep: "hsl(var(--gold-deep))",
+        },
+        ink: "hsl(var(--ink))",
+        cream: "hsl(var(--cream))",
+        surface: "hsl(var(--surface))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -63,10 +74,25 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
         },
       },
+      backgroundImage: {
+        "gradient-hero": "var(--gradient-hero)",
+        "gradient-gold": "var(--gradient-gold)",
+        "gradient-primary": "var(--gradient-primary)",
+        "gradient-surface": "var(--gradient-surface)",
+        "gradient-cream": "var(--gradient-cream)",
+      },
+      boxShadow: {
+        elegant: "var(--shadow-elegant)",
+        gold: "var(--shadow-gold)",
+        card: "var(--shadow-card)",
+        lift: "var(--shadow-lift)",
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        xl: "calc(var(--radius) + 4px)",
+        "2xl": "calc(var(--radius) + 8px)",
       },
       keyframes: {
         "accordion-down": {

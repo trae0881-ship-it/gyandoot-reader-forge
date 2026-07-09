@@ -37,14 +37,23 @@ const Footer = () => {
   };
 
   return (
-    <footer className="w-full border-t border-border bg-foreground text-background">
-      <div className="w-full max-w-screen-2xl mx-auto px-4 lg:px-8 py-14">
+    <footer className="relative w-full border-t border-border/60 bg-ink text-cream overflow-hidden">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-70"
+        style={{
+          background:
+            "radial-gradient(ellipse at 15% 0%, hsl(var(--primary) / 0.35), transparent 55%), radial-gradient(ellipse at 90% 100%, hsl(var(--gold) / 0.18), transparent 55%)",
+        }}
+      />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold/60 to-transparent" />
+      <div className="relative w-full max-w-screen-2xl mx-auto px-4 lg:px-8 py-16">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-5">
           {/* Brand */}
           <div className="lg:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4" aria-label="Homepage">
-              <BookOpen className="h-6 w-6 text-secondary" />
-              <span className="font-serif text-lg font-bold text-secondary">GyandootNova</span>
+              <BookOpen className="h-6 w-6 text-gold" />
+              <span className="font-serif text-2xl">Gyandoot<span className="gradient-text-gold">Nova</span></span>
             </Link>
             <p className="text-sm text-background/70 leading-relaxed">
               GyandootNova (Gyandoot Nova) — प्राचीन ग्रंथों को नए दौर के पाठक तक पहुँचाने की एक ईमानदार कोशिश — शुद्ध पाठ, सरल भाषा, शांत reader।

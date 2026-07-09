@@ -352,8 +352,8 @@ const Index = () => {
       <section className="bg-muted/40 py-20">
         <div className="container">
           <div className="mb-10 text-center">
-            <h2 className="font-serif text-3xl font-bold md:text-4xl">पाठकों की पहली पसंद</h2>
-            <p className="mt-2 text-muted-foreground">जो सबसे ज़्यादा पढ़े और सराहे गए</p>
+            <h2 className="font-serif text-3xl font-bold md:text-4xl">Readers' Favourites</h2>
+            <p className="mt-2 text-muted-foreground">The most-read and most-loved editions in our library</p>
 
           </div>
           {featuredBooks && featuredBooks.length > 0 ? (

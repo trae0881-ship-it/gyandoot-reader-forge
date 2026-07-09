@@ -245,25 +245,25 @@ const Index = () => {
         <div className="container max-w-5xl">
           <div className="text-center mb-10">
             <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-wider">
-              सोच-समझकर बनाया गया
+              Designed with care
             </span>
             <h2 className="mt-3 font-serif text-2xl md:text-3xl font-bold">
-              हमने PDF क्यों नहीं दी? <span className="text-primary">आपकी शांति सोच-कर।</span>
+              Why we don't hand out PDFs? <span className="text-primary">For your peace of mind.</span>
             </h2>
-            <p className="mt-2 text-sm text-muted-foreground">पुरानी e-book वाली परेशानी अब बीते समय की बात है।</p>
+            <p className="mt-2 text-sm text-muted-foreground">The old e-book headaches are a thing of the past.</p>
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-5">
               <h3 className="font-semibold text-destructive mb-3 flex items-center gap-2">
-                <XCircle className="h-5 w-5" /> पुरानी PDF वाली दुनिया
+                <XCircle className="h-5 w-5" /> The old PDF world
               </h3>
               <ul className="space-y-2 text-sm text-foreground/80">
                 {[
-                  { Icon: Smartphone, text: "फ़ोन गुम — साथ में पूरी pothi गायब" },
-                  { Icon: HardDrive, text: "GB भर जाते हैं, नई apps नहीं आतीं" },
-                  { Icon: FileWarning, text: "अक्षर बिखर जाते हैं, पन्ने खुलते नहीं" },
-                  { Icon: Unlock, text: "कोई भी WhatsApp पर share कर दे" },
-                  { Icon: Ban, text: "सुधार आया तो भी आप तक नहीं पहुँचता" },
+                  { Icon: Smartphone, text: "Phone lost — your whole library gone with it" },
+                  { Icon: HardDrive, text: "GBs fill up, new apps can't be installed" },
+                  { Icon: FileWarning, text: "Text breaks, pages refuse to open" },
+                  { Icon: Unlock, text: "Anyone can forward it on WhatsApp" },
+                  { Icon: Ban, text: "Fixes and updates never reach you" },
                 ].map(({ Icon, text }) => (
                   <li key={text} className="flex items-start gap-2">
                     <Icon className="h-4 w-4 mt-0.5 text-destructive/70 shrink-0" />
@@ -274,15 +274,15 @@ const Index = () => {
             </div>
             <div className="rounded-xl border-2 border-primary/30 bg-primary/5 p-5 shadow-md">
               <h3 className="font-semibold text-primary mb-3 flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5" /> GyandootNova की सुविधा
+                <CheckCircle2 className="h-5 w-5" /> The GyandootNova way
               </h3>
               <ul className="space-y-2 text-sm text-foreground/90 font-medium">
                 {[
-                  { Icon: Lock, text: "एक ID से हर device पर आपका पुस्तकालय" },
-                  { Icon: Cloud, text: "फ़ोन की memory पर एक byte भी बोझ नहीं" },
-                  { Icon: BookOpen, text: "हर बार वैसा ही साफ़, HD और पढ़ने योग्य" },
-                  { Icon: ShieldCheck, text: "केवल आपकी नज़र के लिए — कोई और नहीं" },
-                  { Icon: Gift, text: "लेखक का हर नया सुधार आप तक बिना पैसे" },
+                  { Icon: Lock, text: "One ID — your library on every device" },
+                  { Icon: Cloud, text: "Zero bytes taken from your phone's memory" },
+                  { Icon: BookOpen, text: "Always crisp, HD and easy to read" },
+                  { Icon: ShieldCheck, text: "For your eyes only — nobody else's" },
+                  { Icon: Gift, text: "Every author update reaches you, free" },
                 ].map(({ Icon, text }) => (
                   <li key={text} className="flex items-start gap-2">
                     <Icon className="h-4 w-4 mt-0.5 text-primary shrink-0" />

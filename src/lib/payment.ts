@@ -9,12 +9,17 @@ declare global {
 export type PaymentGateway = "razorpay" | "paypal";
 
 interface CreateOrderParams {
-  amount: number;
+  amount: number; // Always in INR (source-of-truth)
   type: "donation" | "purchase";
   gateway?: PaymentGateway;
   book_id?: string;
   name?: string;
   email?: string;
+  coupon_id?: string;
+  referrer_id?: string;
+  // Buyer's display currency + live INR→currency rate (for PayPal international pricing)
+  buyer_currency?: string;
+  buyer_fx_rate?: number;
 }
 
 function loadRazorpayScript(): Promise<void> {

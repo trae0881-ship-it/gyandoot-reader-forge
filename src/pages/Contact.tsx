@@ -165,19 +165,17 @@ const Contact = () => {
           </div>
         </div>
 
-        <section className="mt-16 max-w-5xl mx-auto">
+        <section className="mt-16 w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]">
           <h2 className="font-serif text-2xl font-bold text-foreground mb-4 text-center">हमारा स्थान</h2>
-          <div className="rounded-xl overflow-hidden border border-border shadow-sm">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3580.5738718627367!2d80.65342424352151!3d26.178004032415163!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x399c7ce90fa1954f%3A0x511f55a5c90a8bbd!2sBhagwan%20Khera%2C%20Uttar%20Pradesh%20209863!5e0!3m2!1sen!2sin!4v1783592023814!5m2!1sen!2sin"
-              title="GyandootNova स्थान — Bhagwan Khera, उत्तर प्रदेश"
-              className="w-full block"
-              style={{ border: 0, height: "280px" }}
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="strict-origin-when-cross-origin"
-            />
-          </div>
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3580.5738718627367!2d80.65342424352151!3d26.178004032415163!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x399c7ce90fa1954f%3A0x511f55a5c90a8bbd!2sBhagwan%20Khera%2C%20Uttar%20Pradesh%20209863!5e0!3m2!1sen!2sin!4v1783592023814!5m2!1sen!2sin"
+            title="GyandootNova स्थान — Bhagwan Khera, उत्तर प्रदेश"
+            className="w-full block"
+            style={{ border: 0, height: "280px" }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="strict-origin-when-cross-origin"
+          />
         </section>
       </main>
     </Layout>

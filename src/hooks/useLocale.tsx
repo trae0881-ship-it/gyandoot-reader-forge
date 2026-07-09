@@ -60,8 +60,8 @@ const COUNTRY_MAP: Record<string, { currency: Currency; language: Language }> = 
 const LocaleContext = createContext<LocaleContextValue | null>(null);
 
 export const LocaleProvider = ({ children }: { children: ReactNode }) => {
-  const [currency, setCurrencyState] = useState<Currency>(() => (localStorage.getItem("gn_currency") as Currency) || "INR");
-  const [language, setLanguageState] = useState<Language>(() => (localStorage.getItem("gn_language") as Language) || "hi");
+  const [currency, setCurrencyState] = useState<Currency>(() => (localStorage.getItem("gn_currency") as Currency) || "USD");
+  const [language, setLanguageState] = useState<Language>(() => (localStorage.getItem("gn_language") as Language) || "en");
   const [rates, setRates] = useState<Record<Currency, number>>(FALLBACK_RATES);
   const [country, setCountry] = useState<string | null>(null);
 

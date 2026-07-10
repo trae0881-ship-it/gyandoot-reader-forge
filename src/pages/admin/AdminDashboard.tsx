@@ -461,10 +461,15 @@ const AdminDashboard = () => {
           <TabsTrigger value="content">Content & Readers</TabsTrigger>
           <TabsTrigger value="seo">SEO</TabsTrigger>
           <TabsTrigger value="storage">Space & Storage</TabsTrigger>
+          <TabsTrigger value="downloads">Table Downloads</TabsTrigger>
         </TabsList>
 
         <TabsContent value="storage" className="mt-6">
           <StorageDetailsPanel />
+        </TabsContent>
+
+        <TabsContent value="downloads" className="mt-6">
+          <TableDownloadsPanel />
         </TabsContent>
 
         <TabsContent value="business" className="space-y-6 mt-6">

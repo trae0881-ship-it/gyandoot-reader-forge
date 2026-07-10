@@ -105,21 +105,18 @@ async function llmLovable(messages: ChatMsg[], json: boolean, key: string): Prom
   return data.choices?.[0]?.message?.content ?? "";
 }
 
-async function llmAnthropic(messages: ChatMsg[], json: boolean, key: string): Promise<string> {
-  const sys = messages.filter(m => m.role === "system").map(m => m.content).join("\n\n");
-  const rest = messages.filter(m => m.role !== "system");
-  const res = await withTimeout(fetch("https://api.anthropic.com/v1/messages", {
+async function llmOpenRouter(messages: ChatMsg[], json: boolean, key: string): Promise<string> {
+  const res = await withTimeout(fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
-    headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
     body: JSON.stringify({
-      model: "claude-sonnet-4-20250514", max_tokens: 8000,
-      system: sys + (json ? "\n\nReturn ONLY valid JSON. No markdown fences." : ""),
-      messages: rest.map(m => ({ role: m.role, content: m.content })),
+      model: "deepseek/deepseek-chat", messages,
+      ...(json ? { response_format: { type: "json_object" } } : {}),
     }),
   }), 90000);
-  if (!res.ok) throw new Error(`anthropic ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  if (!res.ok) throw new Error(`openrouter ${res.status}: ${(await res.text()).slice(0, 200)}`);
   const data = await res.json();
-  return data.content?.[0]?.text ?? "";
+  return data.choices?.[0]?.message?.content ?? "";
 }
 async function llmOpenAI(messages: ChatMsg[], json: boolean, key: string): Promise<string> {
   const res = await withTimeout(fetch("https://api.openai.com/v1/chat/completions", {
@@ -163,7 +160,7 @@ type LLMFn = (m: ChatMsg[], j: boolean, key: string) => Promise<string>;
 // External providers remain as fallback only if their keys are configured.
 const LLM_CHAIN: [string, LLMFn][] = [
   ["lovable", llmLovable],
-  ["anthropic", llmAnthropic], ["openai", llmOpenAI], ["deepseek", llmDeepSeek], ["gemini", llmGemini],
+  ["openrouter", llmOpenRouter], ["openai", llmOpenAI], ["deepseek", llmDeepSeek], ["gemini", llmGemini],
 ];
 
 function parseStatus(msg: string): number | null {

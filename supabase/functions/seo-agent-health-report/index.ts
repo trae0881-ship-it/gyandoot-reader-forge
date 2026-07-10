@@ -28,10 +28,10 @@ async function probe(name: string, keyEnv: string, run: () => Promise<Response>)
 
 async function probeAll(): Promise<Probe[]> {
   return await Promise.all([
-    probe("anthropic", "ANTHROPIC_API_KEY", () => fetch("https://api.anthropic.com/v1/messages", {
+    probe("openrouter", "OPENROUTER_API_KEY", () => fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
-      headers: { "x-api-key": Deno.env.get("ANTHROPIC_API_KEY")!, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-      body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 5, messages: [{ role: "user", content: "ping" }] }),
+      headers: { Authorization: `Bearer ${Deno.env.get("OPENROUTER_API_KEY")!}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ model: "deepseek/deepseek-chat", max_tokens: 5, messages: [{ role: "user", content: "ping" }] }),
     })),
     probe("openai", "OPENAI_API_KEY", () => fetch("https://api.openai.com/v1/models", {
       headers: { Authorization: `Bearer ${Deno.env.get("OPENAI_API_KEY")!}` },

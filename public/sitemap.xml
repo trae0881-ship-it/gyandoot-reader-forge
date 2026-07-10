@@ -229,16 +229,22 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://gyandootnova.in/books/%E0%A4%8B%E0%A4%97%E0%A5%8D%E0%A4%B5%E0%A5%87%E0%A4%A6%E0%A4%83-%E0%A4%AE%E0%A4%A3%E0%A5%8D%E0%A4%A1%E0%A4%B2%E0%A4%82-4</loc>
+    <lastmod>2026-07-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/books/%E0%A4%95%E0%A4%A6%E0%A4%B0%E0%A4%A8%E0%A4%A5/%E0%A4%95%E0%A4%A6%E0%A4%B0%E0%A4%A8%E0%A4%A5-1000-name</loc>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://gyandootnova.in/books/krishna-sahastraname/%E0%A4%95%E0%A4%B7%E0%A4%A3-%E0%A4%B8%E0%A4%B9%E0%A4%B8%E0%A4%A4%E0%A4%B0%E0%A4%A8%E0%A4%AE</loc>
     <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.65</priority>
-  </url>
-  <url>
-    <loc>https://gyandootnova.in/books/vishnu-sahastranam-hindi-english-sanskrit/cupan-code</loc>
-    <lastmod>2026-06-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
   </url>
   <url>
     <loc>https://gyandootnova.in/books/bhagavad-gita-simplified/part-1</loc>
@@ -251,6 +257,18 @@
     <lastmod>2026-04-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/books/%E0%A4%8B%E0%A4%97%E0%A5%8D%E0%A4%B5%E0%A5%87%E0%A4%A6%E0%A4%83-%E0%A4%AE%E0%A4%A3%E0%A5%8D%E0%A4%A1%E0%A4%B2%E0%A4%82-4/complete-capter</loc>
+    <lastmod>2026-07-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/books/vishnu-sahastranam-hindi-english-sanskrit/cupan-code</loc>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
   </url>
   <url>
     <loc>https://gyandootnova.in/books/rigved/%E0%A4%8B%E0%A4%97%E0%A4%B5%E0%A4%A6-%E0%A4%AE%E0%A4%A3%E0%A4%A1%E0%A4%B2-%E0%A5%A6%E0%A5%A9</loc>
@@ -271,34 +289,16 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://gyandootnova.in/books/%E0%A4%95%E0%A4%A6%E0%A4%B0%E0%A4%A8%E0%A4%A5/%E0%A4%95%E0%A4%A6%E0%A4%B0%E0%A4%A8%E0%A4%A5-1000-name</loc>
-    <lastmod>2026-06-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://gyandootnova.in/books/%E0%A4%95%E0%A4%A6%E0%A4%B0%E0%A4%A8%E0%A4%A5/cupan-code</loc>
-    <lastmod>2026-06-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://gyandootnova.in/books/bhagavad-gita-simplified/part-2</loc>
-    <lastmod>2026-06-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.65</priority>
-  </url>
-  <url>
     <loc>https://gyandootnova.in/books/krishna-sahastraname/%E0%A4%95%E0%A4%B7%E0%A4%A3-%E0%A4%B8%E0%A4%B9%E0%A4%B8%E0%A4%A4%E0%A4%B0%E0%A4%A8%E0%A4%AE-2</loc>
     <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
-    <loc>https://gyandootnova.in/books/kakradi-sahastraname/cupan-code</loc>
+    <loc>https://gyandootnova.in/books/bhagavad-gita-simplified/part-2</loc>
     <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
+    <priority>0.65</priority>
   </url>
   <url>
     <loc>https://gyandootnova.in/books/rigved-part1/rigved-part-1</loc>
@@ -314,6 +314,18 @@
   </url>
   <url>
     <loc>https://gyandootnova.in/books/rigved-part2/cupan-code</loc>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/books/%E0%A4%95%E0%A4%A6%E0%A4%B0%E0%A4%A8%E0%A4%A5/cupan-code</loc>
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/books/kakradi-sahastraname/cupan-code</loc>
     <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>

@@ -46,7 +46,7 @@ const AdminLayout = () => {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen notranslate" translate="no">
       {/* Sidebar */}
       <aside className="w-64 border-r bg-muted/30 p-4 hidden md:block">
         <div className="mb-6">

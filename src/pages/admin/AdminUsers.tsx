@@ -39,6 +39,8 @@ const AdminUsers = () => {
   const [rolesUser, setRolesUser] = useState<UserRow | null>(null);
 
   const canManageRoles = isAdmin || perms.users;
+
+  const { data, isLoading } = useQuery({
     queryKey: ["admin-users"],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();

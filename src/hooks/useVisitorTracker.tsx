@@ -43,7 +43,34 @@ export function useVisitorTracker() {
           if (r.ok) geo = await r.json();
         } catch {}
 
+        // Pull identity from current auth session + profile
+        let user_id: string | null = null;
+        let user_email: string | null = null;
+        let user_name: string | null = null;
+        let user_phone: string | null = null;
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            user_id = user.id;
+            user_email = user.email ?? null;
+            user_phone = user.phone ?? null;
+            const { data: prof } = await supabase
+              .from("profiles")
+              .select("display_name, phone")
+              .eq("user_id", user.id)
+              .maybeSingle();
+            if (prof) {
+              user_name = (prof as any).display_name ?? null;
+              user_phone = user_phone ?? (prof as any).phone ?? null;
+            }
+          }
+        } catch {}
+
         await supabase.from("visitor_logs").insert({
+          user_id,
+          user_email,
+          user_name,
+          user_phone,
           ip_address: geo.ip ?? null,
           country: geo.country_name ?? null,
           country_code: geo.country_code ?? null,
@@ -66,5 +93,6 @@ export function useVisitorTracker() {
         // silent fail
       }
     })();
+
   }, []);
 }

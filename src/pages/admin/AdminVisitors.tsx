@@ -10,7 +10,10 @@ interface VisitorLog {
   id: string;
   user_id: string | null;
   user_name?: string | null;
+  user_email?: string | null;
+  user_phone?: string | null;
   ip_address: string | null;
+
 
   country: string | null;
   country_code: string | null;
@@ -51,24 +54,42 @@ const AdminVisitors = () => {
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from("visitor_logs" as any)
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(5000);
-    const rows: VisitorLog[] = ((data as any) ?? []);
-    const userIds = Array.from(new Set(rows.map(r => r.user_id).filter(Boolean))) as string[];
-    if (userIds.length) {
+    // Fetch ALL rows (unlimited) using pagination — Supabase caps single request at 1000.
+    const all: any[] = [];
+    const pageSize = 1000;
+    for (let from = 0; ; from += pageSize) {
+      const { data, error } = await supabase
+        .from("visitor_logs" as any)
+        .select("*")
+        .order("created_at", { ascending: false })
+        .range(from, from + pageSize - 1);
+      if (error || !data || data.length === 0) break;
+      all.push(...data);
+      if (data.length < pageSize) break;
+    }
+    const rows: VisitorLog[] = all as any;
+    // Backfill user_name from profiles for older logs missing user_name
+    const missingIds = Array.from(new Set(rows.filter(r => r.user_id && !r.user_name).map(r => r.user_id))) as string[];
+    if (missingIds.length) {
       const { data: profs } = await supabase
         .from("profiles")
-        .select("user_id, display_name")
-        .in("user_id", userIds);
-      const map = new Map((profs ?? []).map((p: any) => [p.user_id, p.display_name]));
-      rows.forEach(r => { if (r.user_id) r.user_name = map.get(r.user_id) ?? null; });
+        .select("user_id, display_name, phone")
+        .in("user_id", missingIds);
+      const map = new Map((profs ?? []).map((p: any) => [p.user_id, p]));
+      rows.forEach(r => {
+        if (r.user_id && !r.user_name) {
+          const p: any = map.get(r.user_id);
+          if (p) {
+            r.user_name = p.display_name ?? null;
+            (r as any).user_phone = (r as any).user_phone ?? p.phone ?? null;
+          }
+        }
+      });
     }
     setLogs(rows);
     setLoading(false);
   };
+
 
 
   useEffect(() => { load(); }, []);
@@ -80,6 +101,10 @@ const AdminVisitors = () => {
       (l.country ?? "").toLowerCase().includes(s) ||
       (l.city ?? "").toLowerCase().includes(s) ||
       (l.ip_address ?? "").toLowerCase().includes(s) ||
+      (l.user_email ?? "").toLowerCase().includes(s) ||
+      (l.user_name ?? "").toLowerCase().includes(s) ||
+      (l.user_phone ?? "").toLowerCase().includes(s) ||
+
       (l.browser ?? "").toLowerCase().includes(s) ||
       (l.os ?? "").toLowerCase().includes(s) ||
       (l.landing_path ?? "").toLowerCase().includes(s) ||
@@ -165,9 +190,16 @@ const AdminVisitors = () => {
                   <td className="p-3">
                     <div className="font-mono text-xs">{l.ip_address ?? "—"}</div>
                     <div className="text-xs text-muted-foreground truncate max-w-[180px]">{l.isp ?? ""}</div>
-                    {l.user_name || l.user_id ? (
-                      <div className="text-xs text-primary mt-1 truncate max-w-[180px] flex items-center gap-1"><User className="h-3 w-3" />{l.user_name ?? l.user_id?.slice(0,8)}</div>
+                    {(l.user_name || l.user_email || l.user_phone || l.user_id) ? (
+                      <div className="mt-1 space-y-0.5">
+                        <div className="text-xs text-primary truncate max-w-[200px] flex items-center gap-1">
+                          <User className="h-3 w-3 shrink-0" />{l.user_name ?? l.user_id?.slice(0,8) ?? "—"}
+                        </div>
+                        {l.user_email && <div className="text-xs text-muted-foreground truncate max-w-[200px]">{l.user_email}</div>}
+                        {l.user_phone && <div className="text-xs text-muted-foreground">{l.user_phone}</div>}
+                      </div>
                     ) : null}
+
 
 
                   </td>

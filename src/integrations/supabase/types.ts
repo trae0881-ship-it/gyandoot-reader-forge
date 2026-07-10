@@ -1357,7 +1357,10 @@ export type Database = {
           screen: string | null
           timezone: string | null
           user_agent: string | null
+          user_email: string | null
           user_id: string | null
+          user_name: string | null
+          user_phone: string | null
         }
         Insert: {
           browser?: string | null
@@ -1379,7 +1382,10 @@ export type Database = {
           screen?: string | null
           timezone?: string | null
           user_agent?: string | null
+          user_email?: string | null
           user_id?: string | null
+          user_name?: string | null
+          user_phone?: string | null
         }
         Update: {
           browser?: string | null
@@ -1401,7 +1407,10 @@ export type Database = {
           screen?: string | null
           timezone?: string | null
           user_agent?: string | null
+          user_email?: string | null
           user_id?: string | null
+          user_name?: string | null
+          user_phone?: string | null
         }
         Relationships: []
       }

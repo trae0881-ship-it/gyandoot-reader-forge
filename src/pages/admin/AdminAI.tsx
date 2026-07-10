@@ -13,10 +13,11 @@ import { Loader2, Shield, Sparkles, Search, CheckCircle, XCircle } from "lucide-
 
 const PROVIDERS = [
   { value: "lovable", label: "Lovable AI (Built-in)", needsKey: false, needsUrl: false },
-  { value: "deepseek", label: "DeepSeek", needsKey: true, needsUrl: false },
+  { value: "openrouter-builtin", label: "OpenRouter · DeepSeek (Built-in key)", needsKey: false, needsUrl: false },
+  { value: "deepseek", label: "DeepSeek (direct)", needsKey: true, needsUrl: false },
   { value: "openai", label: "OpenAI / ChatGPT", needsKey: true, needsUrl: false },
   { value: "gemini", label: "Google Gemini", needsKey: true, needsUrl: false },
-  { value: "openrouter", label: "OpenRouter (Universal — 100+ models)", needsKey: true, needsUrl: false },
+  { value: "openrouter", label: "OpenRouter (custom key)", needsKey: true, needsUrl: false },
   { value: "groq", label: "Groq (Ultra-fast)", needsKey: true, needsUrl: false },
   { value: "nvidia", label: "NVIDIA NIM", needsKey: true, needsUrl: false },
   { value: "together", label: "Together AI", needsKey: true, needsUrl: false },
@@ -29,10 +30,11 @@ const PROVIDERS = [
 
 const MODELS: Record<string, string[]> = {
   lovable: ["google/gemini-2.5-flash", "google/gemini-2.5-pro", "google/gemini-3-flash-preview", "openai/gpt-5-mini", "openai/gpt-5"],
+  "openrouter-builtin": ["deepseek/deepseek-chat", "deepseek/deepseek-r1", "deepseek/deepseek-chat-v3.1"],
   deepseek: ["deepseek-chat", "deepseek-reasoner"],
   openai: ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-3.5-turbo"],
   gemini: ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"],
-  openrouter: ["deepseek/deepseek-chat", "google/gemini-2.5-flash", "openai/gpt-4o-mini", "meta-llama/llama-3.3-70b-instruct", "anthropic/claude-3.5-sonnet"],
+  openrouter: ["deepseek/deepseek-chat", "deepseek/deepseek-r1", "google/gemini-2.5-flash", "openai/gpt-4o-mini", "meta-llama/llama-3.3-70b-instruct"],
   groq: ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768", "gemma2-9b-it"],
   nvidia: ["meta/llama-3.3-70b-instruct", "deepseek-ai/deepseek-r1", "nvidia/llama-3.1-nemotron-70b-instruct", "mistralai/mixtral-8x22b-instruct-v0.1"],
   together: ["meta-llama/Llama-3.3-70B-Instruct-Turbo", "deepseek-ai/DeepSeek-V3", "mistralai/Mixtral-8x7B-Instruct-v0.1"],
@@ -42,6 +44,7 @@ const MODELS: Record<string, string[]> = {
   kimi: ["moonshot-v1-8k", "moonshot-v1-32k"],
   custom: [],
 };
+
 
 // Sanitize pasted API keys regardless of source — removes whitespace,
 // zero-width chars, BOM, and wrapping quotes so any paste "just works".

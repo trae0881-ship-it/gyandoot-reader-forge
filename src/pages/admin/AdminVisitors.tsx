@@ -206,6 +206,73 @@ const AdminVisitors = () => {
 
       <Input placeholder="Search country, city, IP, browser, path..." value={q} onChange={(e) => setQ(e.target.value)} />
 
+      <Card className="p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold">Filters</h3>
+          <Button variant="ghost" size="sm" onClick={clearFilters}>Clear all</Button>
+        </div>
+        <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-4">
+          <div>
+            <label className="text-xs text-muted-foreground">Date from</label>
+            <Input type="date" value={fDateFrom} onChange={(e) => setFDateFrom(e.target.value)} />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">Date to</label>
+            <Input type="date" value={fDateTo} onChange={(e) => setFDateTo(e.target.value)} />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">Time from</label>
+            <Input type="time" value={fTimeFrom} onChange={(e) => setFTimeFrom(e.target.value)} />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">Time to</label>
+            <Input type="time" value={fTimeTo} onChange={(e) => setFTimeTo(e.target.value)} />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">Country</label>
+            <select className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm" value={fCountry} onChange={(e) => setFCountry(e.target.value)}>
+              <option value="">All countries</option>
+              {countries.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">Location (city/region)</label>
+            <Input placeholder="e.g. Mumbai" value={fLocation} onChange={(e) => setFLocation(e.target.value)} />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">Device</label>
+            <select className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm" value={fDevice} onChange={(e) => setFDevice(e.target.value)}>
+              <option value="">All devices</option>
+              {devices.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">Browser</label>
+            <select className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm" value={fBrowser} onChange={(e) => setFBrowser(e.target.value)}>
+              <option value="">All browsers</option>
+              {browsers.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">OS</label>
+            <select className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm" value={fOs} onChange={(e) => setFOs(e.target.value)}>
+              <option value="">All OS</option>
+              {oses.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">Landing path</label>
+            <Input placeholder="/books" value={fLanding} onChange={(e) => setFLanding(e.target.value)} />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">Referrer (host) — use __direct__ for none</label>
+            <Input placeholder="google.com" value={fReferrer} onChange={(e) => setFReferrer(e.target.value)} />
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground mt-3">Showing {filtered.length} of {logs.length} visits</p>
+      </Card>
+
+
       <Card className="overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">

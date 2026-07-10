@@ -95,6 +95,13 @@ const AdminAI = () => {
         });
         if (error) throw error;
         toast({ title: "✅ Lovable AI activated!" });
+      } else if (provider === "openrouter-builtin") {
+        const { data, error } = await supabase.functions.invoke("ai-ask", {
+          body: { action: "set-openrouter-builtin", model_name: model },
+        });
+        if (error) throw error;
+        if (!data?.success) throw new Error(data?.error || "Failed");
+        toast({ title: "✅ OpenRouter DeepSeek activated (built-in key)!" });
       } else {
         if (!apiKey) {
           toast({ title: "API key required", variant: "destructive" });

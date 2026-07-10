@@ -33,6 +33,15 @@ verify_jwt = false
 [functions.otp-providers-manage]
 verify_jwt = false
 
+[functions.seo-book-kb-refresh]
+verify_jwt = false
+
+[functions.seo-daily-publisher]
+verify_jwt = false
+
+[functions.seo-queue-topup]
+verify_jwt = false
+
 
 
 

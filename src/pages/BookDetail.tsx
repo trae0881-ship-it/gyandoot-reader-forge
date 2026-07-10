@@ -504,6 +504,11 @@ const BookDetail = () => {
                     <span className="inline-flex items-center gap-1"><CreditCard className="h-3 w-3" /> UPI / Card / NetBanking</span>
                     <span className="inline-flex items-center gap-1"><InfinityIcon className="h-3 w-3" /> Lifetime Access</span>
                   </div>
+
+                  {/* Viral share bar */}
+                  <div className="pt-2 border-t border-border/60">
+                    <SocialShareBar title={`${book.title} — ${book.author}`} />
+                  </div>
                 </div>
               )}
               {/* Referral Link Section */}

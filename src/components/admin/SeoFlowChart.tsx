@@ -289,13 +289,13 @@ function renderRows(steps: StepDef[], statusOf: (s: StepDef) => any, onSelect: (
   const chunks: StepDef[][] = [];
   for (let i = 0; i < steps.length; i += 4) chunks.push(steps.slice(i, i + 4));
   return chunks.map((row, idx) => (
-    <div key={idx}>
+    <div key={`row-${idx}`}>
       <div className="flex flex-col lg:flex-row items-stretch gap-2">
         {row.map((s, i) => (
-          <>
-            <StepCard key={s.n} step={s} status={statusOf(s)} onClick={() => onSelect(s)} />
-            {i < row.length - 1 && <Arrow key={`a-${s.n}`} />}
-          </>
+          <div key={s.n} className="contents">
+            <StepCard step={s} status={statusOf(s)} onClick={() => onSelect(s)} />
+            {i < row.length - 1 && <Arrow />}
+          </div>
         ))}
       </div>
       {idx < chunks.length - 1 && <div className="flex justify-center py-1"><Arrow dir="down" /></div>}

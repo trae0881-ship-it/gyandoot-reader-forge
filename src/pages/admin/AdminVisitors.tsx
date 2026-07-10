@@ -10,7 +10,10 @@ interface VisitorLog {
   id: string;
   user_id: string | null;
   user_name?: string | null;
+  user_email?: string | null;
+  user_phone?: string | null;
   ip_address: string | null;
+
 
   country: string | null;
   country_code: string | null;

@@ -180,7 +180,7 @@ const RichTextEditor = ({ value, onChange, placeholder = "Start writing…", min
       PreserveStyles,
       Highlight.configure({ multicolor: true }),
       Link.configure({ openOnClick: false, HTMLAttributes: { class: "text-primary underline cursor-pointer" } }),
-      Image.configure({ inline: false, HTMLAttributes: { class: "rounded-lg my-3 mx-auto block" } }),
+      Image.configure({ inline: false, allowBase64: true, HTMLAttributes: { class: "rounded-lg my-3 mx-auto block" } }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       Table.configure({ resizable: true, HTMLAttributes: { class: "rte-table" } }),
       TableRow,
@@ -195,8 +195,30 @@ const RichTextEditor = ({ value, onChange, placeholder = "Start writing…", min
         style: `min-height:${minHeight}px`,
       },
       transformPastedHTML: (html) => cleanWordHtml(html),
+      handlePaste: (view, event) => {
+        const items = event.clipboardData?.items;
+        if (!items) return false;
+        const imageFiles: File[] = [];
+        for (let i = 0; i < items.length; i++) {
+          const it = items[i];
+          if (it.kind === "file" && it.type.startsWith("image/")) {
+            const f = it.getAsFile();
+            if (f) imageFiles.push(f);
+          }
+        }
+        if (imageFiles.length === 0) return false;
+        // Upload each image and insert
+        event.preventDefault();
+        (async () => {
+          for (const file of imageFiles) {
+            await handleImageUpload(file);
+          }
+        })();
+        return true;
+      },
     },
   });
+
 
   /* Sync external `value` changes into the editor (e.g. when async-loading
      an existing chapter's content after mount). Without this, the editor

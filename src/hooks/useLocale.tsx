@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
 
 export type Currency = "INR" | "USD" | "EUR" | "GBP" | "AED" | "AUD" | "CAD" | "SGD";
-export type Language = "hi" | "en" | "es" | "fr" | "de" | "ar" | "zh-CN" | "ja" | "ru" | "pt";
+export type Language = string;
 
 interface LocaleContextValue {
   currency: Currency;

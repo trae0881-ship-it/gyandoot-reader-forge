@@ -31,7 +31,7 @@ export default function NewsletterCta() {
         } as any);
       }
       setDone(true);
-      toast.success("धन्यवाद! जल्दी ही आपसे जुड़ेंगे।");
+      toast.success("Thank you! We'll be in touch soon.");
     } catch {
       setDone(true);
     } finally {
@@ -44,15 +44,15 @@ export default function NewsletterCta() {
       <div className="container max-w-3xl">
         <div className="rounded-2xl bg-primary/[0.04] border border-primary/20 p-8 md:p-10 text-center">
           <h2 className="font-serif text-2xl md:text-3xl font-bold">
-            रोज़ एक <span className="text-primary">श्लोक</span> सीधे आपके WhatsApp पर
+            A daily <span className="text-primary">shloka</span> straight to your WhatsApp
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            कोई spam नहीं • जब चाहें unsubscribe करें • 14,000+ साधक पहले से जुड़े हैं
+            No spam • Unsubscribe anytime • 14,000+ seekers already joined
           </p>
 
           {done ? (
             <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-green-600/10 text-green-700 px-4 py-2 text-sm font-semibold">
-              <CheckCircle2 className="h-4 w-4" /> आप जुड़ चुके हैं — हर सुबह 7 बजे मिलेगा संदेश
+              <CheckCircle2 className="h-4 w-4" /> You're in — your message arrives every morning at 7 AM
             </div>
           ) : (
             <form
@@ -63,7 +63,7 @@ export default function NewsletterCta() {
                 type="text"
                 inputMode="email"
                 required
-                placeholder="आपका Email या WhatsApp नंबर"
+                placeholder="Your Email or WhatsApp number"
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
                 className="bg-background"
@@ -73,7 +73,7 @@ export default function NewsletterCta() {
                 disabled={busy}
                 className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold"
               >
-                <Send className="mr-1.5 h-4 w-4" /> जुड़ें
+                <Send className="mr-1.5 h-4 w-4" /> Subscribe
               </Button>
             </form>
           )}

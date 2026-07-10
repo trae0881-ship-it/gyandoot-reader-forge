@@ -3,23 +3,23 @@ import { ShieldCheck, RefreshCw, Lock, HeadphonesIcon } from "lucide-react";
 const items = [
   {
     icon: ShieldCheck,
-    title: "7-दिन पैसा वापसी",
-    desc: "पसंद नहीं आया? बिना सवाल पूरा refund। आपका पैसा, आपका हक़।",
+    title: "7-day money back",
+    desc: "Didn't like it? Full refund, no questions asked. Your money, your right.",
   },
   {
     icon: Lock,
-    title: "सुरक्षित Payment",
-    desc: "Razorpay + PayPal • UPI, Card, Net Banking • 256-bit encrypted।",
+    title: "Secure Payments",
+    desc: "Razorpay + PayPal • UPI, Card, Net Banking • 256-bit encrypted.",
   },
   {
     icon: RefreshCw,
     title: "Lifetime Updates",
-    desc: "एक बार खरीदी, नए editions और updates हमेशा मुफ़्त।",
+    desc: "Buy once, get new editions and updates free forever.",
   },
   {
     icon: HeadphonesIcon,
-    title: "हिंदी में Support",
-    desc: "WhatsApp पर 24 घंटे में जवाब। कोई बोट नहीं, असली इंसान।",
+    title: "Human Support",
+    desc: "Reply within 24 hours on WhatsApp. No bots — real people.",
   },
 ];
 
@@ -29,13 +29,13 @@ export default function GuaranteeSection() {
       <div className="container max-w-5xl">
         <div className="text-center mb-10">
           <span className="inline-block rounded-full bg-secondary/20 px-3 py-1 text-xs font-semibold text-secondary uppercase tracking-wider">
-            हमारा वादा
+            Our promise
           </span>
           <h2 className="mt-3 font-serif text-2xl md:text-3xl font-bold">
-            <span className="text-primary">100% जोखिम-रहित</span> खरीदारी
+            <span className="text-primary">100% risk-free</span> shopping
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            हम तब तक खुश नहीं, जब तक आप खुश नहीं।
+            We're not happy until you are.
           </p>
         </div>
 

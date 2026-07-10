@@ -49,7 +49,7 @@ const Contact = () => {
     e.preventDefault();
     const phoneDigits = form.phone.replace(/\D/g, "");
     if (phoneDigits.length < 10 || phoneDigits.length > 15) {
-      toast({ title: "Mobile number required", description: "कृपया valid mobile number दर्ज करें (10–15 digits).", variant: "destructive" });
+      toast({ title: "Mobile number required", description: "Please enter a valid mobile number (10–15 digits).", variant: "destructive" });
       return;
     }
     setSending(true);

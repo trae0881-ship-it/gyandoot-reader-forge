@@ -2,25 +2,25 @@ import { useEffect, useState } from "react";
 import { ShoppingBag, X } from "lucide-react";
 
 const NAMES = [
-  "रवि शर्मा", "अनिता वर्मा", "सुरेश यादव", "प्रिया गुप्ता", "मनोज तिवारी",
-  "कविता सिंह", "अमित जोशी", "नेहा अग्रवाल", "विकास पांडे", "स्नेहा मिश्रा",
-  "राहुल सक्सेना", "पूजा त्रिपाठी", "दीपक चौहान", "मीरा देवी", "अजय कुमार",
-  "रचना दुबे", "संजय राठौर", "गीता बहन", "आशीष नायक", "रेखा सोनी",
+  "Ravi Sharma", "Anita Verma", "Suresh Yadav", "Priya Gupta", "Manoj Tiwari",
+  "Kavita Singh", "Amit Joshi", "Neha Agarwal", "Vikas Pandey", "Sneha Mishra",
+  "Rahul Saxena", "Pooja Tripathi", "Deepak Chauhan", "Meera Devi", "Ajay Kumar",
+  "Rachna Dubey", "Sanjay Rathore", "Geeta Behen", "Ashish Nayak", "Rekha Soni",
 ];
 
 const CITIES = [
-  "जयपुर", "लखनऊ", "वाराणसी", "इंदौर", "पटना", "अहमदाबाद", "भोपाल",
-  "नागपुर", "कानपुर", "रायपुर", "दिल्ली", "मुंबई", "पुणे", "रांची",
-  "देहरादून", "गोरखपुर", "उज्जैन", "हरिद्वार", "नासिक", "अमृतसर",
+  "Jaipur", "Lucknow", "Varanasi", "Indore", "Patna", "Ahmedabad", "Bhopal",
+  "Nagpur", "Kanpur", "Raipur", "Delhi", "Mumbai", "Pune", "Ranchi",
+  "Dehradun", "Gorakhpur", "Ujjain", "Haridwar", "Nashik", "Amritsar",
 ];
 
 const BOOKS = [
-  "श्रीमद्भगवद्गीता", "रामचरितमानस", "हनुमान चालीसा सार",
-  "उपनिषद दर्शन", "योग वाशिष्ठ", "विष्णु पुराण",
-  "श्रीमद्भागवत", "देवी महात्म्य", "नारद भक्ति सूत्र",
+  "Shrimad Bhagavad Gita", "Ramcharitmanas", "Hanuman Chalisa Saar",
+  "Upanishad Darshan", "Yoga Vashishtha", "Vishnu Purana",
+  "Shrimad Bhagwatam", "Devi Mahatmya", "Narad Bhakti Sutra",
 ];
 
-const TIMES = ["अभी-अभी", "1 मिनट पहले", "2 मिनट पहले", "5 मिनट पहले", "8 मिनट पहले", "12 मिनट पहले"];
+const TIMES = ["just now", "1 minute ago", "2 minutes ago", "5 minutes ago", "8 minutes ago", "12 minutes ago"];
 
 const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
 
@@ -59,9 +59,9 @@ const RecentPurchasesToast = () => {
         </div>
         <div className="text-xs leading-snug text-foreground">
           <p>
-            <strong>{item.name}</strong> <span className="text-muted-foreground">({item.city})</span> ने
+            <strong>{item.name}</strong> <span className="text-muted-foreground">({item.city})</span>
           </p>
-          <p className="text-foreground/90">"{item.book}" unlock किया</p>
+          <p className="text-foreground/90">unlocked "{item.book}"</p>
           <p className="text-[10px] text-muted-foreground mt-0.5">✓ Verified · {item.time}</p>
         </div>
         <button

@@ -31,7 +31,7 @@ export default function NewsletterCta() {
         } as any);
       }
       setDone(true);
-      toast.success("धन्यवाद! जल्दी ही आपसे जुड़ेंगे।");
+      toast.success("Thank you! We'll be in touch soon.");
     } catch {
       setDone(true);
     } finally {

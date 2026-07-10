@@ -56,7 +56,7 @@ const Footer = () => {
               <span className="font-serif text-2xl">Gyandoot<span className="gradient-text-gold">Nova</span></span>
             </Link>
             <p className="text-sm text-background/70 leading-relaxed">
-              GyandootNova (Gyandoot Nova) — प्राचीन ग्रंथों को नए दौर के पाठक तक पहुँचाने की एक ईमानदार कोशिश — शुद्ध पाठ, सरल भाषा, शांत reader।
+              GyandootNova — bringing ancient scriptures to today's readers with pure text, simple language, and a calm reading experience.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-3">
@@ -95,35 +95,35 @@ const Footer = () => {
 
           {/* Explore */}
           <div>
-            <h3 className="font-serif font-semibold mb-4 text-secondary">मुख्य पन्ने</h3>
+            <h3 className="font-serif font-semibold mb-4 text-secondary">Explore</h3>
             <nav aria-label="Footer explore links" className="flex flex-col gap-2.5 text-sm text-background/70">
-              <Link to="/" className="hover:text-secondary transition-colors">मुख्य पृष्ठ</Link>
-              <Link to="/about" className="hover:text-secondary transition-colors">हमारी कहानी</Link>
-              <Link to="/books" className="hover:text-secondary transition-colors">ग्रंथ-भंडार</Link>
-              <Link to="/articles" className="hover:text-secondary transition-colors">लेख</Link>
-              <Link to="/services" className="hover:text-secondary transition-colors">सेवाएँ</Link>
-              <Link to="/portfolio" className="hover:text-secondary transition-colors">कार्य-सूची</Link>
-              <Link to="/testimonials" className="hover:text-secondary transition-colors">पाठकों की राय</Link>
+              <Link to="/" className="hover:text-secondary transition-colors">Home</Link>
+              <Link to="/about" className="hover:text-secondary transition-colors">Our Story</Link>
+              <Link to="/books" className="hover:text-secondary transition-colors">Books</Link>
+              <Link to="/articles" className="hover:text-secondary transition-colors">Articles</Link>
+              <Link to="/services" className="hover:text-secondary transition-colors">Services</Link>
+              <Link to="/portfolio" className="hover:text-secondary transition-colors">Portfolio</Link>
+              <Link to="/testimonials" className="hover:text-secondary transition-colors">Testimonials</Link>
             </nav>
 
           </div>
 
           {/* Support */}
           <div>
-            <h3 className="font-serif font-semibold mb-4 text-secondary">सहायता</h3>
+            <h3 className="font-serif font-semibold mb-4 text-secondary">Support</h3>
             <nav aria-label="Footer support links" className="flex flex-col gap-2.5 text-sm text-background/70">
-              <Link to="/contact" className="hover:text-secondary transition-colors">सम्पर्क</Link>
-              <Link to="/support-us" className="hover:text-secondary transition-colors">सहयोग दें</Link>
-              <Link to="/faq" className="hover:text-secondary transition-colors">सवाल-जवाब</Link>
-              <Link to="/support" className="hover:text-secondary transition-colors">सहायता केंद्र</Link>
-              <Link to="/careers" className="hover:text-secondary transition-colors">हमारे साथ जुड़िए</Link>
+              <Link to="/contact" className="hover:text-secondary transition-colors">Contact</Link>
+              <Link to="/support-us" className="hover:text-secondary transition-colors">Support Us</Link>
+              <Link to="/faq" className="hover:text-secondary transition-colors">FAQ</Link>
+              <Link to="/support" className="hover:text-secondary transition-colors">Help Center</Link>
+              <Link to="/careers" className="hover:text-secondary transition-colors">Careers</Link>
               <a
                 href="https://gyandootnova.in/sitemap.xml"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-secondary transition-colors"
               >
-                साइट-मानचित्र
+                Sitemap
               </a>
               {whatsappLink && (
                 <a
@@ -132,7 +132,7 @@ const Footer = () => {
                   rel="noopener noreferrer"
                   className="flex items-center gap-1.5 hover:text-secondary transition-colors"
                 >
-                  <MessageCircle className="h-3.5 w-3.5" /> WhatsApp पर लिखिए
+                  <MessageCircle className="h-3.5 w-3.5" /> Message on WhatsApp
                 </a>
               )}
             </nav>
@@ -141,30 +141,30 @@ const Footer = () => {
 
           {/* Legal */}
           <div>
-            <h3 className="font-serif font-semibold mb-4 text-secondary">नियम</h3>
+            <h3 className="font-serif font-semibold mb-4 text-secondary">Legal</h3>
             <nav aria-label="Footer legal links" className="flex flex-col gap-2.5 text-sm text-background/70">
-              <Link to="/privacy-policy" className="hover:text-secondary transition-colors">गोपनीयता नीति</Link>
-              <Link to="/terms-conditions" className="hover:text-secondary transition-colors">उपयोग की शर्तें</Link>
-              <Link to="/refund-policy" className="hover:text-secondary transition-colors">Refund व रद्दीकरण</Link>
-              <Link to="/shipping-policy" className="hover:text-secondary transition-colors">डिलीवरी</Link>
+              <Link to="/privacy-policy" className="hover:text-secondary transition-colors">Privacy Policy</Link>
+              <Link to="/terms-conditions" className="hover:text-secondary transition-colors">Terms & Conditions</Link>
+              <Link to="/refund-policy" className="hover:text-secondary transition-colors">Refund & Cancellation</Link>
+              <Link to="/shipping-policy" className="hover:text-secondary transition-colors">Shipping</Link>
             </nav>
           </div>
 
           {/* Newsletter */}
           <div>
-            <h3 className="font-serif font-semibold mb-4 text-secondary">जुड़े रहिए</h3>
-            <p className="text-sm text-background/70 mb-3">हफ़्ते में एक चुना हुआ लेख — बस इतना ही, कोई spam नहीं।</p>
+            <h3 className="font-serif font-semibold mb-4 text-secondary">Stay Connected</h3>
+            <p className="text-sm text-background/70 mb-3">One curated article a week — that's all, no spam.</p>
             <form onSubmit={handleNewsletter} className="flex gap-2">
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="आपका ईमेल"
+                placeholder="Your email"
                 className="flex-1 rounded-md bg-background/10 border border-background/20 px-3 py-2 text-sm text-background placeholder:text-background/40 focus:outline-none focus:ring-1 focus:ring-secondary"
               />
               <Button type="submit" size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90">
-                जोड़ें
+                Subscribe
               </Button>
             </form>
 
@@ -179,21 +179,21 @@ const Footer = () => {
         {whatsappLink && (
           <div className="mt-10 rounded-xl border border-background/15 bg-background/5 p-5 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-background/80 text-center md:text-left">
-              Roz naye granth aur articles ke liye humse judiye — WhatsApp par updates paayein.
+              Get daily updates on new scriptures and articles — join us on WhatsApp.
             </p>
             <Button asChild size="lg" className="bg-secondary text-secondary-foreground font-bold hover:bg-secondary/90 shrink-0">
               <a href={whatsappLink} target="_blank" rel="noopener noreferrer">
-                <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp Par Judiye
+                <MessageCircle className="mr-2 h-4 w-4" /> Join on WhatsApp
               </a>
             </Button>
           </div>
         )}
 
         <div className="mt-8 border-t border-background/10 pt-6 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-background/40">
-          <p>© {new Date().getFullYear()} GyandootNova. सर्वाधिकार सुरक्षित।</p>
+          <p>© {new Date().getFullYear()} GyandootNova. All rights reserved.</p>
           <div className="flex gap-4">
-            <Link to="/privacy-policy" className="hover:text-secondary transition-colors">गोपनीयता</Link>
-            <Link to="/terms-conditions" className="hover:text-secondary transition-colors">शर्तें</Link>
+            <Link to="/privacy-policy" className="hover:text-secondary transition-colors">Privacy</Link>
+            <Link to="/terms-conditions" className="hover:text-secondary transition-colors">Terms</Link>
             <Link to="/refund-policy" className="hover:text-secondary transition-colors">Refund</Link>
           </div>
 

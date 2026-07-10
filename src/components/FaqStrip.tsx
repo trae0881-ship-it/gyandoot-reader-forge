@@ -33,10 +33,10 @@ export default function FaqStrip() {
       <div className="container max-w-3xl">
         <div className="text-center mb-8">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-wider">
-            <HelpCircle className="h-3 w-3" /> मन की उलझनें
+            <HelpCircle className="h-3 w-3" /> Common questions
           </span>
           <h2 className="mt-3 font-serif text-2xl md:text-3xl font-bold">
-            जो पूछने में झिझक होती है, <span className="text-primary">वो सब यहाँ।</span>
+            The ones you hesitate to ask — <span className="text-primary">answered here.</span>
           </h2>
         </div>
 

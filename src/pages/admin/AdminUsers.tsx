@@ -390,6 +390,13 @@ const AdminUsers = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ManageUserRolesDialog
+        userId={rolesUser?.id ?? null}
+        userLabel={rolesUser?.display_name || rolesUser?.email}
+        open={!!rolesUser}
+        onOpenChange={(o) => !o && setRolesUser(null)}
+      />
     </div>
   );
 };

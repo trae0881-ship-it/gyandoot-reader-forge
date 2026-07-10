@@ -370,7 +370,13 @@ const AdminCoupons = () => {
                       </button>
                     </div>
                     {c.description && <p className="text-xs text-muted-foreground mt-0.5">{c.description}</p>}
+                    {c.repurchase_only && (
+                      <Badge variant="outline" className="mt-1 text-[10px] border-amber-500/40 text-amber-600 dark:text-amber-400">
+                        Repurchase only
+                      </Badge>
+                    )}
                   </TableCell>
+
                   <TableCell>
                     <Badge variant="outline">
                       {c.discount_type === "percent" ? `${c.discount_value}%` : `₹${c.discount_value}`} OFF

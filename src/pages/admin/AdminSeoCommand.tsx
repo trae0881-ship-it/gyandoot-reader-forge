@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Play, RefreshCcw, Mail, Send, Sparkles, TrendingUp, Eye, MousePointerClick, Target } from "lucide-react";
+import SeoFlowChart from "@/components/admin/SeoFlowChart";
 
 type Post = {
   id: string; title: string; slug: string; publish_status: string; scheduled_at: string | null;
@@ -102,6 +103,10 @@ const AdminSeoCommand = () => {
         <StatCard icon={Target} label="Avg Position" value={avgPos ? avgPos.toFixed(1) : "—"} sub="lower is better" />
         <StatCard icon={TrendingUp} label="Scheduled / Published" value={`${scheduled.length} / ${published.length}`} sub={`${drafts.length} drafts`} />
       </div>
+
+      <SeoFlowChart />
+
+
 
       <Tabs defaultValue="scheduled">
         <TabsList>

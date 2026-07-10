@@ -254,13 +254,40 @@ const BookDetail = () => {
     },
   } : undefined;
 
+  const faqJsonLd = book ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": `${book.title} कैसे पढ़ें?`,
+        "acceptedAnswer": { "@type": "Answer", "text": `${book.title} को GyandootNova पर online पढ़ा जा सकता है — mobile, tablet या desktop पर, lifetime access के साथ। खरीदने के बाद book आपके My Books में तुरंत आ जाएगी।` }
+      },
+      {
+        "@type": "Question",
+        "name": `${book.title} की कीमत क्या है?`,
+        "acceptedAnswer": { "@type": "Answer", "text": book.is_free ? `${book.title} पूरी तरह से मुफ़्त है।` : `${book.title} की कीमत ₹${book.price} है — एक बार खरीदें, जीवनभर पढ़ें।` }
+      },
+      {
+        "@type": "Question",
+        "name": "क्या refund policy है?",
+        "acceptedAnswer": { "@type": "Answer", "text": "हाँ — 7-दिन की 100% पैसा वापसी की गारंटी। पसंद ना आए तो एक click में refund।" }
+      },
+      {
+        "@type": "Question",
+        "name": "क्या payment secure है?",
+        "acceptedAnswer": { "@type": "Answer", "text": "जी हाँ — Razorpay (India) और PayPal (International) से 256-bit SSL encrypted checkout। हम आपकी card details कभी store नहीं करते।" }
+      }
+    ]
+  } : undefined;
+
   useSEO({
     title: bookMetaTitle,
     description: bookDescription,
     canonical: book ? `/books/${book.slug}` : undefined,
     ogImage: book?.cover_url ?? undefined,
     ogType: "book",
-    jsonLd: bookJsonLd,
+    jsonLd: bookJsonLd && faqJsonLd ? [bookJsonLd, faqJsonLd] : bookJsonLd,
   });
 
   if (isLoading) {

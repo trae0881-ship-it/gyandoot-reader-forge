@@ -197,6 +197,35 @@ Deno.serve(async (req) => {
       });
     }
 
+    // ── Admin: Save OpenRouter (built-in key from env) ──
+    if (action === "set-openrouter-builtin") {
+      const user = await getAuthenticatedUser(req, supabaseUrl, anonKey);
+      if (!user) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (!(await isAdmin(supabase, user.id))) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (!Deno.env.get("OPENROUTER_API_KEY")) {
+        return new Response(JSON.stringify({ success: false, error: "OPENROUTER_API_KEY not configured in backend" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      await supabase.from("ai_settings").update({ is_active: false }).neq("id", "00000000-0000-0000-0000-000000000000");
+      const { error } = await supabase.from("ai_settings").upsert({
+        provider_name: "openrouter", api_key_encrypted: "env:OPENROUTER_API_KEY",
+        model_name: model_name || "deepseek/deepseek-chat", is_active: true,
+      }, { onConflict: "provider_name" });
+      if (error) throw error;
+      return new Response(JSON.stringify({ success: true, message: "OpenRouter DeepSeek activated" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // ── Get Logs (Admin) ──
     if (action === "get-logs") {
       const user = await getAuthenticatedUser(req, supabaseUrl, anonKey);

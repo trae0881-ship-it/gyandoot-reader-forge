@@ -51,24 +51,42 @@ const AdminVisitors = () => {
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from("visitor_logs" as any)
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(5000);
-    const rows: VisitorLog[] = ((data as any) ?? []);
-    const userIds = Array.from(new Set(rows.map(r => r.user_id).filter(Boolean))) as string[];
-    if (userIds.length) {
+    // Fetch ALL rows (unlimited) using pagination — Supabase caps single request at 1000.
+    const all: any[] = [];
+    const pageSize = 1000;
+    for (let from = 0; ; from += pageSize) {
+      const { data, error } = await supabase
+        .from("visitor_logs" as any)
+        .select("*")
+        .order("created_at", { ascending: false })
+        .range(from, from + pageSize - 1);
+      if (error || !data || data.length === 0) break;
+      all.push(...data);
+      if (data.length < pageSize) break;
+    }
+    const rows: VisitorLog[] = all as any;
+    // Backfill user_name from profiles for older logs missing user_name
+    const missingIds = Array.from(new Set(rows.filter(r => r.user_id && !r.user_name).map(r => r.user_id))) as string[];
+    if (missingIds.length) {
       const { data: profs } = await supabase
         .from("profiles")
-        .select("user_id, display_name")
-        .in("user_id", userIds);
-      const map = new Map((profs ?? []).map((p: any) => [p.user_id, p.display_name]));
-      rows.forEach(r => { if (r.user_id) r.user_name = map.get(r.user_id) ?? null; });
+        .select("user_id, display_name, phone")
+        .in("user_id", missingIds);
+      const map = new Map((profs ?? []).map((p: any) => [p.user_id, p]));
+      rows.forEach(r => {
+        if (r.user_id && !r.user_name) {
+          const p: any = map.get(r.user_id);
+          if (p) {
+            r.user_name = p.display_name ?? null;
+            (r as any).user_phone = (r as any).user_phone ?? p.phone ?? null;
+          }
+        }
+      });
     }
     setLogs(rows);
     setLoading(false);
   };
+
 
 
   useEffect(() => { load(); }, []);

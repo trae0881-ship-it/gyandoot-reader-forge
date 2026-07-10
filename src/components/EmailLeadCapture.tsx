@@ -63,8 +63,6 @@ export default function EmailLeadCapture() {
     if (user) return;
     if (!isAllowedRoute) return;
     if (shownRecently()) return;
-    // Skip on admin routes
-    if (window.location.pathname.startsWith("/admin")) return;
 
     let fired = false;
     const fire = () => {

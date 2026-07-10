@@ -197,21 +197,12 @@ const AdminVisitors = () => {
         </div>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-4">
-        <Card className="p-4"><div className="text-xs text-muted-foreground">Total Visits</div><div className="text-2xl font-bold">{stats.total}</div></Card>
-        <Card className="p-4"><div className="text-xs text-muted-foreground">Countries</div><div className="text-2xl font-bold">{stats.countries}</div></Card>
-        <Card className="p-4"><div className="text-xs text-muted-foreground">Mobile Visits</div><div className="text-2xl font-bold">{stats.mobile}</div></Card>
-        <Card className="p-4"><div className="text-xs text-muted-foreground">Direct (no referrer)</div><div className="text-2xl font-bold">{stats.direct}</div></Card>
-      </div>
-
-      <Input placeholder="Search country, city, IP, browser, path..." value={q} onChange={(e) => setQ(e.target.value)} />
-
-      <Card className="p-4">
+      <Card className="p-4 border-primary/40">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold">Filters</h3>
           <Button variant="ghost" size="sm" onClick={clearFilters}>Clear all</Button>
         </div>
-        <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           <div>
             <label className="text-xs text-muted-foreground">Date from</label>
             <Input type="date" value={fDateFrom} onChange={(e) => setFDateFrom(e.target.value)} />
@@ -268,9 +259,21 @@ const AdminVisitors = () => {
             <label className="text-xs text-muted-foreground">Referrer (host) — use __direct__ for none</label>
             <Input placeholder="google.com" value={fReferrer} onChange={(e) => setFReferrer(e.target.value)} />
           </div>
+          <div>
+            <label className="text-xs text-muted-foreground">Search</label>
+            <Input placeholder="country, city, IP, email..." value={q} onChange={(e) => setQ(e.target.value)} />
+          </div>
         </div>
         <p className="text-xs text-muted-foreground mt-3">Showing {filtered.length} of {logs.length} visits</p>
       </Card>
+
+      <div className="grid gap-3 md:grid-cols-4">
+        <Card className="p-4"><div className="text-xs text-muted-foreground">Total Visits</div><div className="text-2xl font-bold">{stats.total}</div></Card>
+        <Card className="p-4"><div className="text-xs text-muted-foreground">Countries</div><div className="text-2xl font-bold">{stats.countries}</div></Card>
+        <Card className="p-4"><div className="text-xs text-muted-foreground">Mobile Visits</div><div className="text-2xl font-bold">{stats.mobile}</div></Card>
+        <Card className="p-4"><div className="text-xs text-muted-foreground">Direct (no referrer)</div><div className="text-2xl font-bold">{stats.direct}</div></Card>
+      </div>
+
 
 
       <Card className="overflow-hidden">

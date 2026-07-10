@@ -186,9 +186,16 @@ const AdminVisitors = () => {
                   <td className="p-3">
                     <div className="font-mono text-xs">{l.ip_address ?? "—"}</div>
                     <div className="text-xs text-muted-foreground truncate max-w-[180px]">{l.isp ?? ""}</div>
-                    {l.user_name || l.user_id ? (
-                      <div className="text-xs text-primary mt-1 truncate max-w-[180px] flex items-center gap-1"><User className="h-3 w-3" />{l.user_name ?? l.user_id?.slice(0,8)}</div>
+                    {(l.user_name || l.user_email || l.user_phone || l.user_id) ? (
+                      <div className="mt-1 space-y-0.5">
+                        <div className="text-xs text-primary truncate max-w-[200px] flex items-center gap-1">
+                          <User className="h-3 w-3 shrink-0" />{l.user_name ?? l.user_id?.slice(0,8) ?? "—"}
+                        </div>
+                        {l.user_email && <div className="text-xs text-muted-foreground truncate max-w-[200px]">{l.user_email}</div>}
+                        {l.user_phone && <div className="text-xs text-muted-foreground">{l.user_phone}</div>}
+                      </div>
                     ) : null}
+
 
 
                   </td>

@@ -21,6 +21,7 @@ import {
 } from "recharts";
 import { format, subDays, startOfDay, differenceInDays, eachDayOfInterval } from "date-fns";
 import DbStorageCard from "@/components/admin/DbStorageCard";
+import StorageDetailsPanel from "@/components/admin/StorageDetailsPanel";
 
 
 interface DateRange { from: Date; to: Date; label: string; }
@@ -458,7 +459,12 @@ const AdminDashboard = () => {
           <TabsTrigger value="business">Business</TabsTrigger>
           <TabsTrigger value="content">Content & Readers</TabsTrigger>
           <TabsTrigger value="seo">SEO</TabsTrigger>
+          <TabsTrigger value="storage">Space & Storage</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="storage" className="mt-6">
+          <StorageDetailsPanel />
+        </TabsContent>
 
         <TabsContent value="business" className="space-y-6 mt-6">
           <div className="grid gap-6 lg:grid-cols-2">

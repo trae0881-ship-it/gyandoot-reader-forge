@@ -33,10 +33,12 @@ type UserHistory = {
 const AdminUsers = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { perms, isAdmin } = useAuth();
   const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
   const [confirmDisableUser, setConfirmDisableUser] = useState<UserRow | null>(null);
+  const [rolesUser, setRolesUser] = useState<UserRow | null>(null);
 
-  const { data, isLoading } = useQuery({
+  const canManageRoles = isAdmin || perms.users;
     queryKey: ["admin-users"],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();

@@ -29,13 +29,13 @@ export default function GuaranteeSection() {
       <div className="container max-w-5xl">
         <div className="text-center mb-10">
           <span className="inline-block rounded-full bg-secondary/20 px-3 py-1 text-xs font-semibold text-secondary uppercase tracking-wider">
-            हमारा वादा
+            Our promise
           </span>
           <h2 className="mt-3 font-serif text-2xl md:text-3xl font-bold">
-            <span className="text-primary">100% जोखिम-रहित</span> खरीदारी
+            <span className="text-primary">100% risk-free</span> shopping
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            हम तब तक खुश नहीं, जब तक आप खुश नहीं।
+            We're not happy until you are.
           </p>
         </div>
 

@@ -59,9 +59,9 @@ const RecentPurchasesToast = () => {
         </div>
         <div className="text-xs leading-snug text-foreground">
           <p>
-            <strong>{item.name}</strong> <span className="text-muted-foreground">({item.city})</span> ने
+            <strong>{item.name}</strong> <span className="text-muted-foreground">({item.city})</span>
           </p>
-          <p className="text-foreground/90">"{item.book}" unlock किया</p>
+          <p className="text-foreground/90">unlocked "{item.book}"</p>
           <p className="text-[10px] text-muted-foreground mt-0.5">✓ Verified · {item.time}</p>
         </div>
         <button

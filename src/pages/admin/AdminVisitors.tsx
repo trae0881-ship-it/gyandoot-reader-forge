@@ -165,6 +165,10 @@ const AdminVisitors = () => {
                   <td className="p-3">
                     <div className="font-mono text-xs">{l.ip_address ?? "—"}</div>
                     <div className="text-xs text-muted-foreground truncate max-w-[180px]">{l.isp ?? ""}</div>
+                    {l.user_name || l.user_id ? (
+                      <div className="text-xs text-primary mt-1 truncate max-w-[180px]">👤 {l.user_name ?? l.user_id?.slice(0,8)}</div>
+                    ) : null}
+
                   </td>
                   <td className="p-3">
                     <div className="flex items-center gap-1"><DeviceIcon type={l.device_type} /> <span>{l.device_type ?? "—"}</span></div>

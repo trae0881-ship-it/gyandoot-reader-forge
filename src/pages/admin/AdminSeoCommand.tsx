@@ -125,7 +125,7 @@ const AdminSeoCommand = () => {
         <StatCard icon={Target} label="Avg Position" value={avgPos ? avgPos.toFixed(1) : "—"} sub={`${published.length} published · ${drafts.length} drafts`} />
       </div>
 
-      <SeoFlowChart />
+      <SeoFlowChart runLog={runLog} posts={posts} busy={busy} onRunDaily={runDaily} />
 
       <Tabs defaultValue="upcoming">
         <TabsList>

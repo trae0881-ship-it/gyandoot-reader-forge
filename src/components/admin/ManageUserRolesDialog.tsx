@@ -24,11 +24,12 @@ const ASSIGNABLE_ROLES: { role: AdminRole; label: string; description: string; a
 ];
 
 const ManageUserRolesDialog = ({ userId, userLabel, open, onOpenChange }: Props) => {
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const [current, setCurrent] = useState<Set<AdminRole>>(new Set());
   const [selected, setSelected] = useState<Set<AdminRole>>(new Set());
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const isSelf = !!user && !!userId && user.id === userId;
 
   useEffect(() => {
     if (!open || !userId) return;

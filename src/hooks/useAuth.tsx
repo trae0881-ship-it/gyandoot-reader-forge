@@ -1,22 +1,55 @@
-import { useEffect, useState, createContext, useContext } from "react";
+import { useEffect, useState, createContext, useContext, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
+
+export type AdminRole =
+  | "admin"
+  | "books_manager"
+  | "seo_manager"
+  | "payments_manager"
+  | "users_manager"
+  | "support";
+
+export type AdminArea = "books" | "seo" | "payments" | "users";
+
+export interface AdminPermissions {
+  isSuperAdmin: boolean;
+  hasAdminAccess: boolean;
+  books: boolean;
+  seo: boolean;
+  payments: boolean;
+  users: boolean;
+}
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
   isAdmin: boolean;
+  roles: AdminRole[];
+  perms: AdminPermissions;
   signOut: () => Promise<void>;
 }
+
+const emptyPerms: AdminPermissions = {
+  isSuperAdmin: false,
+  hasAdminAccess: false,
+  books: false,
+  seo: false,
+  payments: false,
+  users: false,
+};
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   session: null,
   loading: true,
   isAdmin: false,
+  roles: [],
+  perms: emptyPerms,
   signOut: async () => {},
 });
+
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);

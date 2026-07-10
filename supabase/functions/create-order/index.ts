@@ -70,10 +70,12 @@ Deno.serve(async (req) => {
       if (coupon_id) {
         const { data: coupon } = await supabase
           .from("coupons")
-          .select("id, discount_type, discount_value, min_order_amount, max_uses, used_count, is_active, expires_at")
+          .select("id, discount_type, discount_value, min_order_amount, max_uses, used_count, is_active, expires_at, repurchase_only")
           .eq("id", coupon_id)
           .eq("is_active", true)
           .single();
+
+
 
         if (coupon) {
           const now = new Date();

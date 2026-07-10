@@ -1336,6 +1336,75 @@ export type Database = {
         }
         Relationships: []
       }
+      visitor_logs: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          country_code: string | null
+          created_at: string
+          device_type: string | null
+          id: string
+          ip_address: string | null
+          isp: string | null
+          landing_path: string | null
+          language: string | null
+          latitude: number | null
+          longitude: number | null
+          os: string | null
+          referrer: string | null
+          region: string | null
+          screen: string | null
+          timezone: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          country_code?: string | null
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          ip_address?: string | null
+          isp?: string | null
+          landing_path?: string | null
+          language?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          os?: string | null
+          referrer?: string | null
+          region?: string | null
+          screen?: string | null
+          timezone?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          country_code?: string | null
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          ip_address?: string | null
+          isp?: string | null
+          landing_path?: string | null
+          language?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          os?: string | null
+          referrer?: string | null
+          region?: string | null
+          screen?: string | null
+          timezone?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

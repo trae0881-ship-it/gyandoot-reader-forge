@@ -4,12 +4,14 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, MapPin, Monitor, Smartphone, Tablet, ExternalLink, Download } from "lucide-react";
+import { RefreshCw, MapPin, Monitor, Smartphone, Tablet, ExternalLink, Download, User } from "lucide-react";
 
 interface VisitorLog {
   id: string;
   user_id: string | null;
+  user_name?: string | null;
   ip_address: string | null;
+
   country: string | null;
   country_code: string | null;
   region: string | null;
@@ -53,10 +55,21 @@ const AdminVisitors = () => {
       .from("visitor_logs" as any)
       .select("*")
       .order("created_at", { ascending: false })
-      .limit(500);
-    setLogs((data as any) ?? []);
+      .limit(5000);
+    const rows: VisitorLog[] = ((data as any) ?? []);
+    const userIds = Array.from(new Set(rows.map(r => r.user_id).filter(Boolean))) as string[];
+    if (userIds.length) {
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("user_id, display_name")
+        .in("user_id", userIds);
+      const map = new Map((profs ?? []).map((p: any) => [p.user_id, p.display_name]));
+      rows.forEach(r => { if (r.user_id) r.user_name = map.get(r.user_id) ?? null; });
+    }
+    setLogs(rows);
     setLoading(false);
   };
+
 
   useEffect(() => { load(); }, []);
 
@@ -152,6 +165,11 @@ const AdminVisitors = () => {
                   <td className="p-3">
                     <div className="font-mono text-xs">{l.ip_address ?? "—"}</div>
                     <div className="text-xs text-muted-foreground truncate max-w-[180px]">{l.isp ?? ""}</div>
+                    {l.user_name || l.user_id ? (
+                      <div className="text-xs text-primary mt-1 truncate max-w-[180px] flex items-center gap-1"><User className="h-3 w-3" />{l.user_name ?? l.user_id?.slice(0,8)}</div>
+                    ) : null}
+
+
                   </td>
                   <td className="p-3">
                     <div className="flex items-center gap-1"><DeviceIcon type={l.device_type} /> <span>{l.device_type ?? "—"}</span></div>

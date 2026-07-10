@@ -190,8 +190,9 @@ const AdminIdentifiedVisitors = () => {
             </thead>
             <tbody>
               {filtered.map(g => (
-                <>
-                  <tr key={g.user_id} className="border-t hover:bg-muted/30">
+                <Fragment key={g.user_id}>
+                  <tr className="border-t hover:bg-muted/30">
+
                     <td className="p-3">
                       <div className="font-medium flex items-center gap-1"><User className="h-3 w-3" />{g.name ?? "—"}</div>
                       <div className="text-xs text-muted-foreground font-mono">{g.user_id.slice(0, 8)}…</div>

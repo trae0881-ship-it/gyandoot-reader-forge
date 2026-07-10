@@ -30,6 +30,7 @@ type Coupon = {
   is_active: boolean;
   expires_at: string | null;
   created_at: string;
+  repurchase_only?: boolean;
   restricted_books?: Book[];
 };
 
@@ -42,7 +43,9 @@ const defaultForm = {
   min_order_amount: "",
   is_active: true,
   expires_at: "",
+  repurchase_only: false,
 };
+
 
 const defaultBulkForm = {
   prefix: "",

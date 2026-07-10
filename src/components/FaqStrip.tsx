@@ -4,24 +4,24 @@ import { ChevronDown, HelpCircle } from "lucide-react";
 
 const faqs = [
   {
-    q: "एक बार लिया — फिर हमेशा मेरा?",
-    a: "हाँ। जो ग्रंथ आपके account में जुड़ गया, वो जीवन-भर रहेगा। न किराया, न renewal। लेखक के आगे के सुधार भी बिना पैसे मिलते रहेंगे।",
+    q: "Buy once — mine forever?",
+    a: "Yes. Any scripture added to your account stays for life. No rentals, no renewals. Future author updates come free too.",
   },
   {
-    q: "फ़ोन, tablet, laptop — तीनों पर चलेगा?",
-    a: "एक ही login से हर device पर। पढ़ाई कहाँ छूटी थी, यह भी अपने-आप याद रहता है — अगला पन्ना वहीं से खुलेगा।",
+    q: "Works on phone, tablet and laptop?",
+    a: "One login across every device. Your reading position syncs automatically — pick up right where you left off.",
   },
   {
-    q: "फ़ाइल डाउनलोड क्यों नहीं मिलती?",
-    a: "क्योंकि उसमें पाठक का नुक़सान ज़्यादा है — फ़ोन खोया तो सब गया, storage भरा तो झंझट। हमारे यहाँ login ही आपकी pothi है, कहीं खोने का सवाल नहीं।",
+    q: "Why no file download?",
+    a: "Because it hurts readers more than it helps — lose the phone, lose everything; storage fills up fast. Here, your login is your library — nothing to misplace.",
   },
   {
-    q: "Payment सुरक्षित है क्या?",
-    a: "पूरी तरह। Razorpay और PayPal — दोनों bank-स्तर की सुरक्षा वाले हैं। आपके card की जानकारी कभी हमारे server पर नहीं आती।",
+    q: "Are payments secure?",
+    a: "Completely. Razorpay and PayPal both use bank-grade security. Your card details never touch our servers.",
   },
   {
-    q: "अगर पसंद न आया?",
-    a: "7 दिन के भीतर एक message — बस इतना काफ़ी है। पूरा पैसा 24 घंटे में वापस, बिना कोई सवाल।",
+    q: "What if I don't like it?",
+    a: "One message within 7 days is enough. Full refund within 24 hours, no questions asked.",
   },
 ];
 

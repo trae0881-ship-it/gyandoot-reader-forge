@@ -53,6 +53,7 @@ const AdminAuthProviders = lazy(() => import("./pages/admin/AdminAuthProviders")
 const AdminEnquiries = lazy(() => import("./pages/admin/AdminEnquiries"));
 const AdminLSI = lazy(() => import("./pages/admin/AdminLSI"));
 const AdminAIProviders = lazy(() => import("./pages/admin/AdminAIProviders"));
+const AdminApiTester = lazy(() => import("./pages/admin/AdminApiTester"));
 
 // SEO content — sacred text hubs, Hindi meaning pages, meditation guides
 const BhagavadGitaHub = lazy(() => import("./pages/texts/BhagavadGita"));

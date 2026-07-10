@@ -826,6 +826,7 @@ export type Database = {
           canonical_url: string | null
           category: string | null
           content: string | null
+          content_score: number | null
           cover_url: string | null
           created_at: string
           excerpt: string | null
@@ -833,9 +834,15 @@ export type Database = {
           featured_image_alt: string | null
           featured_image_caption: string | null
           featured_image_title: string | null
+          gsc_clicks: number
+          gsc_ctr: number
+          gsc_impressions: number
+          gsc_position: number | null
           id: string
+          indexing_submitted_at: string | null
           internal_links: Json
           is_published: boolean
+          keyword_difficulty: number | null
           manually_edited: boolean
           meta_description: string | null
           meta_title: string | null
@@ -843,11 +850,14 @@ export type Database = {
           primary_keyword: string | null
           publish_status: string
           reading_time_min: number | null
+          report_sent_at: string | null
           scheduled_at: string | null
           schema_type: string
+          search_intent: string | null
           secondary_keywords: string[]
           slug: string
           social_caption: string | null
+          social_captions: Json
           social_excerpt: string | null
           tags: string[]
           timezone: string
@@ -860,6 +870,7 @@ export type Database = {
           canonical_url?: string | null
           category?: string | null
           content?: string | null
+          content_score?: number | null
           cover_url?: string | null
           created_at?: string
           excerpt?: string | null
@@ -867,9 +878,15 @@ export type Database = {
           featured_image_alt?: string | null
           featured_image_caption?: string | null
           featured_image_title?: string | null
+          gsc_clicks?: number
+          gsc_ctr?: number
+          gsc_impressions?: number
+          gsc_position?: number | null
           id?: string
+          indexing_submitted_at?: string | null
           internal_links?: Json
           is_published?: boolean
+          keyword_difficulty?: number | null
           manually_edited?: boolean
           meta_description?: string | null
           meta_title?: string | null
@@ -877,11 +894,14 @@ export type Database = {
           primary_keyword?: string | null
           publish_status?: string
           reading_time_min?: number | null
+          report_sent_at?: string | null
           scheduled_at?: string | null
           schema_type?: string
+          search_intent?: string | null
           secondary_keywords?: string[]
           slug: string
           social_caption?: string | null
+          social_captions?: Json
           social_excerpt?: string | null
           tags?: string[]
           timezone?: string
@@ -894,6 +914,7 @@ export type Database = {
           canonical_url?: string | null
           category?: string | null
           content?: string | null
+          content_score?: number | null
           cover_url?: string | null
           created_at?: string
           excerpt?: string | null
@@ -901,9 +922,15 @@ export type Database = {
           featured_image_alt?: string | null
           featured_image_caption?: string | null
           featured_image_title?: string | null
+          gsc_clicks?: number
+          gsc_ctr?: number
+          gsc_impressions?: number
+          gsc_position?: number | null
           id?: string
+          indexing_submitted_at?: string | null
           internal_links?: Json
           is_published?: boolean
+          keyword_difficulty?: number | null
           manually_edited?: boolean
           meta_description?: string | null
           meta_title?: string | null
@@ -911,11 +938,14 @@ export type Database = {
           primary_keyword?: string | null
           publish_status?: string
           reading_time_min?: number | null
+          report_sent_at?: string | null
           scheduled_at?: string | null
           schema_type?: string
+          search_intent?: string | null
           secondary_keywords?: string[]
           slug?: string
           social_caption?: string | null
+          social_captions?: Json
           social_excerpt?: string | null
           tags?: string[]
           timezone?: string
@@ -1212,6 +1242,68 @@ export type Database = {
           word_count?: number | null
         }
         Relationships: []
+      }
+      seo_keyword_queue: {
+        Row: {
+          competition_score: number | null
+          discovered_at: string
+          estimated_volume: number | null
+          id: string
+          keyword: string
+          keyword_difficulty: number | null
+          opportunity_score: number | null
+          post_id: string | null
+          reject_reason: string | null
+          search_intent: string | null
+          secondary_keywords: string[]
+          source: string | null
+          status: string
+          trend_score: number | null
+          used_at: string | null
+        }
+        Insert: {
+          competition_score?: number | null
+          discovered_at?: string
+          estimated_volume?: number | null
+          id?: string
+          keyword: string
+          keyword_difficulty?: number | null
+          opportunity_score?: number | null
+          post_id?: string | null
+          reject_reason?: string | null
+          search_intent?: string | null
+          secondary_keywords?: string[]
+          source?: string | null
+          status?: string
+          trend_score?: number | null
+          used_at?: string | null
+        }
+        Update: {
+          competition_score?: number | null
+          discovered_at?: string
+          estimated_volume?: number | null
+          id?: string
+          keyword?: string
+          keyword_difficulty?: number | null
+          opportunity_score?: number | null
+          post_id?: string | null
+          reject_reason?: string | null
+          search_intent?: string | null
+          secondary_keywords?: string[]
+          source?: string | null
+          status?: string
+          trend_score?: number | null
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seo_keyword_queue_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       seo_provider_health: {
         Row: {

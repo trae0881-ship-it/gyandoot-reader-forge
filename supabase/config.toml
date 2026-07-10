@@ -15,6 +15,18 @@ verify_jwt = false
 [functions.seo-agent-health-report]
 verify_jwt = false
 
+[functions.seo-auto-run]
+verify_jwt = false
+
+[functions.seo-post-publish-hook]
+verify_jwt = false
+
+[functions.seo-gsc-sync]
+verify_jwt = false
+
+[functions.seo-social-captions]
+verify_jwt = false
+
 [functions.ai-providers-manage]
 verify_jwt = false
 

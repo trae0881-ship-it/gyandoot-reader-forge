@@ -1,0 +1,123 @@
+// Post-publish hook: submit URL to GSC + send email report via Resend.
+// Called with { post_id } after a post is published.
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+
+const SITE = "https://gyandootnova.in";
+const GSC_SITE_URL = "https://gyandootnova.in/";
+const REPORT_TO = "amrendra8765@gmail.com";
+const GATEWAY = "https://connector-gateway.lovable.dev";
+
+async function submitToGsc(articleUrl: string) {
+  const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+  const gscKey = Deno.env.get("GOOGLE_SEARCH_CONSOLE_API_KEY");
+  if (!lovableKey || !gscKey) return { ok: false, error: "GSC connector not configured" };
+
+  const results: any = {};
+  // 1) Resubmit sitemap so Google notices the new URL.
+  try {
+    const sitemapEncoded = encodeURIComponent(`${SITE}/sitemap.xml`);
+    const siteEncoded = encodeURIComponent(GSC_SITE_URL);
+    const r = await fetch(
+      `${GATEWAY}/google_search_console/webmasters/v3/sites/${siteEncoded}/sitemaps/${sitemapEncoded}`,
+      { method: "PUT", headers: { Authorization: `Bearer ${lovableKey}`, "X-Connection-Api-Key": gscKey } },
+    );
+    results.sitemap = { status: r.status, ok: r.ok };
+  } catch (e: any) {
+    results.sitemap = { ok: false, error: String(e?.message || e) };
+  }
+  // 2) URL inspection so we get current index state.
+  try {
+    const r = await fetch(`${GATEWAY}/google_search_console/v1/urlInspection/index:inspect`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${lovableKey}`,
+        "X-Connection-Api-Key": gscKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ inspectionUrl: articleUrl, siteUrl: GSC_SITE_URL }),
+    });
+    const body = await r.json().catch(() => ({}));
+    results.inspection = { status: r.status, verdict: body?.inspectionResult?.indexStatusResult?.verdict, coverage: body?.inspectionResult?.indexStatusResult?.coverageState };
+  } catch (e: any) {
+    results.inspection = { ok: false, error: String(e?.message || e) };
+  }
+  return { ok: true, ...results };
+}
+
+async function sendReport(post: any, indexingResult: any) {
+  const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+  const resendKey = Deno.env.get("RESEND_API_KEY");
+  if (!resendKey || !lovableKey) return { ok: false, error: "Resend not configured" };
+
+  const url = `${SITE}/articles/${post.slug}`;
+  const html = `
+    <div style="font-family:system-ui,-apple-system,sans-serif;max-width:640px;margin:0 auto;padding:24px;color:#111">
+      <h1 style="color:#0f766e;margin:0 0 8px">New Post Published</h1>
+      <p style="color:#555;margin:0 0 24px">GyandootNova SEO Agent Report</p>
+
+      <table style="width:100%;border-collapse:collapse;font-size:14px">
+        <tr><td style="padding:8px;border-bottom:1px solid #eee"><b>Title</b></td><td style="padding:8px;border-bottom:1px solid #eee">${post.title || ""}</td></tr>
+        <tr><td style="padding:8px;border-bottom:1px solid #eee"><b>URL</b></td><td style="padding:8px;border-bottom:1px solid #eee"><a href="${url}">${url}</a></td></tr>
+        <tr><td style="padding:8px;border-bottom:1px solid #eee"><b>Primary Keyword</b></td><td style="padding:8px;border-bottom:1px solid #eee">${post.primary_keyword || "—"}</td></tr>
+        <tr><td style="padding:8px;border-bottom:1px solid #eee"><b>Secondary</b></td><td style="padding:8px;border-bottom:1px solid #eee">${(post.secondary_keywords || []).join(", ") || "—"}</td></tr>
+        <tr><td style="padding:8px;border-bottom:1px solid #eee"><b>Meta Title</b></td><td style="padding:8px;border-bottom:1px solid #eee">${post.meta_title || ""}</td></tr>
+        <tr><td style="padding:8px;border-bottom:1px solid #eee"><b>Meta Description</b></td><td style="padding:8px;border-bottom:1px solid #eee">${post.meta_description || ""}</td></tr>
+        <tr><td style="padding:8px;border-bottom:1px solid #eee"><b>Slug</b></td><td style="padding:8px;border-bottom:1px solid #eee">${post.slug}</td></tr>
+        <tr><td style="padding:8px;border-bottom:1px solid #eee"><b>Word count</b></td><td style="padding:8px;border-bottom:1px solid #eee">${post.word_count || 0} words · ${post.reading_time_min || 0} min read</td></tr>
+        <tr><td style="padding:8px;border-bottom:1px solid #eee"><b>Published at</b></td><td style="padding:8px;border-bottom:1px solid #eee">${post.scheduled_at || post.updated_at}</td></tr>
+        <tr><td style="padding:8px;border-bottom:1px solid #eee"><b>Index status</b></td><td style="padding:8px;border-bottom:1px solid #eee">${indexingResult?.inspection?.verdict || "unknown"} · ${indexingResult?.inspection?.coverage || ""}</td></tr>
+        <tr><td style="padding:8px"><b>GSC (28d)</b></td><td style="padding:8px">${post.gsc_clicks || 0} clicks · ${post.gsc_impressions || 0} impressions · pos ${post.gsc_position?.toFixed?.(1) || "—"}</td></tr>
+      </table>
+
+      <p style="margin-top:24px;color:#666;font-size:12px">Automated by GyandootNova SEO Command Center.</p>
+    </div>`;
+
+  const r = await fetch(`${GATEWAY}/resend/emails`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${lovableKey}`,
+      "X-Connection-Api-Key": resendKey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: "GyandootNova SEO <onboarding@resend.dev>",
+      to: [REPORT_TO],
+      subject: `[SEO Report] Published: ${post.title}`,
+      html,
+    }),
+  });
+  const body = await r.json().catch(() => ({}));
+  return { ok: r.ok, status: r.status, body };
+}
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  try {
+    const { post_id } = await req.json();
+    if (!post_id) throw new Error("post_id required");
+
+    const { data: post, error } = await supabase.from("posts").select("*").eq("id", post_id).maybeSingle();
+    if (error) throw error;
+    if (!post) throw new Error("post not found");
+
+    const url = `${SITE}/articles/${post.slug}`;
+    const indexing = await submitToGsc(url);
+    const report = await sendReport(post, indexing);
+
+    await supabase.from("posts").update({
+      indexing_submitted_at: indexing.ok ? new Date().toISOString() : null,
+      report_sent_at: report.ok ? new Date().toISOString() : null,
+    }).eq("id", post_id);
+
+    return new Response(JSON.stringify({ success: true, indexing, report }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (e: any) {
+    return new Response(JSON.stringify({ success: false, error: String(e?.message || e) }), {
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});

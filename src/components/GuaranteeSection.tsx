@@ -3,23 +3,23 @@ import { ShieldCheck, RefreshCw, Lock, HeadphonesIcon } from "lucide-react";
 const items = [
   {
     icon: ShieldCheck,
-    title: "7-दिन पैसा वापसी",
-    desc: "पसंद नहीं आया? बिना सवाल पूरा refund। आपका पैसा, आपका हक़।",
+    title: "7-day money back",
+    desc: "Didn't like it? Full refund, no questions asked. Your money, your right.",
   },
   {
     icon: Lock,
-    title: "सुरक्षित Payment",
-    desc: "Razorpay + PayPal • UPI, Card, Net Banking • 256-bit encrypted।",
+    title: "Secure Payments",
+    desc: "Razorpay + PayPal • UPI, Card, Net Banking • 256-bit encrypted.",
   },
   {
     icon: RefreshCw,
     title: "Lifetime Updates",
-    desc: "एक बार खरीदी, नए editions और updates हमेशा मुफ़्त।",
+    desc: "Buy once, get new editions and updates free forever.",
   },
   {
     icon: HeadphonesIcon,
-    title: "हिंदी में Support",
-    desc: "WhatsApp पर 24 घंटे में जवाब। कोई बोट नहीं, असली इंसान।",
+    title: "Human Support",
+    desc: "Reply within 24 hours on WhatsApp. No bots — real people.",
   },
 ];
 

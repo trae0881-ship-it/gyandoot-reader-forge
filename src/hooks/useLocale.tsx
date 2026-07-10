@@ -167,9 +167,9 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
           localStorage.setItem("gn_currency", map.currency);
         }
         if (!manualLanguage) {
-          setLanguageState(map.language);
-          localStorage.setItem("gn_language", map.language);
-          triggerGoogleTranslate(map.language);
+          setLanguageState(targetLang);
+          localStorage.setItem("gn_language", targetLang);
+          triggerGoogleTranslate(targetLang);
         }
       })
       .catch(() => {});

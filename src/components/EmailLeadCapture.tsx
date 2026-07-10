@@ -87,7 +87,12 @@ export default function EmailLeadCapture() {
       window.clearTimeout(t);
       window.removeEventListener("scroll", onScroll);
     };
-  }, []);
+  }, [user, isAllowedRoute]);
+
+  // Auto-close if user logs in or navigates away from allowed page
+  useEffect(() => {
+    if (user || !isAllowedRoute) setOpen(false);
+  }, [user, isAllowedRoute]);
 
   const submit = async () => {
     setErr(null);

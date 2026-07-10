@@ -55,26 +55,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [roles, setRoles] = useState<AdminRole[]>([]);
 
   useEffect(() => {
     let isMounted = true;
 
-    const getAdminStatus = async (userId: string) => {
+    const fetchRoles = async (userId: string): Promise<AdminRole[]> => {
       try {
-        const { data } = await supabase.rpc("has_role", { _user_id: userId, _role: "admin" });
-        return !!data;
+        const { data } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userId);
+        return ((data ?? []) as { role: AdminRole }[]).map((r) => r.role);
       } catch {
-        return false;
+        return [];
       }
     };
 
     const syncAuthState = async (nextSession: Session | null, isInitial = false) => {
       if (!isMounted) return;
-      // Only show full-page loading on the very first hydration.
-      // Subsequent auth events (TOKEN_REFRESHED, SIGNED_IN on tab refocus, etc.)
-      // must NOT flip `loading` back to true — that would unmount the current
-      // route and wipe local form state (e.g. half-written blog posts).
       if (isInitial) setLoading(true);
 
       const nextUser = nextSession?.user ?? null;
@@ -83,7 +82,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (!isMounted) return;
         setSession(null);
         setUser(null);
-        setIsAdmin(false);
+        setRoles([]);
         setLoading(false);
         return;
       }
@@ -94,7 +93,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (!isMounted) return;
         setSession(null);
         setUser(null);
-        setIsAdmin(false);
+        setRoles([]);
         setLoading(false);
         return;
       }
@@ -103,11 +102,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(nextSession);
       setUser(nextUser);
 
-      // Re-query admin status only on initial load or when user actually changes.
       if (isInitial || prevUserId !== nextUser.id) {
-        const admin = await getAdminStatus(nextUser.id);
+        const nextRoles = await fetchRoles(nextUser.id);
         if (!isMounted) return;
-        setIsAdmin(admin);
+        setRoles(nextRoles);
       }
 
       setLoading(false);
@@ -133,11 +131,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     await supabase.auth.signOut();
   };
 
+  const { isAdmin, perms } = useMemo(() => {
+    const isSuper = roles.includes("admin");
+    const has = (r: AdminRole) => isSuper || roles.includes(r);
+    const p: AdminPermissions = {
+      isSuperAdmin: isSuper,
+      hasAdminAccess: roles.some((r) =>
+        ["admin", "books_manager", "seo_manager", "payments_manager", "users_manager", "support"].includes(r),
+      ),
+      books: has("books_manager"),
+      seo: has("seo_manager"),
+      payments: has("payments_manager"),
+      users: has("users_manager"),
+    };
+    return { isAdmin: isSuper, perms: p };
+  }, [roles]);
+
   return (
-    <AuthContext.Provider value={{ user, session, loading, isAdmin, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, isAdmin, roles, perms, signOut }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => useContext(AuthContext);
+

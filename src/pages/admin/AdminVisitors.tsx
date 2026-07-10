@@ -63,7 +63,7 @@ const AdminVisitors = () => {
   const [fReferrer, setFReferrer] = useState("");
 
   const [loading, setLoading] = useState(true);
-  const [q, setQ] = useState("");
+
 
   const load = async () => {
     setLoading(true);

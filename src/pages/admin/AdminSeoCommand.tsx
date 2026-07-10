@@ -59,6 +59,7 @@ const AdminSeoCommand = () => {
 
   useEffect(() => { load(); }, []);
 
+  // Synchronous call — use for fast functions only (< ~30s).
   const call = async (fn: string, body: any = {}, label = fn) => {
     setBusy(label);
     try {
@@ -71,10 +72,28 @@ const AdminSeoCommand = () => {
     } finally { setBusy(null); }
   };
 
+  // Fire-and-forget for long-running jobs. Returns immediately; progress
+  // appears in Daily Runs / Agent Logs tabs as the job proceeds.
+  const dispatch = async (fn: string, body: any = {}, label = fn) => {
+    setBusy(label);
+    try {
+      const { data, error } = await supabase.functions.invoke("seo-dispatch", {
+        body: { fn, body },
+      });
+      if (error) throw error;
+      toast.success(`${label} started in background — refresh to see progress`);
+      // Poll once after a short delay so freshly-created log rows appear.
+      setTimeout(() => { load().catch(() => {}); }, 4000);
+      return data;
+    } catch (e: any) {
+      toast.error(`${label} failed to start: ${e?.message || e}`);
+    } finally { setBusy(null); }
+  };
+
   const syncGsc = async () => { const r = await call("seo-gsc-sync", {}, "GSC sync"); if (r) { setGsc(r); await load(); } };
-  const runDaily = async () => { await call("seo-daily-publisher", {}, "Daily publisher"); await load(); };
-  const refreshKb = async () => { await call("seo-book-kb-refresh", { force: true }, "Book KB refresh"); await load(); };
-  const topUp = async () => { await call("seo-queue-topup", {}, "Queue top-up"); await load(); };
+  const runDaily = async () => { await dispatch("seo-daily-publisher", {}, "Daily publisher"); };
+  const refreshKb = async () => { await dispatch("seo-book-kb-refresh", { force: true }, "Book KB refresh"); };
+  const topUp = async () => { await dispatch("seo-queue-topup", {}, "Queue top-up"); };
   const publishHook = async (id: string) => { await call("seo-post-publish-hook", { post_id: id }, "Publish hook"); await load(); };
   const genSocial = async (id: string) => { await call("seo-social-captions", { post_id: id }, "Social captions"); await load(); };
 

@@ -22,6 +22,7 @@ import {
 import { format, subDays, startOfDay, differenceInDays, eachDayOfInterval } from "date-fns";
 import DbStorageCard from "@/components/admin/DbStorageCard";
 import StorageDetailsPanel from "@/components/admin/StorageDetailsPanel";
+import TableDownloadsPanel from "@/components/admin/TableDownloadsPanel";
 
 
 interface DateRange { from: Date; to: Date; label: string; }

@@ -22,6 +22,7 @@ const navItems = [
   { to: "/admin/ai-providers", label: "AI Providers", icon: KeyRound },
   { to: "/admin/api-tester", label: "API Tester", icon: FlaskConical },
   { to: "/admin/visitors", label: "Visitors", icon: Globe2 },
+  { to: "/admin/identified-visitors", label: "Identified Visitors", icon: UserCheck },
   { to: "/admin/settings", label: "Settings", icon: Settings },
 ];
 

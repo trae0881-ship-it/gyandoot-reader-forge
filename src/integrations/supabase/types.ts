@@ -1888,6 +1888,11 @@ export type Database = {
           status: string
         }[]
       }
+      has_admin_access: { Args: { _user_id: string }; Returns: boolean }
+      has_admin_area: {
+        Args: { _area: string; _user_id: string }
+        Returns: boolean
+      }
       has_purchased_book: {
         Args: { _book_id: string; _user_id: string }
         Returns: boolean

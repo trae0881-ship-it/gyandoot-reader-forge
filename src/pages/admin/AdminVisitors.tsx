@@ -49,6 +49,19 @@ const flag = (cc: string | null) => {
 
 const AdminVisitors = () => {
   const [logs, setLogs] = useState<VisitorLog[]>([]);
+  const [q, setQ] = useState("");
+  const [fDateFrom, setFDateFrom] = useState("");
+  const [fDateTo, setFDateTo] = useState("");
+  const [fTimeFrom, setFTimeFrom] = useState("");
+  const [fTimeTo, setFTimeTo] = useState("");
+  const [fCountry, setFCountry] = useState("");
+  const [fLocation, setFLocation] = useState("");
+  const [fDevice, setFDevice] = useState("");
+  const [fBrowser, setFBrowser] = useState("");
+  const [fOs, setFOs] = useState("");
+  const [fLanding, setFLanding] = useState("");
+  const [fReferrer, setFReferrer] = useState("");
+
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
 

@@ -36,6 +36,25 @@ const AdminLayout = () => {
     }
   }, [user, isAdmin, loading, navigate]);
 
+  // Force Google Translate OFF everywhere admin renders — including portals
+  // (Radix Dialog / Select / Toast) that mount on <body> outside our wrapper.
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtmlT = html.getAttribute("translate");
+    const prevBodyT = body.getAttribute("translate");
+    html.classList.add("notranslate");
+    body.classList.add("notranslate");
+    html.setAttribute("translate", "no");
+    body.setAttribute("translate", "no");
+    return () => {
+      html.classList.remove("notranslate");
+      body.classList.remove("notranslate");
+      if (prevHtmlT == null) html.removeAttribute("translate"); else html.setAttribute("translate", prevHtmlT);
+      if (prevBodyT == null) body.removeAttribute("translate"); else body.setAttribute("translate", prevBodyT);
+    };
+  }, []);
+
   if (loading) {
     return <div className="flex min-h-screen items-center justify-center">Loading...</div>;
   }

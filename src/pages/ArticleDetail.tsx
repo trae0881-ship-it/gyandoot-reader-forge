@@ -143,13 +143,40 @@ const ArticleDetail = () => {
     },
   } : undefined;
 
+  const faqJsonLd = post ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": `${post.title} किस बारे में है?`,
+        "acceptedAnswer": { "@type": "Answer", "text": (post.excerpt || articleDesc).slice(0, 500) },
+      },
+      {
+        "@type": "Question",
+        "name": "क्या यह लेख निःशुल्क है?",
+        "acceptedAnswer": { "@type": "Answer", "text": "हाँ, GyandootNova पर सभी आध्यात्मिक लेख निःशुल्क पढ़ सकते हैं।" },
+      },
+      {
+        "@type": "Question",
+        "name": "और आध्यात्मिक लेख कहाँ मिलेंगे?",
+        "acceptedAnswer": { "@type": "Answer", "text": "हमारे Articles सेक्शन में वेद, उपनिषद, गीता और आधुनिक आध्यात्मिक विषयों पर सैकड़ों लेख उपलब्ध हैं।" },
+      },
+      {
+        "@type": "Question",
+        "name": "क्या मैं इस लेख को साझा कर सकता हूँ?",
+        "acceptedAnswer": { "@type": "Answer", "text": "बिल्कुल — WhatsApp, Facebook, X या LinkedIn पर share बटन से आप इसे तुरंत साझा कर सकते हैं।" },
+      },
+    ],
+  } : undefined;
+
   useSEO({
     title: post ? (post.meta_title || post.title) : "Loading Article... | GyandootNova",
     description: articleDesc,
     canonical: post ? `/articles/${post.slug}` : undefined,
     ogImage: post?.cover_url ?? undefined,
     ogType: "article",
-    jsonLd: post ? [articleJsonLd, breadcrumbJsonLd] : undefined,
+    jsonLd: post ? [articleJsonLd, breadcrumbJsonLd, faqJsonLd] : undefined,
   });
 
   if (isLoading) {

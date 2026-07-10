@@ -301,7 +301,9 @@ const AdminCoupons = () => {
       min_order_amount: coupon.min_order_amount ? String(coupon.min_order_amount) : "",
       is_active: coupon.is_active,
       expires_at: coupon.expires_at ? coupon.expires_at.slice(0, 16) : "",
+      repurchase_only: !!coupon.repurchase_only,
     });
+
     setSelectedBookIds((coupon.restricted_books ?? []).map((b) => b.id));
     setDialogOpen(true);
   };

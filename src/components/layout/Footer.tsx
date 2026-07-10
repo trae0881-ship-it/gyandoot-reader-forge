@@ -95,35 +95,35 @@ const Footer = () => {
 
           {/* Explore */}
           <div>
-            <h3 className="font-serif font-semibold mb-4 text-secondary">मुख्य पन्ने</h3>
+            <h3 className="font-serif font-semibold mb-4 text-secondary">Explore</h3>
             <nav aria-label="Footer explore links" className="flex flex-col gap-2.5 text-sm text-background/70">
-              <Link to="/" className="hover:text-secondary transition-colors">मुख्य पृष्ठ</Link>
-              <Link to="/about" className="hover:text-secondary transition-colors">हमारी कहानी</Link>
-              <Link to="/books" className="hover:text-secondary transition-colors">ग्रंथ-भंडार</Link>
-              <Link to="/articles" className="hover:text-secondary transition-colors">लेख</Link>
-              <Link to="/services" className="hover:text-secondary transition-colors">सेवाएँ</Link>
-              <Link to="/portfolio" className="hover:text-secondary transition-colors">कार्य-सूची</Link>
-              <Link to="/testimonials" className="hover:text-secondary transition-colors">पाठकों की राय</Link>
+              <Link to="/" className="hover:text-secondary transition-colors">Home</Link>
+              <Link to="/about" className="hover:text-secondary transition-colors">Our Story</Link>
+              <Link to="/books" className="hover:text-secondary transition-colors">Books</Link>
+              <Link to="/articles" className="hover:text-secondary transition-colors">Articles</Link>
+              <Link to="/services" className="hover:text-secondary transition-colors">Services</Link>
+              <Link to="/portfolio" className="hover:text-secondary transition-colors">Portfolio</Link>
+              <Link to="/testimonials" className="hover:text-secondary transition-colors">Testimonials</Link>
             </nav>
 
           </div>
 
           {/* Support */}
           <div>
-            <h3 className="font-serif font-semibold mb-4 text-secondary">सहायता</h3>
+            <h3 className="font-serif font-semibold mb-4 text-secondary">Support</h3>
             <nav aria-label="Footer support links" className="flex flex-col gap-2.5 text-sm text-background/70">
-              <Link to="/contact" className="hover:text-secondary transition-colors">सम्पर्क</Link>
-              <Link to="/support-us" className="hover:text-secondary transition-colors">सहयोग दें</Link>
-              <Link to="/faq" className="hover:text-secondary transition-colors">सवाल-जवाब</Link>
-              <Link to="/support" className="hover:text-secondary transition-colors">सहायता केंद्र</Link>
-              <Link to="/careers" className="hover:text-secondary transition-colors">हमारे साथ जुड़िए</Link>
+              <Link to="/contact" className="hover:text-secondary transition-colors">Contact</Link>
+              <Link to="/support-us" className="hover:text-secondary transition-colors">Support Us</Link>
+              <Link to="/faq" className="hover:text-secondary transition-colors">FAQ</Link>
+              <Link to="/support" className="hover:text-secondary transition-colors">Help Center</Link>
+              <Link to="/careers" className="hover:text-secondary transition-colors">Careers</Link>
               <a
                 href="https://gyandootnova.in/sitemap.xml"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-secondary transition-colors"
               >
-                साइट-मानचित्र
+                Sitemap
               </a>
               {whatsappLink && (
                 <a
@@ -132,7 +132,7 @@ const Footer = () => {
                   rel="noopener noreferrer"
                   className="flex items-center gap-1.5 hover:text-secondary transition-colors"
                 >
-                  <MessageCircle className="h-3.5 w-3.5" /> WhatsApp पर लिखिए
+                  <MessageCircle className="h-3.5 w-3.5" /> Message on WhatsApp
                 </a>
               )}
             </nav>
@@ -141,12 +141,12 @@ const Footer = () => {
 
           {/* Legal */}
           <div>
-            <h3 className="font-serif font-semibold mb-4 text-secondary">नियम</h3>
+            <h3 className="font-serif font-semibold mb-4 text-secondary">Legal</h3>
             <nav aria-label="Footer legal links" className="flex flex-col gap-2.5 text-sm text-background/70">
-              <Link to="/privacy-policy" className="hover:text-secondary transition-colors">गोपनीयता नीति</Link>
-              <Link to="/terms-conditions" className="hover:text-secondary transition-colors">उपयोग की शर्तें</Link>
-              <Link to="/refund-policy" className="hover:text-secondary transition-colors">Refund व रद्दीकरण</Link>
-              <Link to="/shipping-policy" className="hover:text-secondary transition-colors">डिलीवरी</Link>
+              <Link to="/privacy-policy" className="hover:text-secondary transition-colors">Privacy Policy</Link>
+              <Link to="/terms-conditions" className="hover:text-secondary transition-colors">Terms & Conditions</Link>
+              <Link to="/refund-policy" className="hover:text-secondary transition-colors">Refund & Cancellation</Link>
+              <Link to="/shipping-policy" className="hover:text-secondary transition-colors">Shipping</Link>
             </nav>
           </div>
 

@@ -98,7 +98,7 @@ const AdminLayout = () => {
           <p className="text-xs text-muted-foreground mt-1">Admin Panel</p>
         </div>
         <nav className="space-y-1">
-          {navItems.map((item) => (
+          {visibleItems.map((item) => (
             <Link
               key={item.to}
               to={item.to}

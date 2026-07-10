@@ -55,10 +55,21 @@ const AdminVisitors = () => {
       .from("visitor_logs" as any)
       .select("*")
       .order("created_at", { ascending: false })
-      .limit(500);
-    setLogs((data as any) ?? []);
+      .limit(5000);
+    const rows: VisitorLog[] = ((data as any) ?? []);
+    const userIds = Array.from(new Set(rows.map(r => r.user_id).filter(Boolean))) as string[];
+    if (userIds.length) {
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("user_id, display_name")
+        .in("user_id", userIds);
+      const map = new Map((profs ?? []).map((p: any) => [p.user_id, p.display_name]));
+      rows.forEach(r => { if (r.user_id) r.user_name = map.get(r.user_id) ?? null; });
+    }
+    setLogs(rows);
     setLoading(false);
   };
+
 
   useEffect(() => { load(); }, []);
 

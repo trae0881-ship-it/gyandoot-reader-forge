@@ -22,6 +22,7 @@ import {
 import { format, subDays, startOfDay, differenceInDays, eachDayOfInterval } from "date-fns";
 import DbStorageCard from "@/components/admin/DbStorageCard";
 import StorageDetailsPanel from "@/components/admin/StorageDetailsPanel";
+import TableDownloadsPanel from "@/components/admin/TableDownloadsPanel";
 
 
 interface DateRange { from: Date; to: Date; label: string; }
@@ -460,10 +461,15 @@ const AdminDashboard = () => {
           <TabsTrigger value="content">Content & Readers</TabsTrigger>
           <TabsTrigger value="seo">SEO</TabsTrigger>
           <TabsTrigger value="storage">Space & Storage</TabsTrigger>
+          <TabsTrigger value="downloads">Table Downloads</TabsTrigger>
         </TabsList>
 
         <TabsContent value="storage" className="mt-6">
           <StorageDetailsPanel />
+        </TabsContent>
+
+        <TabsContent value="downloads" className="mt-6">
+          <TableDownloadsPanel />
         </TabsContent>
 
         <TabsContent value="business" className="space-y-6 mt-6">

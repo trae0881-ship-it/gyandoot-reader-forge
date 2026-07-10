@@ -142,7 +142,8 @@ Deno.serve(async (req) => {
 
     const url = `${SITE}/articles/${post.slug}`;
     const indexing = await submitToGsc(url);
-    const report = await sendReport(post, indexing);
+    const captions = await generateCaptions(post);
+    const report = await sendReport(post, indexing, captions);
 
     await supabase.from("posts").update({
       indexing_submitted_at: indexing.ok ? new Date().toISOString() : null,

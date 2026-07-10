@@ -99,7 +99,24 @@ Deno.serve(async (req) => {
             bookAllowed = (matchCount ?? 0) > 0;
           }
 
-          if (notExpired && hasUses && meetsMin && bookAllowed) {
+          // Enforce repurchase-only server-side: user must have at least one completed purchase
+          let repurchaseOk = true;
+          if ((coupon as any).repurchase_only && user?.id) {
+            const { count: priorCount } = await supabase
+              .from("purchases")
+              .select("id", { count: "exact", head: true })
+              .eq("user_id", user.id)
+              .eq("status", "completed");
+            repurchaseOk = (priorCount ?? 0) >= 1;
+            if (!repurchaseOk) {
+              return new Response(
+                JSON.stringify({ error: "This coupon is only valid for returning customers (requires a previous purchase)." }),
+                { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+              );
+            }
+          }
+
+          if (notExpired && hasUses && meetsMin && bookAllowed && repurchaseOk) {
             let discount = 0;
             if (coupon.discount_type === "percent") {
               discount = Math.round((verifiedAmount * coupon.discount_value / 100) * 100) / 100;
@@ -109,6 +126,7 @@ Deno.serve(async (req) => {
             verifiedAmount = Math.max(verifiedAmount - discount, 1);
           }
         }
+
       }
     }
 

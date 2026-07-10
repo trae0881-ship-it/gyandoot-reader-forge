@@ -35,8 +35,16 @@ const PreserveStyles = Extension.create({
         attributes: {
           fontSize: {
             default: null,
-            parseHTML: (el) => (el as HTMLElement).style.fontSize || null,
+            parseHTML: (el) => {
+              const e = el as HTMLElement;
+              return e.style.fontSize || e.getAttribute("size") || null;
+            },
             renderHTML: (attrs) => (attrs.fontSize ? { style: `font-size:${attrs.fontSize}` } : {}),
+          },
+          backgroundColor: {
+            default: null,
+            parseHTML: (el) => (el as HTMLElement).style.backgroundColor || null,
+            renderHTML: (attrs) => (attrs.backgroundColor ? { style: `background-color:${attrs.backgroundColor}` } : {}),
           },
         },
       },

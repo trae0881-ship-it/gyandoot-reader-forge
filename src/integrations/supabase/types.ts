@@ -633,6 +633,7 @@ export type Database = {
           is_active: boolean
           max_uses: number | null
           min_order_amount: number | null
+          repurchase_only: boolean
           updated_at: string
           used_count: number
         }
@@ -647,6 +648,7 @@ export type Database = {
           is_active?: boolean
           max_uses?: number | null
           min_order_amount?: number | null
+          repurchase_only?: boolean
           updated_at?: string
           used_count?: number
         }
@@ -661,6 +663,7 @@ export type Database = {
           is_active?: boolean
           max_uses?: number | null
           min_order_amount?: number | null
+          repurchase_only?: boolean
           updated_at?: string
           used_count?: number
         }

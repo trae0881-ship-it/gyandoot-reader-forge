@@ -69,7 +69,7 @@ const AdminLayout = () => {
   return (
     <div className="flex min-h-screen notranslate" translate="no">
       {/* Sidebar */}
-      <aside className="w-64 border-r bg-muted/30 p-4 hidden md:block">
+      <aside className="w-64 border-r bg-muted/30 p-4 hidden md:flex md:flex-col md:h-screen md:sticky md:top-0 md:overflow-y-auto">
         <div className="mb-6">
           <Link to="/" className="flex items-center gap-2">
             <BookOpen className="h-6 w-6 text-primary" />

@@ -28,13 +28,13 @@ export default function CompareSection() {
       <div className="container max-w-4xl">
         <div className="text-center mb-8">
           <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-wider">
-            फ़र्क समझिए
+            See the difference
           </span>
           <h2 className="mt-3 font-serif text-2xl md:text-3xl font-bold">
-            छपी हुई किताब, साधारण PDF, या <span className="text-primary">GyandootNova?</span>
+            Printed book, ordinary PDF, or <span className="text-primary">GyandootNova?</span>
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            एक ही नज़र में देखिए — सबसे smart विकल्प कौन सा है।
+            One quick look — see which option is the smartest.
           </p>
         </div>
 
@@ -42,12 +42,12 @@ export default function CompareSection() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/40">
-                <th className="text-left p-3 md:p-4 font-semibold">सुविधा</th>
+                <th className="text-left p-3 md:p-4 font-semibold">Feature</th>
                 <th className="p-3 md:p-4 font-serif font-bold text-primary text-center whitespace-nowrap">
                   GyandootNova
                 </th>
                 <th className="p-3 md:p-4 font-semibold text-muted-foreground text-center whitespace-nowrap">
-                  छपी किताब
+                  Printed Book
                 </th>
                 <th className="p-3 md:p-4 font-semibold text-muted-foreground text-center whitespace-nowrap">
                   PDF

@@ -180,6 +180,20 @@ const RichTextEditor = ({ value, onChange, placeholder = "Start writing…", min
     },
   });
 
+  /* Sync external `value` changes into the editor (e.g. when async-loading
+     an existing chapter's content after mount). Without this, the editor
+     stays showing the initial empty content and any save wipes the row. */
+  useEffect(() => {
+    if (!editor) return;
+    const current = editor.getHTML();
+    // TipTap serializes empty doc as "<p></p>"; treat that as equivalent to ""
+    const isEmpty = (s: string) => !s || s === "<p></p>";
+    if (value !== current && !(isEmpty(value) && isEmpty(current))) {
+      editor.commands.setContent(value || "", { emitUpdate: false });
+    }
+  }, [value, editor]);
+
+
   /* ─── Image upload to Supabase storage ─────────────────────────────── */
   const handleImageUpload = useCallback(async (file: File) => {
     if (!file) return;

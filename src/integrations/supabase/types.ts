@@ -1863,6 +1863,19 @@ export type Database = {
             Args: { _book_id?: string; _code: string; _order_amount: number }
             Returns: Json
           }
+      get_book_chapter_index: {
+        Args: { _book_id: string }
+        Returns: {
+          book_id: string
+          chapter_number: number
+          created_at: string
+          id: string
+          is_preview: boolean
+          slug: string
+          title: string
+          updated_at: string
+        }[]
+      }
       get_chapter_content: {
         Args: { _chapter_id: string }
         Returns: {

@@ -21,12 +21,17 @@ const PreserveStyles = Extension.create({
   addGlobalAttributes() {
     return [
       {
-        types: ["paragraph", "heading", "listItem", "blockquote", "tableCell", "tableHeader"],
+        types: ["paragraph", "heading", "listItem", "blockquote", "tableCell", "tableHeader", "tableRow", "table"],
         attributes: {
           style: {
             default: null,
             parseHTML: (el) => el.getAttribute("style"),
             renderHTML: (attrs) => (attrs.style ? { style: attrs.style } : {}),
+          },
+          align: {
+            default: null,
+            parseHTML: (el) => el.getAttribute("align"),
+            renderHTML: (attrs) => (attrs.align ? { align: attrs.align } : {}),
           },
         },
       },
@@ -41,10 +46,20 @@ const PreserveStyles = Extension.create({
             },
             renderHTML: (attrs) => (attrs.fontSize ? { style: `font-size:${attrs.fontSize}` } : {}),
           },
+          fontFamily: {
+            default: null,
+            parseHTML: (el) => (el as HTMLElement).style.fontFamily || null,
+            renderHTML: (attrs) => (attrs.fontFamily ? { style: `font-family:${attrs.fontFamily}` } : {}),
+          },
           backgroundColor: {
             default: null,
             parseHTML: (el) => (el as HTMLElement).style.backgroundColor || null,
             renderHTML: (attrs) => (attrs.backgroundColor ? { style: `background-color:${attrs.backgroundColor}` } : {}),
+          },
+          color: {
+            default: null,
+            parseHTML: (el) => (el as HTMLElement).style.color || null,
+            renderHTML: (attrs) => (attrs.color ? { style: `color:${attrs.color}` } : {}),
           },
         },
       },
@@ -56,26 +71,29 @@ const PreserveStyles = Extension.create({
 function cleanWordHtml(html: string): string {
   if (!html) return html;
   let out = html;
-  // Strip Word-specific tags/comments
+  // Strip Word-specific tags/comments/xml
   out = out.replace(/<!--[\s\S]*?-->/g, "");
   out = out.replace(/<\?xml[\s\S]*?\?>/g, "");
   out = out.replace(/<\/?(o:p|w:[^>]+|m:[^>]+|v:[^>]+)[^>]*>/gi, "");
   out = out.replace(/<style[\s\S]*?<\/style>/gi, "");
   out = out.replace(/<meta[^>]*>/gi, "");
   out = out.replace(/<link[^>]*>/gi, "");
-  // Remove mso-* inline style props
+  // Remove mso-* inline style props but KEEP font-family, font-size, colors etc
   out = out.replace(/style="([^"]*)"/gi, (_m, s) => {
     const cleaned = s
       .split(";")
       .map((p: string) => p.trim())
-      .filter((p: string) => p && !/^mso-/i.test(p) && !/^font-family:\s*"?Times New Roman/i.test(p))
+      .filter((p: string) => p && !/^mso-/i.test(p))
       .join(";");
     return cleaned ? `style="${cleaned}"` : "";
   });
-  // Remove empty class attrs (MsoNormal etc.)
+  // Remove Word class attrs (MsoNormal etc.) but keep other classes
   out = out.replace(/\sclass="Mso[^"]*"/gi, "");
+  // Convert Word's fake bullet paragraphs (·, o, §) into real bullet text — TipTap will keep them as paragraphs but at least the marker survives
+  // Better: leave them; users usually paste small snippets
   return out;
 }
+
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {

@@ -448,7 +448,10 @@ const AdminDashboard = () => {
         ))}
       </div>
 
+      <DbStorageCard />
+
       <Tabs defaultValue="business" className="w-full">
+
         <TabsList>
           <TabsTrigger value="business">Business</TabsTrigger>
           <TabsTrigger value="content">Content & Readers</TabsTrigger>

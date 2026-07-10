@@ -337,6 +337,59 @@ export type Database = {
           },
         ]
       }
+      book_knowledge: {
+        Row: {
+          author: string | null
+          book_id: string | null
+          concepts: string[] | null
+          created_at: string
+          entities: string[] | null
+          faqs: Json | null
+          id: string
+          keywords: string[] | null
+          summary: string | null
+          title: string | null
+          topics: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          author?: string | null
+          book_id?: string | null
+          concepts?: string[] | null
+          created_at?: string
+          entities?: string[] | null
+          faqs?: Json | null
+          id?: string
+          keywords?: string[] | null
+          summary?: string | null
+          title?: string | null
+          topics?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          author?: string | null
+          book_id?: string | null
+          concepts?: string[] | null
+          created_at?: string
+          entities?: string[] | null
+          faqs?: Json | null
+          id?: string
+          keywords?: string[] | null
+          summary?: string | null
+          title?: string | null
+          topics?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_knowledge_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: true
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookmarks: {
         Row: {
           book_id: string
@@ -646,6 +699,65 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_run_log: {
+        Row: {
+          error: string | null
+          finished_at: string | null
+          id: string
+          keyword: string | null
+          keyword_score: number | null
+          originality_score: number | null
+          post_id: string | null
+          readability_score: number | null
+          run_date: string
+          self_check: Json | null
+          seo_score: number | null
+          started_at: string
+          status: string
+          steps: Json | null
+        }
+        Insert: {
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          keyword?: string | null
+          keyword_score?: number | null
+          originality_score?: number | null
+          post_id?: string | null
+          readability_score?: number | null
+          run_date?: string
+          self_check?: Json | null
+          seo_score?: number | null
+          started_at?: string
+          status?: string
+          steps?: Json | null
+        }
+        Update: {
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          keyword?: string | null
+          keyword_score?: number | null
+          originality_score?: number | null
+          post_id?: string | null
+          readability_score?: number | null
+          run_date?: string
+          self_check?: Json | null
+          seo_score?: number | null
+          started_at?: string
+          status?: string
+          steps?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_run_log_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       donations: {
         Row: {
           amount: number
@@ -846,19 +958,24 @@ export type Database = {
           manually_edited: boolean
           meta_description: string | null
           meta_title: string | null
+          originality_score: number | null
           post_type: string
           primary_keyword: string | null
           publish_status: string
+          quality_passed: boolean | null
+          readability_score: number | null
           reading_time_min: number | null
           report_sent_at: string | null
           scheduled_at: string | null
           schema_type: string
           search_intent: string | null
           secondary_keywords: string[]
+          self_check: Json | null
           slug: string
           social_caption: string | null
           social_captions: Json
           social_excerpt: string | null
+          source_book_ids: string[] | null
           tags: string[]
           timezone: string
           title: string
@@ -890,19 +1007,24 @@ export type Database = {
           manually_edited?: boolean
           meta_description?: string | null
           meta_title?: string | null
+          originality_score?: number | null
           post_type?: string
           primary_keyword?: string | null
           publish_status?: string
+          quality_passed?: boolean | null
+          readability_score?: number | null
           reading_time_min?: number | null
           report_sent_at?: string | null
           scheduled_at?: string | null
           schema_type?: string
           search_intent?: string | null
           secondary_keywords?: string[]
+          self_check?: Json | null
           slug: string
           social_caption?: string | null
           social_captions?: Json
           social_excerpt?: string | null
+          source_book_ids?: string[] | null
           tags?: string[]
           timezone?: string
           title: string
@@ -934,19 +1056,24 @@ export type Database = {
           manually_edited?: boolean
           meta_description?: string | null
           meta_title?: string | null
+          originality_score?: number | null
           post_type?: string
           primary_keyword?: string | null
           publish_status?: string
+          quality_passed?: boolean | null
+          readability_score?: number | null
           reading_time_min?: number | null
           report_sent_at?: string | null
           scheduled_at?: string | null
           schema_type?: string
           search_intent?: string | null
           secondary_keywords?: string[]
+          self_check?: Json | null
           slug?: string
           social_caption?: string | null
           social_captions?: Json
           social_excerpt?: string | null
+          source_book_ids?: string[] | null
           tags?: string[]
           timezone?: string
           title?: string
@@ -1251,12 +1378,15 @@ export type Database = {
           id: string
           keyword: string
           keyword_difficulty: number | null
+          matched_book_ids: string[] | null
           opportunity_score: number | null
           post_id: string | null
           reject_reason: string | null
+          relevance_score: number | null
           search_intent: string | null
           secondary_keywords: string[]
           source: string | null
+          sources: Json | null
           status: string
           trend_score: number | null
           used_at: string | null
@@ -1268,12 +1398,15 @@ export type Database = {
           id?: string
           keyword: string
           keyword_difficulty?: number | null
+          matched_book_ids?: string[] | null
           opportunity_score?: number | null
           post_id?: string | null
           reject_reason?: string | null
+          relevance_score?: number | null
           search_intent?: string | null
           secondary_keywords?: string[]
           source?: string | null
+          sources?: Json | null
           status?: string
           trend_score?: number | null
           used_at?: string | null
@@ -1285,12 +1418,15 @@ export type Database = {
           id?: string
           keyword?: string
           keyword_difficulty?: number | null
+          matched_book_ids?: string[] | null
           opportunity_score?: number | null
           post_id?: string | null
           reject_reason?: string | null
+          relevance_score?: number | null
           search_intent?: string | null
           secondary_keywords?: string[]
           source?: string | null
+          sources?: Json | null
           status?: string
           trend_score?: number | null
           used_at?: string | null

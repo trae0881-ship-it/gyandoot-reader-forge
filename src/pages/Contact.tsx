@@ -152,6 +152,17 @@ const Contact = () => {
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
               />
               <Input
+                id="contact-phone"
+                name="phone"
+                type="tel"
+                inputMode="tel"
+                aria-label="Mobile number"
+                placeholder="Mobile number (required)"
+                required
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              />
+              <Input
                 id="contact-subject"
                 name="subject"
                 aria-label="Subject"

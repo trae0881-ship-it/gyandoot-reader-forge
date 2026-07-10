@@ -108,22 +108,56 @@ const AdminVisitors = () => {
   useEffect(() => { load(); }, []);
 
   const filtered = logs.filter((l) => {
-    if (!q) return true;
-    const s = q.toLowerCase();
-    return (
-      (l.country ?? "").toLowerCase().includes(s) ||
-      (l.city ?? "").toLowerCase().includes(s) ||
-      (l.ip_address ?? "").toLowerCase().includes(s) ||
-      (l.user_email ?? "").toLowerCase().includes(s) ||
-      (l.user_name ?? "").toLowerCase().includes(s) ||
-      (l.user_phone ?? "").toLowerCase().includes(s) ||
-
-      (l.browser ?? "").toLowerCase().includes(s) ||
-      (l.os ?? "").toLowerCase().includes(s) ||
-      (l.landing_path ?? "").toLowerCase().includes(s) ||
-      (l.referrer ?? "").toLowerCase().includes(s)
-    );
+    // Free-text search
+    if (q) {
+      const s = q.toLowerCase();
+      const hit =
+        (l.country ?? "").toLowerCase().includes(s) ||
+        (l.city ?? "").toLowerCase().includes(s) ||
+        (l.ip_address ?? "").toLowerCase().includes(s) ||
+        (l.user_email ?? "").toLowerCase().includes(s) ||
+        (l.user_name ?? "").toLowerCase().includes(s) ||
+        (l.user_phone ?? "").toLowerCase().includes(s) ||
+        (l.browser ?? "").toLowerCase().includes(s) ||
+        (l.os ?? "").toLowerCase().includes(s) ||
+        (l.landing_path ?? "").toLowerCase().includes(s) ||
+        (l.referrer ?? "").toLowerCase().includes(s);
+      if (!hit) return false;
+    }
+    const dt = new Date(l.created_at);
+    if (fDateFrom && dt < new Date(fDateFrom)) return false;
+    if (fDateTo) { const end = new Date(fDateTo); end.setDate(end.getDate() + 1); if (dt >= end) return false; }
+    const hhmm = dt.toTimeString().slice(0, 5);
+    if (fTimeFrom && hhmm < fTimeFrom) return false;
+    if (fTimeTo && hhmm > fTimeTo) return false;
+    if (fCountry && l.country !== fCountry) return false;
+    if (fLocation) {
+      const loc = `${l.city ?? ""} ${l.region ?? ""} ${l.country ?? ""}`.toLowerCase();
+      if (!loc.includes(fLocation.toLowerCase())) return false;
+    }
+    if (fDevice && l.device_type !== fDevice) return false;
+    if (fBrowser && l.browser !== fBrowser) return false;
+    if (fOs && l.os !== fOs) return false;
+    if (fLanding && !(l.landing_path ?? "").toLowerCase().includes(fLanding.toLowerCase())) return false;
+    if (fReferrer) {
+      if (fReferrer === "__direct__") { if (l.referrer) return false; }
+      else if (!(l.referrer ?? "").toLowerCase().includes(fReferrer.toLowerCase())) return false;
+    }
+    return true;
   });
+
+  const uniq = (arr: (string | null)[]) => Array.from(new Set(arr.filter(Boolean) as string[])).sort();
+  const countries = uniq(logs.map((l) => l.country));
+  const devices = uniq(logs.map((l) => l.device_type));
+  const browsers = uniq(logs.map((l) => l.browser));
+  const oses = uniq(logs.map((l) => l.os));
+
+  const clearFilters = () => {
+    setQ(""); setFDateFrom(""); setFDateTo(""); setFTimeFrom(""); setFTimeTo("");
+    setFCountry(""); setFLocation(""); setFDevice(""); setFBrowser(""); setFOs("");
+    setFLanding(""); setFReferrer("");
+  };
+
 
   const stats = {
     total: logs.length,

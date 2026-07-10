@@ -20,6 +20,7 @@ const navItems = [
   { to: "/admin/scripts", label: "Custom Scripts", icon: Code },
   { to: "/admin/auth-providers", label: "Auth Providers", icon: KeyRound },
   { to: "/admin/ai-providers", label: "AI Providers", icon: KeyRound },
+  { to: "/admin/api-tester", label: "API Tester", icon: FlaskConical },
   { to: "/admin/settings", label: "Settings", icon: Settings },
 ];
 

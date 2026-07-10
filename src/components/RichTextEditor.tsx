@@ -1,8 +1,10 @@
 import { useEditor, EditorContent } from "@tiptap/react";
+import { Extension } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { Color } from "@tiptap/extension-color";
+import { FontFamily } from "@tiptap/extension-font-family";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import TextAlign from "@tiptap/extension-text-align";
@@ -12,6 +14,60 @@ import { TableRow } from "@tiptap/extension-table-row";
 import { TableHeader } from "@tiptap/extension-table-header";
 import { TableCell } from "@tiptap/extension-table-cell";
 import { useCallback, useRef, useState } from "react";
+
+/* ─── Preserve inline style/align on block + span nodes (Word paste) ─── */
+const PreserveStyles = Extension.create({
+  name: "preserveStyles",
+  addGlobalAttributes() {
+    return [
+      {
+        types: ["paragraph", "heading", "listItem", "blockquote", "tableCell", "tableHeader"],
+        attributes: {
+          style: {
+            default: null,
+            parseHTML: (el) => el.getAttribute("style"),
+            renderHTML: (attrs) => (attrs.style ? { style: attrs.style } : {}),
+          },
+        },
+      },
+      {
+        types: ["textStyle"],
+        attributes: {
+          fontSize: {
+            default: null,
+            parseHTML: (el) => (el as HTMLElement).style.fontSize || null,
+            renderHTML: (attrs) => (attrs.fontSize ? { style: `font-size:${attrs.fontSize}` } : {}),
+          },
+        },
+      },
+    ];
+  },
+});
+
+/* ─── Clean MS Word HTML but keep formatting ──────────────────────────── */
+function cleanWordHtml(html: string): string {
+  if (!html) return html;
+  let out = html;
+  // Strip Word-specific tags/comments
+  out = out.replace(/<!--[\s\S]*?-->/g, "");
+  out = out.replace(/<\?xml[\s\S]*?\?>/g, "");
+  out = out.replace(/<\/?(o:p|w:[^>]+|m:[^>]+|v:[^>]+)[^>]*>/gi, "");
+  out = out.replace(/<style[\s\S]*?<\/style>/gi, "");
+  out = out.replace(/<meta[^>]*>/gi, "");
+  out = out.replace(/<link[^>]*>/gi, "");
+  // Remove mso-* inline style props
+  out = out.replace(/style="([^"]*)"/gi, (_m, s) => {
+    const cleaned = s
+      .split(";")
+      .map((p: string) => p.trim())
+      .filter((p: string) => p && !/^mso-/i.test(p) && !/^font-family:\s*"?Times New Roman/i.test(p))
+      .join(";");
+    return cleaned ? `style="${cleaned}"` : "";
+  });
+  // Remove empty class attrs (MsoNormal etc.)
+  out = out.replace(/\sclass="Mso[^"]*"/gi, "");
+  return out;
+}
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -94,6 +150,8 @@ const RichTextEditor = ({ value, onChange, placeholder = "Start writing…", min
       Underline,
       TextStyle,
       Color,
+      FontFamily,
+      PreserveStyles,
       Highlight.configure({ multicolor: true }),
       Link.configure({ openOnClick: false, HTMLAttributes: { class: "text-primary underline cursor-pointer" } }),
       Image.configure({ inline: false, HTMLAttributes: { class: "rounded-lg my-3 mx-auto block" } }),
@@ -110,6 +168,7 @@ const RichTextEditor = ({ value, onChange, placeholder = "Start writing…", min
         class: "outline-none prose prose-sm max-w-none px-4 py-3 rte-content",
         style: `min-height:${minHeight}px`,
       },
+      transformPastedHTML: (html) => cleanWordHtml(html),
     },
   });
 

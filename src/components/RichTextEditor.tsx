@@ -207,15 +207,29 @@ const RichTextEditor = ({ value, onChange, placeholder = "Start writing…", min
           }
         }
         if (imageFiles.length === 0) return false;
-        // Upload each image and insert
         event.preventDefault();
         (async () => {
-          for (const file of imageFiles) {
-            await handleImageUpload(file);
+          setUploading(true);
+          try {
+            for (const file of imageFiles) {
+              const ext = file.name.split(".").pop() || "png";
+              const path = `editor/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+              const { error } = await supabase.storage.from("post-images").upload(path, file, { upsert: true });
+              if (error) throw error;
+              const { data } = supabase.storage.from("post-images").getPublicUrl(path);
+              const { state, dispatch } = view;
+              const node = view.state.schema.nodes.image.create({ src: data.publicUrl });
+              dispatch(state.tr.replaceSelectionWith(node));
+            }
+          } catch (e: any) {
+            toast({ title: "Image paste failed", description: e.message, variant: "destructive" });
+          } finally {
+            setUploading(false);
           }
         })();
         return true;
       },
+
     },
   });
 

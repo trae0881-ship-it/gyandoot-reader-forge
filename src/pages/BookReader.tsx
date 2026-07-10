@@ -540,7 +540,7 @@ const BookReader = () => {
                 value={tocSearch}
                 onChange={(e) => setTocSearch(e.target.value)}
                 placeholder="Search chapters…"
-                className={`w-full rounded-md border px-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-primary ${darkMode ? "bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-500" : "bg-background border-input placeholder:text-muted-foreground"}`}
+                className={`w-full rounded-md border px-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-primary ${darkMode ? "bg-gray-800 border-gray-700 text-gray-100 placeholder:text-gray-300" : "bg-background border-input placeholder:text-muted-foreground"}`}
               />
             </div>
             <div className="flex-1 overflow-y-auto py-2">

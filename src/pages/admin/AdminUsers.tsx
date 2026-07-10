@@ -9,7 +9,9 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Users, BookOpen, Heart, Bookmark, BarChart2, ShieldOff, ShieldCheck, Eye } from "lucide-react";
+import { Users, BookOpen, Heart, Bookmark, BarChart2, ShieldOff, ShieldCheck, Eye, Shield } from "lucide-react";
+import ManageUserRolesDialog from "@/components/admin/ManageUserRolesDialog";
+import { useAuth } from "@/hooks/useAuth";
 
 type UserRow = {
   id: string;

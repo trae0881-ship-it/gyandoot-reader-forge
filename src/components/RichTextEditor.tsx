@@ -150,6 +150,8 @@ const RichTextEditor = ({ value, onChange, placeholder = "Start writing…", min
       Underline,
       TextStyle,
       Color,
+      FontFamily,
+      PreserveStyles,
       Highlight.configure({ multicolor: true }),
       Link.configure({ openOnClick: false, HTMLAttributes: { class: "text-primary underline cursor-pointer" } }),
       Image.configure({ inline: false, HTMLAttributes: { class: "rounded-lg my-3 mx-auto block" } }),
@@ -166,6 +168,7 @@ const RichTextEditor = ({ value, onChange, placeholder = "Start writing…", min
         class: "outline-none prose prose-sm max-w-none px-4 py-3 rte-content",
         style: `min-height:${minHeight}px`,
       },
+      transformPastedHTML: (html) => cleanWordHtml(html),
     },
   });
 

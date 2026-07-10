@@ -24,11 +24,12 @@ const ASSIGNABLE_ROLES: { role: AdminRole; label: string; description: string; a
 ];
 
 const ManageUserRolesDialog = ({ userId, userLabel, open, onOpenChange }: Props) => {
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const [current, setCurrent] = useState<Set<AdminRole>>(new Set());
   const [selected, setSelected] = useState<Set<AdminRole>>(new Set());
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const isSelf = !!user && !!userId && user.id === userId;
 
   useEffect(() => {
     if (!open || !userId) return;
@@ -61,6 +62,10 @@ const ManageUserRolesDialog = ({ userId, userLabel, open, onOpenChange }: Props)
 
   const save = async () => {
     if (!userId) return;
+    if (isSelf) {
+      toast.error("Aap apni roles khud edit nahi kar sakte. Kisi doosre Super Admin se karvayein.");
+      return;
+    }
     setSaving(true);
     try {
       const toAdd = [...selected].filter((r) => !current.has(r));
@@ -104,8 +109,13 @@ const ManageUserRolesDialog = ({ userId, userLabel, open, onOpenChange }: Props)
           </div>
         ) : (
           <div className="space-y-3 py-2">
+            {isSelf && (
+              <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-300">
+                Ye aapka apna account hai. Apni roles aap khud edit nahi kar sakte — kisi doosre Super Admin se karvayein.
+              </div>
+            )}
             {ASSIGNABLE_ROLES.map((r) => {
-              const disabled = r.adminOnly && !isAdmin;
+              const disabled = isSelf || (r.adminOnly && !isAdmin);
               return (
                 <label
                   key={r.role}
@@ -126,7 +136,7 @@ const ManageUserRolesDialog = ({ userId, userLabel, open, onOpenChange }: Props)
                 </label>
               );
             })}
-            {!isAdmin && (
+            {!isAdmin && !isSelf && (
               <p className="text-xs text-muted-foreground">
                 Only Super Admins can grant or revoke the Super Admin role.
               </p>
@@ -136,7 +146,7 @@ const ManageUserRolesDialog = ({ userId, userLabel, open, onOpenChange }: Props)
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>Cancel</Button>
-          <Button onClick={save} disabled={saving || loading}>
+          <Button onClick={save} disabled={saving || loading || isSelf}>
             {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             Save Roles
           </Button>

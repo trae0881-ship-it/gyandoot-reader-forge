@@ -21,12 +21,17 @@ const PreserveStyles = Extension.create({
   addGlobalAttributes() {
     return [
       {
-        types: ["paragraph", "heading", "listItem", "blockquote", "tableCell", "tableHeader"],
+        types: ["paragraph", "heading", "listItem", "blockquote", "tableCell", "tableHeader", "tableRow", "table"],
         attributes: {
           style: {
             default: null,
             parseHTML: (el) => el.getAttribute("style"),
             renderHTML: (attrs) => (attrs.style ? { style: attrs.style } : {}),
+          },
+          align: {
+            default: null,
+            parseHTML: (el) => el.getAttribute("align"),
+            renderHTML: (attrs) => (attrs.align ? { align: attrs.align } : {}),
           },
         },
       },
@@ -41,10 +46,20 @@ const PreserveStyles = Extension.create({
             },
             renderHTML: (attrs) => (attrs.fontSize ? { style: `font-size:${attrs.fontSize}` } : {}),
           },
+          fontFamily: {
+            default: null,
+            parseHTML: (el) => (el as HTMLElement).style.fontFamily || null,
+            renderHTML: (attrs) => (attrs.fontFamily ? { style: `font-family:${attrs.fontFamily}` } : {}),
+          },
           backgroundColor: {
             default: null,
             parseHTML: (el) => (el as HTMLElement).style.backgroundColor || null,
             renderHTML: (attrs) => (attrs.backgroundColor ? { style: `background-color:${attrs.backgroundColor}` } : {}),
+          },
+          color: {
+            default: null,
+            parseHTML: (el) => (el as HTMLElement).style.color || null,
+            renderHTML: (attrs) => (attrs.color ? { style: `color:${attrs.color}` } : {}),
           },
         },
       },
@@ -56,26 +71,29 @@ const PreserveStyles = Extension.create({
 function cleanWordHtml(html: string): string {
   if (!html) return html;
   let out = html;
-  // Strip Word-specific tags/comments
+  // Strip Word-specific tags/comments/xml
   out = out.replace(/<!--[\s\S]*?-->/g, "");
   out = out.replace(/<\?xml[\s\S]*?\?>/g, "");
   out = out.replace(/<\/?(o:p|w:[^>]+|m:[^>]+|v:[^>]+)[^>]*>/gi, "");
   out = out.replace(/<style[\s\S]*?<\/style>/gi, "");
   out = out.replace(/<meta[^>]*>/gi, "");
   out = out.replace(/<link[^>]*>/gi, "");
-  // Remove mso-* inline style props
+  // Remove mso-* inline style props but KEEP font-family, font-size, colors etc
   out = out.replace(/style="([^"]*)"/gi, (_m, s) => {
     const cleaned = s
       .split(";")
       .map((p: string) => p.trim())
-      .filter((p: string) => p && !/^mso-/i.test(p) && !/^font-family:\s*"?Times New Roman/i.test(p))
+      .filter((p: string) => p && !/^mso-/i.test(p))
       .join(";");
     return cleaned ? `style="${cleaned}"` : "";
   });
-  // Remove empty class attrs (MsoNormal etc.)
+  // Remove Word class attrs (MsoNormal etc.) but keep other classes
   out = out.replace(/\sclass="Mso[^"]*"/gi, "");
+  // Convert Word's fake bullet paragraphs (·, o, §) into real bullet text — TipTap will keep them as paragraphs but at least the marker survives
+  // Better: leave them; users usually paste small snippets
   return out;
 }
+
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -162,7 +180,7 @@ const RichTextEditor = ({ value, onChange, placeholder = "Start writing…", min
       PreserveStyles,
       Highlight.configure({ multicolor: true }),
       Link.configure({ openOnClick: false, HTMLAttributes: { class: "text-primary underline cursor-pointer" } }),
-      Image.configure({ inline: false, HTMLAttributes: { class: "rounded-lg my-3 mx-auto block" } }),
+      Image.configure({ inline: false, allowBase64: true, HTMLAttributes: { class: "rounded-lg my-3 mx-auto block" } }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       Table.configure({ resizable: true, HTMLAttributes: { class: "rte-table" } }),
       TableRow,
@@ -177,8 +195,44 @@ const RichTextEditor = ({ value, onChange, placeholder = "Start writing…", min
         style: `min-height:${minHeight}px`,
       },
       transformPastedHTML: (html) => cleanWordHtml(html),
+      handlePaste: (view, event) => {
+        const items = event.clipboardData?.items;
+        if (!items) return false;
+        const imageFiles: File[] = [];
+        for (let i = 0; i < items.length; i++) {
+          const it = items[i];
+          if (it.kind === "file" && it.type.startsWith("image/")) {
+            const f = it.getAsFile();
+            if (f) imageFiles.push(f);
+          }
+        }
+        if (imageFiles.length === 0) return false;
+        event.preventDefault();
+        (async () => {
+          setUploading(true);
+          try {
+            for (const file of imageFiles) {
+              const ext = file.name.split(".").pop() || "png";
+              const path = `editor/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+              const { error } = await supabase.storage.from("post-images").upload(path, file, { upsert: true });
+              if (error) throw error;
+              const { data } = supabase.storage.from("post-images").getPublicUrl(path);
+              const { state, dispatch } = view;
+              const node = view.state.schema.nodes.image.create({ src: data.publicUrl });
+              dispatch(state.tr.replaceSelectionWith(node));
+            }
+          } catch (e: any) {
+            toast({ title: "Image paste failed", description: e.message, variant: "destructive" });
+          } finally {
+            setUploading(false);
+          }
+        })();
+        return true;
+      },
+
     },
   });
+
 
   /* Sync external `value` changes into the editor (e.g. when async-loading
      an existing chapter's content after mount). Without this, the editor

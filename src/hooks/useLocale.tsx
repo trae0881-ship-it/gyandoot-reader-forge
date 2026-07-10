@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
 
 export type Currency = "INR" | "USD" | "EUR" | "GBP" | "AED" | "AUD" | "CAD" | "SGD";
-export type Language = "hi" | "en" | "es" | "fr" | "de" | "ar" | "zh-CN" | "ja" | "ru" | "pt";
+export type Language = string;
 
 interface LocaleContextValue {
   currency: Currency;
@@ -37,9 +37,9 @@ const CURRENCY_SYMBOL: Record<Currency, string> = {
 };
 
 // Country → default currency + language
-// English-first globally. Only non-English speaking regions auto-switch language.
+// Auto-switch language to the country's local language wherever Google Translate supports it.
 const COUNTRY_MAP: Record<string, { currency: Currency; language: Language }> = {
-  IN: { currency: "INR", language: "en" },
+  IN: { currency: "INR", language: "hi" }, // fallback; refined per-state below
   US: { currency: "USD", language: "en" },
   GB: { currency: "GBP", language: "en" },
   CA: { currency: "CAD", language: "en" },
@@ -47,16 +47,92 @@ const COUNTRY_MAP: Record<string, { currency: Currency; language: Language }> = 
   SG: { currency: "SGD", language: "en" },
   AE: { currency: "AED", language: "ar" },
   SA: { currency: "AED", language: "ar" },
+  QA: { currency: "AED", language: "ar" },
+  KW: { currency: "AED", language: "ar" },
+  OM: { currency: "AED", language: "ar" },
+  BH: { currency: "AED", language: "ar" },
+  EG: { currency: "USD", language: "ar" },
   DE: { currency: "EUR", language: "de" },
+  AT: { currency: "EUR", language: "de" },
+  CH: { currency: "EUR", language: "de" },
   FR: { currency: "EUR", language: "fr" },
+  BE: { currency: "EUR", language: "fr" },
   ES: { currency: "EUR", language: "es" },
-  IT: { currency: "EUR", language: "en" },
+  MX: { currency: "USD", language: "es" },
+  AR: { currency: "USD", language: "es" },
+  CO: { currency: "USD", language: "es" },
+  CL: { currency: "USD", language: "es" },
+  IT: { currency: "EUR", language: "it" as Language },
   PT: { currency: "EUR", language: "pt" },
   BR: { currency: "USD", language: "pt" },
   JP: { currency: "USD", language: "ja" },
   CN: { currency: "USD", language: "zh-CN" },
+  TW: { currency: "USD", language: "zh-TW" as Language },
+  HK: { currency: "USD", language: "zh-TW" as Language },
+  KR: { currency: "USD", language: "ko" as Language },
   RU: { currency: "USD", language: "ru" },
+  UA: { currency: "USD", language: "uk" as Language },
+  TR: { currency: "USD", language: "tr" as Language },
+  NL: { currency: "EUR", language: "nl" as Language },
+  PL: { currency: "EUR", language: "pl" as Language },
+  SE: { currency: "EUR", language: "sv" as Language },
+  NO: { currency: "EUR", language: "no" as Language },
+  DK: { currency: "EUR", language: "da" as Language },
+  FI: { currency: "EUR", language: "fi" as Language },
+  GR: { currency: "EUR", language: "el" as Language },
+  TH: { currency: "USD", language: "th" as Language },
+  VN: { currency: "USD", language: "vi" as Language },
+  ID: { currency: "USD", language: "id" as Language },
+  MY: { currency: "USD", language: "ms" as Language },
+  PH: { currency: "USD", language: "tl" as Language },
+  BD: { currency: "USD", language: "bn" as Language },
+  PK: { currency: "USD", language: "ur" as Language },
+  NP: { currency: "USD", language: "ne" as Language },
+  LK: { currency: "USD", language: "si" as Language },
+  IL: { currency: "USD", language: "iw" as Language },
+  IR: { currency: "USD", language: "fa" as Language },
 };
+
+// Indian state (region_code from ipapi) → local language supported by Google Translate.
+// Falls back to Hindi where a distinct code isn't supported (Bhojpuri, Maithili, Awadhi, Garhwali, etc.).
+const INDIA_STATE_LANG: Record<string, Language> = {
+  UP: "hi",         // Uttar Pradesh — Hindi/Awadhi
+  BR: "hi",         // Bihar — Hindi/Bhojpuri/Maithili/Magahi
+  MP: "hi",         // Madhya Pradesh — Hindi
+  RJ: "hi",         // Rajasthan — Hindi/Rajasthani
+  HR: "hi",         // Haryana — Hindi/Haryanvi
+  HP: "hi",         // Himachal Pradesh — Hindi/Pahari
+  UT: "hi", UK: "hi", // Uttarakhand — Hindi/Garhwali
+  CT: "hi", CG: "hi", // Chhattisgarh — Hindi/Chhattisgarhi
+  JH: "hi",         // Jharkhand — Hindi/Santali
+  DL: "hi",         // Delhi
+  PB: "pa" as Language, // Punjab — Punjabi
+  CH: "pa" as Language, // Chandigarh
+  JK: "ur" as Language, // Jammu & Kashmir — Urdu
+  LA: "ur" as Language, // Ladakh
+  MH: "mr" as Language, // Maharashtra — Marathi
+  GJ: "gu" as Language, // Gujarat — Gujarati
+  DD: "gu" as Language, DN: "gu" as Language,
+  GA: "kok" as Language, // Goa — Konkani (Google: 'gom')
+  TN: "ta" as Language, // Tamil Nadu — Tamil
+  PY: "ta" as Language, // Puducherry
+  KA: "kn" as Language, // Karnataka — Kannada
+  KL: "ml" as Language, // Kerala — Malayalam
+  LD: "ml" as Language,
+  AP: "te" as Language, // Andhra Pradesh — Telugu
+  TG: "te" as Language, TS: "te" as Language, // Telangana
+  WB: "bn" as Language, // West Bengal — Bengali
+  TR: "bn" as Language, // Tripura — Bengali/Kokborok
+  OR: "or" as Language, OD: "or" as Language, // Odisha — Odia
+  AS: "as" as Language, // Assam — Assamese
+  SK: "ne" as Language, // Sikkim — Nepali
+  MN: "mni-Mtei" as Language, // Manipur — Meitei
+  MZ: "en" as Language, // Mizoram
+  ML: "en" as Language, // Meghalaya
+  NL: "en" as Language, // Nagaland
+  AR: "en" as Language, // Arunachal Pradesh
+};
+
 
 const LocaleContext = createContext<LocaleContextValue | null>(null);
 
@@ -76,6 +152,13 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
         const map = COUNTRY_MAP[code];
         if (!map) return;
 
+        // Refine language for India based on state (region_code)
+        let targetLang = map.language;
+        if (code === "IN") {
+          const region = (d.region_code || "").toUpperCase();
+          if (region && INDIA_STATE_LANG[region]) targetLang = INDIA_STATE_LANG[region];
+        }
+
         const manualCurrency = localStorage.getItem("gn_currency_manual") === "1";
         const manualLanguage = localStorage.getItem("gn_language_manual") === "1";
 
@@ -84,9 +167,9 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
           localStorage.setItem("gn_currency", map.currency);
         }
         if (!manualLanguage) {
-          setLanguageState(map.language);
-          localStorage.setItem("gn_language", map.language);
-          triggerGoogleTranslate(map.language);
+          setLanguageState(targetLang);
+          localStorage.setItem("gn_language", targetLang);
+          triggerGoogleTranslate(targetLang);
         }
       })
       .catch(() => {});
@@ -183,7 +266,7 @@ function injectGoogleTranslate() {
       new g.translate.TranslateElement(
         {
           pageLanguage: "en",
-          includedLanguages: "hi,en,es,fr,de,ar,zh-CN,ja,ru,pt",
+          includedLanguages: "en,hi,bn,gu,kn,ml,mr,or,pa,ta,te,as,ne,ur,sd,sa,gom,mni-Mtei,es,fr,de,it,pt,ar,zh-CN,zh-TW,ja,ko,ru,uk,tr,nl,pl,sv,no,da,fi,el,th,vi,id,ms,tl,si,iw,fa",
           autoDisplay: false,
         },
         "google_translate_element"

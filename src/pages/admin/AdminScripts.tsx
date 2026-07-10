@@ -234,7 +234,17 @@ const AdminScripts = () => {
             <p className="text-sm text-muted-foreground">Abhi tak koi script add nahi ki gayi.</p>
           ) : (
             <div className="space-y-3">
-              {scripts.map((s) => (
+              {(() => {
+                const counts = new Map<string, number>();
+                scripts.forEach((s) => {
+                  const key = s.content.trim().replace(/\s+/g, " ");
+                  if (key) counts.set(key, (counts.get(key) || 0) + 1);
+                });
+                return scripts.map((s) => {
+                  const key = s.content.trim().replace(/\s+/g, " ");
+                  const dupCount = counts.get(key) || 0;
+                  const isDup = dupCount > 1;
+                  return (
                 <div key={s.id} className="border rounded-lg p-4 flex flex-col sm:flex-row sm:items-start gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -243,6 +253,9 @@ const AdminScripts = () => {
                         {s.placement}
                       </Badge>
                       {!s.enabled && <Badge variant="outline">Disabled</Badge>}
+                      {isDup && (
+                        <Badge variant="destructive">Duplicate ({dupCount})</Badge>
+                      )}
                       <span className="text-xs text-muted-foreground">pos: {s.position}</span>
                     </div>
                     <pre className="text-xs bg-muted/50 rounded p-2 overflow-x-auto max-h-24 whitespace-pre-wrap break-all">
@@ -268,7 +281,9 @@ const AdminScripts = () => {
                     </Button>
                   </div>
                 </div>
-              ))}
+                  );
+                });
+              })()}
             </div>
           )}
         </CardContent>

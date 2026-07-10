@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { X, Mail, Gift, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { z } from "zod";
 
 const STORAGE_KEY = "gn_lead_capture_v1";
@@ -32,6 +34,8 @@ function mark() {
 }
 
 export default function EmailLeadCapture() {
+  const { user } = useAuth();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
   const [done, setDone] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -40,10 +44,25 @@ export default function EmailLeadCapture() {
   const [name, setName] = useState("");
   const [copied, setCopied] = useState(false);
 
+  // Allowed pages only: Home, About, Books (list), Articles (list), Services, Support Us, Contact
+  const ALLOWED = new Set([
+    "/",
+    "/about",
+    "/books",
+    "/articles",
+    "/services",
+    "/support-us",
+    "/donate",
+    "/contact",
+  ]);
+  const path = location.pathname.replace(/\/+$/, "") || "/";
+  const isAllowedRoute = ALLOWED.has(path);
+
   useEffect(() => {
+    // Hide for logged-in users and on disallowed pages
+    if (user) return;
+    if (!isAllowedRoute) return;
     if (shownRecently()) return;
-    // Skip on admin routes
-    if (window.location.pathname.startsWith("/admin")) return;
 
     let fired = false;
     const fire = () => {
@@ -68,7 +87,12 @@ export default function EmailLeadCapture() {
       window.clearTimeout(t);
       window.removeEventListener("scroll", onScroll);
     };
-  }, []);
+  }, [user, isAllowedRoute]);
+
+  // Auto-close if user logs in or navigates away from allowed page
+  useEffect(() => {
+    if (user || !isAllowedRoute) setOpen(false);
+  }, [user, isAllowedRoute]);
 
   const submit = async () => {
     setErr(null);

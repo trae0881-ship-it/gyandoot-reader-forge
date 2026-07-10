@@ -152,19 +152,19 @@ const Footer = () => {
 
           {/* Newsletter */}
           <div>
-            <h3 className="font-serif font-semibold mb-4 text-secondary">जुड़े रहिए</h3>
-            <p className="text-sm text-background/70 mb-3">हफ़्ते में एक चुना हुआ लेख — बस इतना ही, कोई spam नहीं।</p>
+            <h3 className="font-serif font-semibold mb-4 text-secondary">Stay Connected</h3>
+            <p className="text-sm text-background/70 mb-3">One curated article a week — that's all, no spam.</p>
             <form onSubmit={handleNewsletter} className="flex gap-2">
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="आपका ईमेल"
+                placeholder="Your email"
                 className="flex-1 rounded-md bg-background/10 border border-background/20 px-3 py-2 text-sm text-background placeholder:text-background/40 focus:outline-none focus:ring-1 focus:ring-secondary"
               />
               <Button type="submit" size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90">
-                जोड़ें
+                Subscribe
               </Button>
             </form>
 

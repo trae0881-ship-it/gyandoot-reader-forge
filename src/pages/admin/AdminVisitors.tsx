@@ -101,6 +101,10 @@ const AdminVisitors = () => {
       (l.country ?? "").toLowerCase().includes(s) ||
       (l.city ?? "").toLowerCase().includes(s) ||
       (l.ip_address ?? "").toLowerCase().includes(s) ||
+      (l.user_email ?? "").toLowerCase().includes(s) ||
+      (l.user_name ?? "").toLowerCase().includes(s) ||
+      (l.user_phone ?? "").toLowerCase().includes(s) ||
+
       (l.browser ?? "").toLowerCase().includes(s) ||
       (l.os ?? "").toLowerCase().includes(s) ||
       (l.landing_path ?? "").toLowerCase().includes(s) ||

@@ -1888,6 +1888,11 @@ export type Database = {
           status: string
         }[]
       }
+      has_admin_access: { Args: { _user_id: string }; Returns: boolean }
+      has_admin_area: {
+        Args: { _area: string; _user_id: string }
+        Returns: boolean
+      }
       has_purchased_book: {
         Args: { _book_id: string; _user_id: string }
         Returns: boolean
@@ -1911,7 +1916,14 @@ export type Database = {
       publish_scheduled_posts: { Args: never; Returns: undefined }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role:
+        | "admin"
+        | "user"
+        | "books_manager"
+        | "seo_manager"
+        | "payments_manager"
+        | "users_manager"
+        | "support"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2039,7 +2051,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: [
+        "admin",
+        "user",
+        "books_manager",
+        "seo_manager",
+        "payments_manager",
+        "users_manager",
+        "support",
+      ],
     },
   },
 } as const

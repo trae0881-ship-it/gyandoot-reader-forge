@@ -9,7 +9,9 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Users, BookOpen, Heart, Bookmark, BarChart2, ShieldOff, ShieldCheck, Eye } from "lucide-react";
+import { Users, BookOpen, Heart, Bookmark, BarChart2, ShieldOff, ShieldCheck, Eye, Shield } from "lucide-react";
+import ManageUserRolesDialog from "@/components/admin/ManageUserRolesDialog";
+import { useAuth } from "@/hooks/useAuth";
 
 type UserRow = {
   id: string;
@@ -31,8 +33,12 @@ type UserHistory = {
 const AdminUsers = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { perms, isAdmin } = useAuth();
   const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
   const [confirmDisableUser, setConfirmDisableUser] = useState<UserRow | null>(null);
+  const [rolesUser, setRolesUser] = useState<UserRow | null>(null);
+
+  const canManageRoles = isAdmin || perms.users;
 
   const { data, isLoading } = useQuery({
     queryKey: ["admin-users"],
@@ -151,6 +157,15 @@ const AdminUsers = () => {
                       >
                         <Eye className="h-4 w-4 mr-1" /> History
                       </Button>
+                      {canManageRoles && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setRolesUser(user)}
+                        >
+                          <Shield className="h-4 w-4 mr-1" /> Roles
+                        </Button>
+                      )}
                       {isDisabled(user) ? (
                         <Button
                           size="sm"
@@ -375,6 +390,13 @@ const AdminUsers = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ManageUserRolesDialog
+        userId={rolesUser?.id ?? null}
+        userLabel={rolesUser?.display_name || rolesUser?.email}
+        open={!!rolesUser}
+        onOpenChange={(o) => !o && setRolesUser(null)}
+      />
     </div>
   );
 };

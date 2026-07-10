@@ -5,40 +5,52 @@ import { BookOpen, FileText, Heart, ShoppingCart, LayoutDashboard, LogOut, Arrow
 import { useEffect, useState } from "react";
 import AdminOtpGate, { isAdminOtpValid } from "@/components/admin/AdminOtpGate";
 
-const navItems = [
-  { to: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/admin/users", label: "Users", icon: Users },
-  { to: "/admin/books", label: "Books", icon: BookOpen },
-  { to: "/admin/posts", label: "Posts", icon: FileText },
-  { to: "/admin/coupons", label: "Coupons", icon: Tag },
-  { to: "/admin/donations", label: "Donations", icon: Heart },
-  { to: "/admin/purchases", label: "Purchases", icon: ShoppingCart },
-  { to: "/admin/enquiries", label: "Enquiries", icon: Mail },
-  { to: "/admin/referrals", label: "Referrals", icon: Share2 },
-  { to: "/admin/ai", label: "AI Assistant", icon: Sparkles },
-  { to: "/admin/seo-command", label: "SEO Command", icon: Rocket },
-  { to: "/admin/team", label: "Team & Agents", icon: UsersRound },
-  { to: "/admin/lsi", label: "LSI Keywords", icon: Hash },
-  { to: "/admin/scripts", label: "Custom Scripts", icon: Code },
-  { to: "/admin/auth-providers", label: "Auth Providers", icon: KeyRound },
-  { to: "/admin/ai-providers", label: "AI Providers", icon: KeyRound },
-  { to: "/admin/api-tester", label: "API Tester", icon: FlaskConical },
-  { to: "/admin/visitors", label: "Visitors", icon: Globe2 },
-  { to: "/admin/identified-visitors", label: "Identified Visitors", icon: UserCheck },
-  { to: "/admin/settings", label: "Settings", icon: Settings },
+import type { AdminPermissions } from "@/hooks/useAuth";
+
+type NavItem = {
+  to: string;
+  label: string;
+  icon: any;
+  /** Which permission area gates this link. undefined = super admin only. */
+  area?: keyof AdminPermissions;
+};
+
+const navItems: NavItem[] = [
+  { to: "/admin", label: "Dashboard", icon: LayoutDashboard, area: "hasAdminAccess" },
+  { to: "/admin/users", label: "Users", icon: Users, area: "users" },
+  { to: "/admin/books", label: "Books", icon: BookOpen, area: "books" },
+  { to: "/admin/posts", label: "Posts", icon: FileText, area: "seo" },
+  { to: "/admin/coupons", label: "Coupons", icon: Tag, area: "payments" },
+  { to: "/admin/donations", label: "Donations", icon: Heart, area: "payments" },
+  { to: "/admin/purchases", label: "Purchases", icon: ShoppingCart, area: "payments" },
+  { to: "/admin/enquiries", label: "Enquiries", icon: Mail, area: "users" },
+  { to: "/admin/referrals", label: "Referrals", icon: Share2, area: "payments" },
+  { to: "/admin/ai", label: "AI Assistant", icon: Sparkles, area: "isSuperAdmin" },
+  { to: "/admin/seo-command", label: "SEO Command", icon: Rocket, area: "seo" },
+  { to: "/admin/team", label: "Team & Agents", icon: UsersRound, area: "users" },
+  { to: "/admin/lsi", label: "LSI Keywords", icon: Hash, area: "seo" },
+  { to: "/admin/scripts", label: "Custom Scripts", icon: Code, area: "isSuperAdmin" },
+  { to: "/admin/auth-providers", label: "Auth Providers", icon: KeyRound, area: "isSuperAdmin" },
+  { to: "/admin/ai-providers", label: "AI Providers", icon: KeyRound, area: "isSuperAdmin" },
+  { to: "/admin/api-tester", label: "API Tester", icon: FlaskConical, area: "isSuperAdmin" },
+  { to: "/admin/visitors", label: "Visitors", icon: Globe2, area: "isSuperAdmin" },
+  { to: "/admin/identified-visitors", label: "Identified Visitors", icon: UserCheck, area: "isSuperAdmin" },
+  { to: "/admin/settings", label: "Settings", icon: Settings, area: "isSuperAdmin" },
 ];
 
 const AdminLayout = () => {
-  const { user, isAdmin, loading, signOut } = useAuth();
+  const { user, isAdmin, perms, loading, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [otpVerified, setOtpVerified] = useState<boolean>(() => isAdminOtpValid());
 
+  const canEnter = perms.hasAdminAccess || isAdmin;
+
   useEffect(() => {
-    if (!loading && (!user || !isAdmin)) {
+    if (!loading && (!user || !canEnter)) {
       navigate("/auth");
     }
-  }, [user, isAdmin, loading, navigate]);
+  }, [user, canEnter, loading, navigate]);
 
   // Force Google Translate OFF everywhere admin renders — including portals
   // (Radix Dialog / Select / Toast) that mount on <body> outside our wrapper.
@@ -63,11 +75,16 @@ const AdminLayout = () => {
     return <div className="flex min-h-screen items-center justify-center">Loading...</div>;
   }
 
-  if (!user || !isAdmin) return null;
+  if (!user || !canEnter) return null;
 
   if (!otpVerified) {
     return <AdminOtpGate userEmail={user.email ?? undefined} onVerified={() => setOtpVerified(true)} />;
   }
+
+  const visibleItems = navItems.filter((item) => {
+    if (!item.area) return isAdmin;
+    return perms[item.area];
+  });
 
   return (
     <div className="flex min-h-screen notranslate" translate="no">
@@ -81,7 +98,7 @@ const AdminLayout = () => {
           <p className="text-xs text-muted-foreground mt-1">Admin Panel</p>
         </div>
         <nav className="space-y-1">
-          {navItems.map((item) => (
+          {visibleItems.map((item) => (
             <Link
               key={item.to}
               to={item.to}

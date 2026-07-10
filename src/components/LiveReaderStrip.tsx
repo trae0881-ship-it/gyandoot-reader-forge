@@ -31,12 +31,12 @@ const LiveReaderStrip = () => {
             <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-600" />
           </span>
           <Eye className="h-3.5 w-3.5 text-primary" />
-          <strong className="text-foreground">{count}</strong>&nbsp;पाठक अभी पढ़ रहे हैं
+          <strong className="text-foreground">{count}</strong>&nbsp;readers online right now
         </span>
         <span className="hidden sm:inline text-foreground/30">•</span>
         <span className="flex items-center gap-1.5 text-foreground/80">
           <Users className="h-3.5 w-3.5 text-primary" />
-          आज <strong className="text-foreground">{todayPurchases}+</strong> लोगों ने unlock किया
+          <strong className="text-foreground">{todayPurchases}+</strong> unlocked a book today
         </span>
       </div>
     </div>

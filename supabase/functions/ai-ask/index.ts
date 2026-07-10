@@ -309,7 +309,9 @@ Deno.serve(async (req) => {
       const model = settings?.model_name || "google/gemini-2.5-flash";
       const apiKey = activeProvider === "lovable" || !settings
         ? Deno.env.get("LOVABLE_API_KEY")!
-        : await decryptApiKey(settings.api_key_encrypted);
+        : (settings.api_key_encrypted?.startsWith("env:")
+            ? (Deno.env.get(settings.api_key_encrypted.slice(4)) || "")
+            : await decryptApiKey(settings.api_key_encrypted));
 
       let systemPrompt: string;
       let bookTitle = "";

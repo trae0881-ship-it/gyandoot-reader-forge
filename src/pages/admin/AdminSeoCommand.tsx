@@ -104,6 +104,10 @@ const AdminSeoCommand = () => {
         <StatCard icon={TrendingUp} label="Scheduled / Published" value={`${scheduled.length} / ${published.length}`} sub={`${drafts.length} drafts`} />
       </div>
 
+      <SeoFlowChart />
+
+
+
       <Tabs defaultValue="scheduled">
         <TabsList>
           <TabsTrigger value="scheduled">Scheduled ({scheduled.length})</TabsTrigger>

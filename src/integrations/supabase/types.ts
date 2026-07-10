@@ -1911,7 +1911,14 @@ export type Database = {
       publish_scheduled_posts: { Args: never; Returns: undefined }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role:
+        | "admin"
+        | "user"
+        | "books_manager"
+        | "seo_manager"
+        | "payments_manager"
+        | "users_manager"
+        | "support"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2039,7 +2046,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: [
+        "admin",
+        "user",
+        "books_manager",
+        "seo_manager",
+        "payments_manager",
+        "users_manager",
+        "support",
+      ],
     },
   },
 } as const

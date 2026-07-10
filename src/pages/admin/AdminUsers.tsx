@@ -157,6 +157,15 @@ const AdminUsers = () => {
                       >
                         <Eye className="h-4 w-4 mr-1" /> History
                       </Button>
+                      {canManageRoles && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setRolesUser(user)}
+                        >
+                          <Shield className="h-4 w-4 mr-1" /> Roles
+                        </Button>
+                      )}
                       {isDisabled(user) ? (
                         <Button
                           size="sm"

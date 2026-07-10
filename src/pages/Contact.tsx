@@ -42,19 +42,29 @@ const Contact = () => {
   });
 
   const { toast } = useToast();
-  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
   const [sending, setSending] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const phoneDigits = form.phone.replace(/\D/g, "");
+    if (phoneDigits.length < 10 || phoneDigits.length > 15) {
+      toast({ title: "Mobile number required", description: "कृपया valid mobile number दर्ज करें (10–15 digits).", variant: "destructive" });
+      return;
+    }
     setSending(true);
     try {
       const { data, error } = await supabase.functions.invoke("send-contact-email", {
-        body: form,
+        body: {
+          name: form.name,
+          email: form.email,
+          subject: form.subject,
+          message: `Mobile: ${form.phone}\n\n${form.message}`,
+        },
       });
       if (error) throw error;
       toast({ title: "Message received", description: "We'll get back to you very soon." });
-      setForm({ name: "", email: "", subject: "", message: "" });
+      setForm({ name: "", email: "", phone: "", subject: "", message: "" });
     } catch {
       toast({ title: "Couldn't send", description: "Please try again in a moment, or email us directly.", variant: "destructive" });
     } finally {
@@ -140,6 +150,17 @@ const Contact = () => {
                 required
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
+              <Input
+                id="contact-phone"
+                name="phone"
+                type="tel"
+                inputMode="tel"
+                aria-label="Mobile number"
+                placeholder="Mobile number (required)"
+                required
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
               />
               <Input
                 id="contact-subject"

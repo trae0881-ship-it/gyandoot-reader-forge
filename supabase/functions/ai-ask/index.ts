@@ -53,12 +53,23 @@ async function callAI(provider: string, apiKey: string, model: string, systemPro
     url = base.endsWith("/chat/completions") ? base : base.replace(/\/+$/, "") + "/chat/completions";
     headers = { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" };
     body = { model, messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userMessage }], temperature: 0.3, max_tokens: 1000 };
-  } else if (provider === "openai" || provider === "deepseek" || provider === "perplexity" || provider === "kimi") {
+  } else if (
+    provider === "openai" || provider === "deepseek" || provider === "perplexity" ||
+    provider === "kimi" || provider === "openrouter" || provider === "groq" ||
+    provider === "nvidia" || provider === "together" || provider === "fireworks" ||
+    provider === "xai"
+  ) {
     const baseUrls: Record<string, string> = {
       openai: "https://api.openai.com/v1/chat/completions",
       deepseek: "https://api.deepseek.com/v1/chat/completions",
       perplexity: "https://api.perplexity.ai/chat/completions",
       kimi: "https://api.moonshot.cn/v1/chat/completions",
+      openrouter: "https://openrouter.ai/api/v1/chat/completions",
+      groq: "https://api.groq.com/openai/v1/chat/completions",
+      nvidia: "https://integrate.api.nvidia.com/v1/chat/completions",
+      together: "https://api.together.xyz/v1/chat/completions",
+      fireworks: "https://api.fireworks.ai/inference/v1/chat/completions",
+      xai: "https://api.x.ai/v1/chat/completions",
     };
     url = baseUrls[provider];
     headers = { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" };
@@ -67,10 +78,6 @@ async function callAI(provider: string, apiKey: string, model: string, systemPro
     url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
     headers = { "Content-Type": "application/json" };
     body = { contents: [{ parts: [{ text: `${systemPrompt}\n\nUser: ${userMessage}` }] }], generationConfig: { temperature: 0.3, maxOutputTokens: 1000 } };
-  } else if (provider === "claude") {
-    url = "https://api.anthropic.com/v1/messages";
-    headers = { "x-api-key": apiKey, "anthropic-version": "2023-06-01", "Content-Type": "application/json" };
-    body = { model, system: systemPrompt, messages: [{ role: "user", content: userMessage }], max_tokens: 1000, temperature: 0.3 };
   } else if (provider === "lovable") {
     const lovableKey = Deno.env.get("LOVABLE_API_KEY");
     url = "https://ai.gateway.lovable.dev/v1/chat/completions";
@@ -89,8 +96,6 @@ async function callAI(provider: string, apiKey: string, model: string, systemPro
   const data = await res.json();
   if (provider === "gemini") {
     return data.candidates?.[0]?.content?.parts?.[0]?.text || "No response";
-  } else if (provider === "claude") {
-    return data.content?.[0]?.text || "No response";
   } else {
     return data.choices?.[0]?.message?.content || "No response";
   }

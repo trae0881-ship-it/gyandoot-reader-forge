@@ -152,6 +152,13 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
         const map = COUNTRY_MAP[code];
         if (!map) return;
 
+        // Refine language for India based on state (region_code)
+        let targetLang = map.language;
+        if (code === "IN") {
+          const region = (d.region_code || "").toUpperCase();
+          if (region && INDIA_STATE_LANG[region]) targetLang = INDIA_STATE_LANG[region];
+        }
+
         const manualCurrency = localStorage.getItem("gn_currency_manual") === "1";
         const manualLanguage = localStorage.getItem("gn_language_manual") === "1";
 

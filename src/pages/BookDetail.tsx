@@ -64,11 +64,7 @@ const BookDetail = () => {
   const { data: chapters } = useQuery({
     queryKey: ["chapters", book?.id],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("book_chapters")
-        .select("id, title, slug, chapter_number, is_preview")
-        .eq("book_id", book!.id)
-        .order("chapter_number");
+      const { data } = await supabase.rpc("get_book_chapter_index" as any, { _book_id: book!.id });
       return data ?? [];
     },
     enabled: !!book?.id,

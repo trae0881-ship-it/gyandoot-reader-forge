@@ -1,14 +1,14 @@
 import { Check, X } from "lucide-react";
 
 const rows = [
-  { feature: "एक बार खरीद, जीवनभर पढ़ें", us: true, print: false, pdf: false },
-  { feature: "मोबाइल / टैबलेट / लैपटॉप पर पढ़ें", us: true, print: false, pdf: true },
-  { feature: "Dark mode + font बड़ा/छोटा", us: true, print: false, pdf: false },
-  { feature: "पन्ने फटने/खोने का डर नहीं", us: true, print: false, pdf: true },
-  { feature: "Bookmark + पढ़ाई का progress", us: true, print: false, pdf: false },
-  { feature: "Author updates मुफ़्त", us: true, print: false, pdf: false },
-  { feature: "चोरी / forward नहीं हो सकती", us: true, print: false, pdf: false },
-  { feature: "Shipping / delay नहीं", us: true, print: false, pdf: true },
+  { feature: "Buy once, read forever", us: true, print: false, pdf: false },
+  { feature: "Read on mobile / tablet / laptop", us: true, print: false, pdf: true },
+  { feature: "Dark mode + adjustable font size", us: true, print: false, pdf: false },
+  { feature: "No risk of torn or lost pages", us: true, print: false, pdf: true },
+  { feature: "Bookmarks + reading progress", us: true, print: false, pdf: false },
+  { feature: "Free author updates", us: true, print: false, pdf: false },
+  { feature: "Can't be pirated or forwarded", us: true, print: false, pdf: false },
+  { feature: "No shipping delays", us: true, print: false, pdf: true },
 ];
 
 const Cell = ({ ok }: { ok: boolean }) =>

@@ -1,7 +1,7 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { BookOpen, FileText, Heart, ShoppingCart, LayoutDashboard, LogOut, ArrowLeft, Settings, Users, Tag, Share2, Sparkles, Code, KeyRound, Mail, Hash, FlaskConical } from "lucide-react";
+import { BookOpen, FileText, Heart, ShoppingCart, LayoutDashboard, LogOut, ArrowLeft, Settings, Users, Tag, Share2, Sparkles, Code, KeyRound, Mail, Hash, FlaskConical, Globe2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import AdminOtpGate, { isAdminOtpValid } from "@/components/admin/AdminOtpGate";
 
@@ -21,6 +21,7 @@ const navItems = [
   { to: "/admin/auth-providers", label: "Auth Providers", icon: KeyRound },
   { to: "/admin/ai-providers", label: "AI Providers", icon: KeyRound },
   { to: "/admin/api-tester", label: "API Tester", icon: FlaskConical },
+  { to: "/admin/visitors", label: "Visitors", icon: Globe2 },
   { to: "/admin/settings", label: "Settings", icon: Settings },
 ];
 

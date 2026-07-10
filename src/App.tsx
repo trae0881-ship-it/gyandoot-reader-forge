@@ -89,6 +89,9 @@ const PageLoader = () => (
 const queryClient = new QueryClient();
 
 const AppContent = () => {
+  useVisitorTracker();
+
+
 
 
   return (
@@ -165,6 +168,7 @@ const AppContent = () => {
                   <Route path="lsi" element={<AdminLSI />} />
                   <Route path="ai-providers" element={<AdminAIProviders />} />
                   <Route path="api-tester" element={<AdminApiTester />} />
+                  <Route path="visitors" element={<AdminVisitors />} />
                   <Route path="settings" element={<AdminSettings />} />
 
                 </Route>

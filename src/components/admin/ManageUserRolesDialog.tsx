@@ -62,6 +62,10 @@ const ManageUserRolesDialog = ({ userId, userLabel, open, onOpenChange }: Props)
 
   const save = async () => {
     if (!userId) return;
+    if (isSelf) {
+      toast.error("Aap apni roles khud edit nahi kar sakte. Kisi doosre Super Admin se karvayein.");
+      return;
+    }
     setSaving(true);
     try {
       const toAdd = [...selected].filter((r) => !current.has(r));

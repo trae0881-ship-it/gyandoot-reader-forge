@@ -91,7 +91,7 @@ const AppContent = () => {
       <TooltipProvider>
         <AuthProvider>
           <LocaleProvider>
-            <PriceAutoConvert />
+            
             <Toaster />
             <Sonner />
             <BrowserRouter>

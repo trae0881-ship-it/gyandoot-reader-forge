@@ -41,9 +41,9 @@ const AdminSeoCommand = () => {
   const load = async () => {
     const [{ data: p }, { data: l }, { data: q }] = await Promise.all([
       supabase.from("posts").select("*").eq("post_type", "article").order("updated_at", { ascending: false }).limit(50),
-      supabase.from("seo_agent_logs").select("*").order("created_at", { ascending: false }).limit: 20 as any,
+      supabase.from("seo_agent_logs").select("*").order("created_at", { ascending: false }).limit(20),
       supabase.from("seo_keyword_queue").select("*").order("opportunity_score", { ascending: false }).limit(30),
-    ] as any);
+    ]);
     setPosts((p as Post[]) || []);
     setLogs(l || []);
     setQueue(q || []);

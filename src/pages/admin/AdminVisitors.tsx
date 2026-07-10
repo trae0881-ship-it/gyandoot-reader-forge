@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, MapPin, Monitor, Smartphone, Tablet, ExternalLink, Download } from "lucide-react";
+import { RefreshCw, MapPin, Monitor, Smartphone, Tablet, ExternalLink, Download, User } from "lucide-react";
 
 interface VisitorLog {
   id: string;

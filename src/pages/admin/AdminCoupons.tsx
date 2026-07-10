@@ -30,6 +30,7 @@ type Coupon = {
   is_active: boolean;
   expires_at: string | null;
   created_at: string;
+  repurchase_only?: boolean;
   restricted_books?: Book[];
 };
 
@@ -42,7 +43,9 @@ const defaultForm = {
   min_order_amount: "",
   is_active: true,
   expires_at: "",
+  repurchase_only: false,
 };
+
 
 const defaultBulkForm = {
   prefix: "",
@@ -128,7 +131,9 @@ const AdminCoupons = () => {
         min_order_amount: values.min_order_amount ? Number(values.min_order_amount) : 0,
         is_active: values.is_active,
         expires_at: values.expires_at ? new Date(values.expires_at).toISOString() : null,
+        repurchase_only: values.repurchase_only,
       };
+
 
       let couponId = editCoupon?.id;
       if (editCoupon) {
@@ -296,7 +301,9 @@ const AdminCoupons = () => {
       min_order_amount: coupon.min_order_amount ? String(coupon.min_order_amount) : "",
       is_active: coupon.is_active,
       expires_at: coupon.expires_at ? coupon.expires_at.slice(0, 16) : "",
+      repurchase_only: !!coupon.repurchase_only,
     });
+
     setSelectedBookIds((coupon.restricted_books ?? []).map((b) => b.id));
     setDialogOpen(true);
   };
@@ -363,7 +370,13 @@ const AdminCoupons = () => {
                       </button>
                     </div>
                     {c.description && <p className="text-xs text-muted-foreground mt-0.5">{c.description}</p>}
+                    {c.repurchase_only && (
+                      <Badge variant="outline" className="mt-1 text-[10px] border-amber-500/40 text-amber-600 dark:text-amber-400">
+                        Repurchase only
+                      </Badge>
+                    )}
                   </TableCell>
+
                   <TableCell>
                     <Badge variant="outline">
                       {c.discount_type === "percent" ? `${c.discount_value}%` : `₹${c.discount_value}`} OFF
@@ -572,6 +585,20 @@ const AdminCoupons = () => {
               )}
             </div>
 
+            <div className="rounded-md border border-amber-500/30 bg-amber-500/5 p-3 space-y-1">
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="repurchase_only"
+                  checked={form.repurchase_only}
+                  onCheckedChange={(v) => setForm({ ...form, repurchase_only: v })}
+                />
+                <Label htmlFor="repurchase_only" className="font-medium">Repurchase only (returning customers)</Label>
+              </div>
+              <p className="text-xs text-muted-foreground pl-11">
+                When enabled, this coupon works only for users who already have at least one completed purchase. First-time buyers will be blocked at checkout.
+              </p>
+            </div>
+
             <div className="flex items-center gap-2">
               <Switch
                 id="is_active"
@@ -580,6 +607,7 @@ const AdminCoupons = () => {
               />
               <Label htmlFor="is_active">Active</Label>
             </div>
+
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>

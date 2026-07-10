@@ -5,6 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { LocaleProvider } from "@/hooks/useLocale";
+import { useVisitorTracker } from "@/hooks/useVisitorTracker";
+
+
 
 import { lazy, Suspense } from "react";
 
@@ -54,6 +57,7 @@ const AdminEnquiries = lazy(() => import("./pages/admin/AdminEnquiries"));
 const AdminLSI = lazy(() => import("./pages/admin/AdminLSI"));
 const AdminAIProviders = lazy(() => import("./pages/admin/AdminAIProviders"));
 const AdminApiTester = lazy(() => import("./pages/admin/AdminApiTester"));
+const AdminVisitors = lazy(() => import("./pages/admin/AdminVisitors"));
 
 // SEO content — sacred text hubs, Hindi meaning pages, meditation guides
 const BhagavadGitaHub = lazy(() => import("./pages/texts/BhagavadGita"));

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Play, RefreshCcw, Mail, Send, Sparkles, TrendingUp, Eye, MousePointerClick, Target } from "lucide-react";
+import SeoFlowChart from "@/components/admin/SeoFlowChart";
 
 type Post = {
   id: string; title: string; slug: string; publish_status: string; scheduled_at: string | null;

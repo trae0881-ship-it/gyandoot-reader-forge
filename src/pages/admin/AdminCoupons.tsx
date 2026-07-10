@@ -131,7 +131,9 @@ const AdminCoupons = () => {
         min_order_amount: values.min_order_amount ? Number(values.min_order_amount) : 0,
         is_active: values.is_active,
         expires_at: values.expires_at ? new Date(values.expires_at).toISOString() : null,
+        repurchase_only: values.repurchase_only,
       };
+
 
       let couponId = editCoupon?.id;
       if (editCoupon) {

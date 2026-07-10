@@ -16,6 +16,7 @@ const navItems = [
   { to: "/admin/enquiries", label: "Enquiries", icon: Mail },
   { to: "/admin/referrals", label: "Referrals", icon: Share2 },
   { to: "/admin/ai", label: "AI Assistant", icon: Sparkles },
+  { to: "/admin/seo-command", label: "SEO Command", icon: Rocket },
   { to: "/admin/lsi", label: "LSI Keywords", icon: Hash },
   { to: "/admin/scripts", label: "Custom Scripts", icon: Code },
   { to: "/admin/auth-providers", label: "Auth Providers", icon: KeyRound },

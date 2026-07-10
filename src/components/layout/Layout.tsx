@@ -3,6 +3,7 @@ import Footer from "./Footer";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import UrgencyBanner from "@/components/UrgencyBanner";
 import ExitIntentOffer from "@/components/ExitIntentOffer";
+import EmailLeadCapture from "@/components/EmailLeadCapture";
 import { useReferralCapture } from "@/hooks/useReferral";
 import { useCustomScripts } from "@/hooks/useCustomScripts";
 
@@ -18,6 +19,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       <Footer />
       <FloatingWhatsApp />
       <ExitIntentOffer />
+      <EmailLeadCapture />
     </div>
   );
 };

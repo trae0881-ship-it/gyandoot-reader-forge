@@ -166,6 +166,64 @@ Deno.serve(async (req) => {
 
     if (chosen) await sb.from("seo_keyword_queue").update({ status: "used", used_at: new Date().toISOString() }).eq("id", chosen.id);
 
+    // 6.5) Hero image — Lovable AI (Nano Banana) → post-images bucket → posts.cover_url
+    try {
+      const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+      if (lovableKey && !post?.cover_url) {
+        const title = post?.title || chosen?.keyword || "Spiritual Wisdom";
+        const brandPrompt =
+          `Editorial hero illustration for a Hindi spiritual publication called GyandootNova. ` +
+          `Topic: "${title}". Style: serene, cinematic, warm saffron-gold and deep indigo palette, ` +
+          `subtle sacred geometry (mandala / lotus motifs), soft dawn light, painterly texture reminiscent ` +
+          `of classical Indian miniature meets modern book-cover art. Absolutely no text, no watermark, ` +
+          `no logo, no letters. Composition: centered subject, ample negative space top-right for a headline overlay. ` +
+          `Widescreen 16:9. Museum-grade, magazine cover quality.`;
+
+        const imgRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash-image",
+            modalities: ["image", "text"],
+            messages: [{ role: "user", content: brandPrompt }],
+          }),
+        });
+        if (imgRes.ok) {
+          const j = await imgRes.json();
+          const dataUrl: string | undefined =
+            j?.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+          if (dataUrl?.startsWith("data:image/")) {
+            const [meta, b64] = dataUrl.split(",");
+            const mime = meta.match(/data:(image\/[^;]+)/)?.[1] || "image/png";
+            const ext = mime.split("/")[1].replace("jpeg", "jpg");
+            const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+            const path = `blog-hero/${postId}.${ext}`;
+            const { error: upErr } = await sb.storage
+              .from("post-images")
+              .upload(path, bytes, { contentType: mime, upsert: true });
+            if (!upErr) {
+              const { data: pub } = sb.storage.from("post-images").getPublicUrl(path);
+              const alt = `${title} — GyandootNova`.slice(0, 150);
+              await sb.from("posts").update({
+                cover_url: pub.publicUrl,
+                featured_image_alt: alt,
+                featured_image_title: title.slice(0, 150),
+              }).eq("id", postId);
+              log("hero_image", { url: pub.publicUrl });
+            } else {
+              log("hero_image_error", { error: upErr.message });
+            }
+          } else {
+            log("hero_image_error", { error: "no image in response" });
+          }
+        } else {
+          log("hero_image_error", { status: imgRes.status, body: (await imgRes.text()).slice(0, 200) });
+        }
+      }
+    } catch (e: any) {
+      log("hero_image_error", { error: String(e?.message || e) });
+    }
+
     // 7) Publish hook (indexing + report email)
     const hook = await invokeFn(url, svc, "seo-post-publish-hook", { post_id: postId });
     log("publish_hook", { status: hook.status });

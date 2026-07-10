@@ -174,6 +174,7 @@ const AppContent = () => {
                   <Route path="visitors" element={<AdminVisitors />} />
                   <Route path="identified-visitors" element={<AdminIdentifiedVisitors />} />
                   <Route path="seo-command" element={<AdminSeoCommand />} />
+                  <Route path="team" element={<AdminTeam />} />
                   <Route path="settings" element={<AdminSettings />} />
 
                 </Route>

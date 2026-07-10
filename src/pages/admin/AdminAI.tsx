@@ -246,7 +246,7 @@ const AdminAI = () => {
 
               {!selectedProvider?.needsKey && (
                 <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3">
-                  🎉 Lovable AI requires no API key — it's built-in and ready to use!
+                  🎉 No API key needed — this provider uses a built-in key configured in the backend.
                 </p>
               )}
 

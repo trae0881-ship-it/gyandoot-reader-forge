@@ -74,7 +74,7 @@ export default function FaqStrip() {
             to="/faq"
             className="inline-flex items-center text-sm font-semibold text-primary hover:underline"
           >
-            बाक़ी सारे सवाल देखिए →
+            See all questions →
           </Link>
         </div>
       </div>

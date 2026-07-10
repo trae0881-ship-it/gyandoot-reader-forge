@@ -1370,6 +1370,60 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_job_runs: {
+        Row: {
+          attempt: number
+          created_at: string
+          dispatched_by: string | null
+          duration_ms: number | null
+          error: string | null
+          finished_at: string | null
+          fn: string
+          http_status: number | null
+          id: string
+          max_attempts: number
+          payload: Json | null
+          result: Json | null
+          run_date: string
+          started_at: string
+          status: string
+        }
+        Insert: {
+          attempt?: number
+          created_at?: string
+          dispatched_by?: string | null
+          duration_ms?: number | null
+          error?: string | null
+          finished_at?: string | null
+          fn: string
+          http_status?: number | null
+          id?: string
+          max_attempts?: number
+          payload?: Json | null
+          result?: Json | null
+          run_date?: string
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          attempt?: number
+          created_at?: string
+          dispatched_by?: string | null
+          duration_ms?: number | null
+          error?: string | null
+          finished_at?: string | null
+          fn?: string
+          http_status?: number | null
+          id?: string
+          max_attempts?: number
+          payload?: Json | null
+          result?: Json | null
+          run_date?: string
+          started_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
       seo_keyword_queue: {
         Row: {
           competition_score: number | null
@@ -1437,6 +1491,47 @@ export type Database = {
             columns: ["post_id"]
             isOneToOne: false
             referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seo_notifications: {
+        Row: {
+          created_at: string
+          fn: string | null
+          id: string
+          job_run_id: string | null
+          level: string
+          message: string | null
+          read_at: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          fn?: string | null
+          id?: string
+          job_run_id?: string | null
+          level?: string
+          message?: string | null
+          read_at?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          fn?: string | null
+          id?: string
+          job_run_id?: string | null
+          level?: string
+          message?: string | null
+          read_at?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seo_notifications_job_run_id_fkey"
+            columns: ["job_run_id"]
+            isOneToOne: false
+            referencedRelation: "seo_job_runs"
             referencedColumns: ["id"]
           },
         ]

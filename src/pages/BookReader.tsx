@@ -557,7 +557,7 @@ const BookReader = () => {
                       isCurrent
                         ? "bg-primary/10 text-primary border-l-2 border-primary"
                         : darkMode
-                        ? "hover:bg-gray-800 text-gray-300"
+                        ? "hover:bg-gray-800 text-gray-200"
                         : "hover:bg-muted text-foreground"
                     }`}
                   >

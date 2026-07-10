@@ -579,6 +579,20 @@ const AdminCoupons = () => {
               )}
             </div>
 
+            <div className="rounded-md border border-amber-500/30 bg-amber-500/5 p-3 space-y-1">
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="repurchase_only"
+                  checked={form.repurchase_only}
+                  onCheckedChange={(v) => setForm({ ...form, repurchase_only: v })}
+                />
+                <Label htmlFor="repurchase_only" className="font-medium">Repurchase only (returning customers)</Label>
+              </div>
+              <p className="text-xs text-muted-foreground pl-11">
+                When enabled, this coupon works only for users who already have at least one completed purchase. First-time buyers will be blocked at checkout.
+              </p>
+            </div>
+
             <div className="flex items-center gap-2">
               <Switch
                 id="is_active"
@@ -587,6 +601,7 @@ const AdminCoupons = () => {
               />
               <Label htmlFor="is_active">Active</Label>
             </div>
+
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>

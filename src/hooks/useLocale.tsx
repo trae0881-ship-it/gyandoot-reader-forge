@@ -266,7 +266,7 @@ function injectGoogleTranslate() {
       new g.translate.TranslateElement(
         {
           pageLanguage: "en",
-          includedLanguages: "hi,en,es,fr,de,ar,zh-CN,ja,ru,pt",
+          includedLanguages: "en,hi,bn,gu,kn,ml,mr,or,pa,ta,te,as,ne,ur,sd,sa,gom,mni-Mtei,es,fr,de,it,pt,ar,zh-CN,zh-TW,ja,ko,ru,uk,tr,nl,pl,sv,no,da,fi,el,th,vi,id,ms,tl,si,iw,fa",
           autoDisplay: false,
         },
         "google_translate_element"

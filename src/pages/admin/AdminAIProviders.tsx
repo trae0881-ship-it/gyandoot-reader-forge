@@ -26,12 +26,14 @@ type Provider = {
 };
 
 const PROVIDER_META: Record<string, { label: string; docsUrl: string; description: string }> = {
-  anthropic: { label: "Anthropic Claude", docsUrl: "https://console.anthropic.com/settings/keys", description: "Primary content generation" },
-  openai:    { label: "OpenAI (GPT)",    docsUrl: "https://platform.openai.com/api-keys", description: "Fallback content generation" },
-  tavily:    { label: "Tavily",          docsUrl: "https://app.tavily.com/home", description: "Trending & general search" },
-  exa:       { label: "Exa",             docsUrl: "https://dashboard.exa.ai/api-keys", description: "Semantic search" },
-  firecrawl: { label: "Firecrawl",       docsUrl: "https://www.firecrawl.dev/app/api-keys", description: "Web crawling" },
-  serpapi:   { label: "SerpAPI",         docsUrl: "https://serpapi.com/manage-api-key", description: "Google SERP" },
+  openrouter: { label: "OpenRouter (DeepSeek)", docsUrl: "https://openrouter.ai/keys", description: "Primary content generation via DeepSeek" },
+  deepseek:  { label: "DeepSeek (direct)",  docsUrl: "https://platform.deepseek.com/api_keys", description: "Direct DeepSeek API" },
+  openai:    { label: "OpenAI (GPT)",       docsUrl: "https://platform.openai.com/api-keys", description: "Fallback content generation" },
+  gemini:    { label: "Google Gemini",      docsUrl: "https://aistudio.google.com/app/apikey", description: "Fallback content generation" },
+  tavily:    { label: "Tavily",             docsUrl: "https://app.tavily.com/home", description: "Trending & general search" },
+  exa:       { label: "Exa",                docsUrl: "https://dashboard.exa.ai/api-keys", description: "Semantic search" },
+  firecrawl: { label: "Firecrawl",          docsUrl: "https://www.firecrawl.dev/app/api-keys", description: "Web crawling" },
+  serpapi:   { label: "SerpAPI",            docsUrl: "https://serpapi.com/manage-api-key", description: "Google SERP" },
 };
 
 const invoke = async (payload: any) => {

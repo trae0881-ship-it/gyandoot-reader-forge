@@ -9,7 +9,7 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-const PROVIDERS = ["anthropic", "openai", "gemini", "deepseek", "tavily", "exa", "firecrawl", "serpapi"];
+const PROVIDERS = ["openrouter", "openai", "gemini", "deepseek", "tavily", "exa", "firecrawl", "serpapi"];
 
 function getIp(req: Request): string {
   return req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
@@ -42,11 +42,11 @@ type TestResult = { status: "connected" | "invalid_key" | "quota_exceeded" | "ra
 async function testProvider(provider: string, key: string): Promise<TestResult> {
   try {
     let res: Response;
-    if (provider === "anthropic") {
-      res = await withTimeout(fetch("https://api.anthropic.com/v1/messages", {
+    if (provider === "openrouter") {
+      res = await withTimeout(fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
-        headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-        body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 5, messages: [{ role: "user", content: "ping" }] }),
+        headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ model: "deepseek/deepseek-chat", max_tokens: 5, messages: [{ role: "user", content: "ping" }] }),
       }), 15000);
     } else if (provider === "openai") {
       res = await withTimeout(fetch("https://api.openai.com/v1/models", { headers: { Authorization: `Bearer ${key}` } }), 15000);

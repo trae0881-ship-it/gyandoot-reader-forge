@@ -6,7 +6,7 @@ import { decryptKey } from "./ai-crypto.ts";
 
 const ENV_MAP: Record<string, string> = {
   lovable: "LOVABLE_API_KEY",
-  anthropic: "ANTHROPIC_API_KEY",
+  openrouter: "OPENROUTER_API_KEY",
   openai: "OPENAI_API_KEY",
   gemini: "GEMINI_API_KEY",
   deepseek: "DEEPSEEK_API_KEY",

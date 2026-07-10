@@ -13,7 +13,7 @@ import { Table } from "@tiptap/extension-table";
 import { TableRow } from "@tiptap/extension-table-row";
 import { TableHeader } from "@tiptap/extension-table-header";
 import { TableCell } from "@tiptap/extension-table-cell";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /* ─── Preserve inline style/align on block + span nodes (Word paste) ─── */
 const PreserveStyles = Extension.create({
@@ -179,6 +179,20 @@ const RichTextEditor = ({ value, onChange, placeholder = "Start writing…", min
       transformPastedHTML: (html) => cleanWordHtml(html),
     },
   });
+
+  /* Sync external `value` changes into the editor (e.g. when async-loading
+     an existing chapter's content after mount). Without this, the editor
+     stays showing the initial empty content and any save wipes the row. */
+  useEffect(() => {
+    if (!editor) return;
+    const current = editor.getHTML();
+    // TipTap serializes empty doc as "<p></p>"; treat that as equivalent to ""
+    const isEmpty = (s: string) => !s || s === "<p></p>";
+    if (value !== current && !(isEmpty(value) && isEmpty(current))) {
+      editor.commands.setContent(value || "", { emitUpdate: false });
+    }
+  }, [value, editor]);
+
 
   /* ─── Image upload to Supabase storage ─────────────────────────────── */
   const handleImageUpload = useCallback(async (file: File) => {

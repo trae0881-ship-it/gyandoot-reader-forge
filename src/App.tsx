@@ -172,6 +172,7 @@ const AppContent = () => {
                   <Route path="api-tester" element={<AdminApiTester />} />
                   <Route path="visitors" element={<AdminVisitors />} />
                   <Route path="identified-visitors" element={<AdminIdentifiedVisitors />} />
+                  <Route path="seo-command" element={<AdminSeoCommand />} />
                   <Route path="settings" element={<AdminSettings />} />
 
                 </Route>

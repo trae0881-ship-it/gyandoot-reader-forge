@@ -738,6 +738,36 @@ const Books = () => {
     },
   });
 
+  // Fetch approved reviews once, aggregate into module-level realStats so
+  // BookCards render real ratings + verified counts without prop-drilling.
+  useQuery({
+    queryKey: ["books-review-stats", (books ?? []).length],
+    enabled: (books?.length ?? 0) > 0,
+    queryFn: async () => {
+      const ids = (books ?? []).map((b) => b.id);
+      const { data } = await supabase
+        .from("book_reviews")
+        .select("book_id, rating, is_verified_purchase")
+        .eq("is_approved", true)
+        .in("book_id", ids);
+      realStats.clear();
+      const acc = new Map<string, { count: number; sum: number; verified: number }>();
+      (data ?? []).forEach((r: any) => {
+        const cur = acc.get(r.book_id) ?? { count: 0, sum: 0, verified: 0 };
+        cur.count += 1;
+        cur.sum += r.rating;
+        if (r.is_verified_purchase) cur.verified += 1;
+        acc.set(r.book_id, cur);
+      });
+      acc.forEach((v, k) =>
+        realStats.set(k, { count: v.count, avg: v.count ? v.sum / v.count : 0, verified: v.verified })
+      );
+      return true;
+    },
+    staleTime: 60_000,
+  });
+
+
   const authors = useMemo(() => {
     const set = new Set<string>();
     (books ?? []).forEach((b) => b.author && set.add(b.author));

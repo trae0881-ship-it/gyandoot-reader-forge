@@ -53,23 +53,28 @@ function walk(dir: string, out: string[] = []): string[] {
   return out;
 }
 
-/** Very small heuristic parser: find calls that reference
- * `seo_agent_logs` and, within a short window, capture column-like
- * arguments passed to .select/.order/.gte/.lte/.eq/.filter. */
+/** Find each `.from("seo_agent_logs")` call and inspect the chained
+ * PostgREST methods that follow, up to the next `.from(` or `;`. */
 function extractColumnRefs(src: string): string[] {
   const cols: string[] = [];
-  const re = /seo_agent_logs[\s\S]{0,600}/g;
+  const fromRe = /\.from\(\s*["'`]seo_agent_logs["'`]\s*\)/g;
   let m: RegExpExecArray | null;
-  while ((m = re.exec(src)) !== null) {
-    const chunk = m[0];
-    // .select("a, b, c")
+  while ((m = fromRe.exec(src)) !== null) {
+    const start = m.index + m[0].length;
+    // stop at next `.from(` or `;`, whichever comes first
+    const rest = src.slice(start);
+    const nextFrom = rest.search(/\.from\(/);
+    const nextSemi = rest.search(/;/);
+    const stops = [nextFrom, nextSemi].filter((n) => n >= 0);
+    const end = stops.length ? Math.min(...stops) : rest.length;
+    const chunk = rest.slice(0, end);
+
     for (const s of chunk.matchAll(/\.select\(\s*["'`]([^"'`]+)["'`]/g)) {
       for (const c of s[1].split(",")) {
         const name = c.trim().split(/\s|\(/)[0];
         if (name && name !== "*") cols.push(name);
       }
     }
-    // .order("x") / .gte("x", ...) / .lte / .eq / .filter
     for (const s of chunk.matchAll(
       /\.(?:order|gte|lte|gt|lt|eq|neq|filter|is|in)\(\s*["'`]([a-zA-Z0-9_]+)["'`]/g,
     )) {

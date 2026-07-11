@@ -23,8 +23,19 @@ const OfferLanding = () => {
   useSEO({
     title: "Limited offer — GyandootNova",
     description: "Instant access, 7-day money back, one-click checkout.",
-    noindex: true,
   });
+  // Ad landing — keep off search index.
+  if (typeof document !== "undefined") {
+    const robots = document.querySelector('meta[name="robots"]');
+    if (robots) robots.setAttribute("content", "noindex, nofollow");
+    else {
+      const m = document.createElement("meta");
+      m.name = "robots";
+      m.content = "noindex, nofollow";
+      document.head.appendChild(m);
+    }
+  }
+
 
   const { data: book, isLoading } = useQuery({
     queryKey: ["offer-book", slug],
@@ -86,16 +97,17 @@ const OfferLanding = () => {
         name: guest?.name,
         email: guest?.email,
       } as any,
-      (payload: any) => {
+      (() => {
         trackSalesEvent("payment_success", { book_id: book.id, source: "offer_landing" });
         setBuying(false);
         setGuestOpen(false);
-        if (payload?.claim_token) {
-          navigate(`/claim/${payload.claim_token}`);
-        } else {
-          navigate("/dashboard");
-        }
-      },
+        // For logged-in users we send to dashboard; guest flow is completed
+        // by verify-payment redirect via URL params (claim_token) added below.
+        const urlToken = new URLSearchParams(window.location.search).get("claim_token");
+        if (urlToken) navigate(`/claim/${urlToken}`);
+        else navigate("/dashboard");
+      }) as unknown as () => void,
+
       (err) => {
         trackSalesEvent("payment_failed", { book_id: book.id, error: err });
         toast({ title: "Payment failed", description: err, variant: "destructive" });

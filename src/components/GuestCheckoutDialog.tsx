@@ -41,7 +41,7 @@ const GuestCheckoutDialog = ({ open, onOpenChange, onContinue, priceLabel }: Pro
     }
     setSubmitting(true);
     trackSalesEvent("begin_guest_checkout", { email: parsed.data.email });
-    onContinue(parsed.data);
+    onContinue(parsed.data as { email: string; name?: string });
     // Parent will close dialog after opening payment.
     setTimeout(() => setSubmitting(false), 1500);
   };

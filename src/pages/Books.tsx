@@ -1008,18 +1008,19 @@ const Books = () => {
         {/* Popular Authors */}
         {popularAuthors.length > 0 && (
           <Reveal>
-            <section className="container pt-16 md:pt-24">
-              <div className="mb-8 flex items-end justify-between">
+            <section className="container py-12 md:py-[72px] lg:py-24">
+              <div className="mb-10 flex items-end justify-between">
                 <div>
                   <h2 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ letterSpacing: "-0.02em" }}>
                     Voices We Love
                   </h2>
-                  <p className="mt-1.5 text-sm md:text-[15px]" style={{ color: T.textMuted }}>
+                  <p className="mt-2 text-[15px] md:text-base" style={{ color: T.textMuted, lineHeight: 1.7 }}>
                     Authors and translators shaping our library.
                   </p>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+              <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:gap-6 lg:grid-cols-6 lg:gap-8">
+
                 {popularAuthors.map((a) => (
                   <button
                     key={a.author}

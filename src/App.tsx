@@ -126,6 +126,8 @@ const AppContent = () => {
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/dashboard" element={<Profile />} />
+                <Route path="/my-library" element={<Navigate to="/dashboard" replace />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/our-story" element={<OurStory />} />
                 <Route path="/story" element={<Navigate to="/our-story" replace />} />

@@ -7,7 +7,7 @@
     "dev": "vite",
     "predev": "node scripts/generate-sitemap.mjs && node scripts/write-build-info.mjs",
     "prebuild": "node scripts/generate-sitemap.mjs && node scripts/write-build-info.mjs",
-    "build": "vite build && node scripts/prerender-and-seo-check.mjs --no-fail && node scripts/verify-prerender-clean.mjs && node scripts/crawl-summary.mjs",
+    "build": "rm -rf dist && vite build && node scripts/prerender-and-seo-check.mjs --no-fail && node scripts/verify-prerender-clean.mjs && node scripts/crawl-summary.mjs",
 
     "build:dev": "vite build --mode development",
     "lint": "eslint .",

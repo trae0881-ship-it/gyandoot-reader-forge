@@ -840,7 +840,6 @@ const Books = () => {
       return next;
     });
   };
-  const addToCart = (b: BookRow) => toast({ title: "Added to cart", description: b.title });
   const pushRecent = (b: BookRow) => {
     setRecent((prev) => {
       const next = [b.id, ...prev.filter((x) => x !== b.id)].slice(0, 8);
@@ -889,7 +888,7 @@ const Books = () => {
       book={b}
       onQuick={setQuick}
       onWish={toggleWish}
-      onCart={addToCart}
+
       onRecent={pushRecent}
       wished={wishlist.has(b.id)}
     />
@@ -960,7 +959,7 @@ const Books = () => {
                       size="featured"
                       onQuick={setQuick}
                       onWish={toggleWish}
-                      onCart={addToCart}
+
                       onRecent={pushRecent}
                       wished={wishlist.has(b.id)}
                     />
@@ -1322,7 +1321,7 @@ const Books = () => {
         </Reveal>
       </div>
 
-      <QuickView book={quick} onClose={() => setQuick(null)} onCart={addToCart} />
+      <QuickView book={quick} onClose={() => setQuick(null)} />
     </Layout>
   );
 };

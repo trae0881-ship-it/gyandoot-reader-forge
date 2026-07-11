@@ -210,10 +210,13 @@ const BookReader = () => {
   useSEO({
     title: book && chapter ? `${chapter.title} — ${book.title} | GyandootNova` : "Reader | GyandootNova",
     description: readerDescription,
-    canonical: book && chapter ? `/books/${book.slug}/${chapter.slug}` : undefined,
+    // Canonical points to the book detail page — chapter reader URLs are premium
+    // content and should not rank; only the book page should appear in search.
+    canonical: book ? `/books/${book.slug}` : undefined,
     ogImage: book?.cover_url ?? undefined,
     ogType: "book",
     jsonLd: readerJsonLd,
+    noindex: true,
   });
 
   /* ─── Highlights ───────────────────────────────────────────────────── */

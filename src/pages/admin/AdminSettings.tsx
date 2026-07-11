@@ -29,14 +29,19 @@ const BOOK_KEYS = [
   { key: "book_free_chapter_note", label: "Free Chapter Note (Book Detail)", placeholder: "पहला अध्याय 100% मुफ़्त है — Login कीजिए और पढ़कर देखिए, पसंद आए तभी खरीदिए।", hint: "Paid book के Table of Contents के ऊपर दिखता है। खाली = hide.", multiline: true },
 ];
 
-const INVOICE_KEYS: { key: string; label: string; placeholder: string; hint: string; multiline?: boolean }[] = [
+const INVOICE_KEYS: { key: string; label: string; placeholder: string; hint: string; multiline?: boolean; type?: "text" | "logo" }[] = [
   { key: "invoice_business_name", label: "Business Name", placeholder: "GyandootNova", hint: "Invoice header में दिखेगा" },
   { key: "invoice_business_address", label: "Business Address", placeholder: "123 Ashram Road, Varanasi, UP 221001, India", hint: "Multi-line allowed", multiline: true },
-  { key: "invoice_gstin", label: "GSTIN", placeholder: "22AAAAA0000A1Z5", hint: "अगर हो तो — नहीं तो खाली छोड़ें" },
-  { key: "invoice_pan", label: "PAN", placeholder: "AAAPL1234C", hint: "Optional" },
-  { key: "invoice_logo_url", label: "Logo URL", placeholder: "https://gyandootnova.in/logo.png", hint: "Public HTTPS PNG/JPG URL — invoice top-right corner में दिखेगा" },
+  { key: "invoice_gstin", label: "GSTIN", placeholder: "22AAAAA0000A1Z5", hint: "15 chars — regex validated. खाली छोड़ दें अगर registered नहीं हैं।" },
+  { key: "invoice_pan", label: "PAN", placeholder: "AAAPL1234C", hint: "10 chars — regex validated. Optional." },
+  { key: "invoice_logo_url", label: "Logo", placeholder: "https://gyandootnova.in/logo.png", hint: "PNG/JPG/WEBP · max 2 MB · 512×512 recommended. Upload या public HTTPS URL paste करें।", type: "logo" },
   { key: "invoice_footer_note", label: "Footer Note", placeholder: "Thank you for supporting original scriptures.", hint: "Invoice के नीचे दिखेगा", multiline: true },
 ];
+
+const GSTIN_RE = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+const PAN_RE = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
+const LOGO_ALLOWED = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+const LOGO_MAX_BYTES = 2 * 1024 * 1024;
 
 const AdminSettings = () => {
   const { toast } = useToast();

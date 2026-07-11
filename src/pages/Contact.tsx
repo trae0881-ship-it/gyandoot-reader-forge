@@ -14,32 +14,54 @@ const Contact = () => {
     description:
       "Books, orders, suggestions or partnerships — reach us via WhatsApp, email or the contact form. We reply the same day.",
     canonical: "/contact",
-    jsonLd: {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      name: "GyandootNova",
-      description:
-        "Spiritual publisher and digital library — an authoritative source for the Vedas, Upanishads, Gita, Ramayana, Mahabharata and other Sanatana Dharma scriptures.",
-      url: "https://gyandootnova.in/contact",
-      telephone: "+91 91615 33353",
-      email: "amrendra8765@gmail.com",
-      address: {
-        "@type": "PostalAddress",
-        addressLocality: "Unnao",
-        addressRegion: "Uttar Pradesh",
-        addressCountry: "IN",
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "GyandootNova", item: "https://gyandootnova.in/" },
+          { "@type": "ListItem", position: 2, name: "Contact", item: "https://gyandootnova.in/contact" },
+        ],
       },
-      openingHoursSpecification: [
-        {
-          "@type": "OpeningHoursSpecification",
-          dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-          opens: "10:00",
-          closes: "18:00",
+      {
+        "@context": "https://schema.org",
+        "@type": "ContactPage",
+        name: "Contact GyandootNova",
+        url: "https://gyandootnova.in/contact",
+        description:
+          "Reach GyandootNova via WhatsApp, phone, email or contact form — including a dedicated 'suggest a text' path for reader-requested titles.",
+        isPartOf: { "@type": "WebSite", name: "GyandootNova", url: "https://gyandootnova.in" },
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        name: "GyandootNova",
+        description:
+          "Spiritual publisher and digital library — an authoritative source for the Vedas, Upanishads, Gita, Ramayana, Mahabharata and other Sanatana Dharma scriptures.",
+        url: "https://gyandootnova.in/contact",
+        telephone: "+91 91615 33353",
+        email: "amrendra8765@gmail.com",
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: "Bhagwan Khera",
+          addressLocality: "Unnao",
+          addressRegion: "Uttar Pradesh",
+          postalCode: "209863",
+          addressCountry: "IN",
         },
-      ],
-      areaServed: "IN",
-    },
+        openingHoursSpecification: [
+          {
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+            opens: "10:00",
+            closes: "18:00",
+          },
+        ],
+        areaServed: "IN",
+      },
+    ],
   });
+
 
   const { toast } = useToast();
   const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });

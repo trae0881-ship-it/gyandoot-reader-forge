@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
-import { Menu, X, User, LogOut, Shield, MessageCircle, Search, BookOpen } from "lucide-react";
+import { Menu, X, User, LogOut, Shield, MessageCircle, Search } from "lucide-react";
 
 import { useState } from "react";
 import logoImg from "@/assets/logo.jpeg";
@@ -76,8 +76,7 @@ const Header = () => {
             />
           </div>
           <span className="hidden sm:flex flex-col leading-tight">
-            <span className="font-serif text-xl tracking-tight text-foreground inline-flex items-center gap-1.5">
-              <BookOpen className="h-5 w-5 text-gold" aria-hidden="true" />
+            <span className="font-serif text-xl tracking-tight text-foreground">
               Gyandoot<span className="gradient-text-gold">Nova</span>
             </span>
             <span className="mt-0.5 font-sans text-[11px] md:text-[12px] font-medium tracking-[0.08em] text-[#6B7280]">

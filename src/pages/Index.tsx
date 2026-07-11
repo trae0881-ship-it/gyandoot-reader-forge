@@ -148,9 +148,9 @@ const Index = () => {
     "GyandootNova (also known as Gyandoot Nova or Gyandoot) is an online Hindi platform for reading sacred Hindu texts — Bhagavad Gita, Vedas, Upanishads, Ramayana, Hanuman Chalisa and Vishnu Sahasranama — with a free, distraction-free reader.";
 
   useSEO({
-    title: "GyandootNova (Gyandoot Nova) — Hindu Religious Books in Hindi | Gita, Vedas, Ramayana",
+    title: "GyandootNova (Gyandoot Nova) — Hindu Scriptures in English | Gita, Vedas, Ramayana",
     description:
-      "GyandootNova (Gyandoot Nova) — Bhagwat Geeta, Vedas, Upanishads, Ramayana aur Hanuman Chalisa Hindi mein padhein. Free online reader ke saath trusted spiritual platform.",
+      "Read the Bhagavad Gita, Vedas, Upanishads, Ramayana and Hanuman Chalisa in clear, modern English on GyandootNova — a trusted spiritual publisher with a free online reader.",
     canonical: "/",
     ogImage: "https://gyandootnova.in/og-image.png",
     jsonLd: {

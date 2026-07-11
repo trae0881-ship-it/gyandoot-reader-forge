@@ -1316,6 +1316,8 @@ export type Database = {
       seo_agent_logs: {
         Row: {
           action: string | null
+          content_score: number | null
+          created_at: string | null
           error: string | null
           external_links: Json | null
           focus_keyword: string | null
@@ -1326,6 +1328,7 @@ export type Database = {
           post_id: string | null
           reading_time_min: number | null
           run_at: string
+          seo_score: number | null
           similarity_score: number | null
           slug: string | null
           sources: Json | null
@@ -1335,6 +1338,8 @@ export type Database = {
         }
         Insert: {
           action?: string | null
+          content_score?: number | null
+          created_at?: string | null
           error?: string | null
           external_links?: Json | null
           focus_keyword?: string | null
@@ -1345,6 +1350,7 @@ export type Database = {
           post_id?: string | null
           reading_time_min?: number | null
           run_at?: string
+          seo_score?: number | null
           similarity_score?: number | null
           slug?: string | null
           sources?: Json | null
@@ -1354,6 +1360,8 @@ export type Database = {
         }
         Update: {
           action?: string | null
+          content_score?: number | null
+          created_at?: string | null
           error?: string | null
           external_links?: Json | null
           focus_keyword?: string | null
@@ -1364,6 +1372,7 @@ export type Database = {
           post_id?: string | null
           reading_time_min?: number | null
           run_at?: string
+          seo_score?: number | null
           similarity_score?: number | null
           slug?: string | null
           sources?: Json | null

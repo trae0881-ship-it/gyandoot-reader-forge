@@ -17,16 +17,13 @@ Deno.serve(async () => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY")!
   );
 
-  const [booksRes, postsRes, chaptersRes] = await Promise.all([
+  const [booksRes, postsRes] = await Promise.all([
     supabase.from("books").select("id, slug, updated_at").order("created_at", { ascending: false }),
     supabase.from("posts").select("slug, updated_at").eq("is_published", true).order("created_at", { ascending: false }),
-    supabase.from("book_chapters").select("book_id, slug, updated_at, is_preview, chapter_number").order("chapter_number", { ascending: true }),
   ]);
 
   const books = booksRes.data ?? [];
   const posts = postsRes.data ?? [];
-  const chapters = chaptersRes.data ?? [];
-  const bookSlugById = new Map((books as Array<{ id?: string; slug?: string }>).filter((b) => b.id && b.slug).map((b) => [b.id!, b.slug!]));
 
   const staticPages = [
     { loc: "/", priority: "1.0", changefreq: "daily" },

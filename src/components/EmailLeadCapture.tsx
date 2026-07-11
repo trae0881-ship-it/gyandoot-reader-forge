@@ -98,7 +98,7 @@ export default function EmailLeadCapture() {
     setErr(null);
     const parsed = schema.safeParse({ email, name });
     if (!parsed.success) {
-      setErr("कृपया valid नाम और email दर्ज करें");
+      setErr("Please enter a valid name and email address.");
       return;
     }
     setBusy(true);
@@ -113,7 +113,7 @@ export default function EmailLeadCapture() {
       mark();
       setDone(true);
     } catch (e: any) {
-      setErr("कुछ गड़बड़ हुई, दोबारा try करें");
+      setErr("Something went wrong — please try again.");
     } finally {
       setBusy(false);
     }
@@ -160,18 +160,18 @@ export default function EmailLeadCapture() {
                 <Gift className="h-7 w-7 text-primary" />
               </div>
               <h3 className="mt-4 font-serif text-2xl font-bold">
-                20% OFF आपकी पहली पुस्तक पर
+                Get 20% off your first book
               </h3>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                अपना email दें — तुरंत coupon पाएं और नए ग्रंथों की notification पाएं।
-                कोई spam नहीं।
+                Drop your email — receive an instant coupon plus notifications when new scriptures
+                are published. No spam, ever.
               </p>
             </div>
 
             <div className="mt-5 space-y-3">
               <div className="relative">
                 <Input
-                  placeholder="आपका नाम"
+                  placeholder="Your name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   maxLength={100}
@@ -199,14 +199,14 @@ export default function EmailLeadCapture() {
               >
                 {busy ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> भेज रहे हैं…
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending…
                   </>
                 ) : (
-                  <>Coupon पाएं →</>
+                  <>Send my coupon →</>
                 )}
               </Button>
               <p className="text-center text-[11px] text-muted-foreground">
-                Unsubscribe anytime · कोई card details नहीं
+                Unsubscribe anytime · No card details required
               </p>
             </div>
           </>
@@ -215,9 +215,9 @@ export default function EmailLeadCapture() {
             <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-secondary/20">
               <Check className="h-7 w-7 text-secondary" />
             </div>
-            <h3 className="mt-4 font-serif text-2xl font-bold">धन्यवाद!</h3>
+            <h3 className="mt-4 font-serif text-2xl font-bold">Thank you!</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              यह रहा आपका coupon — checkout पर apply करें:
+              Here&apos;s your coupon — apply it at checkout:
             </p>
             <div className="mt-4 rounded-xl border-2 border-dashed border-secondary bg-secondary/5 p-4">
               <button
@@ -229,15 +229,15 @@ export default function EmailLeadCapture() {
               <p className="mt-1 text-xs text-muted-foreground">
                 {copied ? (
                   <span className="inline-flex items-center gap-1 text-green-700 font-semibold">
-                    <Check className="h-3 w-3" /> Copy हो गया
+                    <Check className="h-3 w-3" /> Copied
                   </span>
                 ) : (
-                  "Code par click करें copy करने के लिए"
+                  "Tap the code to copy"
                 )}
               </p>
             </div>
             <Button onClick={close} className="mt-5 w-full" size="lg">
-              अभी shop करें →
+              Start shopping →
             </Button>
           </div>
         )}

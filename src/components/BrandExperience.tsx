@@ -3,8 +3,7 @@ import { BookOpen, Compass, Sparkles, HeartHandshake, ShieldCheck, Library, Feat
 
 /**
  * Premium publishing-brand experience blocks.
- * Bilingual (Hindi + English). Uses semantic tokens only.
- * Additive — safe to drop into any page.
+ * English copy, semantic tokens only. Additive — safe to drop into any page.
  */
 
 // ────────────────────────────────────────────────────────────
@@ -14,17 +13,16 @@ export const WhyWeExist = () => (
   <section className="relative py-20 md:py-28 bg-background">
     <div className="container max-w-5xl px-4">
       <div className="text-center">
-        <span className="section-eyebrow">Hamara Uddeshya · Our Purpose</span>
+        <span className="section-eyebrow">Our Purpose</span>
         <h2 className="mt-5 text-3xl md:text-5xl font-bold tracking-tight text-foreground">
-          Kitaabein sirf panne nahi hain —
+          Books are more than pages —
           <br className="hidden md:block" />
-          <span className="text-primary"> vichaar, anubhav aur gyaan hain.</span>
+          <span className="text-primary"> they are ideas, experiences and wisdom.</span>
         </h2>
         <p className="mt-6 mx-auto max-w-2xl text-lg md:text-xl leading-relaxed text-muted-foreground">
-          Books are more than pages. They are ideas, experiences and wisdom that
-          quietly shape our journey. GyandootNova exists to bring meaningful books
-          closer to readers — a trusted space for knowledge, imagination and
-          lifelong learning.
+          Books quietly shape our journey. GyandootNova exists to bring timeless scriptures and
+          meaningful ideas closer to modern readers — a trusted, unhurried space for knowledge,
+          imagination and lifelong learning.
         </p>
         <div className="divider-gold mt-10" />
       </div>
@@ -39,29 +37,25 @@ const journeys = [
   {
     icon: Compass,
     title: "Curious Readers",
-    hindi: "Jigyasu Pathak",
-    line: "Naye vichaaron aur nayi duniyaon ki khoj mein.",
+    line: "In search of new ideas and unexplored worlds.",
     href: "/books",
   },
   {
     icon: BookOpen,
     title: "Lifelong Learners",
-    hindi: "Nirantar Sikhne Wale",
-    line: "Har din thoda gyaan, thoda vistaar.",
+    line: "A little knowledge every day — that&apos;s how depth is built.",
     href: "/articles",
   },
   {
     icon: Sparkles,
     title: "Knowledge Seekers",
-    hindi: "Gyaan Ki Or",
-    line: "Prachin granthon ka gehra adhyayan.",
+    line: "Deep study of ancient scriptures, one chapter at a time.",
     href: "/books?category=adhyatm",
   },
   {
     icon: Feather,
     title: "Story Lovers",
-    hindi: "Kathaon Ke Premi",
-    line: "Kahaniyan jo sadiyon se saath chalti hain.",
+    line: "Stories that have travelled with humanity for centuries.",
     href: "/books?category=katha",
   },
 ];
@@ -70,17 +64,17 @@ export const ReaderJourney = () => (
   <section className="relative py-20 md:py-28 bg-gradient-cream">
     <div className="container max-w-6xl px-4">
       <div className="text-center max-w-2xl mx-auto">
-        <span className="section-eyebrow">Aapki Padhne Ki Yatra · Your Reading Journey</span>
+        <span className="section-eyebrow">Your Reading Journey</span>
         <h2 className="mt-5 text-3xl md:text-4xl font-bold text-foreground">
-          Har pathak ki apni raah hai
+          Every reader walks their own path
         </h2>
         <p className="mt-4 text-lg text-muted-foreground">
-          Aap kaisi bhi yatra par hon, GyandootNova mein aapke liye kuch hai.
+          Whatever your journey looks like, GyandootNova has something for you.
         </p>
       </div>
 
       <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {journeys.map(({ icon: Icon, title, hindi, line, href }) => (
+        {journeys.map(({ icon: Icon, title, line, href }) => (
           <Link
             key={title}
             to={href}
@@ -90,7 +84,6 @@ export const ReaderJourney = () => (
               <Icon className="h-5 w-5" />
             </div>
             <h3 className="mt-6 text-xl font-bold text-foreground">{title}</h3>
-            <p className="mt-1 text-sm font-medium text-primary">{hindi}</p>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground flex-1">
               {line}
             </p>
@@ -110,21 +103,18 @@ export const ReaderJourney = () => (
 const trustPillars = [
   {
     icon: Library,
-    title: "Quality Books",
-    hindi: "Utkrisht Sangraha",
-    body: "Har pustak ka path evam sudhaar samay lekar kiya jata hai — jaldbaazi mein kuch nahi.",
+    title: "Curated Quality",
+    body: "Every scripture is reviewed and refined with patience — nothing rushed to publish.",
   },
   {
     icon: HeartHandshake,
     title: "Reader First",
-    hindi: "Pathak Sarvopari",
-    body: "Aapka anubhav — shanti, sugamta aur bharosa — humari pehli prathmikta hai.",
+    body: "Your experience — calm, easy to navigate, always trustworthy — is our first priority.",
   },
   {
     icon: ShieldCheck,
     title: "Authentic Sources",
-    hindi: "Praamaanik Srot",
-    body: "Har granth ke saath uska mool srot — bina badle, bina jodh-tod.",
+    body: "Every text arrives with its original source — untouched, unaltered, verifiable.",
   },
 ];
 
@@ -132,20 +122,19 @@ export const TrustPillars = () => (
   <section className="relative py-20 md:py-28 bg-background">
     <div className="container max-w-6xl px-4">
       <div className="text-center max-w-2xl mx-auto">
-        <span className="section-eyebrow">Vishwas · Trust</span>
+        <span className="section-eyebrow">Trust</span>
         <h2 className="mt-5 text-3xl md:text-4xl font-bold text-foreground">
-          Ek publishing brand jispar aap bharosa kar sakein
+          A publishing brand you can rely on
         </h2>
       </div>
 
       <div className="mt-14 grid gap-8 md:grid-cols-3">
-        {trustPillars.map(({ icon: Icon, title, hindi, body }) => (
+        {trustPillars.map(({ icon: Icon, title, body }) => (
           <div key={title} className="text-center px-4">
             <div className="mx-auto h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center text-primary">
               <Icon className="h-6 w-6" />
             </div>
             <h3 className="mt-6 text-xl font-bold text-foreground">{title}</h3>
-            <p className="mt-1 text-sm font-medium text-primary">{hindi}</p>
             <p className="mt-4 text-base leading-relaxed text-muted-foreground max-w-xs mx-auto">
               {body}
             </p>
@@ -162,12 +151,12 @@ export const TrustPillars = () => (
 export const BooksJourneyIntro = () => (
   <section className="relative py-16 md:py-24 bg-gradient-cream border-b border-border/60">
     <div className="container max-w-4xl px-4 text-center">
-      <span className="section-eyebrow">Pustak Bhandaar · Our Library</span>
+      <span className="section-eyebrow">Our Library</span>
       <h1 className="mt-5 text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground">
         Explore books for your journey
       </h1>
       <p className="mt-6 mx-auto max-w-2xl text-lg md:text-xl leading-relaxed text-muted-foreground">
-        Ek shant, curated bhandaar — jahan har pustak soch samajh kar chuni gayi hai.
+        A calm, curated collection — every book chosen with care.
         Browse without pressure. Find something that stays with you.
       </p>
     </div>
@@ -184,38 +173,34 @@ export const WhyBookMatters = ({ title }: WhyBookMattersProps) => (
   <section className="py-16 md:py-20 bg-gradient-cream border-y border-border/60">
     <div className="container max-w-5xl px-4">
       <div className="text-center mb-12">
-        <span className="section-eyebrow">Is Pustak Ke Baare Mein · Why This Book Matters</span>
+        <span className="section-eyebrow">Why This Book Matters</span>
         <h2 className="mt-4 text-3xl md:text-4xl font-bold text-foreground">
-          {title ? `Kya milega "${title}" mein` : "Kya milega is pustak mein"}
+          {title ? `What you&apos;ll find inside "${title}"` : "What you&apos;ll find inside this book"}
         </h2>
       </div>
       <div className="grid gap-8 md:grid-cols-3">
         {[
           {
             icon: BookOpen,
-            head: "Gehri samajh",
-            sub: "Deep understanding",
-            body: "Sirf shabd nahi — bhaav, sandarbh aur artha ke saath padhein.",
+            head: "Deep understanding",
+            body: "Read beyond the words — with context, meaning and the emotion behind every verse.",
           },
           {
             icon: Sparkles,
-            head: "Naye drishtikon",
-            sub: "New perspectives",
-            body: "Prachin gyaan ko aaj ke jeevan mein utaarne ki drishti.",
+            head: "New perspectives",
+            body: "Ancient wisdom translated for how we live and think today.",
           },
           {
             icon: HeartHandshake,
-            head: "Shant sangat",
-            sub: "A quiet companion",
-            body: "Ek pustak jo baar-baar padhne par har baar kuch naya deti hai.",
+            head: "A quiet companion",
+            body: "A book that reveals something new each time you return to it.",
           },
-        ].map(({ icon: Icon, head, sub, body }) => (
+        ].map(({ icon: Icon, head, body }) => (
           <div key={head} className="surface-card p-8">
             <div className="h-11 w-11 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
               <Icon className="h-5 w-5" />
             </div>
             <h3 className="mt-5 text-lg font-bold text-foreground">{head}</h3>
-            <p className="text-sm font-medium text-primary">{sub}</p>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{body}</p>
           </div>
         ))}
@@ -230,35 +215,31 @@ export const WhyBookMatters = ({ title }: WhyBookMattersProps) => (
 export const MissionVisionValues = () => {
   const items = [
     {
-      head: "Hamara Uddeshya",
-      sub: "Our Mission",
-      body: "Prachin gyaan ko aaj ke pathak tak — bina jaldi, bina milaawat — pahunchana.",
+      head: "Our Mission",
+      body: "To bring timeless wisdom to modern readers — without shortcuts, without dilution.",
     },
     {
-      head: "Hamari Drishti",
-      sub: "Our Vision",
-      body: "Ek aisi digital sthali jahan padhna ek shant, praamaanik aur bharoseband anubhav ho.",
+      head: "Our Vision",
+      body: "A digital home where reading is calm, authentic, and truly trustworthy.",
     },
     {
-      head: "Hamare Mulya",
-      sub: "Our Values",
-      body: "Praamaanikta, dhairya, pathak ke prati aadar aur srot ke prati shraddha.",
+      head: "Our Values",
+      body: "Authenticity, patience, respect for the reader, and reverence for the source.",
     },
   ];
   return (
     <section className="py-20 md:py-28 bg-gradient-cream border-y border-border/60">
       <div className="container max-w-6xl px-4">
         <div className="text-center max-w-2xl mx-auto">
-          <span className="section-eyebrow">Hamari Neev · Our Foundation</span>
+          <span className="section-eyebrow">Our Foundation</span>
           <h2 className="mt-5 text-3xl md:text-4xl font-bold text-foreground">
-            Jispar humara har nirnay tika hai
+            The principles behind every decision we make
           </h2>
         </div>
         <div className="mt-14 grid gap-6 md:grid-cols-3">
           {items.map((it) => (
-            <div key={it.sub} className="surface-card p-8">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">{it.sub}</p>
-              <h3 className="mt-3 text-2xl font-bold text-foreground">{it.head}</h3>
+            <div key={it.head} className="surface-card p-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">{it.head}</p>
               <p className="mt-4 text-base leading-relaxed text-muted-foreground">{it.body}</p>
             </div>
           ))}
@@ -274,12 +255,12 @@ export const MissionVisionValues = () => {
 export const ContinueReadingInvite = () => (
   <section className="py-16 md:py-20 bg-gradient-cream border-t border-border/60">
     <div className="container max-w-3xl px-4 text-center">
-      <span className="section-eyebrow">Aage Padhein · Continue Your Reading Journey</span>
+      <span className="section-eyebrow">Continue Your Reading Journey</span>
       <h2 className="mt-5 text-3xl md:text-4xl font-bold text-foreground">
-        Ek vichaar samapt hua — agla intezaar mein hai
+        One idea ends — the next one is waiting
       </h2>
       <p className="mt-5 text-lg text-muted-foreground leading-relaxed">
-        Har lekh ek chhoti yatra hai. Agli yatra shuru karein — apni ruchi ke anusaar.
+        Every article is a small journey. Begin the next one — chosen for what you already enjoy.
       </p>
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         <Link

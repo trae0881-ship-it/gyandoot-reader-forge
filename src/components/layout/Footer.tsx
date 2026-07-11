@@ -56,8 +56,7 @@ const Footer = () => {
               <span className="font-serif text-2xl">Gyandoot<span className="gradient-text-gold">Nova</span></span>
             </Link>
             <p className="text-sm text-background/70 leading-relaxed">
-              GyandootNova ek bharoseband sthal hai — jahan pustakein, vichaar aur pathak ek saath aate hain.
-              A trusted destination where books, ideas and readers come together.
+              A trusted publishing home where timeless scriptures, modern ideas and thoughtful readers come together.
             </p>
 
 

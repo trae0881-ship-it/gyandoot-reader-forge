@@ -275,7 +275,7 @@ export const CalmFeeling = () => (
         {calmPromises.map((p) => (
           <div
             key={p.title}
-            className="bg-primary px-4 py-6 transition-colors hover:bg-primary-foreground/[0.03]"
+            className="bg-ink px-4 py-6 transition-colors hover:bg-primary-foreground/[0.03]"
           >
             <p
               className="text-lg md:text-xl text-primary-foreground"

@@ -223,3 +223,78 @@ export const WhyBookMatters = ({ title }: WhyBookMattersProps) => (
     </div>
   </section>
 );
+
+// ────────────────────────────────────────────────────────────
+// Mission · Vision · Values triad — for About page
+// ────────────────────────────────────────────────────────────
+export const MissionVisionValues = () => {
+  const items = [
+    {
+      head: "Hamara Uddeshya",
+      sub: "Our Mission",
+      body: "Prachin gyaan ko aaj ke pathak tak — bina jaldi, bina milaawat — pahunchana.",
+    },
+    {
+      head: "Hamari Drishti",
+      sub: "Our Vision",
+      body: "Ek aisi digital sthali jahan padhna ek shant, praamaanik aur bharoseband anubhav ho.",
+    },
+    {
+      head: "Hamare Mulya",
+      sub: "Our Values",
+      body: "Praamaanikta, dhairya, pathak ke prati aadar aur srot ke prati shraddha.",
+    },
+  ];
+  return (
+    <section className="py-20 md:py-28 bg-gradient-cream border-y border-border/60">
+      <div className="container max-w-6xl px-4">
+        <div className="text-center max-w-2xl mx-auto">
+          <span className="section-eyebrow">Hamari Neev · Our Foundation</span>
+          <h2 className="mt-5 text-3xl md:text-4xl font-bold text-foreground">
+            Jispar humara har nirnay tika hai
+          </h2>
+        </div>
+        <div className="mt-14 grid gap-6 md:grid-cols-3">
+          {items.map((it) => (
+            <div key={it.sub} className="surface-card p-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">{it.sub}</p>
+              <h3 className="mt-3 text-2xl font-bold text-foreground">{it.head}</h3>
+              <p className="mt-4 text-base leading-relaxed text-muted-foreground">{it.body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// ────────────────────────────────────────────────────────────
+// Continue-your-reading invitation — for ArticleDetail
+// ────────────────────────────────────────────────────────────
+export const ContinueReadingInvite = () => (
+  <section className="py-16 md:py-20 bg-gradient-cream border-t border-border/60">
+    <div className="container max-w-3xl px-4 text-center">
+      <span className="section-eyebrow">Aage Padhein · Continue Your Reading Journey</span>
+      <h2 className="mt-5 text-3xl md:text-4xl font-bold text-foreground">
+        Ek vichaar samapt hua — agla intezaar mein hai
+      </h2>
+      <p className="mt-5 text-lg text-muted-foreground leading-relaxed">
+        Har lekh ek chhoti yatra hai. Agli yatra shuru karein — apni ruchi ke anusaar.
+      </p>
+      <div className="mt-8 flex flex-wrap justify-center gap-3">
+        <Link
+          to="/articles"
+          className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
+        >
+          More articles <ArrowRight className="h-4 w-4" />
+        </Link>
+        <Link
+          to="/books"
+          className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold text-foreground hover:border-primary/40 hover:text-primary transition-colors"
+        >
+          Browse books
+        </Link>
+      </div>
+    </div>
+  </section>
+);

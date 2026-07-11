@@ -13,6 +13,8 @@ import {
   ArrowRight,
 } from "lucide-react";
 import useSEO from "@/hooks/useSEO";
+import { MissionVisionValues } from "@/components/BrandExperience";
+
 
 const About = () => {
   useSEO({
@@ -390,8 +392,10 @@ const About = () => {
             </div>
           </div>
         </section>
+        <MissionVisionValues />
       </main>
     </Layout>
+
   );
 };
 

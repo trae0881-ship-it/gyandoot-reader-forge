@@ -16,15 +16,34 @@ const Articles = () => {
     title: "Spiritual Articles & Insights — GyandootNova (Gyandoot Nova)",
     description: "GyandootNova (Gyandoot Nova) — Read spiritual articles, discourses, and insights on Vishnu Sahasraname, Bhagwat Geeta, meditation & more.",
     canonical: "/articles",
-    jsonLd: {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        { "@type": "ListItem", position: 1, name: "GyandootNova", item: "https://gyandootnova.in/" },
-        { "@type": "ListItem", position: 2, name: "Articles", item: "https://gyandootnova.in/articles" },
-      ],
-    },
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "GyandootNova", item: "https://gyandootnova.in/" },
+          { "@type": "ListItem", position: 2, name: "Articles", item: "https://gyandootnova.in/articles" },
+        ],
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        name: "Spiritual Articles & Insights",
+        url: "https://gyandootnova.in/articles",
+        description:
+          "A curated collection of spiritual articles, discourses and reflections on Bhagavad Gita, Vedas, Upanishads, meditation and Sanatan wisdom.",
+        inLanguage: ["hi-IN", "en"],
+        isPartOf: { "@type": "WebSite", name: "GyandootNova", url: "https://gyandootnova.in" },
+        publisher: {
+          "@type": "Organization",
+          name: "GyandootNova",
+          url: "https://gyandootnova.in",
+          logo: "https://gyandootnova.in/gyandoot-nova-icon.ico",
+        },
+      },
+    ],
   });
+
 
 
   const { data: posts, isLoading } = useQuery({

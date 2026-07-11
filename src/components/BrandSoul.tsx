@@ -1,51 +1,98 @@
 import { Link } from "react-router-dom";
-import { Sparkles, HeartHandshake, Leaf, ArrowRight, Quote, Sunrise, Wind, BookOpen } from "lucide-react";
+import {
+  Sparkles,
+  HeartHandshake,
+  Leaf,
+  ArrowRight,
+  Sunrise,
+  Wind,
+  BookOpen,
+  Layers,
+} from "lucide-react";
 
 /**
- * Three quiet, publishing-brand sections for the homepage:
- *  1. BrandPurpose        — why we exist
- *  2. EmotionalConnection — reader ↔ text, real moments
- *  3. CalmFeeling         — the unhurried atmosphere we protect
+ * Editorial trilogy for the homepage:
+ *  I.   Brand Purpose        — the dharma
+ *  II.  Emotional Connection — moments of transcendence (asymmetric, dark middle card)
+ *  III. Calm Feeling         — the sanctuary (deep primary with gold rule)
  *
- * English-only copy. Uses semantic tokens.
+ * Cormorant Garamond display + Manrope body, all through semantic tokens.
+ * English-only copy, no emojis, Lucide icons only.
  */
 
+const displayFont = { fontFamily: "'Cormorant Garamond', 'Manrope', serif" };
+const bodyFont = { fontFamily: "'Manrope', 'Inter', sans-serif" };
+
 // ────────────────────────────────────────────────────────────
-// 1. Brand Purpose
+// I. Brand Purpose
 // ────────────────────────────────────────────────────────────
 export const BrandPurpose = () => (
-  <section className="relative py-20 md:py-28 bg-background overflow-hidden">
-    <div
-      aria-hidden
-      className="absolute inset-0 opacity-[0.05]"
-      style={{
-        backgroundImage:
-          "radial-gradient(circle at 20% 30%, hsl(var(--secondary)) 0%, transparent 45%), radial-gradient(circle at 80% 70%, hsl(var(--primary)) 0%, transparent 45%)",
-      }}
-    />
-    <div className="container relative max-w-4xl px-4 text-center">
-      <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
-        <Sparkles className="h-3 w-3" />
-        Our Purpose
-      </span>
-      <h2 className="mt-6 font-serif text-3xl md:text-5xl font-bold leading-[1.2] tracking-tight text-foreground">
-        Bringing timeless wisdom to today's reader —
-        <br className="hidden md:block" />
-        <span className="text-primary italic font-normal"> without the noise, without the rush.</span>
-      </h2>
-      <p className="mx-auto mt-8 max-w-2xl text-lg md:text-xl leading-[1.85] text-muted-foreground">
-        We are a publishing brand, not just another app. Every scripture has a
-        verified source, every translation is shaped by a scholar, and every
-        reader is given a quiet place — where reading becomes an experience
-        again.
-      </p>
-      <div className="mt-10 h-px w-24 mx-auto bg-gradient-to-r from-transparent via-secondary to-transparent" />
+  <section className="relative bg-background py-24 md:py-32">
+    <div className="container max-w-6xl px-4">
+      <div className="grid lg:grid-cols-12 gap-12 items-center">
+        <div className="lg:col-span-7">
+          <div className="flex items-center gap-4 mb-6">
+            <span className="text-[10px] font-bold uppercase tracking-[0.32em] text-secondary" style={bodyFont}>
+              Chapter I · Our Purpose
+            </span>
+          </div>
+          <h2
+            className="text-4xl md:text-6xl lg:text-7xl leading-[1.05] text-foreground"
+            style={displayFont}
+          >
+            Preserving the{" "}
+            <span className="italic text-secondary">eternal echo</span> of the
+            ancients — for today's reader.
+          </h2>
+          <p
+            className="mt-10 text-lg md:text-xl leading-[1.85] text-muted-foreground max-w-xl"
+            style={bodyFont}
+          >
+            We are a publishing brand, not another app. Every scripture carries
+            a verified source, every translation is shaped by a scholar, and
+            every reader is given a quiet place — so reading becomes an
+            experience again.
+          </p>
+          <div className="mt-10 h-px w-24 bg-gradient-to-r from-secondary via-secondary/60 to-transparent" />
+        </div>
+
+        <div className="lg:col-span-5 flex lg:justify-end">
+          <div className="relative group">
+            <div className="absolute -inset-4 border border-secondary/30 translate-x-4 translate-y-4 transition-transform duration-500 group-hover:translate-x-2 group-hover:translate-y-2" />
+            <div className="relative w-64 h-80 md:w-72 md:h-96 bg-primary flex items-center justify-center overflow-hidden">
+              <Sparkles className="absolute h-40 w-40 text-secondary/10" strokeWidth={0.5} />
+              <div className="relative text-center px-6">
+                <p
+                  className="text-[10px] uppercase tracking-[0.4em] text-secondary/80"
+                  style={bodyFont}
+                >
+                  Volume One
+                </p>
+                <div className="h-px w-8 mx-auto my-4 bg-secondary/40" />
+                <p
+                  className="text-2xl italic text-primary-foreground/90 leading-snug"
+                  style={displayFont}
+                >
+                  The unhurried library
+                </p>
+                <div className="h-px w-8 mx-auto my-4 bg-secondary/40" />
+                <p
+                  className="text-[10px] uppercase tracking-[0.4em] text-secondary/80"
+                  style={bodyFont}
+                >
+                  Est. GyandootNova
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 );
 
 // ────────────────────────────────────────────────────────────
-// 2. Emotional Connection
+// II. Emotional Connection
 // ────────────────────────────────────────────────────────────
 const moments = [
   {
@@ -53,62 +100,114 @@ const moments = [
     when: "With the morning tea",
     sub: "A calm start",
     line: "One shloka, one breath — the day begins a little lighter, a little clearer.",
+    dark: false,
   },
   {
     icon: Wind,
     when: "On a half-hour commute",
     sub: "Stillness in the crowd",
     line: "No noise, no ads — just one chapter of the Gita, and quiet inside the rush.",
+    dark: true,
   },
   {
     icon: BookOpen,
     when: "By the evening lamp",
     sub: "A family ritual",
     line: "Father reads in a larger font, the children sit close and listen — the ritual returns.",
+    dark: false,
   },
 ];
 
 export const EmotionalConnection = () => (
-  <section className="relative py-20 md:py-28 bg-gradient-cream">
+  <section className="relative bg-gradient-cream py-24 md:py-32 border-y border-secondary/10">
     <div className="container max-w-6xl px-4">
-      <div className="text-center max-w-2xl mx-auto">
-        <span className="inline-flex items-center gap-2 rounded-full border border-secondary/40 bg-secondary/10 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-secondary-foreground">
-          <HeartHandshake className="h-3 w-3" />
-          Emotional Connection
-        </span>
-        <h2 className="mt-6 font-serif text-3xl md:text-4xl font-bold text-foreground">
-          A book only truly works when it
-          <span className="text-primary"> settles into your day</span>
-        </h2>
-        <p className="mt-5 text-lg text-muted-foreground leading-relaxed">
-          We don't make loud promises. Just small, honest moments that our
-          readers write in and share with us.
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-16">
+        <div>
+          <span
+            className="text-[10px] font-bold uppercase tracking-[0.32em] text-secondary block mb-4"
+            style={bodyFont}
+          >
+            Chapter II · Emotional Connection
+          </span>
+          <h2
+            className="text-4xl md:text-5xl lg:text-6xl leading-[1.1] text-foreground max-w-2xl"
+            style={displayFont}
+          >
+            Moments a book <span className="italic">quietly enters.</span>
+          </h2>
+        </div>
+        <p
+          className="max-w-xs text-sm italic leading-relaxed text-muted-foreground"
+          style={bodyFont}
+        >
+          Wisdom isn't read — it's felt, in the small spaces between the day.
         </p>
       </div>
 
-      <div className="mt-14 grid gap-6 md:grid-cols-3">
-        {moments.map(({ icon: Icon, when, sub, line }) => (
-          <div
+      <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
+        {moments.map(({ icon: Icon, when, sub, line, dark }, i) => (
+          <article
             key={when}
-            className="relative surface-card p-8 flex flex-col"
+            className={[
+              "group relative min-h-[380px] p-8 flex flex-col justify-between transition-all duration-500",
+              dark
+                ? "bg-primary text-primary-foreground shadow-2xl md:mt-12"
+                : "bg-card border border-secondary/15 hover:-translate-y-2 hover:shadow-[0_24px_60px_-20px_hsl(var(--primary)/0.25)]",
+            ].join(" ")}
           >
-            <Quote className="absolute right-6 top-6 h-8 w-8 text-primary/10" />
-            <div className="h-11 w-11 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-              <Icon className="h-5 w-5" />
+            <div className="flex items-start justify-between">
+              <Icon
+                className={dark ? "h-8 w-8 text-secondary" : "h-8 w-8 text-secondary"}
+                strokeWidth={1.5}
+              />
+              <span
+                className={[
+                  "text-[10px] font-bold uppercase tracking-[0.3em]",
+                  dark ? "text-secondary/70" : "text-muted-foreground/60",
+                ].join(" ")}
+                style={bodyFont}
+              >
+                {String(i + 1).padStart(2, "0")}
+              </span>
             </div>
-            <h3 className="mt-5 font-serif text-xl font-bold text-foreground">{when}</h3>
-            <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-primary">{sub}</p>
-            <p className="mt-4 text-base leading-[1.75] text-muted-foreground flex-1">
-              {line}
-            </p>
-          </div>
+            <div>
+              <p
+                className={[
+                  "text-[10px] font-bold uppercase tracking-[0.28em] mb-3",
+                  dark ? "text-secondary" : "text-primary",
+                ].join(" ")}
+                style={bodyFont}
+              >
+                {sub}
+              </p>
+              <h3
+                className={[
+                  "text-2xl md:text-[1.75rem] leading-tight mb-4",
+                  dark ? "text-primary-foreground" : "text-foreground",
+                ].join(" ")}
+                style={displayFont}
+              >
+                {when}
+              </h3>
+              <p
+                className={[
+                  "text-sm leading-relaxed",
+                  dark ? "text-primary-foreground/75" : "text-muted-foreground",
+                ].join(" ")}
+                style={bodyFont}
+              >
+                {line}
+              </p>
+            </div>
+          </article>
         ))}
       </div>
 
-      <div className="mt-12 text-center">
+      <div className="mt-14 text-center">
         <Link
           to="/testimonials"
           className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
+          style={bodyFont}
         >
           Read more reader stories
           <ArrowRight className="h-3.5 w-3.5" />
@@ -119,7 +218,7 @@ export const EmotionalConnection = () => (
 );
 
 // ────────────────────────────────────────────────────────────
-// 3. Calm Feeling
+// III. Calm Feeling
 // ────────────────────────────────────────────────────────────
 const calmPromises = [
   { title: "No pop-ups", sub: "Ever" },
@@ -129,48 +228,79 @@ const calmPromises = [
 ];
 
 export const CalmFeeling = () => (
-  <section className="relative py-20 md:py-28 bg-primary overflow-hidden">
+  <section className="relative bg-primary overflow-hidden">
     <div
       aria-hidden
-      className="absolute inset-0 opacity-[0.06]"
-      style={{
-        backgroundImage:
-          "radial-gradient(circle at 50% 50%, hsl(var(--secondary)) 0%, transparent 60%)",
-      }}
+      className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full blur-[120px] -mr-48 -mt-48"
+      style={{ backgroundColor: "hsl(var(--secondary) / 0.08)" }}
     />
-    <div className="container relative max-w-4xl px-4 text-center">
-      <div className="inline-flex items-center gap-2 rounded-full border border-secondary/40 bg-secondary/10 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-secondary">
+    <div
+      aria-hidden
+      className="absolute bottom-0 left-0 w-96 h-96 rounded-full blur-[100px] -ml-32 -mb-32"
+      style={{ backgroundColor: "hsl(var(--secondary) / 0.05)" }}
+    />
+
+    <div className="container relative max-w-5xl px-4 py-24 md:py-36 text-center">
+      <span
+        className="text-[10px] font-bold uppercase tracking-[0.32em] text-secondary inline-flex items-center gap-3 mb-10"
+        style={bodyFont}
+      >
         <Leaf className="h-3 w-3" />
-        A Calm Feeling
-      </div>
-      <h2 className="mt-6 font-serif text-3xl md:text-5xl font-semibold leading-[1.2] text-primary-foreground">
-        The place you read in
-        <span className="text-secondary italic font-normal"> should be calm too.</span>
+        Chapter III · A Calm Feeling
+      </span>
+
+      <h2
+        className="text-4xl md:text-6xl lg:text-7xl leading-[1.05] text-primary-foreground max-w-4xl mx-auto"
+        style={displayFont}
+      >
+        An island of <span className="italic text-secondary">stillness</span>
+        <br className="hidden md:block" /> in a sea of noise.
       </h2>
-      <p className="mx-auto mt-8 max-w-2xl text-base md:text-lg leading-[1.85] text-primary-foreground/80">
-        That is why we built a reader that quietly steps back — so nothing
-        stands between you and the scripture in front of you.
+
+      <div className="my-10 flex items-center justify-center gap-4">
+        <div className="h-px w-16 bg-secondary/40" />
+        <Layers className="h-4 w-4 text-secondary" strokeWidth={1.5} />
+        <div className="h-px w-16 bg-secondary/40" />
+      </div>
+
+      <p
+        className="mx-auto max-w-2xl text-lg md:text-xl leading-[1.9] text-primary-foreground/70"
+        style={bodyFont}
+      >
+        We built a reader that quietly steps back — so nothing stands between
+        you and the scripture in front of you.
       </p>
 
-      <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-3 max-w-2xl mx-auto">
+      <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-px bg-primary-foreground/10 max-w-3xl mx-auto border border-primary-foreground/10">
         {calmPromises.map((p) => (
           <div
             key={p.title}
-            className="rounded-xl border border-primary-foreground/15 bg-primary-foreground/5 px-4 py-5 backdrop-blur-sm"
+            className="bg-primary px-4 py-6 transition-colors hover:bg-primary-foreground/[0.03]"
           >
-            <p className="font-serif text-base font-semibold text-primary-foreground">{p.title}</p>
-            <p className="mt-1 text-[11px] uppercase tracking-wider text-secondary/90">{p.sub}</p>
+            <p
+              className="text-lg md:text-xl text-primary-foreground"
+              style={displayFont}
+            >
+              {p.title}
+            </p>
+            <p
+              className="mt-2 text-[10px] uppercase tracking-[0.28em] text-secondary/80"
+              style={bodyFont}
+            >
+              {p.sub}
+            </p>
           </div>
         ))}
       </div>
 
-      <div className="mt-12">
+      <div className="mt-14">
         <Link
           to="/books?filter=free"
-          className="inline-flex items-center gap-2 rounded-full bg-secondary px-8 py-3.5 text-sm font-semibold text-secondary-foreground hover:bg-secondary/90 transition-colors shadow-lg"
+          className="inline-flex items-center gap-3 px-10 py-4 bg-secondary text-secondary-foreground text-xs font-bold uppercase tracking-[0.28em] hover:bg-secondary/90 transition-colors shadow-xl"
+          style={bodyFont}
         >
-          <BookOpen className="h-4 w-4" />
-          Start reading in the calm reader
+          <HeartHandshake className="h-4 w-4" />
+          Begin your journey
         </Link>
       </div>
     </div>

@@ -21,11 +21,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gyandootnova.in/cart</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.4</priority>
-  </url>
-  <url>
     <loc>https://gyandootnova.in/library</loc>
     <changefreq>weekly</changefreq>
     <priority>0.4</priority>

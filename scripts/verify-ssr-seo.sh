@@ -28,10 +28,23 @@ c_dim()   { printf '\033[2m%s\033[0m' "$1"; }
 
 fetch() {
   local url="$1" out="$2"
-  # Cache-buster so we always hit fresh raw HTML, not CDN-cached JS-hydrated response.
-  curl -sSL -A "$UA" -H "Cache-Control: no-cache" -H "Pragma: no-cache" \
-    "${url}?_=$(date +%s%N)" -o "$out"
+  # curl bypasses service workers entirely (SW runs only in browsers), so raw
+  # HTML here always reflects what the CDN/origin returns — not a hydrated /
+  # SW-cached response. We still send explicit no-cache headers + a per-request
+  # cache-buster query so no intermediary (Cloudflare, browser proxy, corporate
+  # proxy) can serve a stale copy.
+  local sep='?'; [[ "$url" == *\?* ]] && sep='&'
+  curl -sSL --compressed \
+    -A "$UA" \
+    -H "Cache-Control: no-cache, no-store, max-age=0" \
+    -H "Pragma: no-cache" \
+    -H "Expires: 0" \
+    -H "Accept: text/html,application/xhtml+xml" \
+    -H "Accept-Language: hi-IN,hi;q=0.9,en;q=0.8" \
+    -H "Service-Worker: script" \
+    "${url}${sep}_nocache=$(date +%s%N)" -o "$out"
 }
+
 
 # check <path> <label> <grep-pattern> [--regex]
 check() {

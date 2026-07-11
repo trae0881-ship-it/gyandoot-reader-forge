@@ -205,6 +205,7 @@ const Index = () => {
     <Layout>
       <LiveReaderStrip />
       <RecentPurchasesToast />
+      <ContinueReadingSection />
       <WhyWeExist />
       <ReaderJourney />
       <TrustPillars />

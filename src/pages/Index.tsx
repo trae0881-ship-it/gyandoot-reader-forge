@@ -643,7 +643,72 @@ const Index = () => {
       {/* ─── 3.5. COMPARE — printed vs PDF vs us ─── */}
       <CompareSection />
 
+      {/* ─── 3.7 HAMARI SEVAYEN · Our Offerings ─── */}
+      <section aria-labelledby="hamari-sevayen" className="bg-background py-20">
+        <div className="container max-w-6xl">
+          <div className="mb-10 text-center">
+            <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-wider">
+              हमारी सेवाएँ
+            </span>
+            <h2 id="hamari-sevayen" className="mt-3 font-serif text-3xl font-bold md:text-4xl">
+              Hamari Sevayen · <span className="text-primary">Our Offerings</span>
+            </h2>
+            <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
+              सिर्फ़ पुस्तकें नहीं — पढ़ने, समझने और आगे बढ़ने का पूरा साथ।
+            </p>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                icon: Bookmark,
+                title: "Premium Reader",
+                sub: "स्वच्छ रीडर",
+                desc: "डार्क मोड, बुकमार्क, नोट्स और रात-में-पढ़ने योग्य टाइपोग्राफी।",
+                to: "/books",
+              },
+              {
+                icon: MessageCircle,
+                title: "WhatsApp दैनिक श्लोक",
+                sub: "Daily Shlok",
+                desc: "हर सुबह एक श्लोक, उसका अर्थ और आज के जीवन से जुड़ाव — सीधे WhatsApp पर।",
+                to: "/contact",
+              },
+              {
+                icon: FileText,
+                title: "लेख व प्रवचन",
+                sub: "Articles & Discourses",
+                desc: "शास्त्र-आधारित लेख और चुनिंदा प्रवचन — रोज़ के प्रश्नों के सरल उत्तर।",
+                to: "/articles",
+              },
+              {
+                icon: GraduationCap,
+                title: "कार्यक्रम व कार्यशालाएँ",
+                sub: "Programs & Workshops",
+                desc: "मौन साधना, शास्त्र-अध्ययन और आत्म-जागरण की कार्यशालाएँ।",
+                to: "/articles",
+              },
+            ].map((s) => (
+              <Link key={s.title} to={s.to} className="group block">
+                <Card className="h-full border-border p-6 transition-all hover:shadow-md hover:-translate-y-0.5 hover:border-primary/40">
+                  <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-secondary/15">
+                    <s.icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="mt-4 font-serif text-base font-semibold text-card-foreground group-hover:text-primary transition-colors">
+                    {s.title}
+                  </h3>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-secondary mt-0.5">
+                    {s.sub}
+                  </p>
+                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ─── 4. PROGRAMS / DISCOURSES ─── */}
+
       <section className="py-20">
         <div className="container">
           <div className="mb-10 text-center">

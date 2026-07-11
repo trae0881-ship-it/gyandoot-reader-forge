@@ -610,6 +610,35 @@ const Profile = () => {
           )}
         </section>
       </main>
+
+      <Dialog open={!!invoicePreview} onOpenChange={(open) => { if (!open) closeInvoicePreview(); }}>
+        <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0 gap-0">
+          <DialogHeader className="px-6 py-4 border-b">
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              Invoice Preview
+              {invoicePreview?.bookTitle && (
+                <span className="text-sm font-normal text-muted-foreground">— {invoicePreview.bookTitle}</span>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 min-h-0 bg-muted/30">
+            {invoicePreview && (
+              <iframe
+                title="Invoice preview"
+                src={invoicePreview.url}
+                className="w-full h-full border-0"
+              />
+            )}
+          </div>
+          <DialogFooter className="px-6 py-3 border-t bg-background">
+            <Button variant="outline" onClick={closeInvoicePreview}>Close</Button>
+            <Button onClick={downloadInvoiceFromPreview} className="gap-2">
+              <Download className="h-4 w-4" /> Download PDF
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };

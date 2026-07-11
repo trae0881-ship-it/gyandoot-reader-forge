@@ -210,7 +210,7 @@ export const EmotionalConnection = () => (
           style={bodyFont}
         >
           Read more reader stories
-          <ArrowRight className="h-3.5 w-3.5" />
+          <ArrowRight className="h-5 w-5" />
         </Link>
       </div>
     </div>

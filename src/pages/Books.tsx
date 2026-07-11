@@ -1167,13 +1167,14 @@ const Books = () => {
           </Reveal>
 
           {/* Grid */}
-          <div className="pt-8 pb-20">
+          <div className="pt-10 md:pt-14">
             {isLoading ? (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-1 gap-x-5 gap-y-5 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-10 xl:grid-cols-4">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <CardSkeleton key={i} />
                 ))}
               </div>
+
             ) : isError ? (
               <EmptyState
                 icon={<AlertTriangle className="h-10 w-10" style={{ color: "#EF4444" }} />}

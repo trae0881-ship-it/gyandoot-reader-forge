@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Mail, Facebook, Linkedin, Youtube, Instagram, MessageCircle } from "lucide-react";
-import brandLogo from "@/assets/gyandootnova-logo.png.asset.json";
+
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -54,7 +54,7 @@ const Footer = () => {
           <div className="lg:col-span-1">
             <Link to="/" className="inline-flex items-center mb-4" aria-label="GyandootNova homepage">
               <img
-                src={brandLogo.url}
+                src="/gyandootnova-logo.png"
                 alt="GyandootNova logo"
                 width={260}
                 height={60}

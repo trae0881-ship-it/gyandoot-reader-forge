@@ -133,6 +133,19 @@ const Header = () => {
             </Button>
           )}
           <LocaleSwitcher />
+          <Link
+            to="/cart"
+            aria-label={`Cart, ${cartCount} item${cartCount === 1 ? "" : "s"}`}
+            className="relative inline-flex items-center justify-center h-8 w-8 rounded-md text-foreground/80 hover:bg-accent/40 hover:text-primary transition-colors"
+          >
+            <ShoppingBag className="h-4 w-4" />
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold leading-4 text-center">
+                {cartCount > 99 ? "99+" : cartCount}
+              </span>
+            )}
+          </Link>
+
           {whatsappLink && (
             <a
               href={whatsappLink}
@@ -200,6 +213,10 @@ const Header = () => {
               </Button>
             </form>
             <div className="pt-2 border-t"><LocaleSwitcher /></div>
+            <Link to="/cart" className="inline-flex items-center gap-2 text-sm font-medium text-foreground" onClick={() => setMobileOpen(false)}>
+              <ShoppingBag className="h-4 w-4 text-primary" /> Cart{cartCount > 0 ? ` (${cartCount})` : ""}
+            </Link>
+
             {whatsappLink && (
               <a
                 href={whatsappLink}

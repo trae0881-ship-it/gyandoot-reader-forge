@@ -1,6 +1,5 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import { BookOpen, ArrowRight, Trash2 } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { BookOpen, ArrowRight, Trash2, LogIn, Lock, Loader2 } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import useSEO from "@/hooks/useSEO";
@@ -13,7 +12,7 @@ import { SITE } from "@/lib/jsonLd";
 
 const Library = () => {
   const { user, loading } = useAuth();
-  const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const { data, isLoading } = useContinueReading(50);
 
@@ -32,10 +31,6 @@ const Library = () => {
     },
   });
 
-  useEffect(() => {
-    if (!loading && !user) navigate("/auth?redirect=/library");
-  }, [loading, user, navigate]);
-
   const removeEntry = async (book_id: string) => {
     if (!user) return;
     const { error } = await supabase
@@ -50,6 +45,9 @@ const Library = () => {
     toast({ title: "Removed from your library" });
     queryClient.invalidateQueries({ queryKey: ["continue-reading"] });
   };
+
+  const signInHref = `/auth?redirect=${encodeURIComponent(location.pathname)}`;
+
 
   return (
     <Layout>

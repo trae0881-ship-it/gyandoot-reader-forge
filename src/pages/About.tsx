@@ -390,8 +390,10 @@ const About = () => {
             </div>
           </div>
         </section>
+        <MissionVisionValues />
       </main>
     </Layout>
+
   );
 };
 

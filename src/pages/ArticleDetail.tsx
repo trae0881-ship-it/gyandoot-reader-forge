@@ -308,7 +308,9 @@ const ArticleDetail = () => {
           </section>
         </div>
       </article>
+      <ContinueReadingInvite />
     </Layout>
+
   );
 };
 

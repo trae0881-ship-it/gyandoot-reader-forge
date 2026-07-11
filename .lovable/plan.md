@@ -1,94 +1,89 @@
-## Goal
+# Plan: Full English Conversion + SEO + Conversion Boost
 
-Ensure nothing goes live on GyandootNova until an admin reviews an automatic originality report. Every book chapter and article gets source-attribution fields, an originality score, and a "pending / approved / rejected" state. Admins get an audit dashboard.
+Goal: Content 8.5→10, SEO 8→10, Conversion 7→10. Keep Hindi SEO pages (`/hindi/*`, Hindi book titles) intact — they rank for Hindi queries. Add English versions alongside where high-value.
 
-## 1. Database changes (migration)
+Scope is large — will ship in **3 phases**, each independently deployable.
 
-**Extend `posts` (articles) and `book_chapters`:**
+---
 
-Add columns to both:
-- `source_type` text — `original | translation | public_domain | licensed | quoted_excerpt`
-- `source_citation` text — free-text citation / URL / book reference
-- `permission_notes` text — rights, license, permission-holder
-- `originality_score` numeric — 0-100 from last check (nullable)
-- `originality_report` jsonb — flagged passages, matched URLs, model summary
-- `originality_checked_at` timestamptz
-- `approval_status` text default `'draft'` — `draft | pending_review | flagged | approved | rejected | needs_rewrite`
-- `approval_notes` text — admin's decision notes
-- `reviewed_by` uuid (references `auth.users`, no FK — nullable)
-- `reviewed_at` timestamptz
-- `last_edited_by` uuid, `last_edited_at` timestamptz
+## Phase 1 — English + Conversion (Highest ROI)
 
-**New table `content_audit_log`:**
-- `id`, `entity_type` (`post | chapter | book`), `entity_id` uuid, `action` text (`edited | submitted | check_run | flagged | approved | rejected`), `actor_id` uuid, `notes` text, `payload` jsonb, `created_at`
-- GRANT to `authenticated` and `service_role`; RLS: admins can select all, authors can select their own rows; only service role / admin inserts.
+**Public pages → English copy (UI chrome, headings, CTAs, body):**
+- `Index.tsx`, `Books.tsx`, `BookDetail.tsx`, `Articles.tsx`, `ArticleDetail.tsx`
+- `About.tsx`, `OurStory.tsx`, `Contact.tsx`, `FAQ.tsx`, `Support.tsx`, `Donate.tsx`
+- `Careers.tsx`, `Portfolio.tsx`, `Services.tsx`, `TestimonialsPage.tsx`
+- `Auth.tsx`, `Profile.tsx`, `Library.tsx`, `NotFound.tsx`
+- Layout: `Header.tsx`, `Footer.tsx`, all nav items, badges, tooltips
+- Components: `BrandExperience`, `CompareSection`, `GuaranteeSection`, `UrgencyBanner`, `NewsletterCta`, `LiveReaderStrip`, `RecentPurchasesToast`, `ExitIntentOffer`, `EmailLeadCapture`, `ContinueReadingSection`, `AskScripture`, `FloatingWhatsApp`, `FaqStrip`, `BundleDecoy`
 
-**Publish gate:** existing `posts.is_published` and `posts.publish_status` stay, but a trigger blocks flipping `is_published = true` unless `approval_status = 'approved'`. Same rule for `book_chapters` (add `is_published` if missing — currently gated via `is_preview` / purchase; skip if not needed and instead gate visibility in the reader by `approval_status`).
+**Legal pages** stay English (already are): Privacy, Terms, Refund, Shipping.
 
-## 2. Edge function `content-originality-check`
+**Conversion upgrades (all 4 selected):**
+1. **Hero (Index)** — English H1 with keyword + benefit, rating stars (4.8★ from N readers), live reader count chip, primary CTA "Start Reading Free" + secondary "Browse Library", trust row (100% Money-Back • Free Preview • Instant Access).
+2. **BookDetail** — Sticky Buy card with: urgency countdown (real 24h), guarantee badge, "X readers bought this week", 3-star review snippets, "What's inside" bullets, related books cross-sell, bundle upsell ("Get all 3 Upanishad volumes @ save 25%").
+3. **Exit intent** — Enhanced `ExitIntentOffer`: English copy, 15% coupon + free first chapter PDF, email capture into existing lead table.
+4. **Bundles** — Enhance `BundleDecoy` with real 2/3/5-book bundles, strikethrough pricing, savings badge, single-click add to cart flow.
 
-Input: `{ entity_type, entity_id }`. Server-only (verify admin or content owner via JWT).
-- Loads content (`posts.content` / `book_chapters.content`), strips HTML.
-- Calls Lovable AI (`google/gemini-2.5-flash`) with a structured-output prompt: return `{ score, verdict: original|borrowed|uncertain, flagged_passages: [{text, reason, likely_source}], summary }`.
-- Optionally cross-checks flagged passages against the web via existing `TAVILY_API_KEY` (already in secrets) for URL matches.
-- Writes result to `originality_score`, `originality_report`, `originality_checked_at`.
-- If `score < 70` OR any flagged passage → sets `approval_status = 'flagged'` and inserts audit-log row.
-- Returns the report to the caller.
+**Preserve:**
+- Hindi book titles/authors from DB (they are the actual product names)
+- `/hindi/*`, `/qa/*`, `/texts/*`, `/meditation/*`, `/how-to-read/*` SEO pages (already English/Hindi mix) — Phase 2 will polish these
+- All emojis rule (Lucide only), semantic tokens, brand fonts
 
-Auto-trigger: called from the client immediately when an editor clicks "Submit for review" (status flips `draft → pending_review`, then function runs, may downgrade to `flagged`).
+---
 
-## 3. Editor UI additions
+## Phase 2 — SEO Enhancement
 
-**`AdminPosts` (article editor) and `AdminBooks` chapter editor:**
-Add a "Sources & Permissions" card above the save button:
-- Source type dropdown (5 options above)
-- Source citation textarea
-- Permission notes textarea
-- Read-only originality panel: score badge, last-checked timestamp, "Run originality check" button, expandable flagged-passages list.
-- Save action still saves as `draft`. New buttons: **Submit for Review** (locks status, runs check), **Save Draft**.
+**Meta + schema per page** (via existing `useSEO` hook + Helmet):
+- Every public route gets: unique `<title>` (<60ch, keyword-first), `<meta description>` (<160ch, benefit + CTA verb), self-referencing canonical, og:title/og:description/og:url, twitter:card.
+- **JSON-LD upgrades** in `src/lib/jsonLd.ts`:
+  - `Book` schema on BookDetail (author, isbn, offers, aggregateRating, review)
+  - `BreadcrumbList` on all inner pages
+  - `FAQPage` on every page with FAQs (already partial)
+  - `Article` on ArticleDetail with author, datePublished, image
+  - `Organization` + `WebSite` with `SearchAction` sitewide
+  - `Product` + `Offer` for bundles
+- **Internal linking**: add contextual links between `/books/[slug]` ↔ `/texts/*` ↔ `/qa/*` ↔ `/hindi/*` (3–5 related links per page).
+- **Sitemap**: verify `scripts/generate-sitemap.mjs` includes all new English SEO pages; priority weights tuned.
+- **Robots.txt**: confirm no accidental disallow.
+- **Image alt text audit**: sweep BookDetail + Article images for descriptive alt.
+- **H1 hygiene**: exactly one H1 per page, keyword-front-loaded.
+- Trigger SEO scan at end.
 
-Author cannot flip to published directly — the "Publish" button is replaced with "Submit for Review" for non-admin authors. Admins keep a separate "Approve & Publish" button that only enables when `approval_status = 'approved'`.
+---
 
-## 4. Admin Content Audit dashboard
+## Phase 3 — English Companions for Hindi SEO Pages
 
-New route `/admin/content-audit` (added to `AdminLayout` sidebar):
-- Tabs: **Pending Review**, **Flagged**, **Approved**, **All**.
-- Table columns: title, type (article/chapter), author, last edited, originality score (color-coded), status badge, sources filled? (✓/✗), actions.
-- Row click → drawer with full originality report, source/permission fields, audit-log timeline, and Approve / Reject / Send back for rewrite buttons (each writes to `approval_status`, `reviewed_by`, `reviewed_at`, `approval_notes` and appends to `content_audit_log`).
-- Rejecting with reason "borrowed content" auto-sets `approval_status = 'needs_rewrite'` and returns the piece to the author's queue.
+Keep every existing `/hindi/*` page. Add English mirrors where valuable:
+- `/hindi/upanishad-meaning-in-hindi` → keep + strengthen; already has `/qa/how-many-upanishads`, `/texts/upanishads` in English ✓
+- `/hindi/vedas-meaning-in-hindi` → keep; English mirrors already exist
+- `/hindi/dhyan-kaise-karein` → add English mirror `/meditation/how-to-meditate` (new page, same structure, English)
+- New: `/guides/how-to-read-vedas`, `/guides/upanishad-beginner-guide` (English long-form)
 
-## 5. Reader-side enforcement
+Cross-link Hindi ↔ English versions with `hreflang="hi"` / `hreflang="en"` alternate tags for correct Google language targeting.
 
-- `Articles.tsx`, `ArticleDetail.tsx`, `BookReader.tsx`, `FileBookReader.tsx`, and the article/book chapter queries all filter to `approval_status = 'approved'` (in addition to existing `is_published` checks). Admins bypass via existing `has_role` check.
-- Content list queries already used everywhere pass through a shared helper so this is a one-line change per file.
+---
 
-## Technical details
+## Technical Details
 
-- Lovable AI is already wired (`LOVABLE_API_KEY` present). Use AI SDK `generateText` with `Output.object` for a small, unconstrained schema (score number, verdict enum, short summary, passages array — no `.min/.max`).
-- Tavily key is present for optional web cross-check; keep it best-effort so a Tavily failure never blocks the report.
-- All new columns are nullable / defaulted so existing rows remain valid; existing published rows are backfilled to `approval_status = 'approved'` in the same migration.
-- GRANTs on the new table + updated RLS on `posts` and `book_chapters` so authors can't UPDATE `approval_status` directly (only through the edge function / admin dashboard).
-- No frontend business-logic rewrite; existing editors get new fields and the new "Submit for Review" button. Existing publish/reader paths gain a single `approval_status` check.
+**Files touched (Phase 1 ≈ 25 files, Phase 2 ≈ 15, Phase 3 ≈ 4 new):**
+- `src/pages/*.tsx` — copy translation, no logic changes
+- `src/components/**/*.tsx` — copy + JSX-level enhancements (sticky buy card, bundle grid, exit-intent form)
+- `src/lib/jsonLd.ts` — expand schema generators
+- `src/hooks/useSEO.tsx` — add og:image, twitter:card, hreflang support
+- `index.html` — sitewide og:* fallbacks (English)
+- `scripts/generate-sitemap.mjs` — add new routes
+- No DB / edge-function / auth changes
+- No new deps (react-helmet-async already present)
 
-## Files to create/edit
+**Preservation guarantees:**
+- Hindi book titles from `books` table render as-is (they're product data, not UI copy)
+- INR/₹ pricing stays (per locale memory)
+- No emojis anywhere (lint rule holds)
+- All existing routes keep their URLs → no redirect debt
+- No auth/logic/backend changes → zero regression risk on payments, referrals, reading progress
 
-New:
-- `supabase/migrations/<ts>_content_originality_workflow.sql`
-- `supabase/functions/content-originality-check/index.ts`
-- `src/pages/admin/AdminContentAudit.tsx`
-- `src/components/admin/OriginalityPanel.tsx` (reusable card)
-- `src/components/admin/SourcesPermissionsCard.tsx`
+**Delivery order:** Phase 1 first (biggest visible impact), you review, then Phase 2, then Phase 3.
 
-Edit:
-- `src/pages/admin/AdminPosts.tsx` — add source/permission fields, replace Publish with Submit-for-Review flow.
-- `src/pages/admin/AdminBooks.tsx` — same additions for chapter editor.
-- `src/pages/admin/AdminLayout.tsx` — sidebar link + route.
-- `src/App.tsx` — route registration.
-- `src/pages/Articles.tsx`, `src/pages/ArticleDetail.tsx`, `src/pages/BookReader.tsx`, `src/pages/FileBookReader.tsx`, `src/pages/Index.tsx` (latest posts query) — add `.eq("approval_status", "approved")` for non-admin reads.
+---
 
-## Rollout
-
-1. Run migration (backfills existing published rows to `approved`).
-2. Deploy edge function.
-3. Ship editor + dashboard UI.
-4. From then on, every new/edited piece must pass the originality check + admin approval before appearing on the site.
+Ready to start Phase 1?

@@ -150,8 +150,9 @@ async function sendReceipt(
           </div>
           <p>You can start reading your book anytime by visiting your library.</p>
           <div style="text-align: center; margin-top: 25px;">
-            <a href="https://gyandootnova.lovable.app/books" style="background: #B71C1C; color: white; text-decoration: none; padding: 12px 30px; border-radius: 6px; font-weight: bold;">Open My Books</a>
+            <a href="${(globalThis as any).__claimUrl || "https://gyandootnova.in/dashboard"}" style="background: #B71C1C; color: white; text-decoration: none; padding: 12px 30px; border-radius: 6px; font-weight: bold;">Access Your Book</a>
           </div>
+
           <hr style="margin-top: 30px; border: none; border-top: 1px solid #eee;" />
           <p style="color: #999; font-size: 12px; text-align: center;">GyandootNova — Illuminating spiritual seekers with sacred knowledge.</p>
         </div>`

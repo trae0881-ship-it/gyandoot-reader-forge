@@ -803,8 +803,10 @@ const BookDetail = () => {
             {claimingFree ? <Loader2 className="h-4 w-4 animate-spin" /> : <>अभी पढ़ें →</>}
           </Button>
         </div>
+      )}
       <WhyBookMatters title={book?.title} />
     </Layout>
+
 
   );
 };

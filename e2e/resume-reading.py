@@ -203,9 +203,10 @@ async def main():
             await browser.close()
             return 3
         chapter_slug = seeded["chapter"]["slug"]
+        chapter_title = seeded["chapter"].get("title")
 
-        ok_home = await check_resume_from_home(page, slug, chapter_slug)
-        ok_detail = await check_resume_from_book_detail(page, slug, chapter_slug)
+        ok_home = await check_resume_from_home(page, slug, chapter_slug, chapter_title)
+        ok_detail = await check_resume_from_book_detail(page, slug, chapter_slug, chapter_title)
 
         await browser.close()
         if ok_home and ok_detail:

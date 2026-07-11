@@ -178,13 +178,6 @@ const AdminSettings = () => {
           </CardContent>
         </Card>
 
-        <Button
-          className="w-full sm:w-auto"
-          onClick={handleSave}
-          disabled={mutation.isPending || isLoading}
-        >
-          {mutation.isPending ? "Saving..." : "Save All Settings"}
-        </Button>
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

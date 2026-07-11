@@ -17,7 +17,7 @@ export default {
       fontFamily: {
         serif: ["'Noto Serif Devanagari'", "'Instrument Serif'", "'Playfair Display'", "Georgia", "serif"],
         display: ["'Noto Serif Devanagari'", "'Instrument Serif'", "'Playfair Display'", "Georgia", "serif"],
-        sans: ["'Noto Serif Devanagari'", "'Work Sans'", "'Inter'", "system-ui", "sans-serif"],
+        sans: ["'Inter'", "'Noto Serif Devanagari'", "'Work Sans'", "system-ui", "sans-serif"],
         devanagari: ["'Noto Serif Devanagari'", "'Tiro Devanagari Hindi'", "serif"],
       },
 

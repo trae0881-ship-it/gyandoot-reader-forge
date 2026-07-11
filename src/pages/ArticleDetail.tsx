@@ -119,7 +119,7 @@ const ArticleDetail = () => {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://gyandootnova.in/" },
+      { "@type": "ListItem", "position": 1, "name": "GyandootNova", "item": "https://gyandootnova.in/" },
       { "@type": "ListItem", "position": 2, "name": "Articles", "item": "https://gyandootnova.in/articles" },
       { "@type": "ListItem", "position": 3, "name": post.title, "item": `https://gyandootnova.in/articles/${post.slug}` },
     ],

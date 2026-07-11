@@ -185,6 +185,50 @@ const AdminSettings = () => {
         >
           {mutation.isPending ? "Saving..." : "Save All Settings"}
         </Button>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" /> Invoice Template
+            </CardTitle>
+            <CardDescription>
+              Purchase invoices पर दिखने वाले business details — GSTIN, address, logo, footer note। खाली फ़ील्ड्स hide हो जाएँगी।
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            {isLoading ? (
+              <p className="text-sm text-muted-foreground">Loading...</p>
+            ) : (
+              INVOICE_KEYS.map(({ key, label, placeholder, hint, multiline }) => (
+                <div key={key} className="space-y-1.5">
+                  <Label>{label}</Label>
+                  {multiline ? (
+                    <Textarea
+                      value={values[key] ?? ""}
+                      onChange={(e) => setValues((prev) => ({ ...prev, [key]: e.target.value }))}
+                      placeholder={placeholder}
+                      rows={3}
+                    />
+                  ) : (
+                    <Input
+                      value={values[key] ?? ""}
+                      onChange={(e) => setValues((prev) => ({ ...prev, [key]: e.target.value }))}
+                      placeholder={placeholder}
+                    />
+                  )}
+                  <p className="text-xs text-muted-foreground">{hint}</p>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
+        <Button
+          className="w-full sm:w-auto"
+          onClick={handleSave}
+          disabled={mutation.isPending || isLoading}
+        >
+          {mutation.isPending ? "Saving..." : "Save All Settings"}
+        </Button>
       </div>
     </div>
   );

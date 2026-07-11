@@ -103,10 +103,38 @@ const Index = () => {
     },
   });
 
+  // Read social profile URLs from the same settings table the footer uses so
+  // the Organization `sameAs` array reflects the site's real, live profiles.
+  const { data: siteSettings } = useQuery({
+    queryKey: ["site-settings-brand"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("settings")
+        .select("key, value")
+        .in("key", ["facebook_url", "instagram_url", "linkedin_url", "youtube_url", "whatsapp_number"]);
+      const map: Record<string, string> = {};
+      (data ?? []).forEach((r: any) => { map[r.key] = (r.value ?? "").trim(); });
+      return map;
+    },
+  });
+
+  const sameAs = [
+    siteSettings?.facebook_url,
+    siteSettings?.instagram_url,
+    siteSettings?.linkedin_url,
+    siteSettings?.youtube_url,
+    siteSettings?.whatsapp_number
+      ? `https://wa.me/${siteSettings.whatsapp_number.replace(/\s+/g, "").replace(/^\+/, "")}`
+      : null,
+  ].filter((u): u is string => !!u && /^https?:\/\//.test(u));
+
+  const brandDescription =
+    "GyandootNova (also known as Gyandoot Nova or Gyandoot) is an online Hindi platform for reading sacred Hindu texts — Bhagavad Gita, Vedas, Upanishads, Ramayana, Hanuman Chalisa and Vishnu Sahasranama — with a free, distraction-free reader.";
+
   useSEO({
-    title: "GyandootNova — Bhagwat Geeta, Vedas & Ramayana Online",
+    title: "GyandootNova (Gyandoot Nova) — Hindu Religious Books in Hindi | Gita, Vedas, Ramayana",
     description:
-      "GyandootNova par padhein Bhagwat Geeta, Vedas, Upanishads, Ramayana aur Hanuman Chalisa Hindi mein — free online reader ke saath. Trusted spiritual platform.",
+      "GyandootNova (Gyandoot Nova) — Bhagwat Geeta, Vedas, Upanishads, Ramayana aur Hanuman Chalisa Hindi mein padhein. Free online reader ke saath trusted spiritual platform.",
     canonical: "/",
     ogImage: "https://gyandootnova.in/og-image.png",
     jsonLd: {
@@ -119,8 +147,8 @@ const Index = () => {
           "name": "GyandootNova",
           "alternateName": ["Gyandoot Nova", "Gyandoot", "Gyan Doot", "gyandootnova.in"],
           "inLanguage": "hi-IN",
-          "description":
-            "GyandootNova (Gyandoot Nova) — dharmik granth online padhein: Geeta, Ramayana, Hanuman Chalisa aur 50+ spiritual books Hindi mein.",
+          "description": brandDescription,
+          "publisher": { "@id": "https://gyandootnova.in/#organization" },
           "potentialAction": {
             "@type": "SearchAction",
             "target": "https://gyandootnova.in/books?search={search_term_string}",
@@ -133,7 +161,12 @@ const Index = () => {
           "name": "GyandootNova",
           "alternateName": ["Gyandoot Nova", "Gyandoot", "Gyan Doot"],
           "url": "https://gyandootnova.in/",
-          "logo": "https://gyandootnova.in/gyandoot-nova-icon.ico",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://gyandootnova.in/gyandoot-nova-icon.ico",
+          },
+          "description": brandDescription,
+          ...(sameAs.length > 0 ? { sameAs } : {}),
         },
         ...((featuredBooks ?? []).length > 0
           ? [{
@@ -150,6 +183,7 @@ const Index = () => {
       ],
     },
   });
+
 
 
   return (

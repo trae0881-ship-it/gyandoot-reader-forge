@@ -20,7 +20,28 @@ const About = () => {
     description:
       "GyandootNova is a mission-driven publishing house dedicated to discovering, preserving and sharing meaningful books that bring timeless knowledge closer to every reader.",
     canonical: "/about",
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "GyandootNova", item: "https://gyandootnova.in/" },
+          { "@type": "ListItem", position: 2, name: "About", item: "https://gyandootnova.in/about" },
+        ],
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "AboutPage",
+        name: "About GyandootNova",
+        url: "https://gyandootnova.in/about",
+        description:
+          "The mission, values and team behind GyandootNova — a small, dedicated publishing effort for authentic spiritual texts in Hindi and English.",
+        isPartOf: { "@type": "WebSite", name: "GyandootNova", url: "https://gyandootnova.in" },
+        publisher: { "@type": "Organization", name: "GyandootNova", url: "https://gyandootnova.in" },
+      },
+    ],
   });
+
 
   const values = [
     {

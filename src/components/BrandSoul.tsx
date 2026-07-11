@@ -7,7 +7,8 @@ import { Sparkles, HeartHandshake, Leaf, ArrowRight, Quote, Sunrise, Wind, BookO
  *  2. EmotionalConnection — reader ↔ text, real moments
  *  3. CalmFeeling         — the unhurried atmosphere we protect
  *
- * Uses semantic tokens only. Additive — safe to drop into Index.
+ * English-forward copy with light Hindi accents.
+ * Uses semantic tokens only.
  */
 
 // ────────────────────────────────────────────────────────────
@@ -26,17 +27,18 @@ export const BrandPurpose = () => (
     <div className="container relative max-w-4xl px-4 text-center">
       <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
         <Sparkles className="h-3 w-3" />
-        Hamara Uddeshya · Brand Purpose
+        Our Purpose
       </span>
       <h2 className="mt-6 font-serif text-3xl md:text-5xl font-bold leading-[1.2] tracking-tight text-foreground">
-        Prachin gyaan ko aaj ke pathak tak —
+        Bringing timeless wisdom to today's reader —
         <br className="hidden md:block" />
-        <span className="text-primary italic font-normal"> bina shor, bina jaldi.</span>
+        <span className="text-primary italic font-normal"> without the noise, without the rush.</span>
       </h2>
       <p className="mx-auto mt-8 max-w-2xl text-lg md:text-xl leading-[1.85] text-muted-foreground">
-        Hum ek publishing brand hain, ek app nahi. Har granth ka ek srot hai,
-        har anuvaad ke peeche ek vidwaan hai, aur har pathak ke liye ek shant
-        jagah hai — jahaan padhna phir se ek anubhav ban jaaye.
+        We are a publishing brand, not just another app. Every scripture has a
+        verified source, every translation is shaped by a scholar, and every
+        reader is given a quiet place — where reading becomes an experience
+        again.
       </p>
       <div className="mt-10 h-px w-24 mx-auto bg-gradient-to-r from-transparent via-secondary to-transparent" />
     </div>
@@ -49,21 +51,21 @@ export const BrandPurpose = () => (
 const moments = [
   {
     icon: Sunrise,
-    when: "सुबह की चाय के साथ",
-    en: "With the morning tea",
-    line: "एक श्लोक, एक साँस — दिन शुरू करने से पहले मन थोड़ा हल्का।",
+    when: "With the morning chai",
+    hi: "सुबह की चाय के साथ",
+    line: "One shloka, one breath — the day begins a little lighter, a little clearer.",
   },
   {
     icon: Wind,
-    when: "मेट्रो के आधे घंटे में",
-    en: "In a half-hour commute",
-    line: "फ़ोन में शोर नहीं — गीता का एक अध्याय, और भीड़ में भी शांति।",
+    when: "On a half-hour commute",
+    hi: "मेट्रो के आधे घंटे में",
+    line: "No noise, no ads — just one chapter of the Gita, and stillness inside the crowd.",
   },
   {
     icon: BookOpen,
-    when: "रात के दीये के पास",
-    en: "By the evening lamp",
-    line: "पिताजी बड़े font में पढ़ते हैं, बच्चे साथ बैठकर सुनते हैं।",
+    when: "By the evening lamp",
+    hi: "रात के दीये के पास",
+    line: "Father reads in a larger font, the children sit close and listen — a family ritual returns.",
   },
 ];
 
@@ -73,20 +75,20 @@ export const EmotionalConnection = () => (
       <div className="text-center max-w-2xl mx-auto">
         <span className="inline-flex items-center gap-2 rounded-full border border-secondary/40 bg-secondary/10 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-secondary-foreground">
           <HeartHandshake className="h-3 w-3" />
-          Pathak Se Judaav · Emotional Connection
+          Emotional Connection
         </span>
         <h2 className="mt-6 font-serif text-3xl md:text-4xl font-bold text-foreground">
-          Kitaab tab kaam karti hai jab woh
-          <span className="text-primary"> aapke din mein baith jaaye</span>
+          A book only truly works when it
+          <span className="text-primary"> settles into your day</span>
         </h2>
         <p className="mt-5 text-lg text-muted-foreground leading-relaxed">
-          Hum bade dawe nahi karte. Bas kuch chhote, sacche pal — jinhe
-          humaare pathak hume roz likhkar bhejte hain.
+          We don't make loud promises. Just small, honest moments that our
+          readers write in and share with us.
         </p>
       </div>
 
       <div className="mt-14 grid gap-6 md:grid-cols-3">
-        {moments.map(({ icon: Icon, when, en, line }) => (
+        {moments.map(({ icon: Icon, when, hi, line }) => (
           <div
             key={when}
             className="relative surface-card p-8 flex flex-col"
@@ -96,7 +98,7 @@ export const EmotionalConnection = () => (
               <Icon className="h-5 w-5" />
             </div>
             <h3 className="mt-5 font-serif text-xl font-bold text-foreground">{when}</h3>
-            <p className="mt-1 text-xs font-medium uppercase tracking-wider text-primary">{en}</p>
+            <p className="mt-1 text-xs font-medium tracking-wide text-primary">{hi}</p>
             <p className="mt-4 text-base leading-[1.75] text-muted-foreground flex-1">
               {line}
             </p>
@@ -109,7 +111,7 @@ export const EmotionalConnection = () => (
           to="/testimonials"
           className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
         >
-          Aur pathakon ki zubaani padhein
+          Read more reader stories
           <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
@@ -121,10 +123,10 @@ export const EmotionalConnection = () => (
 // 3. Calm Feeling
 // ────────────────────────────────────────────────────────────
 const calmPromises = [
-  { hi: "कोई pop-up नहीं", en: "No pop-ups" },
-  { hi: "कोई विज्ञापन नहीं", en: "No ads, ever" },
-  { hi: "कोई notification शोर नहीं", en: "No notification noise" },
-  { hi: "कोई tracking जाल नहीं", en: "No tracking traps" },
+  { en: "No pop-ups", hi: "कोई pop-up नहीं" },
+  { en: "No ads, ever", hi: "कोई विज्ञापन नहीं" },
+  { en: "No noisy notifications", hi: "कोई शोर नहीं" },
+  { en: "No tracking traps", hi: "कोई जाल नहीं" },
 ];
 
 export const CalmFeeling = () => (
@@ -140,15 +142,15 @@ export const CalmFeeling = () => (
     <div className="container relative max-w-4xl px-4 text-center">
       <div className="inline-flex items-center gap-2 rounded-full border border-secondary/40 bg-secondary/10 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-secondary">
         <Leaf className="h-3 w-3" />
-        Shanti Ka Anubhav · A Calm Feeling
+        A Calm Feeling
       </div>
       <h2 className="mt-6 font-serif text-3xl md:text-5xl font-semibold leading-[1.2] text-primary-foreground">
-        Padhne ki jagah bhi
-        <span className="text-secondary italic font-normal"> shant honi chahiye.</span>
+        The place you read in
+        <span className="text-secondary italic font-normal"> should be calm too.</span>
       </h2>
       <p className="mx-auto mt-8 max-w-2xl text-base md:text-lg leading-[1.85] text-primary-foreground/80">
-        Isliye humne ek reader banaya jo aapke saamne aakar khada nahi hota —
-        woh peeche hat jaata hai, taaki granth aur aapke beech kuch na aaye.
+        That is why we built a reader that quietly steps back — so nothing
+        stands between you and the scripture in front of you.
       </p>
 
       <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-3 max-w-2xl mx-auto">
@@ -157,8 +159,8 @@ export const CalmFeeling = () => (
             key={p.en}
             className="rounded-xl border border-primary-foreground/15 bg-primary-foreground/5 px-4 py-5 backdrop-blur-sm"
           >
-            <p className="font-serif text-base font-semibold text-primary-foreground">{p.hi}</p>
-            <p className="mt-1 text-[11px] uppercase tracking-wider text-secondary/90">{p.en}</p>
+            <p className="font-serif text-base font-semibold text-primary-foreground">{p.en}</p>
+            <p className="mt-1 text-[11px] tracking-wide text-secondary/90">{p.hi}</p>
           </div>
         ))}
       </div>
@@ -169,7 +171,7 @@ export const CalmFeeling = () => (
           className="inline-flex items-center gap-2 rounded-full bg-secondary px-8 py-3.5 text-sm font-semibold text-secondary-foreground hover:bg-secondary/90 transition-colors shadow-lg"
         >
           <BookOpen className="h-4 w-4" />
-          Shant reader mein padhna shuru karein
+          Start reading in the calm reader
         </Link>
       </div>
     </div>

@@ -22,33 +22,54 @@ const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const downloadInvoice = async (purchaseId: string, bookTitle?: string) => {
+  const [invoicePreview, setInvoicePreview] = useState<{
+    url: string;
+    purchaseId: string;
+    bookTitle?: string;
+  } | null>(null);
+  const [invoiceLoadingId, setInvoiceLoadingId] = useState<string | null>(null);
+
+  const fetchInvoiceBlob = async (purchaseId: string): Promise<Blob> => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
+    if (!token) throw new Error("Please sign in again");
+    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+    const url = `https://${projectId}.supabase.co/functions/v1/generate-invoice?purchase_id=${purchaseId}&preview=1`;
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) throw new Error((await res.text()) || "Failed to generate invoice");
+    return res.blob();
+  };
+
+  const openInvoicePreview = async (purchaseId: string, bookTitle?: string) => {
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token;
-      if (!token) {
-        toast({ title: "Please sign in again", variant: "destructive" });
-        return;
-      }
-      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-      const url = `https://${projectId}.supabase.co/functions/v1/generate-invoice?purchase_id=${purchaseId}`;
-      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-      if (!res.ok) {
-        const err = await res.text();
-        throw new Error(err || "Failed to generate invoice");
-      }
-      const blob = await res.blob();
+      setInvoiceLoadingId(purchaseId);
+      const blob = await fetchInvoiceBlob(purchaseId);
       const objectUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = objectUrl;
-      a.download = `invoice-${(bookTitle ?? "gyandootnova").replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(objectUrl);
+      setInvoicePreview({ url: objectUrl, purchaseId, bookTitle });
     } catch (e: any) {
-      toast({ title: "Invoice download failed", description: e?.message ?? "Try again", variant: "destructive" });
+      toast({ title: "Invoice preview failed", description: e?.message ?? "Try again", variant: "destructive" });
+    } finally {
+      setInvoiceLoadingId(null);
     }
+  };
+
+  const closeInvoicePreview = () => {
+    if (invoicePreview?.url) URL.revokeObjectURL(invoicePreview.url);
+    setInvoicePreview(null);
+  };
+
+  const triggerDownload = (url: string, bookTitle?: string) => {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `invoice-${(bookTitle ?? "gyandootnova").replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
+
+  const downloadInvoiceFromPreview = () => {
+    if (!invoicePreview) return;
+    triggerDownload(invoicePreview.url, invoicePreview.bookTitle);
   };
 
   useSEO({

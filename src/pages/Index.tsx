@@ -896,7 +896,86 @@ const Index = () => {
         </div>
       </section>
 
+      {/* ─── 7.4 SAMPARK · Prominent Contact Block (trust signal) ─── */}
+      <section aria-labelledby="sampark" className="bg-primary/5 py-16">
+        <div className="container max-w-5xl">
+          <div className="rounded-2xl border border-primary/20 bg-card p-8 md:p-10 shadow-sm">
+            <div className="grid gap-8 md:grid-cols-[1.1fr_1fr] md:items-center">
+              <div>
+                <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-wider">
+                  संपर्क करें
+                </span>
+                <h2 id="sampark" className="mt-3 font-serif text-2xl md:text-3xl font-bold text-card-foreground">
+                  कोई प्रश्न, सुझाव या ग्रंथ की माँग?
+                </h2>
+                <p className="mt-3 text-muted-foreground leading-relaxed">
+                  GyandootNova एक असली, इंसानी टीम है। WhatsApp, फ़ोन या ईमेल — जिस माध्यम से भी लिखें, उसी दिन उत्तर मिलेगा।
+                </p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90">
+                    <Link to="/contact">
+                      <Mail className="mr-2 h-4 w-4" /> संदेश भेजें
+                    </Link>
+                  </Button>
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground"
+                  >
+                    <a href="https://wa.me/919161533353" target="_blank" rel="noopener noreferrer">
+                      <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
+                    </a>
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <a
+                  href="tel:+919161533353"
+                  className="flex items-start gap-4 rounded-xl border border-border p-4 hover:border-primary/40 transition-colors"
+                >
+                  <div className="rounded-lg bg-primary/10 p-2.5 shrink-0">
+                    <Phone className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">फ़ोन / WhatsApp</p>
+                    <p className="font-serif text-lg font-semibold text-card-foreground mt-0.5">+91 91615 33353</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">सोम–शनि · 10 AM – 6 PM (IST)</p>
+                  </div>
+                </a>
+                <a
+                  href="mailto:amrendra8765@gmail.com"
+                  className="flex items-start gap-4 rounded-xl border border-border p-4 hover:border-primary/40 transition-colors"
+                >
+                  <div className="rounded-lg bg-primary/10 p-2.5 shrink-0">
+                    <Mail className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">ईमेल</p>
+                    <p className="font-serif text-base font-semibold text-card-foreground mt-0.5 break-all">
+                      amrendra8765@gmail.com
+                    </p>
+                  </div>
+                </a>
+                <div className="flex items-start gap-4 rounded-xl border border-border p-4">
+                  <div className="rounded-lg bg-primary/10 p-2.5 shrink-0">
+                    <MapPin className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">कार्यालय</p>
+                    <p className="font-serif text-base font-semibold text-card-foreground mt-0.5">
+                      Bhagwan Khera, Unnao
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Uttar Pradesh 209863 · भारत</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ─── 7.5. GUARANTEE / TRUST ─── */}
+
       <GuaranteeSection />
 
       {/* ─── 7.7. FAQ STRIP ─── */}

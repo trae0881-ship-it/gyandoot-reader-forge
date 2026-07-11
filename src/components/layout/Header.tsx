@@ -59,9 +59,9 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
       <div className="pointer-events-none absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-transparent via-gold/50 to-transparent" />
-      <div className="w-full max-w-screen-2xl mx-auto flex h-16 items-center justify-between px-3 md:px-6">
+      <div className="w-full max-w-screen-2xl mx-auto flex h-[68px] md:h-[76px] items-center justify-between px-3 md:px-6">
         {/* Logo */}
-        <Link to="/" className="group flex items-center gap-2.5 shrink-0" aria-label="Go to homepage">
+        <Link to="/" className="group flex items-center gap-3 shrink-0" aria-label="Go to homepage">
           <div className="relative h-10 w-10 shrink-0">
             <div className="absolute inset-0 rounded-full bg-gradient-gold opacity-70 blur-md transition-opacity group-hover:opacity-100" />
             <img
@@ -73,10 +73,16 @@ const Header = () => {
               className="relative h-10 w-10 rounded-full object-cover shadow-elegant ring-2 ring-gold/60 transition-transform duration-500 group-hover:scale-105 group-hover:rotate-3"
             />
           </div>
-          <span className="font-serif text-xl leading-none tracking-tight text-foreground hidden sm:inline">
-            Gyandoot<span className="gradient-text-gold">Nova</span>
+          <span className="hidden sm:flex flex-col leading-tight">
+            <span className="font-serif text-xl tracking-tight text-foreground">
+              Gyandoot<span className="gradient-text-gold">Nova</span>
+            </span>
+            <span className="mt-0.5 font-sans text-[11px] md:text-[12px] font-medium tracking-[0.08em] text-[#6B7280]">
+              Modern Design <span className="opacity-50">•</span> Trust <span className="opacity-50">•</span> Usability
+            </span>
           </span>
         </Link>
+
 
         {/* Desktop nav */}
         <nav aria-label="Main navigation" className="hidden md:flex items-center gap-0.5 lg:gap-1">

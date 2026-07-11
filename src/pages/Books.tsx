@@ -926,7 +926,7 @@ const Books = () => {
       >
         {/* Hero */}
         <section className="border-b" style={{ borderColor: T.border, background: "#fff" }}>
-          <div className="container py-14 md:py-20">
+          <div className="container py-12 md:py-[72px] lg:py-24">
             {/* Breadcrumb — brand-entity link reinforcement in raw HTML */}
             <nav aria-label="Breadcrumb" className="mb-6 text-sm" style={{ color: T.textMuted }}>
               <ol className="flex flex-wrap items-center gap-1.5">

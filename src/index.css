@@ -310,22 +310,30 @@
 
   body {
     @apply bg-background text-foreground font-sans;
-    font-family: 'Noto Serif Devanagari', 'Work Sans', Georgia, serif;
+    font-family: 'Inter', 'Noto Serif Devanagari', 'Work Sans', system-ui, sans-serif;
     font-size: 16px;
     line-height: 1.7;
+    color: #111827;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   p {
     line-height: 1.7;
+    color: #4B5563;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Noto Serif Devanagari', 'Instrument Serif', 'Playfair Display', Georgia, serif;
+    font-family: 'Instrument Serif', 'Noto Serif Devanagari', 'Playfair Display', Georgia, serif;
     letter-spacing: -0.01em;
     font-weight: 600;
-    line-height: 1.3;
+    line-height: 1.25;
+    color: #111827;
+  }
+
+  /* Devanagari script preference for Hindi content */
+  :lang(hi), [lang="hi"] {
+    font-family: 'Noto Serif Devanagari', 'Inter', serif;
   }
 
 
@@ -339,6 +347,21 @@
 @layer components {
   .container-editorial {
     @apply container max-w-6xl;
+  }
+
+  /* Comfortable long-form reading width — max 700px */
+  .prose-reading {
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 17px;
+    line-height: 1.75;
+    color: #374151;
+  }
+
+  /* Premium section rhythm: 48 / 72 / 96 */
+  .section-rhythm {
+    @apply py-12 md:py-[72px] lg:py-24;
   }
 
   .section-eyebrow {

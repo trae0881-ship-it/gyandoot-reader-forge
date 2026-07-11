@@ -43,7 +43,7 @@ const journeys = [
   {
     icon: BookOpen,
     title: "Lifelong Learners",
-    line: "A little knowledge every day — that&apos;s how depth is built.",
+    line: "A little knowledge every day — that is how depth is built.",
     href: "/articles",
   },
   {
@@ -175,7 +175,7 @@ export const WhyBookMatters = ({ title }: WhyBookMattersProps) => (
       <div className="text-center mb-12">
         <span className="section-eyebrow">Why This Book Matters</span>
         <h2 className="mt-4 text-3xl md:text-4xl font-bold text-foreground">
-          {title ? `What you&apos;ll find inside "${title}"` : "What you&apos;ll find inside this book"}
+          {title ? `What you will find inside "${title}"` : "What you will find inside this book"}
         </h2>
       </div>
       <div className="grid gap-8 md:grid-cols-3">
@@ -257,7 +257,7 @@ export const ContinueReadingInvite = () => (
     <div className="container max-w-3xl px-4 text-center">
       <span className="section-eyebrow">Continue Your Reading Journey</span>
       <h2 className="mt-5 text-3xl md:text-4xl font-bold text-foreground">
-        One idea ends — the next one is waiting
+        One idea ends — the next is waiting
       </h2>
       <p className="mt-5 text-lg text-muted-foreground leading-relaxed">
         Every article is a small journey. Begin the next one — chosen for what you already enjoy.

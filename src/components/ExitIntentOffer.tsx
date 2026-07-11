@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { X, Gift, Check } from "lucide-react";
+import { X, Gift, Check, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const STORAGE_KEY = "gn_exit_intent_shown";
@@ -19,7 +19,7 @@ export default function ExitIntentOffer() {
         setOpen(true);
       }
     };
-    // Mobile fallback: trigger after 45s if user is idle on page
+    // Mobile fallback — trigger after 45s of idle
     const timer = window.setTimeout(() => {
       if (!sessionStorage.getItem(STORAGE_KEY)) {
         sessionStorage.setItem(STORAGE_KEY, "1");
@@ -70,15 +70,24 @@ export default function ExitIntentOffer() {
             <Gift className="h-7 w-7 text-secondary" />
           </div>
           <h3 className="mt-4 font-serif text-2xl font-bold text-card-foreground">
-            Rukiye!
+            Wait — before you go
           </h3>
           <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-            Aaj hi shuru karein apni <strong className="text-primary">adhyatmik yatra</strong> — pehla granth bilkul free hai.
+            Start your <strong className="text-primary">spiritual journey today</strong> — your first
+            chapter is completely free, and we&apos;ll unlock <strong>20% off</strong> your first book.
           </p>
+
+          <div className="mt-4 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <BookOpen className="h-3.5 w-3.5 text-primary" /> Free chapter
+            <span className="opacity-40">•</span>
+            <Check className="h-3.5 w-3.5 text-primary" /> No card required
+            <span className="opacity-40">•</span>
+            <Check className="h-3.5 w-3.5 text-primary" /> Instant access
+          </div>
 
           <div className="mt-5 rounded-xl border-2 border-dashed border-secondary bg-secondary/5 p-4">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Bonus — Premium par 20% off
+              Your one-time reader coupon
             </p>
             <button
               onClick={copy}
@@ -89,10 +98,10 @@ export default function ExitIntentOffer() {
             <p className="mt-1 text-xs text-muted-foreground">
               {copied ? (
                 <span className="inline-flex items-center gap-1 text-green-700 font-semibold">
-                  <Check className="h-3 w-3" /> Copy ho gaya!
+                  <Check className="h-3 w-3" /> Copied!
                 </span>
               ) : (
-                "Code par click karke copy karein"
+                "Tap the code to copy"
               )}
             </p>
           </div>
@@ -103,15 +112,14 @@ export default function ExitIntentOffer() {
             className="mt-5 w-full bg-secondary text-secondary-foreground font-bold hover:bg-secondary/90"
           >
             <Link to="/books?filter=free" onClick={() => setOpen(false)}>
-              Abhi Free Mein Padhein →
+              Start Reading Free →
             </Link>
           </Button>
 
           <p className="mt-3 text-[11px] text-muted-foreground">
-            Seemit samay ke liye • Ek khaate par ek baar
+            Limited time · One redemption per account
           </p>
         </div>
-
       </div>
     </div>
   );

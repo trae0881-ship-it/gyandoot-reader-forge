@@ -66,13 +66,13 @@ export default function ContinueReadingSection() {
         <div className="mb-8 flex items-end justify-between gap-4">
           <div>
             <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-wider">
-              Aapka Path · Continue
+              Your Journey · Continue
             </span>
             <h2
               id="continue-reading"
               className="mt-3 font-serif text-3xl font-bold md:text-4xl text-foreground"
             >
-              जहाँ आपने छोड़ा था · <span className="text-primary">Continue reading</span>
+              Pick up where you <span className="text-primary">left off</span>
             </h2>
             <p className="mt-2 max-w-2xl text-muted-foreground text-sm md:text-base">
               Resume any book from your last saved chapter — your progress is safely stored.

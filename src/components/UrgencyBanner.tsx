@@ -72,11 +72,11 @@ export default function UrgencyBanner() {
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <Flame className="h-3.5 w-3.5 shrink-0 animate-pulse" />
           <p className="truncate font-semibold">
-            आज की डील — कोड{" "}
+            Today&apos;s deal — use code{" "}
             <Link to={cfg.link} className="underline underline-offset-2 font-extrabold">
               {cfg.coupon}
             </Link>{" "}
-            से {cfg.discount} • खत्म होने में{" "}
+            for {cfg.discount} • ends in{" "}
             <span className="font-mono font-bold tabular-nums">{format(remaining)}</span>
           </p>
         </div>

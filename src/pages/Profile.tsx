@@ -664,8 +664,22 @@ const Profile = () => {
               )}
             </DialogTitle>
           </DialogHeader>
-          <div className="flex-1 min-h-0 bg-muted/30">
-            {invoicePreview && (
+          <div className="flex-1 min-h-0 bg-muted/30 relative">
+            {invoicePreview?.loading && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-muted-foreground">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="text-sm">Generating your invoice…</p>
+              </div>
+            )}
+            {invoicePreview?.error && !invoicePreview.loading && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center">
+                <FileText className="h-10 w-10 text-destructive/70" />
+                <p className="text-sm font-medium text-destructive">Couldn't load the invoice preview</p>
+                <p className="text-xs text-muted-foreground max-w-sm">{invoicePreview.error}</p>
+                <Button size="sm" variant="outline" onClick={retryInvoicePreview}>Retry</Button>
+              </div>
+            )}
+            {invoicePreview?.url && !invoicePreview.loading && !invoicePreview.error && (
               <iframe
                 title="Invoice preview"
                 src={invoicePreview.url}
@@ -675,8 +689,17 @@ const Profile = () => {
           </div>
           <DialogFooter className="px-6 py-3 border-t bg-background">
             <Button variant="outline" onClick={closeInvoicePreview}>Close</Button>
-            <Button onClick={downloadInvoiceFromPreview} className="gap-2">
-              <Download className="h-4 w-4" /> Download PDF
+            <Button
+              onClick={downloadInvoiceFromPreview}
+              disabled={invoiceDownloading || invoicePreview?.loading}
+              className="gap-2"
+            >
+              {invoiceDownloading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              Download PDF
             </Button>
           </DialogFooter>
         </DialogContent>

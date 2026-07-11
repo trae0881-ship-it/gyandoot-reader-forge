@@ -259,7 +259,7 @@ export const CalmFeeling = () => (
 
       <div className="my-10 flex items-center justify-center gap-4">
         <div className="h-px w-16 bg-secondary/40" />
-        <Layers className="h-4 w-4 text-secondary" strokeWidth={1.5} />
+        <Layers className="h-7 w-7 text-secondary" strokeWidth={1.5} />
         <div className="h-px w-16 bg-secondary/40" />
       </div>
 

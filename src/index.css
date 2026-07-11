@@ -4,8 +4,9 @@
 
 @layer base {
   :root {
-    --background: 40 30% 98%;
-    --foreground: 20 15% 12%;
+    /* Warm off-white #FCFCFA for calm long-reading atmosphere */
+    --background: 60 20% 98.4%;
+    --foreground: 220 13% 18%;
 
     --card: 0 0% 100%;
     --card-foreground: 20 15% 12%;

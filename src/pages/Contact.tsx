@@ -190,10 +190,11 @@ const Contact = () => {
             </div>
           </div>
 
-          <div>
+          <div id="contact-form">
             <h2 className="font-serif text-2xl font-bold text-foreground mb-6">Fill in the form</h2>
 
             <form onSubmit={handleSubmit} className="space-y-4" aria-label="Contact form">
+
               <Input
                 id="contact-name"
                 name="name"

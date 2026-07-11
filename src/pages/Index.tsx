@@ -108,7 +108,7 @@ const Index = () => {
       const { data } = await supabase
         .from("posts")
         .select("id, title, slug, excerpt, cover_url, post_type, created_at")
-        .eq("is_published", true)
+        .eq("is_published", true).eq("approval_status", "approved")
         .order("created_at", { ascending: false })
         .limit(3);
       return data ?? [];

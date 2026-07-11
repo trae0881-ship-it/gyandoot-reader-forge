@@ -16,6 +16,9 @@ import { Progress } from "@/components/ui/progress";
 import RichTextEditor from "@/components/RichTextEditor";
 import BulkBookUpload from "@/components/admin/BulkBookUpload";
 import UploadCsvButton from "@/components/admin/UploadCsvButton";
+import SourcesPermissionsCard from "@/components/admin/SourcesPermissionsCard";
+import OriginalityPanel from "@/components/admin/OriginalityPanel";
+import { Send } from "lucide-react";
 
 const slugify = (t: string) => {
   const slug = t
@@ -72,12 +75,17 @@ const ChapterEditor = ({ book, onBack }: { book: any; onBack: () => void }) => {
   const { toast } = useToast();
   const [view, setView] = useState<"list" | "form">("list");
   const [editing, setEditing] = useState<any>(null);
-  const [form, setForm] = useState({ title: "", content: "", chapter_number: 1, is_preview: true });
+  const [form, setForm] = useState({
+    title: "", content: "", chapter_number: 1, is_preview: true,
+    source_type: "original" as "original" | "translation" | "public_domain" | "licensed" | "quoted_excerpt",
+    source_citation: "",
+    permission_notes: "",
+  });
 
   const { data: chapters } = useQuery({
     queryKey: ["admin-chapters", book.id],
     queryFn: async () => {
-      const { data } = await supabase.from("book_chapters").select("id, book_id, title, slug, chapter_number, is_preview, created_at, updated_at").eq("book_id", book.id).order("chapter_number");
+      const { data } = await supabase.from("book_chapters").select("id, book_id, title, slug, chapter_number, is_preview, created_at, updated_at, approval_status, originality_score, originality_report, originality_checked_at, source_type, source_citation, permission_notes").eq("book_id", book.id).order("chapter_number");
       return data ?? [];
     },
   });
@@ -110,11 +118,23 @@ const ChapterEditor = ({ book, onBack }: { book: any; onBack: () => void }) => {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-chapters", book.id] }); toast({ title: "Chapter deleted" }); },
   });
 
-  const resetChapterForm = () => { setForm({ title: "", content: "", chapter_number: (chapters?.length ?? 0) + 1, is_preview: true }); setEditing(null); setView("list"); };
+  const resetChapterForm = () => {
+    setForm({
+      title: "", content: "", chapter_number: (chapters?.length ?? 0) + 1, is_preview: true,
+      source_type: "original", source_citation: "", permission_notes: "",
+    });
+    setEditing(null);
+    setView("list");
+  };
 
   const openEdit = async (ch: any) => {
     setEditing(ch);
-    setForm({ title: ch.title, content: "", chapter_number: ch.chapter_number, is_preview: ch.is_preview });
+    setForm({
+      title: ch.title, content: "", chapter_number: ch.chapter_number, is_preview: ch.is_preview,
+      source_type: (ch.source_type ?? "original") as any,
+      source_citation: ch.source_citation ?? "",
+      permission_notes: ch.permission_notes ?? "",
+    });
     setView("form");
     const { data, error } = await supabase.rpc("admin_get_chapter_full", { _chapter_id: ch.id });
     if (error) { toast({ title: "Failed to load chapter content", description: error.message, variant: "destructive" }); return; }
@@ -124,7 +144,10 @@ const ChapterEditor = ({ book, onBack }: { book: any; onBack: () => void }) => {
 
   const openNew = () => {
     setEditing(null);
-    setForm({ title: "", content: "", chapter_number: (chapters?.length ?? 0) + 1, is_preview: true });
+    setForm({
+      title: "", content: "", chapter_number: (chapters?.length ?? 0) + 1, is_preview: true,
+      source_type: "original", source_citation: "", permission_notes: "",
+    });
     setView("form");
   };
 
@@ -160,13 +183,59 @@ const ChapterEditor = ({ book, onBack }: { book: any; onBack: () => void }) => {
             />
           </div>
 
+
+          {/* Sources & Permissions + Originality (new) */}
+          <div className="grid gap-4 md:grid-cols-2 border-t border-border pt-4">
+            <SourcesPermissionsCard
+              sourceType={form.source_type}
+              sourceCitation={form.source_citation}
+              permissionNotes={form.permission_notes}
+              onChange={(patch) => setForm({ ...form, ...patch as any })}
+            />
+            <OriginalityPanel
+              entityType="chapter"
+              entityId={editing?.id ?? null}
+              score={editing?.originality_score ?? null}
+              report={(editing?.originality_report ?? null) as any}
+              checkedAt={editing?.originality_checked_at ?? null}
+              approvalStatus={editing?.approval_status ?? "draft"}
+              disableRun={!editing}
+              onChecked={() => qc.invalidateQueries({ queryKey: ["admin-chapters", book.id] })}
+            />
+          </div>
+
           <div className="flex items-center justify-between pt-2">
             <div className="flex items-center gap-2">
               <Switch checked={form.is_preview} onCheckedChange={(v) => setForm({ ...form, is_preview: v })} />
               <Label>{form.is_preview ? "Free Preview" : "Paid Chapter"}</Label>
+              {editing?.approval_status && editing.approval_status !== "approved" && (
+                <span className="ml-3 text-xs text-amber-700">
+                  · Needs admin approval before publish
+                </span>
+              )}
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={resetChapterForm}>Cancel</Button>
+              {editing && (
+                <Button
+                  variant="secondary"
+                  onClick={async () => {
+                    try {
+                      const { error } = await supabase.rpc("submit_chapter_for_review" as any, { _chapter_id: editing.id } as any);
+                      if (error) throw error;
+                      toast({ title: "Submitted for review", description: "Running originality check…" });
+                      await supabase.functions.invoke("content-originality-check", {
+                        body: { entity_type: "chapter", entity_id: editing.id },
+                      });
+                      qc.invalidateQueries({ queryKey: ["admin-chapters", book.id] });
+                    } catch (e: any) {
+                      toast({ title: "Submission failed", description: e.message, variant: "destructive" });
+                    }
+                  }}
+                >
+                  <Send className="mr-1 h-4 w-4" /> Submit for Review
+                </Button>
+              )}
               <Button onClick={() => saveMutation.mutate()} disabled={!form.title || saveMutation.isPending}>
                 {saveMutation.isPending ? "Saving…" : editing ? "Update Chapter" : "Add Chapter"}
               </Button>

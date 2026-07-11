@@ -16,6 +16,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { downloadTableAsCsv } from "@/lib/exportCsv";
 import RichTextEditor from "@/components/RichTextEditor";
 import UploadCsvButton from "@/components/admin/UploadCsvButton";
+import SourcesPermissionsCard from "@/components/admin/SourcesPermissionsCard";
+import OriginalityPanel from "@/components/admin/OriginalityPanel";
+import { Send } from "lucide-react";
 
 const slugify = (t: string) => {
   const slug = t
@@ -41,6 +44,10 @@ const emptyForm = {
   social_caption: "", social_excerpt: "",
   canonical_url: "",
   schema_type: "BlogPosting",
+  // Originality workflow
+  source_type: "original" as "original" | "translation" | "public_domain" | "licensed" | "quoted_excerpt",
+  source_citation: "",
+  permission_notes: "",
 };
 
 
@@ -151,6 +158,9 @@ const AdminPosts = () => {
         social_excerpt: form.social_excerpt || null,
         canonical_url: form.canonical_url || null,
         schema_type: form.schema_type || "BlogPosting",
+        source_type: form.source_type,
+        source_citation: form.source_citation || null,
+        permission_notes: form.permission_notes || null,
       };
       if (editing) {
         const { error } = await supabase.from("posts").update(payload).eq("id", editing.id);
@@ -208,6 +218,9 @@ const AdminPosts = () => {
       social_excerpt: p.social_excerpt ?? "",
       canonical_url: p.canonical_url ?? "",
       schema_type: p.schema_type ?? "BlogPosting",
+      source_type: (p.source_type ?? "original") as any,
+      source_citation: p.source_citation ?? "",
+      permission_notes: p.permission_notes ?? "",
     });
     setView("form");
   };
@@ -510,6 +523,26 @@ const AdminPosts = () => {
             </div>
           </div>
 
+          {/* Sources & Permissions + Originality (new) */}
+          <div className="border-t border-border pt-4 grid gap-4 md:grid-cols-2">
+            <SourcesPermissionsCard
+              sourceType={form.source_type}
+              sourceCitation={form.source_citation}
+              permissionNotes={form.permission_notes}
+              onChange={(patch) => setForm({ ...form, ...patch as any })}
+            />
+            <OriginalityPanel
+              entityType="post"
+              entityId={editing?.id ?? null}
+              score={editing?.originality_score ?? null}
+              report={(editing?.originality_report ?? null) as any}
+              checkedAt={editing?.originality_checked_at ?? null}
+              approvalStatus={editing?.approval_status ?? "draft"}
+              disableRun={!editing}
+              onChecked={() => qc.invalidateQueries({ queryKey: ["admin-posts"] })}
+            />
+          </div>
+
           {/* Actions */}
           <div className="flex items-center justify-between pt-2">
             <div className="text-xs text-muted-foreground">
@@ -518,9 +551,35 @@ const AdminPosts = () => {
                 : form.publish_status === "published"
                   ? "Live on site"
                   : "Saved as draft"}
+              {editing?.approval_status && editing.approval_status !== "approved" && (
+                <span className="ml-2 text-amber-700">
+                  · Requires admin approval before publish
+                </span>
+              )}
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={resetForm}>Cancel</Button>
+              {editing && (
+                <Button
+                  variant="secondary"
+                  onClick={async () => {
+                    try {
+                      const { error } = await supabase.rpc("submit_post_for_review" as any, { _post_id: editing.id } as any);
+                      if (error) throw error;
+                      toast({ title: "Submitted for review", description: "Running originality check…" });
+                      // Kick off originality check right after submission
+                      await supabase.functions.invoke("content-originality-check", {
+                        body: { entity_type: "post", entity_id: editing.id },
+                      });
+                      qc.invalidateQueries({ queryKey: ["admin-posts"] });
+                    } catch (e: any) {
+                      toast({ title: "Submission failed", description: e.message, variant: "destructive" });
+                    }
+                  }}
+                >
+                  <Send className="mr-1 h-4 w-4" /> Submit for Review
+                </Button>
+              )}
               <Button onClick={() => saveMutation.mutate()} disabled={!form.title || saveMutation.isPending || (form.publish_status === "scheduled" && !form.scheduled_at)}>
                 {saveMutation.isPending ? "Saving…" : editing ? "Update Post" : "Save Post"}
               </Button>

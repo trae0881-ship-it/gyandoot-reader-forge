@@ -266,35 +266,71 @@ export type Database = {
       }
       book_chapters: {
         Row: {
+          approval_notes: string | null
+          approval_status: Database["public"]["Enums"]["approval_status_t"]
           book_id: string
           chapter_number: number
           content: string | null
           created_at: string
           id: string
           is_preview: boolean
+          last_edited_at: string | null
+          last_edited_by: string | null
+          originality_checked_at: string | null
+          originality_report: Json | null
+          originality_score: number | null
+          permission_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           slug: string
+          source_citation: string | null
+          source_type: Database["public"]["Enums"]["source_type_t"] | null
           title: string
           updated_at: string
         }
         Insert: {
+          approval_notes?: string | null
+          approval_status?: Database["public"]["Enums"]["approval_status_t"]
           book_id: string
           chapter_number?: number
           content?: string | null
           created_at?: string
           id?: string
           is_preview?: boolean
+          last_edited_at?: string | null
+          last_edited_by?: string | null
+          originality_checked_at?: string | null
+          originality_report?: Json | null
+          originality_score?: number | null
+          permission_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           slug: string
+          source_citation?: string | null
+          source_type?: Database["public"]["Enums"]["source_type_t"] | null
           title: string
           updated_at?: string
         }
         Update: {
+          approval_notes?: string | null
+          approval_status?: Database["public"]["Enums"]["approval_status_t"]
           book_id?: string
           chapter_number?: number
           content?: string | null
           created_at?: string
           id?: string
           is_preview?: boolean
+          last_edited_at?: string | null
+          last_edited_by?: string | null
+          originality_checked_at?: string | null
+          originality_report?: Json | null
+          originality_score?: number | null
+          permission_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           slug?: string
+          source_citation?: string | null
+          source_type?: Database["public"]["Enums"]["source_type_t"] | null
           title?: string
           updated_at?: string
         }
@@ -585,6 +621,42 @@ export type Database = {
           subject?: string
           updated_at?: string
           user_agent?: string | null
+        }
+        Relationships: []
+      }
+      content_audit_log: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string | null
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          notes: string | null
+          payload: Json | null
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          notes?: string | null
+          payload?: Json | null
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          notes?: string | null
+          payload?: Json | null
         }
         Relationships: []
       }
@@ -937,6 +1009,8 @@ export type Database = {
       }
       posts: {
         Row: {
+          approval_notes: string | null
+          approval_status: Database["public"]["Enums"]["approval_status_t"]
           author: string | null
           canonical_url: string | null
           category: string | null
@@ -958,10 +1032,15 @@ export type Database = {
           internal_links: Json
           is_published: boolean
           keyword_difficulty: number | null
+          last_edited_at: string | null
+          last_edited_by: string | null
           manually_edited: boolean
           meta_description: string | null
           meta_title: string | null
+          originality_checked_at: string | null
+          originality_report: Json | null
           originality_score: number | null
+          permission_notes: string | null
           post_type: string
           primary_keyword: string | null
           publish_status: string
@@ -969,6 +1048,8 @@ export type Database = {
           readability_score: number | null
           reading_time_min: number | null
           report_sent_at: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           scheduled_at: string | null
           schema_type: string
           search_intent: string | null
@@ -979,6 +1060,8 @@ export type Database = {
           social_captions: Json
           social_excerpt: string | null
           source_book_ids: string[] | null
+          source_citation: string | null
+          source_type: Database["public"]["Enums"]["source_type_t"] | null
           tags: string[]
           timezone: string
           title: string
@@ -986,6 +1069,8 @@ export type Database = {
           word_count: number | null
         }
         Insert: {
+          approval_notes?: string | null
+          approval_status?: Database["public"]["Enums"]["approval_status_t"]
           author?: string | null
           canonical_url?: string | null
           category?: string | null
@@ -1007,10 +1092,15 @@ export type Database = {
           internal_links?: Json
           is_published?: boolean
           keyword_difficulty?: number | null
+          last_edited_at?: string | null
+          last_edited_by?: string | null
           manually_edited?: boolean
           meta_description?: string | null
           meta_title?: string | null
+          originality_checked_at?: string | null
+          originality_report?: Json | null
           originality_score?: number | null
+          permission_notes?: string | null
           post_type?: string
           primary_keyword?: string | null
           publish_status?: string
@@ -1018,6 +1108,8 @@ export type Database = {
           readability_score?: number | null
           reading_time_min?: number | null
           report_sent_at?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           scheduled_at?: string | null
           schema_type?: string
           search_intent?: string | null
@@ -1028,6 +1120,8 @@ export type Database = {
           social_captions?: Json
           social_excerpt?: string | null
           source_book_ids?: string[] | null
+          source_citation?: string | null
+          source_type?: Database["public"]["Enums"]["source_type_t"] | null
           tags?: string[]
           timezone?: string
           title: string
@@ -1035,6 +1129,8 @@ export type Database = {
           word_count?: number | null
         }
         Update: {
+          approval_notes?: string | null
+          approval_status?: Database["public"]["Enums"]["approval_status_t"]
           author?: string | null
           canonical_url?: string | null
           category?: string | null
@@ -1056,10 +1152,15 @@ export type Database = {
           internal_links?: Json
           is_published?: boolean
           keyword_difficulty?: number | null
+          last_edited_at?: string | null
+          last_edited_by?: string | null
           manually_edited?: boolean
           meta_description?: string | null
           meta_title?: string | null
+          originality_checked_at?: string | null
+          originality_report?: Json | null
           originality_score?: number | null
+          permission_notes?: string | null
           post_type?: string
           primary_keyword?: string | null
           publish_status?: string
@@ -1067,6 +1168,8 @@ export type Database = {
           readability_score?: number | null
           reading_time_min?: number | null
           report_sent_at?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           scheduled_at?: string | null
           schema_type?: string
           search_intent?: string | null
@@ -1077,6 +1180,8 @@ export type Database = {
           social_captions?: Json
           social_excerpt?: string | null
           source_book_ids?: string[] | null
+          source_citation?: string | null
+          source_type?: Database["public"]["Enums"]["source_type_t"] | null
           tags?: string[]
           timezone?: string
           title?: string
@@ -1939,6 +2044,19 @@ export type Database = {
       }
       is_admin_otp_verified: { Args: { _user_id: string }; Returns: boolean }
       publish_scheduled_posts: { Args: never; Returns: undefined }
+      review_chapter: {
+        Args: { _chapter_id: string; _decision: string; _notes?: string }
+        Returns: undefined
+      }
+      review_post: {
+        Args: { _decision: string; _notes?: string; _post_id: string }
+        Returns: undefined
+      }
+      submit_chapter_for_review: {
+        Args: { _chapter_id: string }
+        Returns: undefined
+      }
+      submit_post_for_review: { Args: { _post_id: string }; Returns: undefined }
     }
     Enums: {
       app_role:
@@ -1949,6 +2067,19 @@ export type Database = {
         | "payments_manager"
         | "users_manager"
         | "support"
+      approval_status_t:
+        | "draft"
+        | "pending_review"
+        | "flagged"
+        | "approved"
+        | "rejected"
+        | "needs_rewrite"
+      source_type_t:
+        | "original"
+        | "translation"
+        | "public_domain"
+        | "licensed"
+        | "quoted_excerpt"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2084,6 +2215,21 @@ export const Constants = {
         "payments_manager",
         "users_manager",
         "support",
+      ],
+      approval_status_t: [
+        "draft",
+        "pending_review",
+        "flagged",
+        "approved",
+        "rejected",
+        "needs_rewrite",
+      ],
+      source_type_t: [
+        "original",
+        "translation",
+        "public_domain",
+        "licensed",
+        "quoted_excerpt",
       ],
     },
   },

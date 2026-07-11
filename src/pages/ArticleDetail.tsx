@@ -36,7 +36,7 @@ const ArticleDetail = () => {
   const { data: post, isLoading } = useQuery({
     queryKey: ["post", slug],
     queryFn: async () => {
-      const { data } = await supabase.from("posts").select("*").eq("slug", slug!).eq("is_published", true).single();
+      const { data } = await supabase.from("posts").select("*").eq("slug", slug!).eq("is_published", true).eq("approval_status", "approved").single();
       return data;
     },
     enabled: !!slug,
@@ -52,8 +52,8 @@ const ArticleDetail = () => {
     queryFn: async () => {
       const createdAt = post!.created_at;
       const [olderRes, newerRes] = await Promise.all([
-        supabase.from("posts").select("title, slug").eq("is_published", true).lt("created_at", createdAt).order("created_at", { ascending: false }).limit(1),
-        supabase.from("posts").select("title, slug").eq("is_published", true).gt("created_at", createdAt).order("created_at", { ascending: true }).limit(1),
+        supabase.from("posts").select("title, slug").eq("is_published", true).eq("approval_status", "approved").lt("created_at", createdAt).order("created_at", { ascending: false }).limit(1),
+        supabase.from("posts").select("title, slug").eq("is_published", true).eq("approval_status", "approved").gt("created_at", createdAt).order("created_at", { ascending: true }).limit(1),
       ]);
       return { older: olderRes.data?.[0] ?? null, newer: newerRes.data?.[0] ?? null };
     },
@@ -76,7 +76,7 @@ const ArticleDetail = () => {
         const { data } = await supabase
           .from("posts")
           .select("id, title, slug, cover_url, excerpt, post_type")
-          .eq("is_published", true)
+          .eq("is_published", true).eq("approval_status", "approved")
           .neq("id", post!.id)
           .or(orExpr)
           .limit(12);
@@ -93,7 +93,7 @@ const ArticleDetail = () => {
         const { data } = await supabase
           .from("posts")
           .select("id, title, slug, cover_url, excerpt")
-          .eq("is_published", true)
+          .eq("is_published", true).eq("approval_status", "approved")
           .eq("post_type", post!.post_type)
           .neq("id", post!.id)
           .order("created_at", { ascending: false })

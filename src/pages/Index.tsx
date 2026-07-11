@@ -202,56 +202,62 @@ const Index = () => {
     <Layout>
       <LiveReaderStrip />
       <RecentPurchasesToast />
-      {/* ─── 1. HERO (C.1) ─── */}
-      <section className="relative overflow-hidden bg-primary py-14 md:py-20">
+      {/* ─── 1. HERO — calm publishing-house entrance ─── */}
+      <section className="relative overflow-hidden bg-primary py-20 md:py-28 lg:py-32">
         <div
-          className="absolute inset-0 opacity-[0.07]"
+          aria-hidden
+          className="absolute inset-0 opacity-[0.08]"
           style={{
             backgroundImage:
-              "radial-gradient(circle at 20% 40%, hsl(45 97% 58%) 0%, transparent 50%), radial-gradient(circle at 80% 60%, hsl(0 82% 60%) 0%, transparent 50%)",
+              "radial-gradient(circle at 15% 20%, hsl(45 97% 58%) 0%, transparent 55%), radial-gradient(circle at 85% 80%, hsl(0 60% 55%) 0%, transparent 55%)",
           }}
         />
-        <div className="container relative text-center">
-          <div className="inline-flex items-center gap-2 rounded-full bg-secondary/20 px-4 py-1.5 text-xs font-semibold text-secondary mb-5">
-            <Star className="h-3.5 w-3.5 fill-secondary" /> Trusted by 24,000+ readers worldwide
+        <div
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-primary/40"
+        />
+        <div className="container relative">
+          <div className="mx-auto max-w-3xl text-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-secondary/40 bg-secondary/10 px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.2em] text-secondary mb-8">
+              <Star className="h-3 w-3 fill-secondary" />
+              A quiet home for sacred reading
+            </div>
+            <h1 className="font-serif text-4xl md:text-5xl lg:text-[3.75rem] font-semibold leading-[1.15] tracking-tight text-primary-foreground">
+              Timeless Indian scriptures,
+              <br className="hidden md:block" />
+              gathered in one <span className="text-secondary italic font-normal">unhurried</span> library.
+            </h1>
+            <p className="mx-auto mt-8 max-w-2xl text-base md:text-lg leading-[1.85] text-primary-foreground/80">
+              Bhagavad Gita, the Vedas, Upanishads, Ramayana, Hanuman Chalisa and Vishnu Sahasranama —
+              carefully translated into clear Hindi and English, and offered in a reader made for
+              slow, thoughtful discovery.
+            </p>
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+              <Button
+                size="lg"
+                className="bg-secondary text-secondary-foreground font-semibold hover:bg-secondary/90 shadow-lg rounded-full px-8 text-base"
+                asChild
+              >
+                <Link to="/books?filter=free">
+                  <BookOpen className="mr-2 h-4 w-4" /> Begin reading — free
+                </Link>
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 rounded-full px-8"
+                asChild
+              >
+                <Link to="/books?filter=paid">Explore the library</Link>
+              </Button>
+            </div>
+            <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-xs text-primary-foreground/70">
+              <span className="inline-flex items-center gap-1.5"><Lock className="h-3.5 w-3.5 text-secondary/80" /> Private &amp; secure</span>
+              <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-secondary/80" /> 7-day refund</span>
+              <span className="inline-flex items-center gap-1.5"><InfinityIcon className="h-3.5 w-3.5 text-secondary/80" /> Lifetime access</span>
+              <span className="inline-flex items-center gap-1.5"><RefreshCw className="h-3.5 w-3.5 text-secondary/80" /> Free future editions</span>
+            </div>
           </div>
-          <h1 className="font-serif text-3xl font-extrabold leading-tight text-primary-foreground md:text-5xl lg:text-6xl">
-            Ancient Indian Scriptures, Online —{" "}
-            <span className="text-secondary">Bhagavad Gita, Ramayana, Hanuman Chalisa</span>
-            <br className="hidden md:block" /> in Clear English & Hindi
-          </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-primary-foreground/90 md:text-lg">
-            50+ sacred texts in one library. Start reading free, or{" "}
-            <strong className="text-secondary">unlock premium editions for lifetime access to timeless wisdom.</strong>
-          </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Button
-              size="lg"
-              className="bg-secondary text-secondary-foreground font-bold hover:bg-secondary/90 shadow-xl px-8 text-base"
-              asChild
-            >
-              <Link to="/books?filter=free">
-                <BookOpen className="mr-2 h-5 w-5" /> Start Reading Free →
-              </Link>
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-2 border-primary-foreground/40 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 font-semibold px-8"
-              asChild
-            >
-              <Link to="/books?filter=paid">
-                Explore Premium Editions
-              </Link>
-            </Button>
-          </div>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs md:text-sm text-primary-foreground/80">
-            <span className="inline-flex items-center gap-1.5"><Lock className="h-3.5 w-3.5 text-secondary" /> Private & Secure</span>
-            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-secondary" /> 7-day full refund guarantee</span>
-            <span className="inline-flex items-center gap-1.5"><InfinityIcon className="h-3.5 w-3.5 text-secondary" /> Lifetime access, read forever</span>
-            <span className="inline-flex items-center gap-1.5"><RefreshCw className="h-3.5 w-3.5 text-secondary" /> Free updates & new editions</span>
-          </div>
-
         </div>
       </section>
 

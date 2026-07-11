@@ -42,6 +42,7 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Keywords = lazy(() => import("./pages/Keywords"));
 const Cart = lazy(() => import("./pages/Cart"));
+const Library = lazy(() => import("./pages/Library"));
 
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));

@@ -278,57 +278,57 @@ const Index = () => {
         <div className="container">
           <div className="mb-10 text-center">
             <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-wider">
-              विषय अनुसार खोजें
+              Browse by Topic
             </span>
             <h2 id="granth-categories" className="mt-3 font-serif text-3xl font-bold md:text-4xl">
-              श्रेणी अनुसार ग्रंथ · <span className="text-primary">Browse by Category</span>
+              Scriptures by <span className="text-primary">Category</span>
             </h2>
             <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
-              50+ पवित्र ग्रंथ — वेद, उपनिषद, इतिहास, भक्ति और स्तोत्र, सब एक ही पुस्तकालय में।
+              50+ sacred texts — Vedas, Upanishads, epics, devotion and stotras, all in one library.
             </p>
           </div>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {[
               {
                 icon: ScrollText,
-                title: "वेद व उपनिषद",
+                title: "Vedas & Upanishads",
                 subtitle: "Vedic Texts",
-                desc: "ऋग्वेद, यजुर्वेद, सामवेद, अथर्ववेद और प्रमुख उपनिषदों का हिंदी अनुवाद।",
+                desc: "English translations of the Rigveda, Yajurveda, Samaveda, Atharvaveda and the major Upanishads.",
                 to: "/books?category=adhyatm",
               },
               {
                 icon: Landmark,
-                title: "इतिहास ग्रंथ",
-                subtitle: "Itihasa · Ramayana & Mahabharata",
-                desc: "रामायण, महाभारत, सुंदरकांड — मूल कथाएँ सरल हिंदी में।",
+                title: "Itihasa · Epics",
+                subtitle: "Ramayana & Mahabharata",
+                desc: "Ramayana, Mahabharata, Sundarkand — the original stories in clear, modern English.",
                 to: "/books?category=katha",
               },
               {
                 icon: Heart,
-                title: "भक्ति मार्ग",
+                title: "The Path of Devotion",
                 subtitle: "Bhagavad Gita & Commentaries",
-                desc: "श्रीमद्भगवद्गीता और उस पर सरल भाष्य — रोज़ के जीवन के लिए।",
+                desc: "The Srimad Bhagavad Gita with plain-language commentary — for everyday life.",
                 to: "/books?category=devta",
               },
               {
                 icon: Music2,
-                title: "स्तोत्र व मंत्र संग्रह",
+                title: "Stotras & Mantras",
                 subtitle: "Stotra & Mantra Sangrah",
-                desc: "विष्णु सहस्रनाम, हनुमान चालीसा, आरती और नित्य पाठ के मंत्र।",
+                desc: "Vishnu Sahasranama, Hanuman Chalisa, aartis and mantras for daily practice.",
                 to: "/books?category=devi",
               },
               {
                 icon: Flame,
-                title: "पुराण व कथाएँ",
+                title: "Puranas & Stories",
                 subtitle: "Puranas & Devotional Stories",
-                desc: "श्रीमद्भागवत, विष्णु पुराण और भक्ति भाव से भरी कथाएँ।",
+                desc: "Srimad Bhagavatam, Vishnu Purana and stories rich with devotion.",
                 to: "/books?category=puran",
               },
               {
                 icon: Feather,
-                title: "योग व साधना",
+                title: "Yoga & Sadhana",
                 subtitle: "Yoga & Sadhna Guides",
-                desc: "ध्यान, प्राणायाम और आध्यात्मिक साधना पर मार्गदर्शन।",
+                desc: "Guidance on meditation, pranayama and spiritual practice.",
                 to: "/books?category=other",
               },
             ].map((cat) => (
@@ -347,7 +347,7 @@ const Index = () => {
                       </p>
                       <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{cat.desc}</p>
                       <span className="mt-3 inline-flex items-center text-xs font-semibold text-primary">
-                        पढ़ना शुरू करें <ArrowRight className="ml-1 h-3 w-3" />
+                        Start reading <ArrowRight className="ml-1 h-3 w-3" />
                       </span>
                     </div>
                   </div>
@@ -522,10 +522,10 @@ const Index = () => {
         <div className="container max-w-6xl">
           <div className="mb-12 text-center">
             <span className="inline-block rounded-full bg-secondary/20 px-3 py-1 text-xs font-semibold text-secondary-foreground uppercase tracking-wider">
-              हमारा उद्देश्य
+              Our Purpose
             </span>
             <h2 id="our-mission" className="mt-3 font-serif text-3xl font-bold md:text-4xl">
-              Our Mission · <span className="text-primary">तीन संकल्प</span>
+              Our Mission · <span className="text-primary">Three Commitments</span>
             </h2>
             <div className="mt-3 mx-auto h-1 w-16 rounded-full bg-secondary" />
           </div>
@@ -533,21 +533,21 @@ const Index = () => {
             {[
               {
                 icon: ScrollText,
-                pillar: "संरक्षण",
-                title: "प्राचीन शास्त्रों का शुद्ध संरक्षण",
-                desc: "संस्कृत और हिंदी के मूल ग्रंथों को उनकी शुद्धता के साथ, विद्वानों की देख-रेख में डिजिटल रूप में सुरक्षित रखना।",
+                pillar: "Preservation",
+                title: "Faithful preservation of ancient scriptures",
+                desc: "Keeping the Sanskrit and English source texts in their pure form, under scholarly supervision, safeguarded in digital form.",
               },
               {
                 icon: Globe,
-                pillar: "सुलभता",
-                title: "हर हिंदी पाठक तक धर्म-ज्ञान",
-                desc: "गाँव हो या विदेश — जहाँ भी इंटरनेट है, वहाँ हर पाठक को सच्चे धर्म-ग्रंथ नि:शुल्क या न्यूनतम मूल्य पर उपलब्ध हों।",
+                pillar: "Accessibility",
+                title: "Scripture within reach of every reader",
+                desc: "From a village to a distant city — wherever there is internet, every reader deserves access to authentic scriptures for free or at a minimal cost.",
               },
               {
                 icon: Sparkles,
-                pillar: "आधुनिकता",
-                title: "प्राचीन ज्ञान, आज की तकनीक",
-                desc: "स्वच्छ रीडर, डार्क मोड, बुकमार्क और नोट्स — प्राचीन शास्त्रों को आज पढ़ना उतना ही सहज हो जितना एक अख़बार पढ़ना।",
+                pillar: "Modernity",
+                title: "Ancient wisdom, today's technology",
+                desc: "A clean reader, dark mode, bookmarks and notes — reading the ancient scriptures should feel as easy as reading a newspaper.",
               },
             ].map((p) => (
               <div
@@ -703,13 +703,13 @@ const Index = () => {
         <div className="container max-w-6xl">
           <div className="mb-10 text-center">
             <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-wider">
-              हमारी सेवाएँ
+              Our Offerings
             </span>
             <h2 id="hamari-sevayen" className="mt-3 font-serif text-3xl font-bold md:text-4xl">
-              Hamari Sevayen · <span className="text-primary">Our Offerings</span>
+              What We <span className="text-primary">Offer</span>
             </h2>
             <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
-              सिर्फ़ पुस्तकें नहीं — पढ़ने, समझने और आगे बढ़ने का पूरा साथ।
+              More than books — the full companionship of reading, understanding and going deeper.
             </p>
           </div>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -717,29 +717,29 @@ const Index = () => {
               {
                 icon: Bookmark,
                 title: "Premium Reader",
-                sub: "स्वच्छ रीडर",
-                desc: "डार्क मोड, बुकमार्क, नोट्स और रात-में-पढ़ने योग्य टाइपोग्राफी।",
+                sub: "A quiet, distraction-free reader",
+                desc: "Dark mode, bookmarks, notes, and typography built for reading at night.",
                 to: "/books",
               },
               {
                 icon: MessageCircle,
-                title: "WhatsApp दैनिक श्लोक",
+                title: "Daily Shloka on WhatsApp",
                 sub: "Daily Shlok",
-                desc: "हर सुबह एक श्लोक, उसका अर्थ और आज के जीवन से जुड़ाव — सीधे WhatsApp पर।",
+                desc: "One shloka every morning, its meaning, and how it applies to today — delivered on WhatsApp.",
                 to: "/contact",
               },
               {
                 icon: FileText,
-                title: "लेख व प्रवचन",
+                title: "Articles & Discourses",
                 sub: "Articles & Discourses",
-                desc: "शास्त्र-आधारित लेख और चुनिंदा प्रवचन — रोज़ के प्रश्नों के सरल उत्तर।",
+                desc: "Scripture-grounded essays and selected discourses — simple answers to everyday questions.",
                 to: "/articles",
               },
               {
                 icon: GraduationCap,
-                title: "कार्यक्रम व कार्यशालाएँ",
+                title: "Programs & Workshops",
                 sub: "Programs & Workshops",
-                desc: "मौन साधना, शास्त्र-अध्ययन और आत्म-जागरण की कार्यशालाएँ।",
+                desc: "Silent practice, scripture study, and self-awareness workshops.",
                 to: "/articles",
               },
             ].map((s) => (
@@ -889,12 +889,12 @@ const Index = () => {
         <div className="container">
           <div className="mb-10 text-center">
             <span className="inline-block rounded-full bg-secondary/20 px-3 py-1 text-xs font-semibold text-secondary-foreground uppercase tracking-wider">
-              पाठकों की आवाज़ें
+              Reader Voices
             </span>
             <h2 className="mt-3 font-serif text-3xl font-bold md:text-4xl">
-              हमारे पाठकों की <span className="text-primary">आस्था और भरोसे</span> की आवाज़ें
+              Voices of <span className="text-primary">faith and trust</span> from our readers
             </h2>
-            <p className="mt-2 text-muted-foreground">Voices of faith and trust from our readers</p>
+            <p className="mt-2 text-muted-foreground">What our readers say about GyandootNova</p>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {[
@@ -949,18 +949,18 @@ const Index = () => {
             <div className="grid gap-8 md:grid-cols-[1.1fr_1fr] md:items-center">
               <div>
                 <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-wider">
-                  संपर्क करें
+                  Get in touch
                 </span>
                 <h2 id="sampark" className="mt-3 font-serif text-2xl md:text-3xl font-bold text-card-foreground">
-                  कोई प्रश्न, सुझाव या ग्रंथ की माँग?
+                  A question, suggestion, or a scripture request?
                 </h2>
                 <p className="mt-3 text-muted-foreground leading-relaxed">
-                  GyandootNova एक असली, इंसानी टीम है। WhatsApp, फ़ोन या ईमेल — जिस माध्यम से भी लिखें, उसी दिन उत्तर मिलेगा।
+                  GyandootNova is a real, human team. Write to us on WhatsApp, phone, or email — you'll hear back the same day.
                 </p>
                 <div className="mt-6 flex flex-wrap gap-3">
                   <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90">
                     <Link to="/contact">
-                      <Mail className="mr-2 h-4 w-4" /> संदेश भेजें
+                      <Mail className="mr-2 h-4 w-4" /> Send a message
                     </Link>
                   </Button>
                   <Button
@@ -983,9 +983,9 @@ const Index = () => {
                     <Phone className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">फ़ोन / WhatsApp</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Phone / WhatsApp</p>
                     <p className="font-serif text-lg font-semibold text-card-foreground mt-0.5">+91 91615 33353</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">सोम–शनि · 10 AM – 6 PM (IST)</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Mon–Sat · 10 AM – 6 PM (IST)</p>
                   </div>
                 </a>
                 <a
@@ -996,7 +996,7 @@ const Index = () => {
                     <Mail className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">ईमेल</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Email</p>
                     <p className="font-serif text-base font-semibold text-card-foreground mt-0.5 break-all">
                       amrendra8765@gmail.com
                     </p>
@@ -1007,11 +1007,11 @@ const Index = () => {
                     <MapPin className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">कार्यालय</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Office</p>
                     <p className="font-serif text-base font-semibold text-card-foreground mt-0.5">
                       Bhagwan Khera, Unnao
                     </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">Uttar Pradesh 209863 · भारत</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Uttar Pradesh 209863 · India</p>
                   </div>
                 </div>
               </div>

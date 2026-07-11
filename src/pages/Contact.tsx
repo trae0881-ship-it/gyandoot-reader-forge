@@ -115,11 +115,11 @@ const Contact = () => {
                 const s = document.getElementById("contact-subject") as HTMLInputElement | null;
                 const m = document.getElementById("contact-message") as HTMLTextAreaElement | null;
                 if (s) s.value = "Suggest a text / Scripture request";
-                if (m) m.value = "मैं यह पाठ / ग्रंथ देखना चाहूँगा:\n\n(Title, edition or tradition — anything helps)";
+                if (m) m.value = "I would like to see this text / scripture:\n\n(Title, edition or tradition — anything helps)";
                 setForm((f) => ({
                   ...f,
                   subject: "Suggest a text / Scripture request",
-                  message: "मैं यह पाठ / ग्रंथ देखना चाहूँगा:\n\n(Title, edition or tradition — anything helps)",
+                  message: "I would like to see this text / scripture:\n\n(Title, edition or tradition — anything helps)",
                 }));
                 s?.focus();
                 s?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -130,7 +130,7 @@ const Contact = () => {
                 <BookMarked className="h-5 w-5" />
               </div>
               <h3 className="mt-5 font-serif text-lg font-semibold text-foreground">
-                Suggest a text · कोई ग्रंथ सुझाइए
+                Suggest a text
               </h3>
               <p className="mt-3 text-sm text-muted-foreground leading-[1.8]">
                 Twelve of last month's twelve new titles came from reader requests alone. Ask for a

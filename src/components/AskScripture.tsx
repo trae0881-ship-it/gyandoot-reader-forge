@@ -34,8 +34,8 @@ const AskScripture = ({ bookId, bookTitle }: AskScriptureProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const isGeneral = !bookId;
-  const displayTitle = bookTitle || "सनातन धर्म";
-  const subtitle = isGeneral ? "हिंदू धर्म से जुड़ा कोई भी प्रश्न पूछें" : bookTitle;
+  const displayTitle = bookTitle || "Sanatana Dharma";
+  const subtitle = isGeneral ? "Ask any question about Hindu dharma" : bookTitle;
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -80,15 +80,15 @@ const AskScripture = ({ bookId, bookTitle }: AskScriptureProps) => {
       const aiMsg: Message = {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: data.answer || "यह जानकारी उपलब्ध नहीं है",
+        content: data.answer || "That information isn't available.",
         cached: data.cached,
       };
       setMessages(prev => [...prev, aiMsg]);
     } catch (err: any) {
       console.error("AI Ask error:", err);
       const errorMessage = err?.message?.includes("login") || err?.message?.includes("Unauthorized")
-        ? "कृपया पहले लॉगिन करें। AI assistant का उपयोग करने के लिए लॉगिन आवश्यक है।"
-        : "कुछ त्रुटि हुई। कृपया पुनः प्रयास करें।";
+        ? "Please sign in first. Login is required to use the AI assistant."
+        : "Something went wrong. Please try again.";
       setMessages(prev => [...prev, {
         id: crypto.randomUUID(),
         role: "assistant",
@@ -146,7 +146,7 @@ const AskScripture = ({ bookId, bookTitle }: AskScriptureProps) => {
       >
         <Sparkles className="h-5 w-5" />
         <span className="hidden sm:inline text-sm font-medium">
-          {isGeneral ? "धर्म से पूछें" : "पुस्तक से पूछें"}
+          {isGeneral ? "Ask about dharma" : "Ask this book"}
         </span>
       </button>
     );
@@ -164,7 +164,7 @@ const AskScripture = ({ bookId, bookTitle }: AskScriptureProps) => {
         )}
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold truncate">
-            {isGeneral ? "Gyandootnova AI" : "पुस्तक से पूछें"}
+            {isGeneral ? "Gyandootnova AI" : "Ask this book"}
           </p>
           <p className="text-xs opacity-80 truncate">{subtitle}</p>
         </div>
@@ -181,8 +181,8 @@ const AskScripture = ({ bookId, bookTitle }: AskScriptureProps) => {
             <p className="text-sm font-medium">Gyandootnova AI</p>
             <p className="text-xs mt-1 max-w-[220px]">
               {isGeneral
-                ? "वेद, गीता, रामायण, उपनिषद या किसी भी हिंदू ग्रंथ के बारे में प्रामाणिक जानकारी पाएं"
-                : `"${displayTitle}" के बारे में कोई भी प्रश्न पूछें`}
+                ? "Get authentic information about the Vedas, Gita, Ramayana, Upanishads or any Hindu scripture"
+                : `Ask any question about "${displayTitle}"`}
             </p>
           </div>
         )}
@@ -209,7 +209,7 @@ const AskScripture = ({ bookId, bookTitle }: AskScriptureProps) => {
             <div className="flex justify-start">
               <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3 text-sm text-muted-foreground flex items-center gap-2">
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                <span>{isGeneral ? "⚡ शास्त्रों में खोज रहा हूँ..." : "⚡ पुस्तक में खोज रहा हूँ..."}</span>
+                <span>{isGeneral ? "Searching the scriptures..." : "Searching this book..."}</span>
               </div>
             </div>
           )}
@@ -224,7 +224,7 @@ const AskScripture = ({ bookId, bookTitle }: AskScriptureProps) => {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={isGeneral ? "धर्म से जुड़ा प्रश्न पूछें..." : "अपना प्रश्न यहाँ लिखें..."}
+            placeholder={isGeneral ? "Ask a question about dharma..." : "Type your question here..."}
             disabled={loading}
             className="flex-1 rounded-full text-sm"
           />

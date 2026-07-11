@@ -1,90 +1,57 @@
-# Sales Conversion Overhaul — /books & Book Detail
+# Sales Conversion Sprint — 4 features
 
-Goal: `/books` aur book-detail pages ko sales-optimized banana. Sirf UI theek hone se sales nahi aati — trust, low-friction checkout, aur clear offer chahiye. Yeh plan 4 phases me deliver hoga.
+## 1. Book Reviews (submit + display verified count)
 
-## Phase 1 — Trust & Social Proof (highest ROI)
+**DB** — `book_reviews` table already exists (rating, review, is_verified_purchase auto-set by trigger, is_approved). No migration needed.
 
-**Book cards (/books) me add:**
-- Star rating + review count badge (e.g. "4.8 ★ · 1,240 readers")
-- "Verified Purchase" badge on reviews
-- Live reader count chip (already exists in `mem://ui/social-proof` — reuse)
-- "Bestseller" / "New" / "Free preview" tags with Lucide icons
+**Components** — new `src/components/BookReviewForm.tsx` (star picker + textarea, logged-in only, one review per user per book) and `src/components/BookReviewList.tsx` (approved reviews with verified badge, avg rating, count).
 
-**Book detail page me add:**
-- Testimonials carousel (min 3, real quotes from `contact_enquiries` or seeded)
-- "X people bought in last 24h" (from `purchases` table)
-- Money-back / satisfaction guarantee strip
-- Author credibility block (photo, credentials, other books)
+**Book card** — replace the hardcoded `Stars`/reviews line in `BookCard` (Books.tsx line 382-390) with real aggregate from `book_reviews` (count of approved). Show "✓ Verified" badge next to count if any verified purchases exist. Fetch aggregates once per page in a single query keyed by book_id.
 
-**DB:** naya `book_reviews` table (rating 1-5, review text, verified flag, user_id, book_id) + admin moderation.
+**Book detail** — add reviews section at bottom of `BookDetail.tsx` with the form (if logged in) + list.
 
-## Phase 2 — Checkout Friction Removal
+## 2. `/offer/[slug]` ads landing page
 
-**Current problem:** multi-step, requires login before payment.
+New route `src/pages/OfferLanding.tsx` registered in `App.tsx`. Distraction-free:
+- No header/footer (use a bare layout, just a small logo top-left)
+- Big cover, title, one-line pitch, price + WELCOME10 auto-applied
+- Single sticky "Buy Now — ₹XXX" CTA that jumps straight into checkout
+- Trust bar (compact), 2 short reviews, money-back note, FAQ (3 items)
+- UTM capture on mount → `sales_events` (view_offer_landing)
+- SEO: noindex (ad landing, not organic)
 
-**Changes:**
-- One-click **Buy Now** on card → direct Razorpay modal (guest checkout via email only)
-- Save address/phone on profile after first purchase; auto-fill next time
-- Remove all optional fields from checkout
-- Sticky mobile "Buy Now ₹XXX" bar on book detail page
-- UPI + Cards + Wallets prominently shown (Razorpay already integrated)
-- Post-payment: instant access + email receipt (Resend already set up)
+## 3. Admin Sales Funnel dashboard
 
-**DB:** `guest_checkouts` table for email-only orders; link to user on later signup.
+New tab in `AdminDashboard.tsx` (or new `src/pages/admin/AdminSalesFunnel.tsx` linked from admin nav). One-screen funnel:
 
-## Phase 3 — Pricing & Offers
+```text
+view_books_list  ████████████ 1,240
+  → view_book      ██████ 480 (39%)
+    → click_buy_now  ███ 210 (44%)
+      → begin_checkout ██ 92 (44%)
+        → payment_success █ 38 (41%)
+```
 
-- **First-time buyer coupon:** auto-apply `WELCOME10` (10% off) — banner on `/books`
-- **Bundle discount:** "Buy 2 get 15% off, Buy 3 get 25%" — auto-calculated in cart
-- **Free shipping threshold** removed (digital books) — instead "Instant PDF + Reader access"
-- **Stock urgency** (honest): "Limited-time launch price · ends [date]" — admin-editable, no fake countdown
-- Coupon input already exists; add "Apply best coupon automatically" toggle
+Data source: existing `sales_events` table. Show:
+- Funnel bars (last 7d / 30d toggle)
+- Drop-off % between each step
+- Top UTM sources by conversion
+- Recent 20 events table
 
-## Phase 4 — Landing Optimization for Traffic Sources
+## 4. Guest checkout (email-only)
 
-**SEO (Google organic):**
-- Each book page: FAQ schema, Review schema, Product schema with price/availability
-- H1 = book title + core benefit, H2s = "What you'll learn", "Who this is for"
-- Internal linking from blog posts → books (LSI keywords already tracked)
+**Frontend** — on `BookDetail.tsx` Buy Now: if not logged in, show a compact inline dialog asking only for email (+ optional name). No password, no OTP required for the checkout itself.
 
-**WhatsApp / direct share:**
-- Per-book OG image with title + price + cover (auto-generated)
-- Short share link: `/b/[slug]` → redirects to full book URL with UTM
-- "Share on WhatsApp" button with pre-filled message
+**Backend** — extend `create-order` edge function to accept `guest_email` when there is no auth. Store as `guest_email` column on `purchases` (add if missing). `verify-payment` grants access + emails download link to guest email.
 
-**Instagram/Facebook ads:**
-- New route `/offer/[slug]` — single-CTA landing variant (no nav, no footer clutter, testimonial above fold, one Buy Now button)
-- UTM auto-capture into `purchases.utm_source`
+**DB migration** — add `guest_email TEXT` and `guest_name TEXT` on `purchases`, allow null user_id when guest_email present (validation trigger — one of the two must be set), plus RLS grant so anon can insert via edge function only (service role).
 
-**Repeat readers / email:**
-- Abandoned checkout email (24h after `purchases.status='pending'`) via Resend
-- "Complete your library" recommendation email after purchase
-- Personalized "You might also like" on book detail (based on past purchases)
-
-## Phase 5 — Analytics Funnel (measure what matters)
-
-Client-side events (custom edge function `track-event` → `visitor_logs`):
-- `view_books_list`, `view_book`, `click_buy_now`, `begin_checkout`, `payment_success`, `payment_failed`
-- Store `utm_source/medium/campaign` on every event
-
-Admin dashboard tab **"Sales Funnel"**:
-- Funnel chart: views → buy click → checkout → paid
-- Drop-off % at each stage
-- Top-converting traffic sources
-- Coupon usage & revenue impact
-
-## Technical notes (for reference)
-
-- Reuse existing tables: `books`, `purchases`, `coupons`, `visitor_logs`, `profiles`
-- New tables: `book_reviews`, `guest_checkouts`, `sales_events`
-- Edge functions: `track-event`, `abandoned-checkout-email`, `auto-apply-coupon`
-- No new payment gateway — extend existing Razorpay flow
-- Follow brand rules: no emojis, Lucide icons only, INR-first, Hindi-first copy
+**Post-purchase** — send an existing transactional email with the file download link + a "claim account" link (magic-link signup) so they can access their library later.
 
 ## Delivery order
 
-Phase 1 (trust) + Phase 2 (checkout) deliver ~70% of the sales lift and are done first in one pass. Phase 3-5 follow. Each phase is independently shippable.
+1. DB migration (guest checkout columns) — one approval gate.
+2. Features 1, 2, 3 in parallel edits (no cross-dependencies).
+3. Feature 4 wiring (frontend dialog + edge function updates) after migration lands.
 
-## Ek confirmation chahiye
-
-Kya main **Phase 1 + Phase 2 abhi start karun** (biggest sales impact, ~1 build), aur baaki phases uske baad? Ya aap koi ek specific phase pehle chahte ho?
+All four use existing tables/functions where possible — only one migration is required.

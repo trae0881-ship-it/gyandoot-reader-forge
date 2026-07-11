@@ -336,7 +336,18 @@ const BookDetail = () => {
       <RecentPurchasesToast />
       <section className="py-12">
         <div className="container">
+          {/* Breadcrumb — SEO + brand-entity link back to GyandootNova. */}
+          <nav aria-label="Breadcrumb" className="mb-5 text-sm text-muted-foreground">
+            <ol className="flex flex-wrap items-center gap-1.5">
+              <li><Link to="/" className="hover:text-primary transition-colors">GyandootNova</Link></li>
+              <li aria-hidden="true">/</li>
+              <li><Link to="/books" className="hover:text-primary transition-colors">Books</Link></li>
+              <li aria-hidden="true">/</li>
+              <li className="text-foreground/80 truncate max-w-[60vw]">{book.title}</li>
+            </ol>
+          </nav>
           <div className="grid gap-8 md:grid-cols-3">
+
             <div className="md:col-span-1">
               <div className="aspect-[3/4] overflow-hidden rounded-lg bg-muted flex items-center justify-center">
                 {book.cover_url ? (

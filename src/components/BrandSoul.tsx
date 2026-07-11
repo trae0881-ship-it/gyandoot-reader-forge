@@ -228,29 +228,28 @@ const calmPromises = [
 ];
 
 export const CalmFeeling = () => (
-  <section className="relative bg-royal overflow-hidden">
+  <section className="relative bg-ink overflow-hidden">
+    {/* Maroon radial glow from center */}
     <div
       aria-hidden
-      className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full blur-[120px] -mr-48 -mt-48"
-      style={{ backgroundColor: "hsl(var(--secondary) / 0.08)" }}
-    />
-    <div
-      aria-hidden
-      className="absolute bottom-0 left-0 w-96 h-96 rounded-full blur-[100px] -ml-32 -mb-32"
-      style={{ backgroundColor: "hsl(var(--secondary) / 0.05)" }}
+      className="absolute inset-0 pointer-events-none"
+      style={{
+        background:
+          "radial-gradient(circle at 50% 40%, hsl(var(--primary) / 0.18) 0%, transparent 60%)",
+      }}
     />
 
-    <div className="container relative max-w-5xl px-4 py-24 md:py-36 text-center">
+    <div className="container relative max-w-5xl px-4 py-24 md:py-32 text-center">
       <span
-        className="text-xs font-extrabold uppercase tracking-[0.16em] text-secondary inline-flex items-center gap-3 mb-10"
+        className="text-xs font-extrabold uppercase tracking-[0.28em] text-secondary inline-flex items-center gap-3 mb-8"
         style={bodyFont}
       >
-        <Leaf className="h-5 w-5" />
-        Chapter III · A Calm Feeling
+        <Leaf className="h-4 w-4" />
+        Chapter III · The Sanctuary
       </span>
 
       <h2
-        className="text-4xl md:text-6xl lg:text-7xl leading-[1.05] text-primary-foreground max-w-4xl mx-auto"
+        className="text-4xl md:text-6xl lg:text-7xl font-light leading-[1.1] text-primary-foreground max-w-3xl mx-auto"
         style={displayFont}
       >
         An island of <span className="italic text-secondary">stillness</span>
@@ -258,51 +257,63 @@ export const CalmFeeling = () => (
       </h2>
 
       <div className="my-10 flex items-center justify-center gap-4">
-        <div className="h-px w-16 bg-secondary/40" />
-        <Layers className="h-7 w-7 text-secondary" strokeWidth={1.5} />
-        <div className="h-px w-16 bg-secondary/40" />
+        <div className="h-px w-14 bg-secondary/30" />
+        <div className="w-2.5 h-2.5 rotate-45 border border-secondary bg-primary" />
+        <div className="h-px w-14 bg-secondary/30" />
       </div>
 
       <p
-        className="mx-auto max-w-2xl text-lg md:text-xl leading-[1.85] text-primary-foreground/85 font-medium"
+        className="mx-auto max-w-2xl text-lg leading-[1.85] text-primary-foreground/70 font-light"
         style={bodyFont}
       >
         We built a reader that quietly steps back — so nothing stands between
         you and the scripture in front of you.
       </p>
 
-      <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-px bg-primary-foreground/10 max-w-3xl mx-auto border border-primary-foreground/10">
-        {calmPromises.map((p) => (
+      <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-3xl mx-auto">
+        {calmPromises.map((p, i) => (
           <div
             key={p.title}
-            className="bg-royal px-4 py-6 transition-colors hover:bg-primary-foreground/[0.03]"
+            className="group relative p-8 border border-secondary/20 bg-primary-foreground/[0.02] backdrop-blur-sm text-left transition-all duration-300 hover:border-secondary/50 hover:bg-primary-foreground/[0.04] overflow-hidden"
           >
-            <p
-              className="text-lg md:text-xl text-primary-foreground"
+            <span
+              className="absolute top-3 right-5 text-6xl text-secondary/10 select-none pointer-events-none group-hover:text-secondary/20 transition-colors font-light"
               style={displayFont}
             >
-              {p.title}
-            </p>
-            <p
-              className="mt-2 text-xs font-extrabold uppercase tracking-[0.12em] text-secondary"
-              style={bodyFont}
-            >
-              {p.sub}
-            </p>
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <div className="relative">
+              <div className="w-10 h-10 rounded-full border border-primary/70 bg-primary/20 flex items-center justify-center mb-5">
+                <div className="w-1.5 h-1.5 bg-secondary rounded-full" />
+              </div>
+              <h3
+                className="text-2xl text-primary-foreground mb-1.5"
+                style={displayFont}
+              >
+                {p.title}
+              </h3>
+              <p
+                className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary/80"
+                style={bodyFont}
+              >
+                {p.sub}
+              </p>
+            </div>
           </div>
         ))}
       </div>
 
-      <div className="mt-14">
+      <div className="mt-16">
         <Link
           to="/books?filter=free"
-          className="inline-flex items-center gap-3 px-10 py-4 bg-secondary text-secondary-foreground text-xs font-bold uppercase tracking-[0.28em] hover:bg-secondary/90 transition-colors shadow-xl"
+          className="inline-flex items-center gap-3 px-10 py-4 bg-secondary text-secondary-foreground text-xs font-bold uppercase tracking-[0.28em] hover:bg-secondary/90 hover:-translate-y-0.5 transition-all shadow-xl"
           style={bodyFont}
         >
-          <HeartHandshake className="h-6 w-6" />
+          <HeartHandshake className="h-5 w-5" />
           Begin your journey
         </Link>
       </div>
     </div>
   </section>
 );
+

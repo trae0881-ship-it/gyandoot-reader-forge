@@ -3,12 +3,11 @@ import { Sparkles, HeartHandshake, Leaf, ArrowRight, Quote, Sunrise, Wind, BookO
 
 /**
  * Three quiet, publishing-brand sections for the homepage:
- *  1. BrandPurpose        — why we exist, in one strong line
+ *  1. BrandPurpose        — why we exist
  *  2. EmotionalConnection — reader ↔ text, real moments
  *  3. CalmFeeling         — the unhurried atmosphere we protect
  *
- * English-forward copy with light Hindi accents.
- * Uses semantic tokens only.
+ * English-only copy. Uses semantic tokens.
  */
 
 // ────────────────────────────────────────────────────────────
@@ -51,21 +50,21 @@ export const BrandPurpose = () => (
 const moments = [
   {
     icon: Sunrise,
-    when: "With the morning chai",
-    hi: "सुबह की चाय के साथ",
+    when: "With the morning tea",
+    sub: "A calm start",
     line: "One shloka, one breath — the day begins a little lighter, a little clearer.",
   },
   {
     icon: Wind,
     when: "On a half-hour commute",
-    hi: "मेट्रो के आधे घंटे में",
-    line: "No noise, no ads — just one chapter of the Gita, and stillness inside the crowd.",
+    sub: "Stillness in the crowd",
+    line: "No noise, no ads — just one chapter of the Gita, and quiet inside the rush.",
   },
   {
     icon: BookOpen,
     when: "By the evening lamp",
-    hi: "रात के दीये के पास",
-    line: "Father reads in a larger font, the children sit close and listen — a family ritual returns.",
+    sub: "A family ritual",
+    line: "Father reads in a larger font, the children sit close and listen — the ritual returns.",
   },
 ];
 
@@ -88,7 +87,7 @@ export const EmotionalConnection = () => (
       </div>
 
       <div className="mt-14 grid gap-6 md:grid-cols-3">
-        {moments.map(({ icon: Icon, when, hi, line }) => (
+        {moments.map(({ icon: Icon, when, sub, line }) => (
           <div
             key={when}
             className="relative surface-card p-8 flex flex-col"
@@ -98,7 +97,7 @@ export const EmotionalConnection = () => (
               <Icon className="h-5 w-5" />
             </div>
             <h3 className="mt-5 font-serif text-xl font-bold text-foreground">{when}</h3>
-            <p className="mt-1 text-xs font-medium tracking-wide text-primary">{hi}</p>
+            <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-primary">{sub}</p>
             <p className="mt-4 text-base leading-[1.75] text-muted-foreground flex-1">
               {line}
             </p>
@@ -123,10 +122,10 @@ export const EmotionalConnection = () => (
 // 3. Calm Feeling
 // ────────────────────────────────────────────────────────────
 const calmPromises = [
-  { en: "No pop-ups", hi: "कोई pop-up नहीं" },
-  { en: "No ads, ever", hi: "कोई विज्ञापन नहीं" },
-  { en: "No noisy notifications", hi: "कोई शोर नहीं" },
-  { en: "No tracking traps", hi: "कोई जाल नहीं" },
+  { title: "No pop-ups", sub: "Ever" },
+  { title: "No ads", sub: "Never sold" },
+  { title: "No noisy alerts", sub: "Silent by default" },
+  { title: "No tracking traps", sub: "Your reading is yours" },
 ];
 
 export const CalmFeeling = () => (
@@ -156,11 +155,11 @@ export const CalmFeeling = () => (
       <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-3 max-w-2xl mx-auto">
         {calmPromises.map((p) => (
           <div
-            key={p.en}
+            key={p.title}
             className="rounded-xl border border-primary-foreground/15 bg-primary-foreground/5 px-4 py-5 backdrop-blur-sm"
           >
-            <p className="font-serif text-base font-semibold text-primary-foreground">{p.en}</p>
-            <p className="mt-1 text-[11px] tracking-wide text-secondary/90">{p.hi}</p>
+            <p className="font-serif text-base font-semibold text-primary-foreground">{p.title}</p>
+            <p className="mt-1 text-[11px] uppercase tracking-wider text-secondary/90">{p.sub}</p>
           </div>
         ))}
       </div>

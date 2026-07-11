@@ -41,8 +41,40 @@ const About = () => {
         isPartOf: { "@type": "WebSite", name: "GyandootNova", url: "https://gyandootnova.in" },
         publisher: { "@type": "Organization", name: "GyandootNova", url: "https://gyandootnova.in" },
       },
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        name: "GyandootNova",
+        alternateName: ["Gyandoot", "Gyandoot Nova", "gyandootnova.in"],
+        url: "https://gyandootnova.in",
+        logo: "https://gyandootnova.in/gyandoot-nova-icon.ico",
+        email: "amrendra8765@gmail.com",
+        telephone: "+91-91615-33353",
+        foundingDate: "2024",
+        description:
+          "A mission-driven publishing house dedicated to authentic spiritual texts — Bhagavad Gita, Vedas, Upanishads, Ramayana and more — for Hindi and English readers.",
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: "Bhagwan Khera",
+          addressLocality: "Unnao",
+          addressRegion: "Uttar Pradesh",
+          postalCode: "209863",
+          addressCountry: "IN",
+        },
+        areaServed: ["IN", "US", "GB", "CA", "AU"],
+        contactPoint: [
+          {
+            "@type": "ContactPoint",
+            contactType: "customer support",
+            email: "amrendra8765@gmail.com",
+            telephone: "+91-91615-33353",
+            availableLanguage: ["Hindi", "English"],
+          },
+        ],
+      },
     ],
   });
+
 
 
   const values = [

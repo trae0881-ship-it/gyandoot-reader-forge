@@ -4,13 +4,16 @@ import { supabase } from "@/integrations/supabase/client";
 export type SalesEventName =
   | "view_books_list"
   | "view_book"
+  | "view_offer_landing"
   | "click_buy_now"
   | "begin_checkout"
+  | "begin_guest_checkout"
   | "coupon_applied"
   | "payment_success"
   | "payment_failed"
   | "add_to_wishlist"
-  | "share_book";
+  | "share_book"
+  | "submit_review";
 
 function getUtms(): Record<string, string | null> {
   if (typeof window === "undefined") return {};

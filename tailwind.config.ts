@@ -12,14 +12,18 @@ export default {
         sm: "1.5rem",
         lg: "2rem",
       },
+      screens: {
+        "2xl": "1280px",
+      },
     },
     extend: {
       fontFamily: {
-        serif: ["'Noto Serif Devanagari'", "'Instrument Serif'", "'Playfair Display'", "Georgia", "serif"],
-        display: ["'Noto Serif Devanagari'", "'Instrument Serif'", "'Playfair Display'", "Georgia", "serif"],
-        sans: ["'Inter'", "'Noto Serif Devanagari'", "'Work Sans'", "system-ui", "sans-serif"],
-        devanagari: ["'Noto Serif Devanagari'", "'Tiro Devanagari Hindi'", "serif"],
+        serif: ["'Manrope'", "'Inter'", "'Noto Serif Devanagari'", "system-ui", "sans-serif"],
+        display: ["'Manrope'", "'Inter'", "'Noto Serif Devanagari'", "system-ui", "sans-serif"],
+        sans: ["'Inter'", "'Manrope'", "'Noto Serif Devanagari'", "system-ui", "sans-serif"],
+        devanagari: ["'Noto Serif Devanagari'", "'Manrope'", "serif"],
       },
+
 
       colors: {
         border: "hsl(var(--border))",

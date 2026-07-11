@@ -34,12 +34,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    if (type === "purchase" && !user) {
-      return new Response(JSON.stringify({ error: "Login required for purchase verification" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    // Guest purchases are allowed — verify-payment will look up the pending row by order_id.
+    // No auth required.
+
 
     if (gateway === "razorpay") {
       return await verifyRazorpay(supabase, user, order_id, payment_id, signature, type);
@@ -83,20 +80,32 @@ async function sendReceipt(
     if (type === "purchase") {
       const { data: purchase } = await supabase
         .from("purchases")
-        .select("book_id, created_at")
+        .select("book_id, created_at, guest_email, guest_name, claim_token")
         .eq("razorpay_order_id", orderId)
         .single();
       if (purchase?.book_id) {
         const { data: book } = await supabase
           .from("books")
-          .select("title, price")
+          .select("title, price, slug")
           .eq("id", purchase.book_id)
           .single();
         if (book) {
           bookTitle = book.title;
           amount = book.price;
         }
+        if (purchase.guest_email) {
+          recipientEmail = purchase.guest_email;
+          recipientName = purchase.guest_name ?? "";
+        }
       }
+      // Attach claim URL for guest receipts
+      if (purchase?.claim_token) {
+        (globalThis as any).__claimUrl = `https://gyandootnova.in/claim/${purchase.claim_token}`;
+      } else {
+        (globalThis as any).__claimUrl = "";
+      }
+    }
+
     } else {
       const { data: donation } = await supabase
         .from("donations")

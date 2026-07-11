@@ -4,60 +4,63 @@
 
 @layer base {
   :root {
-    /* Premium publishing palette — #FCFCFA base, #111827 ink, #C77B30 copper accent */
-    --background: 60 20% 98.4%;
-    --foreground: 221 39% 11%;
+    /* Premium spiritual publication — warm white base, deep temple red,
+       saffron yellow accents, royal indigo blue for trust. */
+    --background: 45 100% 98%;
+    --foreground: 0 0% 13%;
 
     --card: 0 0% 100%;
-    --card-foreground: 221 39% 11%;
+    --card-foreground: 0 0% 13%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 221 39% 11%;
+    --popover-foreground: 0 0% 13%;
 
-    /* Copper accent — refined publishing house */
-    --primary: 28 61% 49%;
-    --primary-foreground: 0 0% 100%;
-    --primary-glow: 28 75% 62%;
+    /* Deep spiritual red — primary CTA / heading accents */
+    --primary: 0 76% 41%;
+    --primary-foreground: 45 100% 98%;
+    --primary-glow: 0 72% 52%;
 
-    /* Warm brass — subtle secondary detail */
-    --secondary: 40 55% 52%;
-    --secondary-foreground: 221 39% 11%;
+    /* Saffron yellow — secondary accents, badges, highlights */
+    --secondary: 45 96% 48%;
+    --secondary-foreground: 0 0% 13%;
 
-    --muted: 40 20% 96%;
-    --muted-foreground: 220 9% 46%;
+    --muted: 40 30% 96%;
+    --muted-foreground: 0 0% 40%;
 
-    --accent: 28 61% 49%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 45 96% 48%;
+    --accent-foreground: 0 0% 13%;
 
     --destructive: 0 74% 46%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 28 61% 49%;
+    --border: 40 20% 90%;
+    --input: 40 20% 90%;
+    --ring: 0 76% 41%;
 
-    --radius: 0.75rem;
+    --radius: 0.875rem;
 
-    /* Extended editorial tokens — brass, ink, cream */
-    --gold: 40 55% 52%;
-    --gold-glow: 44 78% 66%;
-    --gold-deep: 36 55% 42%;
-    --ink: 221 39% 11%;
-    --cream: 60 20% 98.4%;
-    --surface: 40 25% 97%;
+    /* Editorial tokens */
+    --gold: 46 65% 52%;
+    --gold-glow: 45 96% 62%;
+    --gold-deep: 40 58% 42%;
+    --ink: 0 0% 13%;
+    --cream: 45 100% 98%;
+    --surface: 40 40% 97%;
+    --royal-blue: 224 64% 33%;
+    --royal-blue-glow: 220 70% 48%;
 
-    /* Gradients — softer, publisher-calm */
-    --gradient-hero: radial-gradient(ellipse at 20% 0%, hsl(28 45% 22% / 0.9) 0%, hsl(221 30% 12%) 55%, hsl(221 39% 8%) 100%);
+    /* Gradients — soft, editorial */
+    --gradient-hero: linear-gradient(180deg, hsl(45 100% 98%) 0%, hsl(40 60% 96%) 100%);
     --gradient-gold: linear-gradient(135deg, hsl(var(--gold)) 0%, hsl(var(--gold-glow)) 100%);
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-glow)) 100%);
     --gradient-surface: linear-gradient(180deg, hsl(var(--surface)) 0%, hsl(var(--background)) 100%);
-    --gradient-cream: linear-gradient(180deg, hsl(60 20% 99%) 0%, hsl(40 22% 96%) 100%);
+    --gradient-cream: linear-gradient(180deg, hsl(45 100% 99%) 0%, hsl(40 40% 96%) 100%);
 
-    /* Shadows — quieter, more premium */
-    --shadow-elegant: 0 24px 60px -30px hsl(221 39% 11% / 0.22), 0 8px 20px -14px hsl(221 39% 11% / 0.08);
-    --shadow-gold: 0 12px 32px -16px hsl(var(--primary) / 0.35);
-    --shadow-card: 0 1px 2px hsl(221 39% 11% / 0.04), 0 6px 20px -12px hsl(221 39% 11% / 0.06);
-    --shadow-lift: 0 20px 50px -24px hsl(221 39% 11% / 0.18);
+    /* Shadows — soft, premium */
+    --shadow-elegant: 0 24px 60px -30px hsl(0 0% 13% / 0.18), 0 8px 20px -14px hsl(0 0% 13% / 0.06);
+    --shadow-gold: 0 12px 32px -16px hsl(var(--secondary) / 0.35);
+    --shadow-card: 0 1px 2px hsl(0 0% 13% / 0.04), 0 6px 20px -12px hsl(0 0% 13% / 0.06);
+    --shadow-lift: 0 20px 50px -24px hsl(0 0% 13% / 0.14);
 
     /* Motion */
     --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);

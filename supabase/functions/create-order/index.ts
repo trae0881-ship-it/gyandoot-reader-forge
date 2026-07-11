@@ -16,19 +16,23 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { amount, type, book_id, name, email, gateway = "razorpay", coupon_id, referrer_id, buyer_currency, buyer_fx_rate } = await req.json();
+    const {
+      amount, type, book_id, name, email, gateway = "razorpay",
+      coupon_id, referrer_id, buyer_currency, buyer_fx_rate,
+      guest_email, guest_name,
+    } = await req.json();
 
-    // For purchases, auth is required. For donations, auth is optional.
+    // Auth is optional. Purchases allow logged-in OR guest (guest_email required).
     let user: any = null;
     const authHeader = req.headers.get("Authorization");
-    if (authHeader) {
+    if (authHeader && !authHeader.endsWith("Bearer ") && !authHeader.endsWith("Bearer anonymous")) {
       const token = authHeader.replace("Bearer ", "");
       const { data: { user: authUser } } = await supabase.auth.getUser(token);
       user = authUser ?? null;
     }
 
-    if (type === "purchase" && !user) {
-      return new Response(JSON.stringify({ error: "Login required to purchase books" }), {
+    if (type === "purchase" && !user && !guest_email) {
+      return new Response(JSON.stringify({ error: "Login OR guest email required to purchase" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -66,7 +70,7 @@ Deno.serve(async (req) => {
       }
       verifiedAmount = book.price;
 
-      // Apply coupon discount if coupon_id provided
+      // Apply coupon discount if coupon_id provided (skip for guests — repurchase check needs user)
       if (coupon_id) {
         const { data: coupon } = await supabase
           .from("coupons")
@@ -75,15 +79,12 @@ Deno.serve(async (req) => {
           .eq("is_active", true)
           .single();
 
-
-
         if (coupon) {
           const now = new Date();
           const notExpired = !coupon.expires_at || new Date(coupon.expires_at) > now;
           const hasUses = !coupon.max_uses || coupon.used_count < coupon.max_uses;
           const meetsMin = verifiedAmount >= (coupon.min_order_amount ?? 0);
 
-          // Enforce book restriction server-side
           let bookAllowed = true;
           const { count: restrictionCount } = await supabase
             .from("coupon_books")
@@ -99,15 +100,18 @@ Deno.serve(async (req) => {
             bookAllowed = (matchCount ?? 0) > 0;
           }
 
-          // Enforce repurchase-only server-side: user must have at least one completed purchase
           let repurchaseOk = true;
-          if ((coupon as any).repurchase_only && user?.id) {
-            const { count: priorCount } = await supabase
-              .from("purchases")
-              .select("id", { count: "exact", head: true })
-              .eq("user_id", user.id)
-              .eq("status", "completed");
-            repurchaseOk = (priorCount ?? 0) >= 1;
+          if ((coupon as any).repurchase_only) {
+            if (!user?.id) {
+              repurchaseOk = false;
+            } else {
+              const { count: priorCount } = await supabase
+                .from("purchases")
+                .select("id", { count: "exact", head: true })
+                .eq("user_id", user.id)
+                .eq("status", "completed");
+              repurchaseOk = (priorCount ?? 0) >= 1;
+            }
             if (!repurchaseOk) {
               return new Response(
                 JSON.stringify({ error: "This coupon is only valid for returning customers (requires a previous purchase)." }),
@@ -126,14 +130,13 @@ Deno.serve(async (req) => {
             verifiedAmount = Math.max(verifiedAmount - discount, 1);
           }
         }
-
       }
     }
 
     if (gateway === "razorpay") {
-      return await handleRazorpay(supabase, user, verifiedAmount, type, book_id, name, email, coupon_id, referrer_id);
+      return await handleRazorpay(supabase, user, verifiedAmount, type, book_id, name, email, coupon_id, referrer_id, guest_email, guest_name);
     } else if (gateway === "paypal") {
-      return await handlePaypal(supabase, user, verifiedAmount, type, book_id, name, email, coupon_id, referrer_id, buyer_currency, buyer_fx_rate);
+      return await handlePaypal(supabase, user, verifiedAmount, type, book_id, name, email, coupon_id, referrer_id, buyer_currency, buyer_fx_rate, guest_email, guest_name);
     } else {
       return new Response(JSON.stringify({ error: "Unsupported gateway" }), {
         status: 400,
@@ -149,9 +152,16 @@ Deno.serve(async (req) => {
   }
 });
 
+function newClaimToken(): string {
+  const bytes = new Uint8Array(24);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 async function handleRazorpay(
   supabase: any, user: any, amount: number, type: string,
-  book_id?: string, name?: string, email?: string, coupon_id?: string, referrer_id?: string
+  book_id?: string, name?: string, email?: string, coupon_id?: string, referrer_id?: string,
+  guest_email?: string, guest_name?: string,
 ) {
   const keyId = Deno.env.get("RAZORPAY_KEY_ID");
   const keySecret = Deno.env.get("RAZORPAY_KEY_SECRET");
@@ -169,7 +179,7 @@ async function handleRazorpay(
       Authorization: "Basic " + btoa(`${keyId}:${keySecret}`),
     },
     body: JSON.stringify({
-      amount: Math.round(amount * 100), // paise
+      amount: Math.round(amount * 100),
       currency: "INR",
       receipt: `${type}_${Date.now()}`,
     }),
@@ -185,25 +195,26 @@ async function handleRazorpay(
   }
 
   const order = await orderRes.json();
+  const isGuest = !user && !!guest_email;
+  const claim_token = type === "purchase" && isGuest ? newClaimToken() : undefined;
 
-  // Store pending record
   if (type === "purchase") {
     const purchaseData: any = {
-      user_id: user.id,
+      user_id: user?.id ?? null,
+      guest_email: isGuest ? guest_email : null,
+      guest_name: isGuest ? (guest_name ?? null) : null,
+      claim_token: claim_token ?? null,
       book_id,
       razorpay_order_id: order.id,
       status: "pending",
-      amount, // freeze the amount paid at time of order (post-coupon)
+      amount,
       currency: "INR",
     };
-    if (referrer_id && referrer_id !== user.id) {
+    if (referrer_id && referrer_id !== user?.id) {
       purchaseData.referrer_id = referrer_id;
     }
-    // Persist the coupon so verify-payment can redeem it atomically AFTER success.
     if (coupon_id) purchaseData.coupon_id = coupon_id;
     await supabase.from("purchases").insert(purchaseData);
-    // NOTE: coupon usage is incremented ONLY after successful payment verification
-    // (see verify-payment) to prevent coupon exhaustion via abandoned orders.
   } else {
     await supabase.from("donations").insert({
       user_id: user?.id ?? null,
@@ -216,15 +227,12 @@ async function handleRazorpay(
   }
 
   return new Response(
-    JSON.stringify({ gateway: "razorpay", order_id: order.id, key_id: keyId, amount: order.amount, currency: order.currency }),
+    JSON.stringify({ gateway: "razorpay", order_id: order.id, key_id: keyId, amount: order.amount, currency: order.currency, claim_token }),
     { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
 }
 
-// PayPal-supported presentment currencies (safe subset). If buyer currency isn't listed → fall back to USD.
 const PAYPAL_SUPPORTED = new Set(["USD", "EUR", "GBP", "AUD", "CAD", "SGD", "HKD", "JPY", "NZD", "CHF", "SEK", "NOK", "DKK", "PLN", "CZK", "HUF", "ILS", "MXN", "PHP", "THB", "TWD", "BRL"]);
-
-// Fallback FX rates (1 INR = X currency) — used only when client didn't send a live rate.
 const FALLBACK_FX: Record<string, number> = {
   USD: 0.012, EUR: 0.011, GBP: 0.0095, AUD: 0.018, CAD: 0.016, SGD: 0.016, HKD: 0.094, JPY: 1.8,
 };
@@ -233,6 +241,7 @@ async function handlePaypal(
   supabase: any, user: any, amount: number, type: string,
   book_id?: string, name?: string, email?: string, coupon_id?: string, referrer_id?: string,
   buyer_currency?: string, buyer_fx_rate?: number,
+  guest_email?: string, guest_name?: string,
 ) {
   const clientId = Deno.env.get("PAYPAL_CLIENT_ID");
   const clientSecret = Deno.env.get("PAYPAL_CLIENT_SECRET");
@@ -243,7 +252,6 @@ async function handlePaypal(
     });
   }
 
-  // Get access token
   const tokenRes = await fetch("https://api-m.paypal.com/v1/oauth2/token", {
     method: "POST",
     headers: {
@@ -263,10 +271,8 @@ async function handlePaypal(
 
   const { access_token } = await tokenRes.json();
 
-  // Pick presentment currency: buyer's own if PayPal supports it, else USD.
   const requested = (buyer_currency || "USD").toUpperCase();
   const currency = PAYPAL_SUPPORTED.has(requested) ? requested : "USD";
-  // Live rate from client (from exchangerate-api on frontend); fall back if missing.
   const rate = (buyer_fx_rate && buyer_fx_rate > 0)
     ? buyer_fx_rate
     : (FALLBACK_FX[currency] ?? FALLBACK_FX.USD);
@@ -300,18 +306,22 @@ async function handlePaypal(
   }
 
   const ppOrder = await orderRes.json();
+  const isGuest = !user && !!guest_email;
+  const claim_token = type === "purchase" && isGuest ? newClaimToken() : undefined;
 
-  // Store pending record — persist the actual charged amount + currency for accurate reconciliation
   if (type === "purchase") {
     const purchaseData: any = {
-      user_id: user.id,
+      user_id: user?.id ?? null,
+      guest_email: isGuest ? guest_email : null,
+      guest_name: isGuest ? (guest_name ?? null) : null,
+      claim_token: claim_token ?? null,
       book_id,
       razorpay_order_id: ppOrder.id,
       status: "pending",
       amount: Number(paypalValue),
       currency,
     };
-    if (referrer_id && referrer_id !== user.id) {
+    if (referrer_id && referrer_id !== user?.id) {
       purchaseData.referrer_id = referrer_id;
     }
     if (coupon_id) purchaseData.coupon_id = coupon_id;
@@ -330,7 +340,7 @@ async function handlePaypal(
   const approveLink = ppOrder.links?.find((l: any) => l.rel === "approve")?.href;
 
   return new Response(
-    JSON.stringify({ gateway: "paypal", order_id: ppOrder.id, approve_url: approveLink, currency, amount: paypalValue }),
+    JSON.stringify({ gateway: "paypal", order_id: ppOrder.id, approve_url: approveLink, currency, amount: paypalValue, claim_token }),
     { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
 }

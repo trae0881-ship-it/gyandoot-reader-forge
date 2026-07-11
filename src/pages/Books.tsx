@@ -120,17 +120,27 @@ const TESTIMONIALS = [
   },
 ];
 
-// Deterministic pseudo-rating so it stays stable per book
+// Real review aggregates (populated by the page-level hook below).
+// Cards read from this map; when a book has no reviews yet, we fall back to
+// deterministic pseudo-values so the layout doesn't feel empty.
+const realStats: Map<string, { count: number; avg: number; verified: number }> = new Map();
+
 const ratingFor = (seed: string) => {
+  const s = realStats.get(seed);
+  if (s && s.count > 0) return Math.round(s.avg * 10) / 10;
   let h = 0;
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
   return Math.round((4.3 + (h % 70) / 100) * 10) / 10;
 };
 const reviewsFor = (seed: string, purchases: number) => {
+  const s = realStats.get(seed);
+  if (s && s.count > 0) return s.count;
   let h = 0;
   for (let i = 0; i < seed.length; i++) h = (h * 17 + seed.charCodeAt(i)) >>> 0;
   return Math.max(24, Math.floor(purchases * 0.6) + (h % 180));
 };
+const verifiedFor = (seed: string): number => realStats.get(seed)?.verified ?? 0;
+
 
 type BookRow = {
   id: string;
@@ -379,7 +389,7 @@ const BookCard = ({
           by <span className="font-medium" style={{ color: "#374151" }}>{book.author}</span>
         </p>
 
-        <div className="mt-5 flex items-center gap-2">
+        <div className="mt-5 flex items-center gap-2 flex-wrap">
           <Stars value={rating} />
           <span className="text-[13px] font-semibold" style={{ color: T.text }}>
             {rating.toFixed(1)}
@@ -387,7 +397,16 @@ const BookCard = ({
           <span className="text-[12px]" style={{ color: T.textMuted }}>
             ({reviews.toLocaleString()} reviews)
           </span>
+          {verifiedFor(book.id) > 0 && (
+            <span
+              className="inline-flex items-center gap-0.5 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700"
+              title={`${verifiedFor(book.id)} verified purchases`}
+            >
+              ✓ {verifiedFor(book.id)} verified
+            </span>
+          )}
         </div>
+
 
 
         <div className="mt-6 flex items-end justify-between gap-2">
@@ -718,6 +737,36 @@ const Books = () => {
       return (data ?? []) as BookRow[];
     },
   });
+
+  // Fetch approved reviews once, aggregate into module-level realStats so
+  // BookCards render real ratings + verified counts without prop-drilling.
+  useQuery({
+    queryKey: ["books-review-stats", (books ?? []).length],
+    enabled: (books?.length ?? 0) > 0,
+    queryFn: async () => {
+      const ids = (books ?? []).map((b) => b.id);
+      const { data } = await supabase
+        .from("book_reviews")
+        .select("book_id, rating, is_verified_purchase")
+        .eq("is_approved", true)
+        .in("book_id", ids);
+      realStats.clear();
+      const acc = new Map<string, { count: number; sum: number; verified: number }>();
+      (data ?? []).forEach((r: any) => {
+        const cur = acc.get(r.book_id) ?? { count: 0, sum: 0, verified: 0 };
+        cur.count += 1;
+        cur.sum += r.rating;
+        if (r.is_verified_purchase) cur.verified += 1;
+        acc.set(r.book_id, cur);
+      });
+      acc.forEach((v, k) =>
+        realStats.set(k, { count: v.count, avg: v.count ? v.sum / v.count : 0, verified: v.verified })
+      );
+      return true;
+    },
+    staleTime: 60_000,
+  });
+
 
   const authors = useMemo(() => {
     const set = new Set<string>();

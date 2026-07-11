@@ -23,6 +23,11 @@ import BundleDecoy from "@/components/BundleDecoy";
 import RecentPurchasesToast from "@/components/RecentPurchasesToast";
 import { getReferrerId } from "@/hooks/useReferral";
 import { WhyBookMatters } from "@/components/BrandExperience";
+import BookReviewList from "@/components/BookReviewList";
+import BookReviewForm from "@/components/BookReviewForm";
+import GuestCheckoutDialog from "@/components/GuestCheckoutDialog";
+import { trackSalesEvent, useTrackOnMount } from "@/hooks/useAnalytics";
+
 
 
 
@@ -184,38 +189,58 @@ const BookDetail = () => {
     }
   };
 
-  const handlePurchase = async () => {
-    if (!user) {
-      toast({ title: "कृपया पहले लॉगिन करें", description: "Purchase के लिए login ज़रूरी है।", variant: "destructive" });
-      navigate("/auth");
-      return;
-    }
-    const finalAmount = appliedCoupon ? appliedCoupon.final_amount : book!.price;
+  const [guestDialogOpen, setGuestDialogOpen] = useState(false);
+
+  const runPayment = async (guest?: { email: string; name?: string }) => {
+    if (!book) return;
+    const finalAmount = appliedCoupon ? appliedCoupon.final_amount : book.price;
     setPurchasing(true);
+    trackSalesEvent("begin_checkout", { book_id: book.id, guest: !!guest });
     await initiatePayment(
       {
         amount: finalAmount,
         type: "purchase",
         gateway,
-        book_id: book!.id,
+        book_id: book.id,
         coupon_id: appliedCoupon?.coupon_id,
         referrer_id: referrerId || undefined,
         buyer_currency: currency,
-        buyer_fx_rate: 1, // 1:1 parity — ₹100 base = $100/€100/£100 etc.
+        buyer_fx_rate: 1,
+        guest_email: guest?.email,
+        guest_name: guest?.name,
+        name: guest?.name,
+        email: guest?.email,
       } as any,
-      () => {
+      (info) => {
+        trackSalesEvent("payment_success", { book_id: book!.id });
         toast({ title: "Purchase Successful!", description: "You can now read the full book." });
-        queryClient.invalidateQueries({ queryKey: ["purchase", book!.id, user!.id] });
+        queryClient.invalidateQueries({ queryKey: ["purchase", book!.id, user?.id] });
         setPurchasing(false);
+        setGuestDialogOpen(false);
         setAppliedCoupon(null);
         setCouponCode("");
+        if (info?.claim_token) navigate(`/claim/${info.claim_token}`);
       },
       (error) => {
+        trackSalesEvent("payment_failed", { book_id: book!.id, error });
         toast({ title: "Payment Failed", description: error, variant: "destructive" });
         setPurchasing(false);
       }
     );
   };
+
+  const handlePurchase = () => {
+    if (!book) return;
+    trackSalesEvent("click_buy_now", { book_id: book.id, source: "book_detail" });
+    if (!user) {
+      setGuestDialogOpen(true);
+      return;
+    }
+    runPayment();
+  };
+
+  useTrackOnMount("view_book", { slug });
+
 
   const cleanedDesc = book?.description?.replace(/<[^>]*>/g, "").trim();
   const priceLabel = book ? (book.is_free ? "मुफ़्त" : `₹${book.price}`) : "";
@@ -785,6 +810,32 @@ const BookDetail = () => {
 
       <SimilarBooks currentBookId={book.id} category={book.category} />
       {book && canRead && <AskScripture bookId={book.id} bookTitle={book.title} />}
+
+      {/* Reader reviews — social proof drives conversion */}
+      <section className="container py-12 md:py-16">
+        <div className="max-w-3xl">
+          <h2 className="font-serif text-2xl md:text-3xl font-bold mb-2">Reader reviews</h2>
+          <p className="text-sm text-muted-foreground mb-6">
+            Verified purchases badge un readers ke liye hai jinhone ye book actually kharidi.
+          </p>
+          <div className="grid gap-6 md:grid-cols-[1fr_320px]">
+            <BookReviewList bookId={book.id} />
+            <div>
+              <h3 className="font-semibold mb-2 text-sm">Share your experience</h3>
+              <BookReviewForm bookId={book.id} />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Guest checkout dialog */}
+      <GuestCheckoutDialog
+        open={guestDialogOpen}
+        onOpenChange={setGuestDialogOpen}
+        onContinue={(data) => runPayment(data)}
+        priceLabel={`₹${appliedCoupon ? appliedCoupon.final_amount : book.price}`}
+      />
+
 
       {/* Sticky Mobile Purchase CTA */}
       {!canRead && !book.is_free && (

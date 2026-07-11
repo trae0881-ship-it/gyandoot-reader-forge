@@ -247,7 +247,7 @@ const BookDetail = () => {
   const shortDesc = cleanedDesc && cleanedDesc.length >= 20 ? cleanedDesc.slice(0, 110) : "";
   const bookDescription = book
     ? (shortDesc
-        ? `${shortDesc}… ${book.author} द्वारा। ${priceLabel} — Instant digital delivery, UPI/Card/COD-friendly checkout।`
+        ? `${shortDesc}… ${book.author} द्वारा। ${priceLabel} — Instant digital delivery, UPI/Card checkout।`
         : `${book.title} — ${book.author} द्वारा। ${priceLabel} में पढ़ें, तुरंत access, सभी devices पर। GyandootNova पर सुरक्षित checkout।`)
     : "Loading book...";
   const bookMetaTitle = book
@@ -408,9 +408,8 @@ const BookDetail = () => {
               <div className="mt-4 grid grid-cols-2 gap-2 rounded-lg border border-border bg-muted/30 p-3 text-xs sm:grid-cols-4">
                 <div className="flex items-center gap-1.5"><Tag className="h-3.5 w-3.5 text-primary" /><span><strong>{book.is_free ? "मुफ़्त" : `₹${book.price}`}</strong> कीमत</span></div>
                 <div className="flex items-center gap-1.5"><PlayCircle className="h-3.5 w-3.5 text-primary" /><span><strong>तुरंत</strong> delivery (0 min)</span></div>
-                <div className="flex items-center gap-1.5"><CreditCard className="h-3.5 w-3.5 text-primary" /><span>UPI · Card · <strong>COD*</strong></span></div>
+                <div className="flex items-center gap-1.5"><CreditCard className="h-3.5 w-3.5 text-primary" /><span><strong>UPI</strong> · Card · NetBanking</span></div>
                 <div className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-primary" /><span><strong>7-day</strong> refund</span></div>
-                <p className="col-span-2 sm:col-span-4 mt-1 text-[10px] text-muted-foreground">*COD only for physical add-ons; digital books unlock instantly after payment.</p>
               </div>
 
               {showFreeBuyCard && (

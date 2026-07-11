@@ -9,6 +9,8 @@ interface SEOProps {
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
   /** If true, emits hreflang link tags for en-US/GB/AU/CA/IN + hi-IN + x-default pointing at the current canonical URL. */
   hreflang?: boolean;
+  /** If true, emits <meta name="robots" content="noindex, nofollow"> so search engines skip this page. Used for premium chapter reader URLs. */
+  noindex?: boolean;
 }
 
 const BASE_URL = "https://gyandootnova.in";

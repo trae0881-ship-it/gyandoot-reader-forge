@@ -34,6 +34,8 @@ const ALLOWED_COLUMNS = new Set([
   "reading_time_min",
   "error",
   "meta",
+  "content_score",
+  "seo_score",
 ]);
 
 function walk(dir: string, out: string[] = []): string[] {

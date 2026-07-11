@@ -1248,26 +1248,27 @@ const Books = () => {
 
         {/* Testimonials */}
         <Reveal>
-          <section className="container pt-20 md:pt-28">
-            <div className="mb-10 text-center">
+          <section className="container py-12 md:py-[72px] lg:py-24">
+            <div className="mb-12 text-center">
               <h2 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ letterSpacing: "-0.02em" }}>
                 Loved by thoughtful readers
               </h2>
-              <p className="mt-1.5 text-sm md:text-[15px]" style={{ color: T.textMuted }}>
+              <p className="mt-2 text-[15px] md:text-base" style={{ color: T.textMuted, lineHeight: 1.7 }}>
                 Real words from the GyandootNova community.
               </p>
             </div>
-            <div className="grid gap-5 md:grid-cols-3">
+            <div className="grid gap-x-5 gap-y-5 md:grid-cols-3 md:gap-6 lg:gap-x-8 lg:gap-y-10">
               {TESTIMONIALS.map((t, i) => (
                 <Reveal key={t.name} delay={i * 80}>
                   <figure
-                    className="flex h-full flex-col rounded-2xl border p-7"
+                    className="flex h-full flex-col rounded-2xl border p-8 md:p-9"
                     style={{ borderColor: T.border, background: "#fff" }}
                   >
                     <Stars value={5} size={16} />
-                    <blockquote className="mt-4 flex-1 text-[15px] leading-relaxed" style={{ color: "#374151" }}>
+                    <blockquote className="mt-5 flex-1 text-[15px] md:text-base" style={{ color: "#374151", lineHeight: 1.7 }}>
                       "{t.quote}"
                     </blockquote>
+
                     <figcaption className="mt-6">
                       <p className="text-sm font-semibold" style={{ color: T.text }}>{t.name}</p>
                       <p className="text-xs" style={{ color: T.textMuted }}>{t.role}</p>

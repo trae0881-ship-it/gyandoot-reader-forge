@@ -24,11 +24,23 @@ const Footer = () => {
   const whatsappNumber = settings?.whatsapp_number?.replace(/\s+/g, "") ?? "";
   const whatsappLink = whatsappNumber ? `https://wa.me/${whatsappNumber.replace("+", "")}` : null;
 
+  // Admin may save social URLs without a protocol ("facebook.com/gyandootnova"),
+  // which the browser then resolves as a same-origin relative path
+  // (https://gyandootnova.in/facebook.com/gyandootnova). Normalize to absolute
+  // https:// so every social icon opens the intended external profile.
+  const toAbsoluteUrl = (raw?: string | null): string | null => {
+    const trimmed = raw?.trim();
+    if (!trimmed) return null;
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    if (trimmed.startsWith("//")) return `https:${trimmed}`;
+    return `https://${trimmed.replace(/^\/+/, "")}`;
+  };
+
   const socialLinks = [
-    { icon: Facebook, href: settings?.facebook_url || null, label: "Facebook" },
-    { icon: Linkedin, href: settings?.linkedin_url || null, label: "LinkedIn" },
-    { icon: Instagram, href: settings?.instagram_url || null, label: "Instagram" },
-    { icon: Youtube, href: settings?.youtube_url || null, label: "YouTube" },
+    { icon: Facebook, href: toAbsoluteUrl(settings?.facebook_url), label: "Facebook" },
+    { icon: Linkedin, href: toAbsoluteUrl(settings?.linkedin_url), label: "LinkedIn" },
+    { icon: Instagram, href: toAbsoluteUrl(settings?.instagram_url), label: "Instagram" },
+    { icon: Youtube, href: toAbsoluteUrl(settings?.youtube_url), label: "YouTube" },
     { icon: MessageCircle, href: whatsappLink, label: "WhatsApp" },
   ].filter((s) => s.href);
 

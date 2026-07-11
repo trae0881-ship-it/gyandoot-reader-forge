@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, MessageCircle, Facebook, Instagram, Youtube, Linkedin, Flame, BookOpen } from "lucide-react";
+import { Settings, MessageCircle, Facebook, Instagram, Youtube, Linkedin, Flame, BookOpen, FileText } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect } from "react";
 
@@ -27,6 +27,15 @@ const URGENCY_KEYS = [
 
 const BOOK_KEYS = [
   { key: "book_free_chapter_note", label: "Free Chapter Note (Book Detail)", placeholder: "पहला अध्याय 100% मुफ़्त है — Login कीजिए और पढ़कर देखिए, पसंद आए तभी खरीदिए।", hint: "Paid book के Table of Contents के ऊपर दिखता है। खाली = hide.", multiline: true },
+];
+
+const INVOICE_KEYS: { key: string; label: string; placeholder: string; hint: string; multiline?: boolean }[] = [
+  { key: "invoice_business_name", label: "Business Name", placeholder: "GyandootNova", hint: "Invoice header में दिखेगा" },
+  { key: "invoice_business_address", label: "Business Address", placeholder: "123 Ashram Road, Varanasi, UP 221001, India", hint: "Multi-line allowed", multiline: true },
+  { key: "invoice_gstin", label: "GSTIN", placeholder: "22AAAAA0000A1Z5", hint: "अगर हो तो — नहीं तो खाली छोड़ें" },
+  { key: "invoice_pan", label: "PAN", placeholder: "AAAPL1234C", hint: "Optional" },
+  { key: "invoice_logo_url", label: "Logo URL", placeholder: "https://gyandootnova.in/logo.png", hint: "Public HTTPS PNG/JPG URL — invoice top-right corner में दिखेगा" },
+  { key: "invoice_footer_note", label: "Footer Note", placeholder: "Thank you for supporting original scriptures.", hint: "Invoice के नीचे दिखेगा", multiline: true },
 ];
 
 const AdminSettings = () => {
@@ -71,7 +80,7 @@ const AdminSettings = () => {
   });
 
   const handleSave = () => {
-    const updates = [...SOCIAL_KEYS, ...URGENCY_KEYS, ...BOOK_KEYS].map(({ key }) => ({ key, value: values[key] ?? "" }));
+    const updates = [...SOCIAL_KEYS, ...URGENCY_KEYS, ...BOOK_KEYS, ...INVOICE_KEYS].map(({ key }) => ({ key, value: values[key] ?? "" }));
     mutation.mutate(updates);
   };
 
@@ -162,6 +171,43 @@ const AdminSettings = () => {
                     placeholder={placeholder}
                     rows={3}
                   />
+                  <p className="text-xs text-muted-foreground">{hint}</p>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" /> Invoice Template
+            </CardTitle>
+            <CardDescription>
+              Purchase invoices पर दिखने वाले business details — GSTIN, address, logo, footer note। खाली फ़ील्ड्स hide हो जाएँगी।
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            {isLoading ? (
+              <p className="text-sm text-muted-foreground">Loading...</p>
+            ) : (
+              INVOICE_KEYS.map(({ key, label, placeholder, hint, multiline }) => (
+                <div key={key} className="space-y-1.5">
+                  <Label>{label}</Label>
+                  {multiline ? (
+                    <Textarea
+                      value={values[key] ?? ""}
+                      onChange={(e) => setValues((prev) => ({ ...prev, [key]: e.target.value }))}
+                      placeholder={placeholder}
+                      rows={3}
+                    />
+                  ) : (
+                    <Input
+                      value={values[key] ?? ""}
+                      onChange={(e) => setValues((prev) => ({ ...prev, [key]: e.target.value }))}
+                      placeholder={placeholder}
+                    />
+                  )}
                   <p className="text-xs text-muted-foreground">{hint}</p>
                 </div>
               ))

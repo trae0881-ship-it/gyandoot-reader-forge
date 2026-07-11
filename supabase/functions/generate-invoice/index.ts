@@ -1,5 +1,7 @@
 // Generates a PDF invoice for a user's own purchase.
 // Auth-required: verifies JWT and only returns invoices for the caller's own purchases.
+// Reads customizable branding (business name, address, GSTIN, PAN, logo, footer) from public.settings.
+// Supports ?preview=1 to serve inline for on-screen preview.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
@@ -18,7 +20,6 @@ Deno.serve(async (req) => {
       return json({ error: "Unauthorized" }, 401);
     }
 
-    // Verify JWT via user client
     const userClient = createClient(SUPABASE_URL, ANON_KEY, {
       global: { headers: { Authorization: authHeader } },
     });
@@ -29,9 +30,9 @@ Deno.serve(async (req) => {
 
     const url = new URL(req.url);
     const purchaseId = url.searchParams.get("purchase_id");
+    const preview = url.searchParams.get("preview") === "1";
     if (!purchaseId) return json({ error: "purchase_id required" }, 400);
 
-    // Use service role to fetch, but scope by user_id
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
 
     const { data: purchase, error: pErr } = await admin
@@ -46,13 +47,42 @@ Deno.serve(async (req) => {
       return json({ error: "Invoice available only for completed purchases" }, 400);
     }
 
-    const [{ data: book }, { data: profile }, { data: coupon }] = await Promise.all([
+    const settingKeys = [
+      "invoice_business_name",
+      "invoice_business_address",
+      "invoice_gstin",
+      "invoice_pan",
+      "invoice_logo_url",
+      "invoice_footer_note",
+    ];
+    const [{ data: book }, { data: profile }, { data: coupon }, { data: settingsRows }] = await Promise.all([
       admin.from("books").select("title, author").eq("id", purchase.book_id).maybeSingle(),
       admin.from("profiles").select("display_name").eq("user_id", userId).maybeSingle(),
       purchase.coupon_id
         ? admin.from("coupons").select("code, discount_type, discount_value").eq("id", purchase.coupon_id).maybeSingle()
         : Promise.resolve({ data: null }),
+      admin.from("settings").select("key, value").in("key", settingKeys),
     ]);
+
+    const settings: Record<string, string> = {};
+    (settingsRows ?? []).forEach((r: { key: string; value: string | null }) => {
+      settings[r.key] = (r.value ?? "").trim();
+    });
+
+    // Fetch logo (best-effort) so we can embed it in the PDF.
+    let logoDataUrl: string | null = null;
+    if (settings.invoice_logo_url) {
+      try {
+        const resp = await fetch(settings.invoice_logo_url);
+        if (resp.ok) {
+          const ct = resp.headers.get("content-type") ?? "image/png";
+          const buf = new Uint8Array(await resp.arrayBuffer());
+          logoDataUrl = `data:${ct};base64,${base64Encode(buf)}`;
+        }
+      } catch {
+        logoDataUrl = null;
+      }
+    }
 
     const pdf = buildInvoicePdf({
       purchase,
@@ -60,6 +90,8 @@ Deno.serve(async (req) => {
       buyerName: profile?.display_name ?? userEmail.split("@")[0] ?? "Customer",
       buyerEmail: userEmail,
       coupon,
+      settings,
+      logoDataUrl,
     });
 
     const bytes = pdf.output("arraybuffer");
@@ -70,7 +102,8 @@ Deno.serve(async (req) => {
       headers: {
         ...corsHeaders,
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${invoiceNo}.pdf"`,
+        "Content-Disposition": `${preview ? "inline" : "attachment"}; filename="${invoiceNo}.pdf"`,
+        "Cache-Control": "no-store",
       },
     });
   } catch (err) {
@@ -84,6 +117,13 @@ function json(body: unknown, status = 200) {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
+}
+
+function base64Encode(bytes: Uint8Array): string {
+  let binary = "";
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  // deno-lint-ignore no-explicit-any
+  return (globalThis as any).btoa(binary);
 }
 
 function makeInvoiceNumber(purchaseId: string, createdAt: string) {
@@ -106,12 +146,16 @@ function buildInvoicePdf({
   buyerName,
   buyerEmail,
   coupon,
+  settings,
+  logoDataUrl,
 }: {
   purchase: any;
   book: any;
   buyerName: string;
   buyerEmail: string;
   coupon: any;
+  settings: Record<string, string>;
+  logoDataUrl: string | null;
 }) {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
@@ -124,52 +168,79 @@ function buildInvoicePdf({
     day: "2-digit", month: "short", year: "numeric",
   });
 
+  const businessName = settings.invoice_business_name || "GyandootNova";
+  const businessAddress = settings.invoice_business_address || "";
+  const gstin = settings.invoice_gstin || "";
+  const pan = settings.invoice_pan || "";
+  const footerNote = settings.invoice_footer_note || "Thank you for supporting original scriptures. — GyandootNova";
+
+  // Optional logo (top-right)
+  if (logoDataUrl) {
+    try {
+      const fmt = logoDataUrl.startsWith("data:image/jpeg") || logoDataUrl.startsWith("data:image/jpg") ? "JPEG" : "PNG";
+      doc.addImage(logoDataUrl, fmt, pageW - margin - 90, 40, 90, 45, undefined, "FAST");
+    } catch {
+      // ignore invalid image
+    }
+  }
+
   // Header brand
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
   doc.setTextColor(183, 28, 28);
-  doc.text("GyandootNova", margin, 70);
+  doc.text(businessName, margin, 70);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(90);
-  doc.text("Original Hindi-first Spiritual Publications", margin, 86);
-  doc.text("gyandootnova.in  |  support@gyandootnova.in", margin, 99);
+  let headerY = 86;
+  if (businessAddress) {
+    const wrapped = doc.splitTextToSize(businessAddress, pageW / 2 - margin);
+    doc.text(wrapped, margin, headerY);
+    headerY += wrapped.length * 11;
+  }
+  doc.text("gyandootnova.in  |  support@gyandootnova.in", margin, headerY);
+  headerY += 11;
+  if (gstin) { doc.text(`GSTIN: ${gstin}`, margin, headerY); headerY += 11; }
+  if (pan) { doc.text(`PAN: ${pan}`, margin, headerY); headerY += 11; }
 
-  // Invoice meta box (right)
+  // Invoice meta box (right) — nudged down if a logo is present.
+  const metaTop = logoDataUrl ? 100 : 70;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
   doc.setTextColor(20);
-  doc.text("TAX INVOICE", pageW - margin, 70, { align: "right" });
+  doc.text("TAX INVOICE", pageW - margin, metaTop, { align: "right" });
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(60);
-  doc.text(`Invoice #: ${invoiceNo}`, pageW - margin, 88, { align: "right" });
-  doc.text(`Date: ${dateStr}`, pageW - margin, 102, { align: "right" });
+  doc.text(`Invoice #: ${invoiceNo}`, pageW - margin, metaTop + 18, { align: "right" });
+  doc.text(`Date: ${dateStr}`, pageW - margin, metaTop + 32, { align: "right" });
   if (purchase.razorpay_payment_id) {
-    doc.text(`Payment ID: ${purchase.razorpay_payment_id}`, pageW - margin, 116, { align: "right" });
+    doc.text(`Payment ID: ${purchase.razorpay_payment_id}`, pageW - margin, metaTop + 46, { align: "right" });
   }
 
-  // Divider
+  // Divider (below the taller of the two header columns)
+  const dividerY = Math.max(headerY + 8, metaTop + 60);
   doc.setDrawColor(220);
   doc.setLineWidth(0.6);
-  doc.line(margin, 132, pageW - margin, 132);
+  doc.line(margin, dividerY, pageW - margin, dividerY);
 
   // Bill To
+  const billTop = dividerY + 24;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
   doc.setTextColor(30);
-  doc.text("Bill To", margin, 158);
+  doc.text("Bill To", margin, billTop);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(60);
-  doc.text(buyerName, margin, 176);
-  doc.text(buyerEmail, margin, 190);
+  doc.text(buyerName, margin, billTop + 18);
+  doc.text(buyerEmail, margin, billTop + 32);
 
   // Line items table
-  const tableTop = 236;
+  const tableTop = billTop + 68;
   doc.setFillColor(245, 240, 232);
   doc.rect(margin, tableTop, pageW - margin * 2, 26, "F");
   doc.setFont("helvetica", "bold");
@@ -240,7 +311,8 @@ function buildInvoicePdf({
   doc.setFont("helvetica", "italic");
   doc.setFontSize(9);
   doc.setTextColor(120);
-  doc.text("Thank you for supporting original scriptures. — GyandootNova", pageW / 2, pageH - 40, { align: "center" });
+  const footerWrapped = doc.splitTextToSize(footerNote, pageW - margin * 2);
+  doc.text(footerWrapped, pageW / 2, pageH - 40, { align: "center" });
 
   return doc;
 }

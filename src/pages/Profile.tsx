@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,9 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import {
   BookOpen, Heart, User, Calendar, IndianRupee, PlayCircle,
-  Bookmark, StickyNote, Highlighter, Download, FileText, Share2, Copy
+  Bookmark, StickyNote, Highlighter, Download, FileText, Share2, Copy, Eye, Loader2
 } from "lucide-react";
 import useSEO from "@/hooks/useSEO";
 
@@ -21,33 +22,54 @@ const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const downloadInvoice = async (purchaseId: string, bookTitle?: string) => {
+  const [invoicePreview, setInvoicePreview] = useState<{
+    url: string;
+    purchaseId: string;
+    bookTitle?: string;
+  } | null>(null);
+  const [invoiceLoadingId, setInvoiceLoadingId] = useState<string | null>(null);
+
+  const fetchInvoiceBlob = async (purchaseId: string): Promise<Blob> => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
+    if (!token) throw new Error("Please sign in again");
+    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+    const url = `https://${projectId}.supabase.co/functions/v1/generate-invoice?purchase_id=${purchaseId}&preview=1`;
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) throw new Error((await res.text()) || "Failed to generate invoice");
+    return res.blob();
+  };
+
+  const openInvoicePreview = async (purchaseId: string, bookTitle?: string) => {
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token;
-      if (!token) {
-        toast({ title: "Please sign in again", variant: "destructive" });
-        return;
-      }
-      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-      const url = `https://${projectId}.supabase.co/functions/v1/generate-invoice?purchase_id=${purchaseId}`;
-      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-      if (!res.ok) {
-        const err = await res.text();
-        throw new Error(err || "Failed to generate invoice");
-      }
-      const blob = await res.blob();
+      setInvoiceLoadingId(purchaseId);
+      const blob = await fetchInvoiceBlob(purchaseId);
       const objectUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = objectUrl;
-      a.download = `invoice-${(bookTitle ?? "gyandootnova").replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(objectUrl);
+      setInvoicePreview({ url: objectUrl, purchaseId, bookTitle });
     } catch (e: any) {
-      toast({ title: "Invoice download failed", description: e?.message ?? "Try again", variant: "destructive" });
+      toast({ title: "Invoice preview failed", description: e?.message ?? "Try again", variant: "destructive" });
+    } finally {
+      setInvoiceLoadingId(null);
     }
+  };
+
+  const closeInvoicePreview = () => {
+    if (invoicePreview?.url) URL.revokeObjectURL(invoicePreview.url);
+    setInvoicePreview(null);
+  };
+
+  const triggerDownload = (url: string, bookTitle?: string) => {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `invoice-${(bookTitle ?? "gyandootnova").replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
+
+  const downloadInvoiceFromPreview = () => {
+    if (!invoicePreview) return;
+    triggerDownload(invoicePreview.url, invoicePreview.bookTitle);
   };
 
   useSEO({
@@ -339,9 +361,15 @@ const Profile = () => {
                         size="sm"
                         variant="outline"
                         className="h-7 gap-1.5 text-xs"
-                        onClick={() => downloadInvoice(p.id, p.book?.title)}
+                        onClick={() => openInvoicePreview(p.id, p.book?.title)}
+                        disabled={invoiceLoadingId === p.id}
                       >
-                        <Download className="h-3.5 w-3.5" /> Invoice
+                        {invoiceLoadingId === p.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Eye className="h-3.5 w-3.5" />
+                        )}
+                        Invoice
                       </Button>
                     </div>
                   </Card>
@@ -582,6 +610,35 @@ const Profile = () => {
           )}
         </section>
       </main>
+
+      <Dialog open={!!invoicePreview} onOpenChange={(open) => { if (!open) closeInvoicePreview(); }}>
+        <DialogContent className="max-w-4xl h-[85vh] flex flex-col p-0 gap-0">
+          <DialogHeader className="px-6 py-4 border-b">
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              Invoice Preview
+              {invoicePreview?.bookTitle && (
+                <span className="text-sm font-normal text-muted-foreground">— {invoicePreview.bookTitle}</span>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 min-h-0 bg-muted/30">
+            {invoicePreview && (
+              <iframe
+                title="Invoice preview"
+                src={invoicePreview.url}
+                className="w-full h-full border-0"
+              />
+            )}
+          </div>
+          <DialogFooter className="px-6 py-3 border-t bg-background">
+            <Button variant="outline" onClick={closeInvoicePreview}>Close</Button>
+            <Button onClick={downloadInvoiceFromPreview} className="gap-2">
+              <Download className="h-4 w-4" /> Download PDF
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };

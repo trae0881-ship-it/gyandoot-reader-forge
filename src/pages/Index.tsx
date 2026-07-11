@@ -57,35 +57,48 @@ import ContinueReadingSection from "@/components/ContinueReadingSection";
 
 /* ─── Animated Counter ─── */
 const AnimatedCounter = ({ target, suffix = "" }: { target: number; suffix?: string }) => {
-  const [count, setCount] = useState(0);
+  // Start at the real target so the number is ALWAYS visible, even if the
+  // IntersectionObserver never fires (short viewports, prerender, JS delay).
+  // The count-up animation is a progressive enhancement.
+  const [count, setCount] = useState(target);
   const ref = useRef<HTMLDivElement>(null);
   const started = useRef(false);
 
   useEffect(() => {
+    const startAnimation = () => {
+      if (started.current) return;
+      started.current = true;
+      let current = 0;
+      setCount(0);
+      const step = Math.max(1, Math.ceil(target / 40));
+      const timer = setInterval(() => {
+        current += step;
+        if (current >= target) {
+          current = target;
+          clearInterval(timer);
+        }
+        setCount(current);
+      }, 30);
+    };
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !started.current) {
-          started.current = true;
-          let current = 0;
-          const step = Math.ceil(target / 40);
-          const timer = setInterval(() => {
-            current += step;
-            if (current >= target) {
-              current = target;
-              clearInterval(timer);
-            }
-            setCount(current);
-          }, 30);
-        }
+        if (entry.isIntersecting) startAnimation();
       },
-      { threshold: 0.5 },
+      { threshold: 0.25 },
     );
     if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
+    const fallback = window.setTimeout(() => {
+      if (!started.current) setCount(target);
+    }, 2000);
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(fallback);
+    };
   }, [target]);
 
   return (
-    <div ref={ref} className="font-serif text-4xl font-bold text-secondary md:text-5xl">
+    <div ref={ref} translate="no" className="font-serif text-4xl font-bold text-secondary md:text-5xl">
       {count.toLocaleString()}
       {suffix}
     </div>

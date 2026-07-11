@@ -554,7 +554,52 @@ const Index = () => {
         </div>
       </section>
 
+      {/* ─── OUR REACH — honest, no fabricated global scale ─── */}
+      <section aria-labelledby="our-reach" className="bg-background border-y border-border/60 py-16 md:py-20">
+        <div className="container">
+          <div className="max-w-2xl mx-auto text-center">
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-primary">
+              Hamari Pahunch · Our Reach
+            </p>
+            <h2 id="our-reach" className="mt-4 font-serif text-3xl md:text-4xl font-bold text-foreground leading-tight">
+              A growing readership across India and beyond
+            </h2>
+            <p className="mt-6 text-muted-foreground leading-[1.9]">
+              We are not everywhere yet — and we don't pretend to be. But quietly, readers from a
+              handful of countries have made GyandootNova a part of their daily reading.
+            </p>
+          </div>
+
+          <div className="mt-12 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 max-w-4xl mx-auto">
+            {[
+              { flag: "🇮🇳", name: "India", note: "Home base" },
+              { flag: "🇺🇸", name: "United States", note: "Diaspora readers" },
+              { flag: "🇬🇧", name: "United Kingdom", note: "Diaspora readers" },
+              { flag: "🇨🇦", name: "Canada", note: "Diaspora readers" },
+              { flag: "🇦🇺", name: "Australia", note: "Diaspora readers" },
+            ].map((c) => (
+              <div
+                key={c.name}
+                className="rounded-2xl border border-border/70 bg-card px-5 py-6 text-center shadow-card"
+              >
+                <div className="text-2xl leading-none" aria-hidden>{c.flag}</div>
+                <p className="mt-3 text-sm font-semibold text-foreground">{c.name}</p>
+                <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                  {c.note}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <p className="mt-8 max-w-2xl mx-auto text-center text-xs text-muted-foreground">
+            Countries listed are based on real reader traffic. We only add a country when we can
+            honestly say readers are there.
+          </p>
+        </div>
+      </section>
+
       {/* ─── 3. FEATURED BOOKS ─── */}
+
       <section className="bg-muted/40 py-20">
 
         <div className="container">

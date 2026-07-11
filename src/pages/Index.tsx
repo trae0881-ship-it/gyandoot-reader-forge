@@ -50,6 +50,8 @@ import GuaranteeSection from "@/components/GuaranteeSection";
 import FaqStrip from "@/components/FaqStrip";
 import NewsletterCta from "@/components/NewsletterCta";
 import { useEffect, useRef, useState } from "react";
+import { WhyWeExist, ReaderJourney, TrustPillars } from "@/components/BrandExperience";
+
 
 /* ─── Animated Counter ─── */
 const AnimatedCounter = ({ target, suffix = "" }: { target: number; suffix?: string }) => {

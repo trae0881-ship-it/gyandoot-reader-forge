@@ -1282,7 +1282,7 @@ const Books = () => {
 
         {/* Newsletter */}
         <Reveal>
-          <section className="container pt-20 md:pt-28 pb-24 md:pb-32">
+          <section className="container py-12 md:py-[72px] lg:py-24">
             <div
               className="relative overflow-hidden rounded-3xl border p-10 md:p-16 text-center"
               style={{

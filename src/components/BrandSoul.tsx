@@ -228,7 +228,7 @@ const calmPromises = [
 ];
 
 export const CalmFeeling = () => (
-  <section className="relative bg-primary overflow-hidden">
+  <section className="relative bg-ink overflow-hidden">
     <div
       aria-hidden
       className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full blur-[120px] -mr-48 -mt-48"

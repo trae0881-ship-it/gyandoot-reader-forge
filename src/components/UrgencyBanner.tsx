@@ -29,9 +29,13 @@ export default function UrgencyBanner() {
   const [closed, setClosed] = useState(false);
   const [cfg, setCfg] = useState<Cfg | null>(null);
   const [now, setNow] = useState(Date.now());
+  const [mounted, setMounted] = useState(false);
+
 
   useEffect(() => {
+    setMounted(true);
     if (sessionStorage.getItem("gn_urgency_closed")) setClosed(true);
+
     (async () => {
       const { data } = await supabase
         .from("settings")
@@ -53,7 +57,7 @@ export default function UrgencyBanner() {
     return () => window.clearInterval(id);
   }, []);
 
-  if (closed || !cfg || !cfg.enabled) return null;
+  if (!mounted || closed || !cfg || !cfg.enabled) return null;
   const target = cfg.endsAt ?? endOfToday();
   const remaining = target - now;
   if (remaining <= 0) return null;

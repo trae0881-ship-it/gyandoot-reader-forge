@@ -2,7 +2,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
-import { Menu, X, User, LogOut, Shield, MessageCircle, Search } from "lucide-react";
+import { Menu, X, User, LogOut, Shield, MessageCircle, Search, ShoppingBag } from "lucide-react";
+import { useCart } from "@/hooks/useCart";
+
 import { useState } from "react";
 import logoImg from "@/assets/logo.jpeg";
 import { useQuery } from "@tanstack/react-query";

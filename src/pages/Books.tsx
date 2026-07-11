@@ -1073,7 +1073,7 @@ const Books = () => {
         </Reveal>
 
         {/* Toolbar + library */}
-        <section id="library" className="container pt-20 md:pt-28">
+        <section id="library" className="container py-12 md:py-[72px] lg:py-24">
           <Reveal>
             <div className="mb-6">
               <h2 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ letterSpacing: "-0.02em" }}>

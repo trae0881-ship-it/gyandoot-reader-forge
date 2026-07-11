@@ -130,6 +130,22 @@ const BookReader = () => {
 
   const chapter = chapters?.find((c) => c.slug === chapterSlug);
 
+  // Saved reading progress for this book (single row per user+book).
+  const { data: savedProgress } = useQuery({
+    queryKey: ["reading-progress", book?.id, user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("reading_progress")
+        .select("chapter_id, chapter_number, scroll_percent")
+        .eq("user_id", user!.id)
+        .eq("book_id", book!.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!book?.id && !!user?.id,
+  });
+
+
   // Securely fetch chapter content via RPC (enforces access server-side)
   const { data: chapterContent, isLoading: contentLoading, error: contentError } = useQuery({
     queryKey: ["chapter-content", chapter?.id, user?.id],
@@ -346,12 +362,45 @@ const BookReader = () => {
     };
   }, [handleScroll]);
 
+  // Restore saved scroll position when a chapter loads. If this chapter matches
+  // the user's last-read chapter for this book AND we have content, jump to
+  // the saved percent. Otherwise start at the top.
+  const restoredForChapterRef = useRef<string | null>(null);
   useEffect(() => {
-    if (user && book?.id && chapter?.id) {
-      window.scrollTo(0, 0);
-      saveProgressMutation.mutate({ scrollPct: 0 });
-    }
-  }, [chapter?.id]);
+    if (!chapter?.id) return;
+    // Guard: only restore once per chapter mount.
+    if (restoredForChapterRef.current === chapter.id) return;
+    // Wait until chapter content is actually rendered.
+    if (contentLoading || !chapterContent) return;
+
+    const shouldRestore =
+      user &&
+      savedProgress &&
+      savedProgress.chapter_id === chapter.id &&
+      typeof savedProgress.scroll_percent === "number" &&
+      savedProgress.scroll_percent > 2 &&
+      savedProgress.scroll_percent < 98;
+
+    // Let the DOM settle so scrollHeight is final.
+    const t = setTimeout(() => {
+      if (shouldRestore) {
+        const el = document.documentElement;
+        const target = ((el.scrollHeight - el.clientHeight) * savedProgress!.scroll_percent) / 100;
+        window.scrollTo({ top: target, behavior: "auto" });
+        toast({
+          title: "Resuming where you left off",
+          description: `${savedProgress!.scroll_percent}% into this chapter.`,
+        });
+      } else {
+        window.scrollTo(0, 0);
+      }
+      restoredForChapterRef.current = chapter.id;
+    }, 120);
+
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chapter?.id, chapterContent, contentLoading, savedProgress?.chapter_id, savedProgress?.scroll_percent, user?.id]);
+
 
   /* ─── Text selection / highlight bar ──────────────────────────────── */
   const handleMouseUp = useCallback(() => {

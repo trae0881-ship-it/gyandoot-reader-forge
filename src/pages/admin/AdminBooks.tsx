@@ -183,13 +183,59 @@ const ChapterEditor = ({ book, onBack }: { book: any; onBack: () => void }) => {
             />
           </div>
 
+
+          {/* Sources & Permissions + Originality (new) */}
+          <div className="grid gap-4 md:grid-cols-2 border-t border-border pt-4">
+            <SourcesPermissionsCard
+              sourceType={form.source_type}
+              sourceCitation={form.source_citation}
+              permissionNotes={form.permission_notes}
+              onChange={(patch) => setForm({ ...form, ...patch as any })}
+            />
+            <OriginalityPanel
+              entityType="chapter"
+              entityId={editing?.id ?? null}
+              score={editing?.originality_score ?? null}
+              report={(editing?.originality_report ?? null) as any}
+              checkedAt={editing?.originality_checked_at ?? null}
+              approvalStatus={editing?.approval_status ?? "draft"}
+              disableRun={!editing}
+              onChecked={() => qc.invalidateQueries({ queryKey: ["admin-chapters", book.id] })}
+            />
+          </div>
+
           <div className="flex items-center justify-between pt-2">
             <div className="flex items-center gap-2">
               <Switch checked={form.is_preview} onCheckedChange={(v) => setForm({ ...form, is_preview: v })} />
               <Label>{form.is_preview ? "Free Preview" : "Paid Chapter"}</Label>
+              {editing?.approval_status && editing.approval_status !== "approved" && (
+                <span className="ml-3 text-xs text-amber-700">
+                  · Needs admin approval before publish
+                </span>
+              )}
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={resetChapterForm}>Cancel</Button>
+              {editing && (
+                <Button
+                  variant="secondary"
+                  onClick={async () => {
+                    try {
+                      const { error } = await supabase.rpc("submit_chapter_for_review" as any, { _chapter_id: editing.id } as any);
+                      if (error) throw error;
+                      toast({ title: "Submitted for review", description: "Running originality check…" });
+                      await supabase.functions.invoke("content-originality-check", {
+                        body: { entity_type: "chapter", entity_id: editing.id },
+                      });
+                      qc.invalidateQueries({ queryKey: ["admin-chapters", book.id] });
+                    } catch (e: any) {
+                      toast({ title: "Submission failed", description: e.message, variant: "destructive" });
+                    }
+                  }}
+                >
+                  <Send className="mr-1 h-4 w-4" /> Submit for Review
+                </Button>
+              )}
               <Button onClick={() => saveMutation.mutate()} disabled={!form.title || saveMutation.isPending}>
                 {saveMutation.isPending ? "Saving…" : editing ? "Update Chapter" : "Add Chapter"}
               </Button>

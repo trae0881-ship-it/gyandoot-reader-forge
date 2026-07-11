@@ -15,7 +15,7 @@ const REQUIRED_ROUTES = [
   "/",
   "/books",
   "/articles",
-  "/cart",
+  
   "/library",
   "/our-story",
   "/about",

@@ -196,8 +196,9 @@ const ArticleDetail = () => {
             <ol className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
               <li>
                 <Link to="/" className="inline-flex items-center gap-1 hover:text-primary transition-colors">
-                  <Home className="h-3.5 w-3.5" /> Home
+                  <Home className="h-3.5 w-3.5" /> GyandootNova
                 </Link>
+
               </li>
               <li aria-hidden="true"><ChevronRight className="h-3.5 w-3.5" /></li>
               <li>

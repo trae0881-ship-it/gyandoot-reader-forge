@@ -848,6 +848,7 @@ const BookReader = () => {
             content={rawContent}
             fontSize={fontSize}
             darkMode={darkMode}
+            theme={theme}
             watermarkText={watermarkText}
           />
         </div>

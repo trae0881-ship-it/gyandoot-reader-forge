@@ -294,15 +294,25 @@ const Profile = () => {
                       <p className="text-xs text-muted-foreground">Not started yet</p>
                     )}
 
-                    {resumeHref && (
-                      <Link
-                        to={resumeHref}
-                        className="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline"
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                      {resumeHref && (
+                        <Link
+                          to={resumeHref}
+                          className="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline"
+                        >
+                          <PlayCircle className="h-3.5 w-3.5" />
+                          {progress ? "Resume Reading" : "Start Reading"}
+                        </Link>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 gap-1.5 text-xs"
+                        onClick={() => downloadInvoice(p.id, p.book?.title)}
                       >
-                        <PlayCircle className="h-3.5 w-3.5" />
-                        {progress ? "Resume Reading" : "Start Reading"}
-                      </Link>
-                    )}
+                        <Download className="h-3.5 w-3.5" /> Invoice
+                      </Button>
+                    </div>
                   </Card>
                 );
               })}

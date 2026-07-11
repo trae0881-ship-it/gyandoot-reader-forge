@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import Layout from "@/components/layout/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,36 @@ import useSEO from "@/hooks/useSEO";
 const Profile = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const downloadInvoice = async (purchaseId: string, bookTitle?: string) => {
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) {
+        toast({ title: "Please sign in again", variant: "destructive" });
+        return;
+      }
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const url = `https://${projectId}.supabase.co/functions/v1/generate-invoice?purchase_id=${purchaseId}`;
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(err || "Failed to generate invoice");
+      }
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      a.download = `invoice-${(bookTitle ?? "gyandootnova").replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch (e: any) {
+      toast({ title: "Invoice download failed", description: e?.message ?? "Try again", variant: "destructive" });
+    }
+  };
 
   useSEO({
     title: "My Profile — Purchased Books & Reading | GyandootNova",
@@ -294,15 +325,25 @@ const Profile = () => {
                       <p className="text-xs text-muted-foreground">Not started yet</p>
                     )}
 
-                    {resumeHref && (
-                      <Link
-                        to={resumeHref}
-                        className="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline"
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                      {resumeHref && (
+                        <Link
+                          to={resumeHref}
+                          className="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline"
+                        >
+                          <PlayCircle className="h-3.5 w-3.5" />
+                          {progress ? "Resume Reading" : "Start Reading"}
+                        </Link>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 gap-1.5 text-xs"
+                        onClick={() => downloadInvoice(p.id, p.book?.title)}
                       >
-                        <PlayCircle className="h-3.5 w-3.5" />
-                        {progress ? "Resume Reading" : "Start Reading"}
-                      </Link>
-                    )}
+                        <Download className="h-3.5 w-3.5" /> Invoice
+                      </Button>
+                    </div>
                   </Card>
                 );
               })}

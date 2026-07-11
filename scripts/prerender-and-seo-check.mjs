@@ -215,8 +215,9 @@ function renderReaderSnapshot(row) {
     <title>${esc(title)}</title>
     <meta name="description" content="${esc(description)}">
     <meta name="author" content="GyandootNova">
-    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-    <link rel="canonical" href="${esc(abs)}">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="canonical" href="${esc(bookUrl)}">
+
     <link rel="icon" href="/gyandoot-nova-icon.ico" type="image/x-icon">
     <meta property="og:title" content="${esc(title)}">
     <meta property="og:description" content="${esc(description)}">

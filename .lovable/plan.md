@@ -1,84 +1,94 @@
+## Goal
 
-# SEO Content Build — Vedas/Upanishads/Gita + Meditation + International Ranking
+Ensure nothing goes live on GyandootNova until an admin reviews an automatic originality report. Every book chapter and article gets source-attribution fields, an originality score, and a "pending / approved / rejected" state. Admins get an audit dashboard.
 
-Goal: capture the demand Semrush revealed (Bhagavad Gita 301K, Vedas 33K, Upanishads 27K, "how to meditate properly" 60K, etc.) and expand reach beyond India into US / AU / CA / Europe.
+## 1. Database changes (migration)
 
-## What we'll build
+**Extend `posts` (articles) and `book_chapters`:**
 
-**A. Text Hub Pages** (new routes, one per ancient text)
-- `/texts/rigved`, `/texts/vedas`, `/texts/upanishads`, `/texts/bhagavad-gita`
-- Each hub answers who/how many/what/when/oldest in structured sections
-- Each includes an FAQ accordion at the bottom (schema-backed)
+Add columns to both:
+- `source_type` text — `original | translation | public_domain | licensed | quoted_excerpt`
+- `source_citation` text — free-text citation / URL / book reference
+- `permission_notes` text — rights, license, permission-holder
+- `originality_score` numeric — 0-100 from last check (nullable)
+- `originality_report` jsonb — flagged passages, matched URLs, model summary
+- `originality_checked_at` timestamptz
+- `approval_status` text default `'draft'` — `draft | pending_review | flagged | approved | rejected | needs_rewrite`
+- `approval_notes` text — admin's decision notes
+- `reviewed_by` uuid (references `auth.users`, no FK — nullable)
+- `reviewed_at` timestamptz
+- `last_edited_by` uuid, `last_edited_at` timestamptz
 
-**B. Structured Data (JSON-LD)**
-- `Article` + `Book` schema on every hub and post page
-- `FAQPage` schema wherever an FAQ accordion appears
-- `BreadcrumbList` on hubs and Hindi meaning pages
+**New table `content_audit_log`:**
+- `id`, `entity_type` (`post | chapter | book`), `entity_id` uuid, `action` text (`edited | submitted | check_run | flagged | approved | rejected`), `actor_id` uuid, `notes` text, `payload` jsonb, `created_at`
+- GRANT to `authenticated` and `service_role`; RLS: admins can select all, authors can select their own rows; only service role / admin inserts.
 
-**C. Hindi "Meaning" & "How to Read" Pages** (new routes)
-- `/hindi/upanishad-meaning-in-hindi` (2,900/mo, low comp)
-- `/hindi/vedas-meaning-in-hindi`
-- `/how-to-read/bhagavad-gita` (1,300/mo)
-- `/how-to-read/vedas`
+**Publish gate:** existing `posts.is_published` and `posts.publish_status` stay, but a trigger blocks flipping `is_published = true` unless `approval_status = 'approved'`. Same rule for `book_chapters` (add `is_published` if missing — currently gated via `is_preview` / purchase; skip if not needed and instead gate visibility in the reader by `approval_status`).
 
-**D. Meditation Posts** (as regular blog posts in existing posts system)
-- "Meditation for Anxiety — Hindi + English guide" (1,300/mo)
-- "Meditation for Stress — techniques that actually work" (2,400/mo)
-- Each: optimized meta, reading time, "Related articles" module
+## 2. Edge function `content-originality-check`
 
-**E. Comparison Hub** (new route)
-- `/meditation/techniques-compared` — Vipassana / Zen / TM / Kriya / Who-Am-I
-- Comparison table + internal links to individual technique posts
+Input: `{ entity_type, entity_id }`. Server-only (verify admin or content owner via JWT).
+- Loads content (`posts.content` / `book_chapters.content`), strips HTML.
+- Calls Lovable AI (`google/gemini-2.5-flash`) with a structured-output prompt: return `{ score, verdict: original|borrowed|uncertain, flagged_passages: [{text, reason, likely_source}], summary }`.
+- Optionally cross-checks flagged passages against the web via existing `TAVILY_API_KEY` (already in secrets) for URL matches.
+- Writes result to `originality_score`, `originality_report`, `originality_checked_at`.
+- If `score < 70` OR any flagged passage → sets `approval_status = 'flagged'` and inserts audit-log row.
+- Returns the report to the caller.
 
-**F. Hindi Pillar Page** (new route, cornerstone content)
-- `/hindi/dhyan-kaise-karein` — "ध्यान कैसे करें — शुरुआती लोगों के लिए संपूर्ण मार्गदर्शिका"
-- Targets *how to meditate properly* (60,500/mo, low comp)
-- Sections: तकनीक (technique), चरण-दर-चरण (steps), सामान्य गलतियाँ (common mistakes), लाभ (benefits), FAQ
+Auto-trigger: called from the client immediately when an editor clicks "Submit for review" (status flips `draft → pending_review`, then function runs, may downgrade to `flagged`).
 
-**G. Q&A Pages** (new route family)
-- `/qa/who-wrote-bhagavad-gita` (22,200/mo)
-- `/qa/who-wrote-vedas` (8,100/mo)
-- `/qa/how-many-vedas-are-there` (6,600/mo)
-- `/qa/what-is-vipassana` etc.
-- Each: single-question H1, direct answer in first 40 words, FAQ schema
+## 3. Editor UI additions
 
-**H. International Ranking Layer** (US / AU / CA / EU)
-- Add `hreflang` tags on all English pages (`en-US`, `en-GB`, `en-AU`, `en-CA`, `en-IN`, `hi-IN`) pointing to same URLs — signals Google to serve these pages in those markets
-- English metadata polished on all text hubs
-- Add `geo.region` meta tags on English versions
-- Submit expanded sitemap to Bing Webmaster Tools (already done) + Google Search Console for the new URLs
-- Note: single set of English URLs targeting all English markets — no separate `/us/` or `/uk/` paths needed for this content type
+**`AdminPosts` (article editor) and `AdminBooks` chapter editor:**
+Add a "Sources & Permissions" card above the save button:
+- Source type dropdown (5 options above)
+- Source citation textarea
+- Permission notes textarea
+- Read-only originality panel: score badge, last-checked timestamp, "Run originality check" button, expandable flagged-passages list.
+- Save action still saves as `draft`. New buttons: **Submit for Review** (locks status, runs check), **Save Draft**.
 
-## Routing & sitemap
+Author cannot flip to published directly — the "Publish" button is replaced with "Submit for Review" for non-admin authors. Admins keep a separate "Approve & Publish" button that only enables when `approval_status = 'approved'`.
 
-- New routes added to `App.tsx` router
-- All new URLs appended to `scripts/generate-sitemap.mjs`
-- Each hub/post added to `public/llms.txt` for AI-search visibility
-- Prerender config updated so crawlers see full HTML
+## 4. Admin Content Audit dashboard
 
-## Technical section
+New route `/admin/content-audit` (added to `AdminLayout` sidebar):
+- Tabs: **Pending Review**, **Flagged**, **Approved**, **All**.
+- Table columns: title, type (article/chapter), author, last edited, originality score (color-coded), status badge, sources filled? (✓/✗), actions.
+- Row click → drawer with full originality report, source/permission fields, audit-log timeline, and Approve / Reject / Send back for rewrite buttons (each writes to `approval_status`, `reviewed_by`, `reviewed_at`, `approval_notes` and appends to `content_audit_log`).
+- Rejecting with reason "borrowed content" auto-sets `approval_status = 'needs_rewrite'` and returns the piece to the author's queue.
 
-- **JSON-LD helper:** new `src/lib/jsonLd.ts` with typed builders (`buildArticleSchema`, `buildBookSchema`, `buildFAQSchema`, `buildBreadcrumbSchema`)
-- **FAQ component:** new `src/components/FaqAccordion.tsx` — takes `{ question, answer }[]`, renders shadcn accordion + injects matching `FAQPage` JSON-LD via `react-helmet-async`
-- **Hub template:** new `src/components/TextHub.tsx` — reusable layout for A. Props: `{ text, hindiName, sanskritName, description, sections, faqs, downloadUrl? }`
-- **Q&A template:** new `src/components/QAPage.tsx` — H1 = question, TL;DR answer box, long-form explanation, related Q&As
-- **hreflang:** new `src/components/HreflangTags.tsx` — reusable Helmet block emitting `<link rel="alternate" hreflang="...">` for all 6 locales + `x-default`
-- **Reading time:** existing posts already track it or compute via word count / 200 wpm
-- **Related articles module:** query `posts` table filtered by shared tag/category, limit 3
+## 5. Reader-side enforcement
 
-**Content authoring:** English + Hindi copy for A/C/D/E/F/G will be written by me inline (long-form, sourced/factually correct — Vedas authorship attributed to rishis/Vyasa tradition, chapter counts verified, etc.). No AI hallucination on facts.
+- `Articles.tsx`, `ArticleDetail.tsx`, `BookReader.tsx`, `FileBookReader.tsx`, and the article/book chapter queries all filter to `approval_status = 'approved'` (in addition to existing `is_published` checks). Admins bypass via existing `has_role` check.
+- Content list queries already used everywhere pass through a shared helper so this is a one-line change per file.
 
-**Deferred to a follow-up if scope is too big for one pass:** Q&A pages (G) can ship in a second batch after A–F land, since G is 5+ pages of copy.
+## Technical details
 
-## Estimated file impact
+- Lovable AI is already wired (`LOVABLE_API_KEY` present). Use AI SDK `generateText` with `Output.object` for a small, unconstrained schema (score number, verdict enum, short summary, passages array — no `.min/.max`).
+- Tavily key is present for optional web cross-check; keep it best-effort so a Tavily failure never blocks the report.
+- All new columns are nullable / defaulted so existing rows remain valid; existing published rows are backfilled to `approval_status = 'approved'` in the same migration.
+- GRANTs on the new table + updated RLS on `posts` and `book_chapters` so authors can't UPDATE `approval_status` directly (only through the edge function / admin dashboard).
+- No frontend business-logic rewrite; existing editors get new fields and the new "Submit for Review" button. Existing publish/reader paths gain a single `approval_status` check.
 
-- ~15 new route/page files
-- ~4 new shared components + 1 lib
-- Edits to `App.tsx`, `scripts/generate-sitemap.mjs`, `public/llms.txt`, `index.html` (sitewide hreflang fallback)
-- No DB migration needed — hubs are static content, posts use existing table
+## Files to create/edit
 
-## What I need from you before starting
+New:
+- `supabase/migrations/<ts>_content_originality_workflow.sql`
+- `supabase/functions/content-originality-check/index.ts`
+- `src/pages/admin/AdminContentAudit.tsx`
+- `src/components/admin/OriginalityPanel.tsx` (reusable card)
+- `src/components/admin/SourcesPermissionsCard.tsx`
 
-1. **Confirm scope:** Should I ship all A–H in one pass (larger, longer), or A–F first and defer G (Q&A pages) + H (hreflang) to a second turn?
-2. **Language mix per hub:** Bilingual (Hindi + English side-by-side) or separate English hub + Hindi companion page linked from it?
-3. **Downloads:** Do you want the free Bhagavad Gita / Vedas PDFs offered on the hubs? (You mentioned the 40K/mo *bhagwat geeta in hindi pdf* opportunity earlier.) If yes, do you have the PDFs to upload, or should the hubs just link to your existing free chapters in the reader?
+Edit:
+- `src/pages/admin/AdminPosts.tsx` — add source/permission fields, replace Publish with Submit-for-Review flow.
+- `src/pages/admin/AdminBooks.tsx` — same additions for chapter editor.
+- `src/pages/admin/AdminLayout.tsx` — sidebar link + route.
+- `src/App.tsx` — route registration.
+- `src/pages/Articles.tsx`, `src/pages/ArticleDetail.tsx`, `src/pages/BookReader.tsx`, `src/pages/FileBookReader.tsx`, `src/pages/Index.tsx` (latest posts query) — add `.eq("approval_status", "approved")` for non-admin reads.
+
+## Rollout
+
+1. Run migration (backfills existing published rows to `approved`).
+2. Deploy edge function.
+3. Ship editor + dashboard UI.
+4. From then on, every new/edited piece must pass the originality check + admin approval before appearing on the site.

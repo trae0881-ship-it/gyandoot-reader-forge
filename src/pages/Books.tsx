@@ -120,17 +120,27 @@ const TESTIMONIALS = [
   },
 ];
 
-// Deterministic pseudo-rating so it stays stable per book
+// Real review aggregates (populated by the page-level hook below).
+// Cards read from this map; when a book has no reviews yet, we fall back to
+// deterministic pseudo-values so the layout doesn't feel empty.
+const realStats: Map<string, { count: number; avg: number; verified: number }> = new Map();
+
 const ratingFor = (seed: string) => {
+  const s = realStats.get(seed);
+  if (s && s.count > 0) return Math.round(s.avg * 10) / 10;
   let h = 0;
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
   return Math.round((4.3 + (h % 70) / 100) * 10) / 10;
 };
 const reviewsFor = (seed: string, purchases: number) => {
+  const s = realStats.get(seed);
+  if (s && s.count > 0) return s.count;
   let h = 0;
   for (let i = 0; i < seed.length; i++) h = (h * 17 + seed.charCodeAt(i)) >>> 0;
   return Math.max(24, Math.floor(purchases * 0.6) + (h % 180));
 };
+const verifiedFor = (seed: string): number => realStats.get(seed)?.verified ?? 0;
+
 
 type BookRow = {
   id: string;

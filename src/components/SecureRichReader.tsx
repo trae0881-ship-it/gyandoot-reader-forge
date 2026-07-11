@@ -5,6 +5,7 @@ interface SecureRichReaderProps {
   content: string;
   fontSize: number;
   darkMode: boolean;
+  theme?: "light" | "sepia" | "dark";
   watermarkText: string;
 }
 

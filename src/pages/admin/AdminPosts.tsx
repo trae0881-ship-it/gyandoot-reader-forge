@@ -41,6 +41,10 @@ const emptyForm = {
   social_caption: "", social_excerpt: "",
   canonical_url: "",
   schema_type: "BlogPosting",
+  // Originality workflow
+  source_type: "original" as "original" | "translation" | "public_domain" | "licensed" | "quoted_excerpt",
+  source_citation: "",
+  permission_notes: "",
 };
 
 
@@ -151,6 +155,9 @@ const AdminPosts = () => {
         social_excerpt: form.social_excerpt || null,
         canonical_url: form.canonical_url || null,
         schema_type: form.schema_type || "BlogPosting",
+        source_type: form.source_type,
+        source_citation: form.source_citation || null,
+        permission_notes: form.permission_notes || null,
       };
       if (editing) {
         const { error } = await supabase.from("posts").update(payload).eq("id", editing.id);

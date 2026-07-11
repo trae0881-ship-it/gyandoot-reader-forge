@@ -25,6 +25,7 @@ const Donate = lazy(() => import("./pages/Donate"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Profile = lazy(() => import("./pages/Profile"));
 const About = lazy(() => import("./pages/About"));
+const OurStory = lazy(() => import("./pages/OurStory"));
 const Services = lazy(() => import("./pages/Services"));
 const Contact = lazy(() => import("./pages/Contact"));
 const FAQ = lazy(() => import("./pages/FAQ"));
@@ -122,6 +123,8 @@ const AppContent = () => {
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/our-story" element={<OurStory />} />
+                <Route path="/story" element={<Navigate to="/our-story" replace />} />
                 <Route path="/services" element={<Services />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/faq" element={<FAQ />} />

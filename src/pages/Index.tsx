@@ -248,7 +248,7 @@ const Index = () => {
                 className="border border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 rounded-full px-8"
                 asChild
               >
-                <Link to="/books?filter=paid">Explore the library</Link>
+                <Link to="/our-story">Discover our story</Link>
               </Button>
             </div>
             <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-xs text-primary-foreground/70">

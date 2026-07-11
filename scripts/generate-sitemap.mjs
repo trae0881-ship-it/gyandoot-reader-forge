@@ -22,6 +22,7 @@ const STATIC = [
   { path: "/articles", changefreq: "daily", priority: "0.9" },
   { path: "/our-story", changefreq: "monthly", priority: "0.7" },
   { path: "/cart", changefreq: "weekly", priority: "0.4" },
+  { path: "/library", changefreq: "weekly", priority: "0.4" },
 
   { path: "/about", changefreq: "monthly", priority: "0.7" },
   { path: "/services", changefreq: "monthly", priority: "0.7" },

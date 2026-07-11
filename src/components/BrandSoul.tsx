@@ -299,7 +299,7 @@ export const CalmFeeling = () => (
           className="inline-flex items-center gap-3 px-10 py-4 bg-secondary text-secondary-foreground text-xs font-bold uppercase tracking-[0.28em] hover:bg-secondary/90 transition-colors shadow-xl"
           style={bodyFont}
         >
-          <HeartHandshake className="h-4 w-4" />
+          <HeartHandshake className="h-6 w-6" />
           Begin your journey
         </Link>
       </div>

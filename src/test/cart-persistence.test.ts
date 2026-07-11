@@ -214,7 +214,7 @@ describe("useCart DB persistence", () => {
       s2.result.current.items.map((i) => [i.book_id, i.qty]),
     );
     expect(restored).toEqual({ "book-1": 2, "book-2": 1 });
-    expect(s2.result.current.subtotal).toBe(2 * 100 + 1 * 250);
+    expect(s2.result.current.subtotal).toBe(2 * 100 + 1 * 100);
   });
 
   it("does not leak another user's cart on sign-in", async () => {

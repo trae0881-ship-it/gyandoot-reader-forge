@@ -15,6 +15,9 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { BooksJourneyIntro } from "@/components/BrandExperience";
+import SalesTrustBar from "@/components/SalesTrustBar";
+import LaunchOfferBanner from "@/components/LaunchOfferBanner";
+import { useTrackOnMount, trackSalesEvent } from "@/hooks/useAnalytics";
 
 import {
   BookOpen,
@@ -424,7 +427,10 @@ const BookCard = ({
         <div className="mt-auto pt-6">
           <Link
             to={`/books/${book.slug}`}
-            onClick={() => onRecent(book)}
+            onClick={() => {
+              onRecent(book);
+              trackSalesEvent("click_buy_now", { book_id: book.id, slug: book.slug, source: "books_list" });
+            }}
             className="flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl py-3 text-[13px] font-semibold transition-colors"
             style={{ background: T.primary, color: "#fff" }}
             onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = T.primaryDark)}
@@ -639,6 +645,7 @@ const QuickView = ({
 // Page
 // ==============================
 const Books = () => {
+  useTrackOnMount("view_books_list");
   useSEO({
     title: "Hindu Scriptures in English — Gita, Vedas, Ramayana Library",
     description:
@@ -935,8 +942,15 @@ const Books = () => {
                 Curated Hindu scriptures, spiritual classics and modern reflections — with a calm reader designed for depth, instant access, and lifetime reading.
               </p>
             </Reveal>
+
+            {/* Launch offer + trust bar — conversion boosters */}
+            <div className="mt-10 space-y-5">
+              <LaunchOfferBanner />
+              <SalesTrustBar />
+            </div>
           </div>
         </section>
+
 
         {/* Featured */}
         {featured.length > 0 && (

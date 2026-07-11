@@ -1,89 +1,90 @@
-# Plan: Full English Conversion + SEO + Conversion Boost
+# Sales Conversion Overhaul — /books & Book Detail
 
-Goal: Content 8.5→10, SEO 8→10, Conversion 7→10. Keep Hindi SEO pages (`/hindi/*`, Hindi book titles) intact — they rank for Hindi queries. Add English versions alongside where high-value.
+Goal: `/books` aur book-detail pages ko sales-optimized banana. Sirf UI theek hone se sales nahi aati — trust, low-friction checkout, aur clear offer chahiye. Yeh plan 4 phases me deliver hoga.
 
-Scope is large — will ship in **3 phases**, each independently deployable.
+## Phase 1 — Trust & Social Proof (highest ROI)
 
----
+**Book cards (/books) me add:**
+- Star rating + review count badge (e.g. "4.8 ★ · 1,240 readers")
+- "Verified Purchase" badge on reviews
+- Live reader count chip (already exists in `mem://ui/social-proof` — reuse)
+- "Bestseller" / "New" / "Free preview" tags with Lucide icons
 
-## Phase 1 — English + Conversion (Highest ROI)
+**Book detail page me add:**
+- Testimonials carousel (min 3, real quotes from `contact_enquiries` or seeded)
+- "X people bought in last 24h" (from `purchases` table)
+- Money-back / satisfaction guarantee strip
+- Author credibility block (photo, credentials, other books)
 
-**Public pages → English copy (UI chrome, headings, CTAs, body):**
-- `Index.tsx`, `Books.tsx`, `BookDetail.tsx`, `Articles.tsx`, `ArticleDetail.tsx`
-- `About.tsx`, `OurStory.tsx`, `Contact.tsx`, `FAQ.tsx`, `Support.tsx`, `Donate.tsx`
-- `Careers.tsx`, `Portfolio.tsx`, `Services.tsx`, `TestimonialsPage.tsx`
-- `Auth.tsx`, `Profile.tsx`, `Library.tsx`, `NotFound.tsx`
-- Layout: `Header.tsx`, `Footer.tsx`, all nav items, badges, tooltips
-- Components: `BrandExperience`, `CompareSection`, `GuaranteeSection`, `UrgencyBanner`, `NewsletterCta`, `LiveReaderStrip`, `RecentPurchasesToast`, `ExitIntentOffer`, `EmailLeadCapture`, `ContinueReadingSection`, `AskScripture`, `FloatingWhatsApp`, `FaqStrip`, `BundleDecoy`
+**DB:** naya `book_reviews` table (rating 1-5, review text, verified flag, user_id, book_id) + admin moderation.
 
-**Legal pages** stay English (already are): Privacy, Terms, Refund, Shipping.
+## Phase 2 — Checkout Friction Removal
 
-**Conversion upgrades (all 4 selected):**
-1. **Hero (Index)** — English H1 with keyword + benefit, rating stars (4.8★ from N readers), live reader count chip, primary CTA "Start Reading Free" + secondary "Browse Library", trust row (100% Money-Back • Free Preview • Instant Access).
-2. **BookDetail** — Sticky Buy card with: urgency countdown (real 24h), guarantee badge, "X readers bought this week", 3-star review snippets, "What's inside" bullets, related books cross-sell, bundle upsell ("Get all 3 Upanishad volumes @ save 25%").
-3. **Exit intent** — Enhanced `ExitIntentOffer`: English copy, 15% coupon + free first chapter PDF, email capture into existing lead table.
-4. **Bundles** — Enhance `BundleDecoy` with real 2/3/5-book bundles, strikethrough pricing, savings badge, single-click add to cart flow.
+**Current problem:** multi-step, requires login before payment.
 
-**Preserve:**
-- Hindi book titles/authors from DB (they are the actual product names)
-- `/hindi/*`, `/qa/*`, `/texts/*`, `/meditation/*`, `/how-to-read/*` SEO pages (already English/Hindi mix) — Phase 2 will polish these
-- All emojis rule (Lucide only), semantic tokens, brand fonts
+**Changes:**
+- One-click **Buy Now** on card → direct Razorpay modal (guest checkout via email only)
+- Save address/phone on profile after first purchase; auto-fill next time
+- Remove all optional fields from checkout
+- Sticky mobile "Buy Now ₹XXX" bar on book detail page
+- UPI + Cards + Wallets prominently shown (Razorpay already integrated)
+- Post-payment: instant access + email receipt (Resend already set up)
 
----
+**DB:** `guest_checkouts` table for email-only orders; link to user on later signup.
 
-## Phase 2 — SEO Enhancement
+## Phase 3 — Pricing & Offers
 
-**Meta + schema per page** (via existing `useSEO` hook + Helmet):
-- Every public route gets: unique `<title>` (<60ch, keyword-first), `<meta description>` (<160ch, benefit + CTA verb), self-referencing canonical, og:title/og:description/og:url, twitter:card.
-- **JSON-LD upgrades** in `src/lib/jsonLd.ts`:
-  - `Book` schema on BookDetail (author, isbn, offers, aggregateRating, review)
-  - `BreadcrumbList` on all inner pages
-  - `FAQPage` on every page with FAQs (already partial)
-  - `Article` on ArticleDetail with author, datePublished, image
-  - `Organization` + `WebSite` with `SearchAction` sitewide
-  - `Product` + `Offer` for bundles
-- **Internal linking**: add contextual links between `/books/[slug]` ↔ `/texts/*` ↔ `/qa/*` ↔ `/hindi/*` (3–5 related links per page).
-- **Sitemap**: verify `scripts/generate-sitemap.mjs` includes all new English SEO pages; priority weights tuned.
-- **Robots.txt**: confirm no accidental disallow.
-- **Image alt text audit**: sweep BookDetail + Article images for descriptive alt.
-- **H1 hygiene**: exactly one H1 per page, keyword-front-loaded.
-- Trigger SEO scan at end.
+- **First-time buyer coupon:** auto-apply `WELCOME10` (10% off) — banner on `/books`
+- **Bundle discount:** "Buy 2 get 15% off, Buy 3 get 25%" — auto-calculated in cart
+- **Free shipping threshold** removed (digital books) — instead "Instant PDF + Reader access"
+- **Stock urgency** (honest): "Limited-time launch price · ends [date]" — admin-editable, no fake countdown
+- Coupon input already exists; add "Apply best coupon automatically" toggle
 
----
+## Phase 4 — Landing Optimization for Traffic Sources
 
-## Phase 3 — English Companions for Hindi SEO Pages
+**SEO (Google organic):**
+- Each book page: FAQ schema, Review schema, Product schema with price/availability
+- H1 = book title + core benefit, H2s = "What you'll learn", "Who this is for"
+- Internal linking from blog posts → books (LSI keywords already tracked)
 
-Keep every existing `/hindi/*` page. Add English mirrors where valuable:
-- `/hindi/upanishad-meaning-in-hindi` → keep + strengthen; already has `/qa/how-many-upanishads`, `/texts/upanishads` in English ✓
-- `/hindi/vedas-meaning-in-hindi` → keep; English mirrors already exist
-- `/hindi/dhyan-kaise-karein` → add English mirror `/meditation/how-to-meditate` (new page, same structure, English)
-- New: `/guides/how-to-read-vedas`, `/guides/upanishad-beginner-guide` (English long-form)
+**WhatsApp / direct share:**
+- Per-book OG image with title + price + cover (auto-generated)
+- Short share link: `/b/[slug]` → redirects to full book URL with UTM
+- "Share on WhatsApp" button with pre-filled message
 
-Cross-link Hindi ↔ English versions with `hreflang="hi"` / `hreflang="en"` alternate tags for correct Google language targeting.
+**Instagram/Facebook ads:**
+- New route `/offer/[slug]` — single-CTA landing variant (no nav, no footer clutter, testimonial above fold, one Buy Now button)
+- UTM auto-capture into `purchases.utm_source`
 
----
+**Repeat readers / email:**
+- Abandoned checkout email (24h after `purchases.status='pending'`) via Resend
+- "Complete your library" recommendation email after purchase
+- Personalized "You might also like" on book detail (based on past purchases)
 
-## Technical Details
+## Phase 5 — Analytics Funnel (measure what matters)
 
-**Files touched (Phase 1 ≈ 25 files, Phase 2 ≈ 15, Phase 3 ≈ 4 new):**
-- `src/pages/*.tsx` — copy translation, no logic changes
-- `src/components/**/*.tsx` — copy + JSX-level enhancements (sticky buy card, bundle grid, exit-intent form)
-- `src/lib/jsonLd.ts` — expand schema generators
-- `src/hooks/useSEO.tsx` — add og:image, twitter:card, hreflang support
-- `index.html` — sitewide og:* fallbacks (English)
-- `scripts/generate-sitemap.mjs` — add new routes
-- No DB / edge-function / auth changes
-- No new deps (react-helmet-async already present)
+Client-side events (custom edge function `track-event` → `visitor_logs`):
+- `view_books_list`, `view_book`, `click_buy_now`, `begin_checkout`, `payment_success`, `payment_failed`
+- Store `utm_source/medium/campaign` on every event
 
-**Preservation guarantees:**
-- Hindi book titles from `books` table render as-is (they're product data, not UI copy)
-- INR/₹ pricing stays (per locale memory)
-- No emojis anywhere (lint rule holds)
-- All existing routes keep their URLs → no redirect debt
-- No auth/logic/backend changes → zero regression risk on payments, referrals, reading progress
+Admin dashboard tab **"Sales Funnel"**:
+- Funnel chart: views → buy click → checkout → paid
+- Drop-off % at each stage
+- Top-converting traffic sources
+- Coupon usage & revenue impact
 
-**Delivery order:** Phase 1 first (biggest visible impact), you review, then Phase 2, then Phase 3.
+## Technical notes (for reference)
 
----
+- Reuse existing tables: `books`, `purchases`, `coupons`, `visitor_logs`, `profiles`
+- New tables: `book_reviews`, `guest_checkouts`, `sales_events`
+- Edge functions: `track-event`, `abandoned-checkout-email`, `auto-apply-coupon`
+- No new payment gateway — extend existing Razorpay flow
+- Follow brand rules: no emojis, Lucide icons only, INR-first, Hindi-first copy
 
-Ready to start Phase 1?
+## Delivery order
+
+Phase 1 (trust) + Phase 2 (checkout) deliver ~70% of the sales lift and are done first in one pass. Phase 3-5 follow. Each phase is independently shippable.
+
+## Ek confirmation chahiye
+
+Kya main **Phase 1 + Phase 2 abhi start karun** (biggest sales impact, ~1 build), aur baaki phases uske baad? Ya aap koi ek specific phase pehle chahte ho?

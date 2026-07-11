@@ -426,6 +426,53 @@ export type Database = {
           },
         ]
       }
+      book_reviews: {
+        Row: {
+          book_id: string
+          created_at: string
+          id: string
+          is_approved: boolean
+          is_verified_purchase: boolean
+          rating: number
+          review: string
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          book_id: string
+          created_at?: string
+          id?: string
+          is_approved?: boolean
+          is_verified_purchase?: boolean
+          rating: number
+          review: string
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          book_id?: string
+          created_at?: string
+          id?: string
+          is_approved?: boolean
+          is_verified_purchase?: boolean
+          rating?: number
+          review?: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_reviews_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookmarks: {
         Row: {
           book_id: string
@@ -1367,6 +1414,57 @@ export type Database = {
           referrer_user_id?: string
           status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      sales_events: {
+        Row: {
+          created_at: string
+          event: string
+          id: string
+          ip_address: string | null
+          path: string | null
+          payload: Json
+          referrer: string | null
+          user_agent: string | null
+          user_id: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          id?: string
+          ip_address?: string | null
+          path?: string | null
+          payload?: Json
+          referrer?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          id?: string
+          ip_address?: string | null
+          path?: string | null
+          payload?: Json
+          referrer?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
         }
         Relationships: []
       }

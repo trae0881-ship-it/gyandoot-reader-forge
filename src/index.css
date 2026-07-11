@@ -170,6 +170,17 @@
     text-rendering: optimizeLegibility;
   }
   .secure-rich-reader.is-dark { color: #f5f5f0; font-weight: 450; }
+  .secure-rich-reader.is-sepia { color: #3a2a12; background: transparent; }
+  .secure-rich-reader.is-sepia strong,
+  .secure-rich-reader.is-sepia b { color: #1e1200; }
+  .secure-rich-reader.is-sepia blockquote {
+    background: rgba(120, 78, 30, 0.08);
+    border-left-color: #8a5a1a;
+  }
+  .secure-rich-reader.is-sepia th { background: rgba(120, 78, 30, 0.12); }
+  .secure-rich-reader.is-sepia code,
+  .secure-rich-reader.is-sepia pre { background: rgba(120, 78, 30, 0.1); }
+  .secure-rich-reader.is-sepia a { color: #8a4d0f; }
   .secure-rich-reader p {
     margin: 0 0 1.15em;
     text-align: justify;

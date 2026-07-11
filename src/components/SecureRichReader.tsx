@@ -5,6 +5,7 @@ interface SecureRichReaderProps {
   content: string;
   fontSize: number;
   darkMode: boolean;
+  theme?: "light" | "sepia" | "dark";
   watermarkText: string;
 }
 
@@ -16,7 +17,8 @@ const textToHtml = (text: string) =>
     .map((para) => `<p>${para.replace(/\n/g, "<br/>")}</p>`)
     .join("");
 
-const SecureRichReader = ({ content, fontSize, darkMode, watermarkText }: SecureRichReaderProps) => {
+const SecureRichReader = ({ content, fontSize, darkMode, theme, watermarkText }: SecureRichReaderProps) => {
+  const resolvedTheme = theme ?? (darkMode ? "dark" : "light");
   const safeHtml = useMemo(() => {
     const raw = (content ?? "").trim();
     if (!raw) return "<p>इस अध्याय की सामग्री उपलब्ध नहीं है।</p>";
@@ -38,10 +40,10 @@ const SecureRichReader = ({ content, fontSize, darkMode, watermarkText }: Secure
   return (
     <div className="relative" data-secure-reader="true">
       <div
-        className={`secure-rich-reader ${darkMode ? "is-dark" : ""}`}
+        className={`secure-rich-reader is-${resolvedTheme}`}
         style={{
           fontSize: `${fontSize}px`,
-          lineHeight: 1.95,
+          lineHeight: 1.85,
           userSelect: "text",
           WebkitUserSelect: "text",
           position: "relative",

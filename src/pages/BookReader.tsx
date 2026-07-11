@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import {
   ChevronLeft, ChevronRight, ArrowLeft, Sun, Moon, Minus, Plus,
-  BookOpen, Bookmark, BookmarkCheck, StickyNote, X, Save, Highlighter, Trash2, List, Check,
+  BookOpen, Bookmark, BookmarkCheck, StickyNote, X, Save, Highlighter, Trash2, List, Check, Palette,
 } from "lucide-react";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -74,10 +74,25 @@ const BookReader = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Reader settings
-  const [fontSize, setFontSize] = useState(18);
-  const [darkMode, setDarkMode] = useState(false);
+  // Reader settings (persisted)
+  type ReaderTheme = "light" | "sepia" | "dark";
+  const [fontSize, setFontSize] = useState<number>(() => {
+    if (typeof window === "undefined") return 19;
+    const v = parseInt(localStorage.getItem("reader:fontSize") ?? "");
+    return Number.isFinite(v) && v >= 14 && v <= 32 ? v : 19;
+  });
+  const [theme, setTheme] = useState<ReaderTheme>(() => {
+    if (typeof window === "undefined") return "light";
+    const v = localStorage.getItem("reader:theme") as ReaderTheme | null;
+    return v === "sepia" || v === "dark" || v === "light" ? v : "light";
+  });
+  const darkMode = theme === "dark";
   const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => { localStorage.setItem("reader:fontSize", String(fontSize)); }, [fontSize]);
+  useEffect(() => { localStorage.setItem("reader:theme", theme); }, [theme]);
+
+  const cycleTheme = () => setTheme((t) => (t === "light" ? "sepia" : t === "sepia" ? "dark" : "light"));
 
   // Panels
   const [showNotes, setShowNotes] = useState(false);
@@ -550,10 +565,21 @@ const BookReader = () => {
   const rawContent = (chapterContent ?? "") as string;
   const watermarkText = user?.email ? `GyandootNova • ${user.email}` : "GyandootNova • Protected";
 
+  const themeShellClass =
+    theme === "dark"
+      ? "bg-gray-900 text-gray-100"
+      : theme === "sepia"
+      ? "bg-[#f4ecd8] text-[#3a2a12]"
+      : "bg-background text-foreground";
+  const toolbarClass =
+    theme === "dark"
+      ? "border-gray-700 bg-gray-900/95"
+      : theme === "sepia"
+      ? "border-[#e6d9b8] bg-[#f4ecd8]/95 backdrop-blur"
+      : "bg-background/95 backdrop-blur";
+
   return (
-    <div
-      className={`min-h-screen transition-colors ${darkMode ? "bg-gray-900 text-gray-100" : "bg-background text-foreground"}`}
-    >
+    <div className={`min-h-screen transition-colors ${themeShellClass}`}>
       {/* Scroll progress bar */}
       <div className="fixed top-0 left-0 right-0 z-50">
         <Progress value={scrollProgress} className="h-1 rounded-none" />
@@ -633,8 +659,8 @@ const BookReader = () => {
       )}
 
       {/* Toolbar */}
-      <div className={`sticky top-0 z-40 border-b px-4 py-2 ${darkMode ? "border-gray-700 bg-gray-900/95" : "bg-background/95 backdrop-blur"}`}>
-        <div className="mx-auto flex max-w-3xl items-center justify-between">
+      <div className={`sticky top-0 z-40 border-b px-4 py-2 ${toolbarClass}`}>
+        <div className="mx-auto flex max-w-4xl items-center justify-between">
           <div className="flex items-center gap-1">
             {/* TOC button */}
             <Button
@@ -654,8 +680,8 @@ const BookReader = () => {
             <Button variant="ghost" size="icon" onClick={() => setFontSize((s) => Math.max(14, s - 2))}><Minus className="h-4 w-4" /></Button>
             <span className="text-xs w-6 text-center">{fontSize}</span>
             <Button variant="ghost" size="icon" onClick={() => setFontSize((s) => Math.min(28, s + 2))}><Plus className="h-4 w-4" /></Button>
-            <Button variant="ghost" size="icon" onClick={() => setDarkMode(!darkMode)}>
-              {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            <Button variant="ghost" size="icon" onClick={cycleTheme} title={`Theme: ${theme}`}>
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : theme === "sepia" ? <Palette className="h-4 w-4 text-amber-700" /> : <Moon className="h-4 w-4" />}
             </Button>
             {user && (
               <>
@@ -699,7 +725,7 @@ const BookReader = () => {
       {/* Notes panel */}
       {showNotes && user && (
         <div className={`sticky top-[49px] z-30 border-b px-4 py-3 ${darkMode ? "border-gray-700 bg-gray-800" : "bg-muted/60 backdrop-blur"}`}>
-          <div className="mx-auto max-w-3xl">
+          <div className="mx-auto max-w-4xl">
             <div className="flex items-center justify-between mb-2">
               <p className="text-sm font-medium flex items-center gap-1.5">
                 <StickyNote className="h-4 w-4 text-primary" /> My Notes — {chapter.title}
@@ -729,7 +755,7 @@ const BookReader = () => {
       {/* Highlights panel */}
       {showHighlightsPanel && user && highlights.length > 0 && (
         <div className={`sticky top-[49px] z-30 border-b px-4 py-3 ${darkMode ? "border-gray-700 bg-gray-800" : "bg-muted/60 backdrop-blur"}`}>
-          <div className="mx-auto max-w-3xl">
+          <div className="mx-auto max-w-4xl">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <Highlighter className="h-4 w-4 text-muted-foreground" />
@@ -793,7 +819,7 @@ const BookReader = () => {
       )}
 
       {/* Chapter content */}
-      <article className="mx-auto max-w-3xl px-6 py-10">
+      <article className="mx-auto max-w-4xl px-6 py-10">
         <div className="mb-2 text-sm text-muted-foreground">
           Chapter {chapter.chapter_number} of {totalChapters}
         </div>
@@ -822,13 +848,14 @@ const BookReader = () => {
             content={rawContent}
             fontSize={fontSize}
             darkMode={darkMode}
+            theme={theme}
             watermarkText={watermarkText}
           />
         </div>
       </article>
 
       {/* Book progress bar */}
-      <div className="mx-auto max-w-3xl px-6 pb-4">
+      <div className="mx-auto max-w-4xl px-6 pb-4">
         <div className="flex items-center gap-3 text-sm text-muted-foreground">
           <span className="shrink-0">Chapter {currentIndex + 1}/{totalChapters}</span>
           <Progress value={chapterProgress} className="flex-1 h-2" />
@@ -837,7 +864,7 @@ const BookReader = () => {
       </div>
 
       {/* Navigation */}
-      <div className="mx-auto max-w-3xl px-6 pb-10">
+      <div className="mx-auto max-w-4xl px-6 pb-10">
         <div className="flex justify-between">
           {prevChapter ? (
             <Button variant="outline" onClick={() => navigate(`/books/${slug}/${prevChapter.slug}`)}>

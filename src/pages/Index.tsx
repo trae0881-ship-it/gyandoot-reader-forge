@@ -202,7 +202,11 @@ const Index = () => {
     <Layout>
       <LiveReaderStrip />
       <RecentPurchasesToast />
+      <WhyWeExist />
+      <ReaderJourney />
+      <TrustPillars />
       {/* ─── 1. HERO — calm publishing-house entrance ─── */}
+
       <section className="relative overflow-hidden bg-primary py-20 md:py-28 lg:py-32">
         <div
           aria-hidden

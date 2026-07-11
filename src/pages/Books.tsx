@@ -917,7 +917,9 @@ const Books = () => {
 
   return (
     <Layout>
+      <BooksJourneyIntro />
       <div
+
         style={{
           background: T.bg,
           color: T.text,

@@ -252,10 +252,58 @@ const AdminSettings = () => {
             {isLoading ? (
               <p className="text-sm text-muted-foreground">Loading...</p>
             ) : (
-              INVOICE_KEYS.map(({ key, label, placeholder, hint, multiline }) => (
+              INVOICE_KEYS.map(({ key, label, placeholder, hint, multiline, type }) => (
                 <div key={key} className="space-y-1.5">
                   <Label>{label}</Label>
-                  {multiline ? (
+                  {type === "logo" ? (
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <Input
+                          value={values[key] ?? ""}
+                          onChange={(e) => { setValues((prev) => ({ ...prev, [key]: e.target.value })); setLogoPreviewError(false); }}
+                          placeholder={placeholder}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={logoUploading}
+                          onClick={() => document.getElementById("invoice-logo-file")?.click()}
+                        >
+                          {logoUploading ? "Uploading…" : "Upload"}
+                        </Button>
+                      </div>
+                      <input
+                        id="invoice-logo-file"
+                        type="file"
+                        accept="image/png,image/jpeg,image/jpg,image/webp"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) handleLogoUpload(f);
+                          e.target.value = "";
+                        }}
+                      />
+                      {values[key] && (
+                        <div className="flex items-center gap-3 rounded-md border bg-muted/30 p-2">
+                          {logoPreviewError ? (
+                            <div className="h-16 w-16 flex items-center justify-center rounded bg-destructive/10 text-destructive text-[10px] text-center px-1">
+                              Preview failed
+                            </div>
+                          ) : (
+                            <img
+                              src={values[key]}
+                              alt="Invoice logo preview"
+                              className="h-16 w-16 object-contain rounded bg-white"
+                              onError={() => setLogoPreviewError(true)}
+                            />
+                          )}
+                          <div className="flex-1 text-xs text-muted-foreground truncate">{values[key]}</div>
+                          <Button type="button" variant="ghost" size="sm" onClick={clearLogo}>Remove</Button>
+                        </div>
+                      )}
+                    </div>
+                  ) : multiline ? (
                     <Textarea
                       value={values[key] ?? ""}
                       onChange={(e) => setValues((prev) => ({ ...prev, [key]: e.target.value }))}

@@ -325,10 +325,16 @@ const BookDetail = () => {
   useSEO({
     title: bookMetaTitle,
     description: bookDescription,
-    canonical: book ? `/books/${book.slug}` : undefined,
+    // Always self-reference: even for a not-found slug, the canonical must
+    // point at this URL (never fall back to the root canonical baked into
+    // index.html) so unknown-slug pages aren't attributed to the homepage.
+    canonical: slug ? `/books/${slug}` : undefined,
     ogImage: book?.cover_url ?? undefined,
     ogType: "book",
     jsonLd: book ? [bookJsonLd!, faqJsonLd!, breadcrumbJsonLd!] : undefined,
+    // Book was fetched and not found → noindex the page so search engines
+    // don't index a "Book not found" shell as if it were real content.
+    noindex: !isLoading && !book,
   });
 
 

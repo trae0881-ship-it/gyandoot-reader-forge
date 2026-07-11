@@ -93,26 +93,32 @@ const Articles = () => {
             <div className="grid gap-8 md:gap-10 md:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
 
               {filtered.map((post) => (
-                <Link key={post.id} to={`/articles/${post.slug}`}>
-                  <Card className="group h-full transition-shadow hover:shadow-lg">
+                <Link key={post.id} to={`/articles/${post.slug}`} className="group block">
+                  <article className="h-full rounded-2xl overflow-hidden bg-card border border-border/70 shadow-card transition-all duration-500 group-hover:-translate-y-1 group-hover:shadow-lift">
                     {post.cover_url && (
-                      <div className="aspect-video overflow-hidden">
-                        <img src={post.cover_url} alt={post.title} className="h-full w-full object-cover" loading="lazy" />
+                      <div className="aspect-[16/10] overflow-hidden">
+                        <img src={post.cover_url} alt={post.title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" loading="lazy" />
                       </div>
                     )}
-                    <CardContent className="p-5">
-                      <span className="text-xs font-medium uppercase tracking-wider text-primary">{post.post_type}</span>
-                      <h2 className="mt-1 font-serif text-lg font-semibold group-hover:text-primary transition-colors line-clamp-2">
+                    <div className="p-7 md:p-8">
+                      <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-primary">{post.post_type}</span>
+                      <h2 className="mt-3 font-serif text-xl md:text-2xl font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug">
                         {post.title}
                       </h2>
-                      {post.excerpt && <p className="mt-2 text-sm text-muted-foreground line-clamp-3" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.excerpt) }} />}
-                      <p className="mt-3 text-xs text-muted-foreground">
+                      {post.excerpt && (
+                        <p
+                          className="mt-4 text-[15px] text-muted-foreground line-clamp-3 leading-[1.8]"
+                          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.excerpt) }}
+                        />
+                      )}
+                      <p className="mt-6 text-xs uppercase tracking-[0.14em] text-muted-foreground">
                         {new Date(post.created_at).toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" })}
                       </p>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </article>
                 </Link>
               ))}
+
             </div>
           ) : (
             <div className="py-20 text-center">

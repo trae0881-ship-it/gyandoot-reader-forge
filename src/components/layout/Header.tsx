@@ -14,7 +14,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import LocaleSwitcher from "@/components/LocaleSwitcher";
 
 const Header = () => {
   const { user, isAdmin, signOut } = useAuth();
@@ -130,9 +129,6 @@ const Header = () => {
               <Search className="h-4 w-4" />
             </Button>
           )}
-          <LocaleSwitcher />
-
-
           {whatsappLink && (
             <a
               href={whatsappLink}
@@ -200,8 +196,6 @@ const Header = () => {
                 <Search className="h-4 w-4" />
               </Button>
             </form>
-            <div className="pt-2 border-t"><LocaleSwitcher /></div>
-
             {whatsappLink && (
               <a
                 href={whatsappLink}

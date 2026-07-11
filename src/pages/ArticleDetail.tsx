@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import useSEO from "@/hooks/useSEO";
 import Layout from "@/components/layout/Layout";
 import { Loader2, ChevronLeft, ChevronRight, Home } from "lucide-react";
+import { ContinueReadingInvite } from "@/components/BrandExperience";
+
 
 // Hindi + English stopwords to strip when building keyword set
 const STOPWORDS = new Set([

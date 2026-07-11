@@ -218,7 +218,6 @@ const BookCard = ({
   book,
   onQuick,
   onWish,
-  onCart,
   onRecent,
   wished,
   size = "default",
@@ -226,7 +225,6 @@ const BookCard = ({
   book: BookRow;
   onQuick: (b: BookRow) => void;
   onWish: (id: string) => void;
-  onCart: (b: BookRow) => void;
   onRecent: (b: BookRow) => void;
   wished: boolean;
   size?: "default" | "featured";
@@ -424,29 +422,18 @@ const BookCard = ({
         </p>
 
         <div className="mt-auto pt-6">
-          <div className="grid grid-cols-2 gap-3 opacity-100 transition-opacity duration-300 md:opacity-90 md:group-hover:opacity-100">
-            <button
-              type="button"
-              onClick={() => onCart(book)}
-              className="flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border py-3 text-[13px] font-semibold transition-colors"
-              style={{ borderColor: T.border, color: T.text, background: "#fff" }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "#F9FAFB")}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "#fff")}
-            >
-              <ShoppingCart className="h-4 w-4" /> Add
-            </button>
-            <Link
-              to={`/books/${book.slug}`}
-              onClick={() => onRecent(book)}
-              className="flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl py-3 text-[13px] font-semibold transition-colors"
-              style={{ background: T.primary, color: "#fff" }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = T.primaryDark)}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = T.primary)}
-            >
-              <Zap className="h-4 w-4" /> Buy Now
-            </Link>
-          </div>
+          <Link
+            to={`/books/${book.slug}`}
+            onClick={() => onRecent(book)}
+            className="flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl py-3 text-[13px] font-semibold transition-colors"
+            style={{ background: T.primary, color: "#fff" }}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = T.primaryDark)}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = T.primary)}
+          >
+            <Zap className="h-4 w-4" /> Buy Now
+          </Link>
         </div>
+
 
       </div>
     </article>
@@ -542,11 +529,9 @@ const BookCarousel = ({
 const QuickView = ({
   book,
   onClose,
-  onCart,
 }: {
   book: BookRow | null;
   onClose: () => void;
-  onCart: (b: BookRow) => void;
 }) => {
   useEffect(() => {
     if (!book) return;
@@ -628,14 +613,7 @@ const QuickView = ({
           </div>
 
           <div className="mt-6 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => onCart(book)}
-              className="flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold"
-              style={{ borderColor: T.border, color: T.text }}
-            >
-              <ShoppingCart className="h-4 w-4" /> Add to Cart
-            </button>
+
             <Link
               to={`/books/${book.slug}`}
               className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold"

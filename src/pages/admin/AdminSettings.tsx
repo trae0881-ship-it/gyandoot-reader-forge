@@ -29,19 +29,26 @@ const BOOK_KEYS = [
   { key: "book_free_chapter_note", label: "Free Chapter Note (Book Detail)", placeholder: "पहला अध्याय 100% मुफ़्त है — Login कीजिए और पढ़कर देखिए, पसंद आए तभी खरीदिए।", hint: "Paid book के Table of Contents के ऊपर दिखता है। खाली = hide.", multiline: true },
 ];
 
-const INVOICE_KEYS: { key: string; label: string; placeholder: string; hint: string; multiline?: boolean }[] = [
+const INVOICE_KEYS: { key: string; label: string; placeholder: string; hint: string; multiline?: boolean; type?: "text" | "logo" }[] = [
   { key: "invoice_business_name", label: "Business Name", placeholder: "GyandootNova", hint: "Invoice header में दिखेगा" },
   { key: "invoice_business_address", label: "Business Address", placeholder: "123 Ashram Road, Varanasi, UP 221001, India", hint: "Multi-line allowed", multiline: true },
-  { key: "invoice_gstin", label: "GSTIN", placeholder: "22AAAAA0000A1Z5", hint: "अगर हो तो — नहीं तो खाली छोड़ें" },
-  { key: "invoice_pan", label: "PAN", placeholder: "AAAPL1234C", hint: "Optional" },
-  { key: "invoice_logo_url", label: "Logo URL", placeholder: "https://gyandootnova.in/logo.png", hint: "Public HTTPS PNG/JPG URL — invoice top-right corner में दिखेगा" },
+  { key: "invoice_gstin", label: "GSTIN", placeholder: "22AAAAA0000A1Z5", hint: "15 chars — regex validated. खाली छोड़ दें अगर registered नहीं हैं।" },
+  { key: "invoice_pan", label: "PAN", placeholder: "AAAPL1234C", hint: "10 chars — regex validated. Optional." },
+  { key: "invoice_logo_url", label: "Logo", placeholder: "https://gyandootnova.in/logo.png", hint: "PNG/JPG/WEBP · max 2 MB · 512×512 recommended. Upload या public HTTPS URL paste करें।", type: "logo" },
   { key: "invoice_footer_note", label: "Footer Note", placeholder: "Thank you for supporting original scriptures.", hint: "Invoice के नीचे दिखेगा", multiline: true },
 ];
+
+const GSTIN_RE = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+const PAN_RE = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
+const LOGO_ALLOWED = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+const LOGO_MAX_BYTES = 2 * 1024 * 1024;
 
 const AdminSettings = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [values, setValues] = useState<Record<string, string>>({});
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [logoPreviewError, setLogoPreviewError] = useState(false);
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ["admin-settings"],
@@ -79,9 +86,63 @@ const AdminSettings = () => {
     },
   });
 
+  const validateInvoiceFields = (): string | null => {
+    const gstin = (values.invoice_gstin ?? "").trim().toUpperCase();
+    if (gstin && !GSTIN_RE.test(gstin)) {
+      return "GSTIN format invalid (expected 15 chars, e.g. 22AAAAA0000A1Z5). Leave blank if not registered.";
+    }
+    const pan = (values.invoice_pan ?? "").trim().toUpperCase();
+    if (pan && !PAN_RE.test(pan)) {
+      return "PAN format invalid (expected 10 chars, e.g. AAAPL1234C).";
+    }
+    const logo = (values.invoice_logo_url ?? "").trim();
+    if (logo && !/^https:\/\//i.test(logo)) {
+      return "Logo URL must start with https:// (or upload a file instead).";
+    }
+    return null;
+  };
+
   const handleSave = () => {
+    const err = validateInvoiceFields();
+    if (err) {
+      toast({ title: "Invalid invoice settings", description: err, variant: "destructive" });
+      return;
+    }
     const updates = [...SOCIAL_KEYS, ...URGENCY_KEYS, ...BOOK_KEYS, ...INVOICE_KEYS].map(({ key }) => ({ key, value: values[key] ?? "" }));
     mutation.mutate(updates);
+  };
+
+  const handleLogoUpload = async (file: File) => {
+    if (!LOGO_ALLOWED.includes(file.type)) {
+      toast({ title: "Unsupported file type", description: "Please upload PNG, JPG, or WEBP.", variant: "destructive" });
+      return;
+    }
+    if (file.size > LOGO_MAX_BYTES) {
+      toast({ title: "File too large", description: "Logo must be 2 MB or smaller.", variant: "destructive" });
+      return;
+    }
+    try {
+      setLogoUploading(true);
+      setLogoPreviewError(false);
+      const ext = file.name.split(".").pop()?.toLowerCase() ?? "png";
+      const path = `invoice-logos/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("book-covers")
+        .upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
+      if (upErr) throw upErr;
+      const { data } = supabase.storage.from("book-covers").getPublicUrl(path);
+      setValues((prev) => ({ ...prev, invoice_logo_url: data.publicUrl }));
+      toast({ title: "Logo uploaded", description: "Click 'Save All Settings' to apply." });
+    } catch (e: any) {
+      toast({ title: "Upload failed", description: e?.message ?? "Try again", variant: "destructive" });
+    } finally {
+      setLogoUploading(false);
+    }
+  };
+
+  const clearLogo = () => {
+    setValues((prev) => ({ ...prev, invoice_logo_url: "" }));
+    setLogoPreviewError(false);
   };
 
   return (
@@ -191,10 +252,58 @@ const AdminSettings = () => {
             {isLoading ? (
               <p className="text-sm text-muted-foreground">Loading...</p>
             ) : (
-              INVOICE_KEYS.map(({ key, label, placeholder, hint, multiline }) => (
+              INVOICE_KEYS.map(({ key, label, placeholder, hint, multiline, type }) => (
                 <div key={key} className="space-y-1.5">
                   <Label>{label}</Label>
-                  {multiline ? (
+                  {type === "logo" ? (
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <Input
+                          value={values[key] ?? ""}
+                          onChange={(e) => { setValues((prev) => ({ ...prev, [key]: e.target.value })); setLogoPreviewError(false); }}
+                          placeholder={placeholder}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={logoUploading}
+                          onClick={() => document.getElementById("invoice-logo-file")?.click()}
+                        >
+                          {logoUploading ? "Uploading…" : "Upload"}
+                        </Button>
+                      </div>
+                      <input
+                        id="invoice-logo-file"
+                        type="file"
+                        accept="image/png,image/jpeg,image/jpg,image/webp"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) handleLogoUpload(f);
+                          e.target.value = "";
+                        }}
+                      />
+                      {values[key] && (
+                        <div className="flex items-center gap-3 rounded-md border bg-muted/30 p-2">
+                          {logoPreviewError ? (
+                            <div className="h-16 w-16 flex items-center justify-center rounded bg-destructive/10 text-destructive text-[10px] text-center px-1">
+                              Preview failed
+                            </div>
+                          ) : (
+                            <img
+                              src={values[key]}
+                              alt="Invoice logo preview"
+                              className="h-16 w-16 object-contain rounded bg-white"
+                              onError={() => setLogoPreviewError(true)}
+                            />
+                          )}
+                          <div className="flex-1 text-xs text-muted-foreground truncate">{values[key]}</div>
+                          <Button type="button" variant="ghost" size="sm" onClick={clearLogo}>Remove</Button>
+                        </div>
+                      )}
+                    </div>
+                  ) : multiline ? (
                     <Textarea
                       value={values[key] ?? ""}
                       onChange={(e) => setValues((prev) => ({ ...prev, [key]: e.target.value }))}

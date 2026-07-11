@@ -23,34 +23,55 @@ const Profile = () => {
   const { toast } = useToast();
 
   const [invoicePreview, setInvoicePreview] = useState<{
-    url: string;
     purchaseId: string;
     bookTitle?: string;
+    url: string | null;      // object URL for the PDF; null while loading
+    error: string | null;    // populated on failure
+    loading: boolean;
   } | null>(null);
   const [invoiceLoadingId, setInvoiceLoadingId] = useState<string | null>(null);
+  const [invoiceDownloading, setInvoiceDownloading] = useState(false);
 
   const fetchInvoiceBlob = async (purchaseId: string): Promise<Blob> => {
     const { data: sessionData } = await supabase.auth.getSession();
     const token = sessionData.session?.access_token;
-    if (!token) throw new Error("Please sign in again");
+    if (!token) throw new Error("Please sign in again to generate this invoice.");
     const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
     const url = `https://${projectId}.supabase.co/functions/v1/generate-invoice?purchase_id=${purchaseId}&preview=1`;
     const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-    if (!res.ok) throw new Error((await res.text()) || "Failed to generate invoice");
-    return res.blob();
+    if (!res.ok) {
+      // Server always returns JSON error bodies; fall back to raw text for safety.
+      const raw = await res.text();
+      let msg = raw;
+      try { msg = JSON.parse(raw)?.error ?? raw; } catch { /* not JSON */ }
+      throw new Error(msg || `Failed to generate invoice (HTTP ${res.status})`);
+    }
+    const blob = await res.blob();
+    if (blob.type && !blob.type.includes("pdf")) {
+      throw new Error("Server returned an unexpected file type.");
+    }
+    return blob;
   };
 
   const openInvoicePreview = async (purchaseId: string, bookTitle?: string) => {
+    // Open the modal in a loading state first so the user always sees feedback.
+    setInvoiceLoadingId(purchaseId);
+    setInvoicePreview({ purchaseId, bookTitle, url: null, error: null, loading: true });
     try {
-      setInvoiceLoadingId(purchaseId);
       const blob = await fetchInvoiceBlob(purchaseId);
       const objectUrl = URL.createObjectURL(blob);
-      setInvoicePreview({ url: objectUrl, purchaseId, bookTitle });
+      setInvoicePreview({ purchaseId, bookTitle, url: objectUrl, error: null, loading: false });
     } catch (e: any) {
-      toast({ title: "Invoice preview failed", description: e?.message ?? "Try again", variant: "destructive" });
+      const msg = e?.message ?? "Try again in a moment.";
+      setInvoicePreview({ purchaseId, bookTitle, url: null, error: msg, loading: false });
+      toast({ title: "Invoice preview failed", description: msg, variant: "destructive" });
     } finally {
       setInvoiceLoadingId(null);
     }
+  };
+
+  const retryInvoicePreview = () => {
+    if (invoicePreview) openInvoicePreview(invoicePreview.purchaseId, invoicePreview.bookTitle);
   };
 
   const closeInvoicePreview = () => {
@@ -67,10 +88,31 @@ const Profile = () => {
     a.remove();
   };
 
-  const downloadInvoiceFromPreview = () => {
+  /**
+   * Always-works download: if the preview already fetched a blob, reuse it.
+   * Otherwise (error state, or user opened the modal but the fetch hadn't
+   * completed) re-fetch a fresh PDF and download that directly.
+   */
+  const downloadInvoiceFromPreview = async () => {
     if (!invoicePreview) return;
-    triggerDownload(invoicePreview.url, invoicePreview.bookTitle);
+    if (invoicePreview.url) {
+      triggerDownload(invoicePreview.url, invoicePreview.bookTitle);
+      return;
+    }
+    try {
+      setInvoiceDownloading(true);
+      const blob = await fetchInvoiceBlob(invoicePreview.purchaseId);
+      const objectUrl = URL.createObjectURL(blob);
+      triggerDownload(objectUrl, invoicePreview.bookTitle);
+      // Keep the URL alive briefly so the browser can start the download.
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 30_000);
+    } catch (e: any) {
+      toast({ title: "Download failed", description: e?.message ?? "Try again", variant: "destructive" });
+    } finally {
+      setInvoiceDownloading(false);
+    }
   };
+
 
   useSEO({
     title: "My Profile — Purchased Books & Reading | GyandootNova",
@@ -622,8 +664,22 @@ const Profile = () => {
               )}
             </DialogTitle>
           </DialogHeader>
-          <div className="flex-1 min-h-0 bg-muted/30">
-            {invoicePreview && (
+          <div className="flex-1 min-h-0 bg-muted/30 relative">
+            {invoicePreview?.loading && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-muted-foreground">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="text-sm">Generating your invoice…</p>
+              </div>
+            )}
+            {invoicePreview?.error && !invoicePreview.loading && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center">
+                <FileText className="h-10 w-10 text-destructive/70" />
+                <p className="text-sm font-medium text-destructive">Couldn't load the invoice preview</p>
+                <p className="text-xs text-muted-foreground max-w-sm">{invoicePreview.error}</p>
+                <Button size="sm" variant="outline" onClick={retryInvoicePreview}>Retry</Button>
+              </div>
+            )}
+            {invoicePreview?.url && !invoicePreview.loading && !invoicePreview.error && (
               <iframe
                 title="Invoice preview"
                 src={invoicePreview.url}
@@ -633,8 +689,17 @@ const Profile = () => {
           </div>
           <DialogFooter className="px-6 py-3 border-t bg-background">
             <Button variant="outline" onClick={closeInvoicePreview}>Close</Button>
-            <Button onClick={downloadInvoiceFromPreview} className="gap-2">
-              <Download className="h-4 w-4" /> Download PDF
+            <Button
+              onClick={downloadInvoiceFromPreview}
+              disabled={invoiceDownloading || invoicePreview?.loading}
+              className="gap-2"
+            >
+              {invoiceDownloading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              Download PDF
             </Button>
           </DialogFooter>
         </DialogContent>

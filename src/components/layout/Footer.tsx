@@ -196,8 +196,15 @@ const Footer = () => {
             <Link to="/terms-conditions" className="hover:text-secondary transition-colors">Terms</Link>
             <Link to="/refund-policy" className="hover:text-secondary transition-colors">Refund</Link>
           </div>
-
         </div>
+        <p
+          className="mt-3 text-center text-[10px] font-mono text-background/30"
+          title={`Built ${__BUILT_AT__}`}
+          data-build-id={__BUILD_ID__}
+        >
+          build {String(__BUILD_ID__).slice(0, 12)} · {__BUILT_AT__}
+        </p>
+
 
       </div>
     </footer>

@@ -68,6 +68,10 @@ export default {
         ink: "hsl(var(--ink))",
         cream: "hsl(var(--cream))",
         surface: "hsl(var(--surface))",
+        royal: {
+          DEFAULT: "hsl(var(--royal-blue))",
+          glow: "hsl(var(--royal-blue-glow))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

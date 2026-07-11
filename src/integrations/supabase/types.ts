@@ -1271,47 +1271,56 @@ export type Database = {
         Row: {
           amount: number | null
           book_id: string
+          claim_token: string | null
           coupon_id: string | null
           coupon_redeemed_at: string | null
           created_at: string
           currency: string
+          guest_email: string | null
+          guest_name: string | null
           id: string
           razorpay_order_id: string | null
           razorpay_payment_id: string | null
           razorpay_signature: string | null
           referrer_id: string | null
           status: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           amount?: number | null
           book_id: string
+          claim_token?: string | null
           coupon_id?: string | null
           coupon_redeemed_at?: string | null
           created_at?: string
           currency?: string
+          guest_email?: string | null
+          guest_name?: string | null
           id?: string
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
           razorpay_signature?: string | null
           referrer_id?: string | null
           status?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           amount?: number | null
           book_id?: string
+          claim_token?: string | null
           coupon_id?: string | null
           coupon_redeemed_at?: string | null
           created_at?: string
           currency?: string
+          guest_email?: string | null
+          guest_name?: string | null
           id?: string
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
           razorpay_signature?: string | null
           referrer_id?: string | null
           status?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -2092,6 +2101,22 @@ export type Database = {
         Args: { _chapter_id: string }
         Returns: {
           content: string
+        }[]
+      }
+      get_guest_book_file_url: { Args: { _token: string }; Returns: string }
+      get_guest_purchase_by_token: {
+        Args: { _token: string }
+        Returns: {
+          amount: number
+          book_cover: string
+          book_id: string
+          book_slug: string
+          book_title: string
+          created_at: string
+          guest_email: string
+          guest_name: string
+          id: string
+          status: string
         }[]
       }
       get_user_donations: {

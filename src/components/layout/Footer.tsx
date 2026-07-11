@@ -52,15 +52,26 @@ const Footer = () => {
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-5">
           {/* Brand */}
           <div className="lg:col-span-1">
-            <Link to="/" className="inline-flex items-center mb-4" aria-label="GyandootNova homepage">
-              <img
-                src="/gyandootnova-logo.png"
-                alt="GyandootNova logo"
-                width={260}
-                height={60}
-                className="h-14 w-auto rounded-md"
-                loading="lazy"
-              />
+            <Link to="/" className="group flex items-center gap-3 mb-4" aria-label="GyandootNova homepage">
+              <div className="relative h-11 w-11 shrink-0">
+                <div className="absolute inset-0 rounded-full bg-gradient-gold opacity-70 blur-md" />
+                <img
+                  src="/logo.jpeg"
+                  alt="GyandootNova logo"
+                  width={44}
+                  height={44}
+                  loading="lazy"
+                  className="relative h-11 w-11 rounded-full object-cover shadow-elegant ring-2 ring-gold/60"
+                />
+              </div>
+              <span className="flex flex-col leading-tight">
+                <span className="font-serif text-xl tracking-tight text-cream">
+                  Gyandoot<span className="gradient-text-gold">Nova</span>
+                </span>
+                <span className="mt-0.5 font-sans text-[11px] font-medium tracking-[0.08em] text-cream/60">
+                  Modern Design <span className="opacity-50">•</span> Trust <span className="opacity-50">•</span> Usability
+                </span>
+              </span>
             </Link>
             <p className="text-sm text-background/70 leading-relaxed">
               A trusted publishing home where timeless scriptures, modern ideas and thoughtful readers come together.

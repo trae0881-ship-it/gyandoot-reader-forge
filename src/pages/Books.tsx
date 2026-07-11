@@ -521,7 +521,7 @@ const BookCarousel = ({
         </div>
         <div
           ref={ref}
-          className="scrollbar-hide -mx-4 flex gap-5 overflow-x-auto px-4 pb-3 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          className="scrollbar-hide -mx-4 flex gap-5 overflow-x-auto px-4 pb-3 snap-x snap-mandatory md:gap-6 lg:gap-8 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
         >
           {books.map((b) => (
             <div key={b.id} className="w-[240px] shrink-0 snap-start sm:w-[260px]">

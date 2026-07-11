@@ -55,8 +55,17 @@ const Articles = () => {
     <Layout>
       <section className="py-12">
         <div className="container">
+          {/* Breadcrumb — brand-entity link reinforcement in raw HTML */}
+          <nav aria-label="Breadcrumb" className="mb-5 text-sm text-muted-foreground">
+            <ol className="flex flex-wrap items-center gap-1.5">
+              <li><Link to="/" className="hover:text-primary transition-colors">GyandootNova</Link></li>
+              <li aria-hidden="true">/</li>
+              <li aria-current="page" className="text-foreground/80">Articles</li>
+            </ol>
+          </nav>
           <h1 className="font-serif text-4xl font-bold">Articles & Programs</h1>
           <p className="mt-2 text-muted-foreground">Spiritual insights and transformative programs</p>
+
 
           {/* Search */}
           <div className="mt-6 relative max-w-md">

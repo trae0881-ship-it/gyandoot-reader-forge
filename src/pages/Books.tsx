@@ -489,7 +489,8 @@ const BookCarousel = ({
   if (books.length === 0) return null;
   return (
     <Reveal>
-      <section className="pt-16 md:pt-24">
+      <section className="py-12 md:py-[72px] lg:py-24">
+
         <div className="mb-6 flex items-end justify-between gap-4">
           <div>
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ color: T.text, letterSpacing: "-0.02em" }}>

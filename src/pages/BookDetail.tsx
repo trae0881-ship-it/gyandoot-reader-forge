@@ -23,6 +23,8 @@ import BundleDecoy from "@/components/BundleDecoy";
 import RecentPurchasesToast from "@/components/RecentPurchasesToast";
 import { getReferrerId } from "@/hooks/useReferral";
 import { WhyBookMatters } from "@/components/BrandExperience";
+import { useCart } from "@/hooks/useCart";
+
 
 
 const BookDetail = () => {
@@ -32,6 +34,8 @@ const BookDetail = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { addItem: addToCart } = useCart();
+
   const [purchasing, setPurchasing] = useState(false);
   const [claimingFree, setClaimingFree] = useState(false);
   const { country, currency, rates, formatPrice } = useLocale();
@@ -513,6 +517,26 @@ const BookDetail = () => {
                       <><Unlock className="mr-2 h-4 w-4" /> Buy Now — ₹{appliedCoupon ? appliedCoupon.final_amount : book.price} (जीवनभर)</>
                     )}
                   </Button>
+
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="w-full text-base font-semibold"
+                    onClick={() => {
+                      addToCart({
+                        slug: book.slug,
+                        title: book.title,
+                        cover_url: book.cover_url,
+                        author: book.author,
+                        price: appliedCoupon ? appliedCoupon.final_amount : book.price,
+                        is_free: book.is_free,
+                      });
+                      toast({ title: "Added to cart", description: book.title });
+                    }}
+                  >
+                    <ShoppingCart className="mr-2 h-4 w-4" /> Add to cart
+                  </Button>
+
 
                   {/* Risk Reversal */}
                   <div className="flex items-start gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3">

@@ -51,6 +51,7 @@ import FaqStrip from "@/components/FaqStrip";
 import NewsletterCta from "@/components/NewsletterCta";
 import { useEffect, useRef, useState } from "react";
 import { WhyWeExist, ReaderJourney, TrustPillars } from "@/components/BrandExperience";
+import ContinueReadingSection from "@/components/ContinueReadingSection";
 
 
 /* ─── Animated Counter ─── */

@@ -10,7 +10,7 @@ import { createContext, useContext, useEffect, ReactNode, useCallback } from "re
  */
 
 export type Currency = "INR";
-export type Language = "hi";
+export type Language = "en-IN";
 
 interface LocaleContextValue {
   currency: Currency;
@@ -65,7 +65,7 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     purgeLegacyLocaleState();
     if (typeof document !== "undefined") {
-      document.documentElement.lang = "hi";
+      document.documentElement.lang = "en-IN";
       // Signal to translation tools / crawlers to leave the content alone.
       document.documentElement.setAttribute("translate", "no");
       document.documentElement.classList.add("notranslate");
@@ -83,7 +83,7 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
 
   const value: LocaleContextValue = {
     currency: "INR",
-    language: "hi",
+    language: "en-IN",
     setCurrency: noop,
     setLanguage: noop,
     formatPrice,

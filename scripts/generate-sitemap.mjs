@@ -46,7 +46,6 @@ const STATIC = [
   { path: "/texts/vedas", changefreq: "monthly", priority: "0.9" },
   { path: "/texts/upanishads", changefreq: "monthly", priority: "0.9" },
   { path: "/texts/rig-veda", changefreq: "monthly", priority: "0.9" },
-  { path: "/texts/rigveda", changefreq: "monthly", priority: "0.9" },
 
   // Hindi meaning + pillar
   { path: "/hindi/upanishad-meaning-in-hindi", changefreq: "monthly", priority: "0.85" },

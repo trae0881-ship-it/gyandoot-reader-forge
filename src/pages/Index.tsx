@@ -51,6 +51,7 @@ import FaqStrip from "@/components/FaqStrip";
 import NewsletterCta from "@/components/NewsletterCta";
 import { useEffect, useRef, useState } from "react";
 import { WhyWeExist, ReaderJourney, TrustPillars } from "@/components/BrandExperience";
+import { BrandPurpose, EmotionalConnection, CalmFeeling } from "@/components/BrandSoul";
 import ContinueReadingSection from "@/components/ContinueReadingSection";
 
 
@@ -206,9 +207,12 @@ const Index = () => {
       <LiveReaderStrip />
       <RecentPurchasesToast />
       <ContinueReadingSection />
+      <BrandPurpose />
       <WhyWeExist />
+      <EmotionalConnection />
       <ReaderJourney />
       <TrustPillars />
+      <CalmFeeling />
       {/* ─── 1. HERO — calm publishing-house entrance ─── */}
 
       <section className="relative overflow-hidden bg-primary py-20 md:py-28 lg:py-32">

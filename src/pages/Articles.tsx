@@ -16,7 +16,16 @@ const Articles = () => {
     title: "Spiritual Articles & Insights — GyandootNova (Gyandoot Nova)",
     description: "GyandootNova (Gyandoot Nova) — Read spiritual articles, discourses, and insights on Vishnu Sahasraname, Bhagwat Geeta, meditation & more.",
     canonical: "/articles",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "GyandootNova", item: "https://gyandootnova.in/" },
+        { "@type": "ListItem", position: 2, name: "Articles", item: "https://gyandootnova.in/articles" },
+      ],
+    },
   });
+
 
   const { data: posts, isLoading } = useQuery({
     queryKey: ["posts"],

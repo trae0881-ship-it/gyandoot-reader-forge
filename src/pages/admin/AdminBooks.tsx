@@ -16,6 +16,9 @@ import { Progress } from "@/components/ui/progress";
 import RichTextEditor from "@/components/RichTextEditor";
 import BulkBookUpload from "@/components/admin/BulkBookUpload";
 import UploadCsvButton from "@/components/admin/UploadCsvButton";
+import SourcesPermissionsCard from "@/components/admin/SourcesPermissionsCard";
+import OriginalityPanel from "@/components/admin/OriginalityPanel";
+import { Send } from "lucide-react";
 
 const slugify = (t: string) => {
   const slug = t
@@ -72,12 +75,17 @@ const ChapterEditor = ({ book, onBack }: { book: any; onBack: () => void }) => {
   const { toast } = useToast();
   const [view, setView] = useState<"list" | "form">("list");
   const [editing, setEditing] = useState<any>(null);
-  const [form, setForm] = useState({ title: "", content: "", chapter_number: 1, is_preview: true });
+  const [form, setForm] = useState({
+    title: "", content: "", chapter_number: 1, is_preview: true,
+    source_type: "original" as "original" | "translation" | "public_domain" | "licensed" | "quoted_excerpt",
+    source_citation: "",
+    permission_notes: "",
+  });
 
   const { data: chapters } = useQuery({
     queryKey: ["admin-chapters", book.id],
     queryFn: async () => {
-      const { data } = await supabase.from("book_chapters").select("id, book_id, title, slug, chapter_number, is_preview, created_at, updated_at").eq("book_id", book.id).order("chapter_number");
+      const { data } = await supabase.from("book_chapters").select("id, book_id, title, slug, chapter_number, is_preview, created_at, updated_at, approval_status, originality_score, originality_report, originality_checked_at, source_type, source_citation, permission_notes").eq("book_id", book.id).order("chapter_number");
       return data ?? [];
     },
   });
@@ -110,11 +118,23 @@ const ChapterEditor = ({ book, onBack }: { book: any; onBack: () => void }) => {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-chapters", book.id] }); toast({ title: "Chapter deleted" }); },
   });
 
-  const resetChapterForm = () => { setForm({ title: "", content: "", chapter_number: (chapters?.length ?? 0) + 1, is_preview: true }); setEditing(null); setView("list"); };
+  const resetChapterForm = () => {
+    setForm({
+      title: "", content: "", chapter_number: (chapters?.length ?? 0) + 1, is_preview: true,
+      source_type: "original", source_citation: "", permission_notes: "",
+    });
+    setEditing(null);
+    setView("list");
+  };
 
   const openEdit = async (ch: any) => {
     setEditing(ch);
-    setForm({ title: ch.title, content: "", chapter_number: ch.chapter_number, is_preview: ch.is_preview });
+    setForm({
+      title: ch.title, content: "", chapter_number: ch.chapter_number, is_preview: ch.is_preview,
+      source_type: (ch.source_type ?? "original") as any,
+      source_citation: ch.source_citation ?? "",
+      permission_notes: ch.permission_notes ?? "",
+    });
     setView("form");
     const { data, error } = await supabase.rpc("admin_get_chapter_full", { _chapter_id: ch.id });
     if (error) { toast({ title: "Failed to load chapter content", description: error.message, variant: "destructive" }); return; }
@@ -124,7 +144,10 @@ const ChapterEditor = ({ book, onBack }: { book: any; onBack: () => void }) => {
 
   const openNew = () => {
     setEditing(null);
-    setForm({ title: "", content: "", chapter_number: (chapters?.length ?? 0) + 1, is_preview: true });
+    setForm({
+      title: "", content: "", chapter_number: (chapters?.length ?? 0) + 1, is_preview: true,
+      source_type: "original", source_citation: "", permission_notes: "",
+    });
     setView("form");
   };
 

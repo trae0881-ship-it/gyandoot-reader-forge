@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import {
   ChevronLeft, ChevronRight, ArrowLeft, Sun, Moon, Minus, Plus,
-  BookOpen, Bookmark, BookmarkCheck, StickyNote, X, Save, Highlighter, Trash2, List, Check,
+  BookOpen, Bookmark, BookmarkCheck, StickyNote, X, Save, Highlighter, Trash2, List, Check, Palette,
 } from "lucide-react";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";

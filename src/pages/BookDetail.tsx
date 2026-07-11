@@ -278,14 +278,28 @@ const BookDetail = () => {
     ]
   } : undefined;
 
+  // BreadcrumbList links this book detail page back to Home ("GyandootNova")
+  // and the /books listing — helps SERP breadcrumbs and reinforces the brand
+  // entity across the site.
+  const breadcrumbJsonLd = book ? {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "GyandootNova", "item": "https://gyandootnova.in/" },
+      { "@type": "ListItem", "position": 2, "name": "Books", "item": "https://gyandootnova.in/books" },
+      { "@type": "ListItem", "position": 3, "name": book.title, "item": `https://gyandootnova.in/books/${book.slug}` },
+    ],
+  } : undefined;
+
   useSEO({
     title: bookMetaTitle,
     description: bookDescription,
     canonical: book ? `/books/${book.slug}` : undefined,
     ogImage: book?.cover_url ?? undefined,
     ogType: "book",
-    jsonLd: bookJsonLd && faqJsonLd ? [bookJsonLd, faqJsonLd] : bookJsonLd,
+    jsonLd: book ? [bookJsonLd!, faqJsonLd!, breadcrumbJsonLd!] : undefined,
   });
+
 
   if (isLoading) {
     return (
@@ -322,7 +336,18 @@ const BookDetail = () => {
       <RecentPurchasesToast />
       <section className="py-12">
         <div className="container">
+          {/* Breadcrumb — SEO + brand-entity link back to GyandootNova. */}
+          <nav aria-label="Breadcrumb" className="mb-5 text-sm text-muted-foreground">
+            <ol className="flex flex-wrap items-center gap-1.5">
+              <li><Link to="/" className="hover:text-primary transition-colors">GyandootNova</Link></li>
+              <li aria-hidden="true">/</li>
+              <li><Link to="/books" className="hover:text-primary transition-colors">Books</Link></li>
+              <li aria-hidden="true">/</li>
+              <li className="text-foreground/80 truncate max-w-[60vw]">{book.title}</li>
+            </ol>
+          </nav>
           <div className="grid gap-8 md:grid-cols-3">
+
             <div className="md:col-span-1">
               <div className="aspect-[3/4] overflow-hidden rounded-lg bg-muted flex items-center justify-center">
                 {book.cover_url ? (

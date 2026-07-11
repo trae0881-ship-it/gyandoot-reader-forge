@@ -119,7 +119,7 @@ const ArticleDetail = () => {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://gyandootnova.in/" },
+      { "@type": "ListItem", "position": 1, "name": "GyandootNova", "item": "https://gyandootnova.in/" },
       { "@type": "ListItem", "position": 2, "name": "Articles", "item": "https://gyandootnova.in/articles" },
       { "@type": "ListItem", "position": 3, "name": post.title, "item": `https://gyandootnova.in/articles/${post.slug}` },
     ],
@@ -196,8 +196,9 @@ const ArticleDetail = () => {
             <ol className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
               <li>
                 <Link to="/" className="inline-flex items-center gap-1 hover:text-primary transition-colors">
-                  <Home className="h-3.5 w-3.5" /> Home
+                  <Home className="h-3.5 w-3.5" /> GyandootNova
                 </Link>
+
               </li>
               <li aria-hidden="true"><ChevronRight className="h-3.5 w-3.5" /></li>
               <li>

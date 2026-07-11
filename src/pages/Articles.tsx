@@ -33,7 +33,7 @@ const Articles = () => {
       const { data } = await supabase
         .from("posts")
         .select("*")
-        .eq("is_published", true)
+        .eq("is_published", true).eq("approval_status", "approved")
         .order("created_at", { ascending: false });
       return data ?? [];
     },

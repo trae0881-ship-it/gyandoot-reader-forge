@@ -661,7 +661,16 @@ const Books = () => {
     description:
       "GyandootNova — Hindu religious books online: Bhagavad Gita Hindi PDF, Geeta shlok, 4 Vedas, Upanishads, Ramayana, Hanuman Chalisa aur 50+ dharmik granth premium reader ke saath.",
     canonical: "/books",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "GyandootNova", item: "https://gyandootnova.in/" },
+        { "@type": "ListItem", position: 2, name: "Books", item: "https://gyandootnova.in/books" },
+      ],
+    },
   });
+
 
   // Page-local Inter font
   useEffect(() => {

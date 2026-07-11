@@ -157,7 +157,7 @@ export const EmotionalConnection = () => (
           >
             <div className="flex items-start justify-between">
               <Icon
-                className={dark ? "h-8 w-8 text-secondary" : "h-8 w-8 text-secondary"}
+                className={dark ? "h-14 w-14 text-secondary" : "h-14 w-14 text-secondary"}
                 strokeWidth={1.5}
               />
               <span

@@ -31,7 +31,7 @@ const getOrCreateMeta = (attr: string, value: string): HTMLMetaElement => {
   return el;
 };
 
-const useSEO = ({ title, description, canonical, ogImage, ogType, jsonLd, hreflang }: SEOProps) => {
+const useSEO = ({ title, description, canonical, ogImage, ogType, jsonLd, hreflang, noindex }: SEOProps) => {
   useEffect(() => {
     // Title
     document.title = title.includes("GyandootNova") ? title : `${title} | GyandootNova`;
@@ -40,6 +40,10 @@ const useSEO = ({ title, description, canonical, ogImage, ogType, jsonLd, hrefla
     if (description) {
       getOrCreateMeta("name", "description").content = description;
     }
+
+    // Robots — noindex premium/reader pages so book listings rank instead of chapters.
+    const robotsEl = getOrCreateMeta("name", "robots");
+    robotsEl.content = noindex ? "noindex, nofollow" : "index, follow";
 
     // Resolve og:image
     const rawImage = ogImage && ogImage.trim().length > 0 ? ogImage : DEFAULT_OG;

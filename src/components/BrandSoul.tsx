@@ -27,25 +27,25 @@ const bodyFont = { fontFamily: "'Manrope', 'Inter', sans-serif" };
 // I. Brand Purpose
 // ────────────────────────────────────────────────────────────
 export const BrandPurpose = () => (
-  <section className="relative bg-background py-24 md:py-32">
+  <section className="relative bg-background py-20 md:py-28">
     <div className="container max-w-6xl px-4">
       <div className="grid lg:grid-cols-12 gap-12 items-center">
         <div className="lg:col-span-7">
           <div className="flex items-center gap-4 mb-6">
-            <span className="text-[10px] font-bold uppercase tracking-[0.32em] text-secondary" style={bodyFont}>
+            <span className="text-xs font-extrabold uppercase tracking-[0.2em] text-primary" style={bodyFont}>
               Chapter I · Our Purpose
             </span>
           </div>
           <h2
-            className="text-4xl md:text-6xl lg:text-7xl leading-[1.05] text-foreground"
+            className="text-4xl md:text-6xl lg:text-7xl leading-[1.08] text-foreground"
             style={displayFont}
           >
             Preserving the{" "}
-            <span className="italic text-secondary">eternal echo</span> of the
+            <span className="italic text-primary">eternal echo</span> of the
             ancients — for today's reader.
           </h2>
           <p
-            className="mt-10 text-lg md:text-xl leading-[1.85] text-muted-foreground max-w-xl"
+            className="mt-8 text-lg md:text-xl leading-[1.8] text-foreground/75 max-w-xl font-medium"
             style={bodyFont}
           >
             We are a publishing brand, not another app. Every scripture carries
@@ -58,26 +58,26 @@ export const BrandPurpose = () => (
 
         <div className="lg:col-span-5 flex lg:justify-end">
           <div className="relative group">
-            <div className="absolute -inset-4 border border-secondary/30 translate-x-4 translate-y-4 transition-transform duration-500 group-hover:translate-x-2 group-hover:translate-y-2" />
-            <div className="relative w-64 h-80 md:w-72 md:h-96 bg-primary flex items-center justify-center overflow-hidden shadow-2xl">
-              <Sparkles className="absolute h-40 w-40 text-secondary/15" strokeWidth={0.5} />
-              <div className="relative text-center px-6">
+            <div className="absolute -inset-4 border-2 border-secondary/50 translate-x-4 translate-y-4 transition-transform duration-500 group-hover:translate-x-2 group-hover:translate-y-2" />
+            <div className="relative w-64 h-80 md:w-72 md:h-96 bg-primary flex items-center justify-center shadow-2xl ring-1 ring-primary/20">
+              <Sparkles className="absolute h-40 w-40 text-primary-foreground/10" strokeWidth={0.5} />
+              <div className="relative text-center px-7">
                 <p
-                  className="text-xs font-semibold uppercase tracking-[0.4em] text-secondary"
+                  className="text-sm font-extrabold uppercase tracking-[0.16em] text-primary-foreground"
                   style={bodyFont}
                 >
                   Volume One
                 </p>
-                <div className="h-px w-10 mx-auto my-5 bg-secondary" />
+                <div className="h-0.5 w-14 mx-auto my-6 bg-secondary" />
                 <p
-                  className="text-2xl md:text-[26px] italic text-white leading-snug"
+                  className="text-3xl md:text-[34px] italic text-primary-foreground leading-tight"
                   style={displayFont}
                 >
                   The unhurried library
                 </p>
-                <div className="h-px w-10 mx-auto my-5 bg-secondary" />
+                <div className="h-0.5 w-14 mx-auto my-6 bg-secondary" />
                 <p
-                  className="text-xs font-semibold uppercase tracking-[0.4em] text-secondary"
+                  className="text-sm font-extrabold uppercase tracking-[0.14em] text-primary-foreground"
                   style={bodyFont}
                 >
                   Est. GyandootNova
@@ -124,7 +124,7 @@ export const EmotionalConnection = () => (
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-16">
         <div>
           <span
-            className="text-[10px] font-bold uppercase tracking-[0.32em] text-secondary block mb-4"
+            className="text-xs font-extrabold uppercase tracking-[0.2em] text-primary block mb-4"
             style={bodyFont}
           >
             Chapter II · Emotional Connection
@@ -137,7 +137,7 @@ export const EmotionalConnection = () => (
           </h2>
         </div>
         <p
-          className="max-w-xs text-sm italic leading-relaxed text-muted-foreground"
+          className="max-w-xs text-base italic leading-relaxed text-foreground/70 font-medium"
           style={bodyFont}
         >
           Wisdom isn't read — it's felt, in the small spaces between the day.
@@ -162,8 +162,8 @@ export const EmotionalConnection = () => (
               />
               <span
                 className={[
-                  "text-[10px] font-bold uppercase tracking-[0.3em]",
-                  dark ? "text-secondary/70" : "text-muted-foreground/60",
+                  "text-xs font-extrabold uppercase tracking-[0.14em]",
+                  dark ? "text-primary-foreground/75" : "text-foreground/55",
                 ].join(" ")}
                 style={bodyFont}
               >
@@ -173,7 +173,7 @@ export const EmotionalConnection = () => (
             <div>
               <p
                 className={[
-                  "text-[10px] font-bold uppercase tracking-[0.28em] mb-3",
+                  "text-xs font-extrabold uppercase tracking-[0.14em] mb-3",
                   dark ? "text-secondary" : "text-primary",
                 ].join(" ")}
                 style={bodyFont}
@@ -191,8 +191,8 @@ export const EmotionalConnection = () => (
               </h3>
               <p
                 className={[
-                  "text-sm leading-relaxed",
-                  dark ? "text-primary-foreground/75" : "text-muted-foreground",
+                  "text-base leading-relaxed font-medium",
+                  dark ? "text-primary-foreground/85" : "text-foreground/70",
                 ].join(" ")}
                 style={bodyFont}
               >
@@ -242,7 +242,7 @@ export const CalmFeeling = () => (
 
     <div className="container relative max-w-5xl px-4 py-24 md:py-36 text-center">
       <span
-        className="text-[10px] font-bold uppercase tracking-[0.32em] text-secondary inline-flex items-center gap-3 mb-10"
+        className="text-xs font-extrabold uppercase tracking-[0.16em] text-secondary inline-flex items-center gap-3 mb-10"
         style={bodyFont}
       >
         <Leaf className="h-3 w-3" />
@@ -264,7 +264,7 @@ export const CalmFeeling = () => (
       </div>
 
       <p
-        className="mx-auto max-w-2xl text-lg md:text-xl leading-[1.9] text-primary-foreground/70"
+        className="mx-auto max-w-2xl text-lg md:text-xl leading-[1.85] text-primary-foreground/85 font-medium"
         style={bodyFont}
       >
         We built a reader that quietly steps back — so nothing stands between
@@ -284,7 +284,7 @@ export const CalmFeeling = () => (
               {p.title}
             </p>
             <p
-              className="mt-2 text-[10px] uppercase tracking-[0.28em] text-secondary/80"
+              className="mt-2 text-xs font-extrabold uppercase tracking-[0.12em] text-secondary"
               style={bodyFont}
             >
               {p.sub}

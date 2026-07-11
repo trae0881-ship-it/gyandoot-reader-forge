@@ -640,9 +640,9 @@ const QuickView = ({
 // ==============================
 const Books = () => {
   useSEO({
-    title: "Hindu Religious Books — Gita, Vedas, Ramayana PDF",
+    title: "Hindu Scriptures in English — Gita, Vedas, Ramayana Library",
     description:
-      "GyandootNova — Hindu religious books online: Bhagavad Gita Hindi PDF, Geeta shlok, 4 Vedas, Upanishads, Ramayana, Hanuman Chalisa aur 50+ dharmik granth premium reader ke saath.",
+      "GyandootNova — Hindu scriptures online: Bhagavad Gita, the 4 Vedas, Upanishads, Ramayana, Hanuman Chalisa and 50+ sacred texts in English with a premium reader.",
     canonical: "/books",
     jsonLd: {
       "@context": "https://schema.org",

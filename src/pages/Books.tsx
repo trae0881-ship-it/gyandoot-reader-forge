@@ -427,7 +427,10 @@ const BookCard = ({
         <div className="mt-auto pt-6">
           <Link
             to={`/books/${book.slug}`}
-            onClick={() => onRecent(book)}
+            onClick={() => {
+              onRecent(book);
+              trackSalesEvent("click_buy_now", { book_id: book.id, slug: book.slug, source: "books_list" });
+            }}
             className="flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl py-3 text-[13px] font-semibold transition-colors"
             style={{ background: T.primary, color: "#fff" }}
             onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = T.primaryDark)}
@@ -642,6 +645,7 @@ const QuickView = ({
 // Page
 // ==============================
 const Books = () => {
+  useTrackOnMount("view_books_list");
   useSEO({
     title: "Hindu Scriptures in English — Gita, Vedas, Ramayana Library",
     description:

@@ -1191,7 +1191,7 @@ const Books = () => {
               />
             ) : (
               <>
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div className="grid grid-cols-1 gap-x-5 gap-y-5 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-10 xl:grid-cols-4">
                   {paged.map((b, i) => (
                     <Reveal key={b.id} delay={Math.min(i, 8) * 40}>
                       {renderCard(b)}

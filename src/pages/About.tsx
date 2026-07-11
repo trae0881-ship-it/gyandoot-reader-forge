@@ -183,7 +183,63 @@ const About = () => {
           </div>
         </section>
 
+        {/* 5b. HAMARI TEEM — Our Team (honest, role-based) */}
+        <section className="container py-16 md:py-24">
+          <div className="max-w-2xl mx-auto text-center">
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-primary">
+              Hamari Teem · Our Team
+            </p>
+            <h2 className="mt-4 font-serif text-3xl md:text-4xl font-bold text-foreground leading-tight">
+              A small, dedicated circle behind every book
+            </h2>
+            <p className="mt-6 text-muted-foreground leading-[1.9]">
+              GyandootNova is a small effort — not a large corporation. What you read here has passed
+              through the care of a few committed hands, each of them attentive to a different part of
+              the work.
+            </p>
+          </div>
+
+          <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            {[
+              {
+                role: "Scripture reviewers",
+                text: "Readers of Sanskrit and Hindi who check every translation against the source text before it goes online.",
+              },
+              {
+                role: "Content curators",
+                text: "The quiet work of tracking down authentic manuscripts, editions and lineage-verified sources.",
+              },
+              {
+                role: "Design & reading experience",
+                text: "A small development effort focused on one goal — a calm, distraction-free reader that respects your time.",
+              },
+              {
+                role: "Reader support",
+                text: "Personal replies on WhatsApp and email — usually the founder himself, not a ticketing system.",
+              },
+            ].map((m) => (
+              <div
+                key={m.role}
+                className="rounded-2xl bg-card border border-border/70 p-8 shadow-card"
+              >
+                <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-primary">
+                  Role
+                </p>
+                <h3 className="mt-3 font-serif text-lg font-semibold text-foreground">
+                  {m.role}
+                </h3>
+                <p className="mt-4 text-sm text-muted-foreground leading-[1.8]">{m.text}</p>
+              </div>
+            ))}
+          </div>
+
+          <p className="mt-10 max-w-2xl mx-auto text-center text-sm text-muted-foreground italic">
+            We deliberately keep the team small so the reader stays at the centre of every decision.
+          </p>
+        </section>
+
         {/* 6. WHY GYANDOOTNOVA */}
+
         <section className="container py-16 md:py-24">
           <div className="max-w-2xl mx-auto text-center">
             <p className="text-xs font-medium uppercase tracking-[0.18em] text-primary">

@@ -86,9 +86,63 @@ const AdminSettings = () => {
     },
   });
 
+  const validateInvoiceFields = (): string | null => {
+    const gstin = (values.invoice_gstin ?? "").trim().toUpperCase();
+    if (gstin && !GSTIN_RE.test(gstin)) {
+      return "GSTIN format invalid (expected 15 chars, e.g. 22AAAAA0000A1Z5). Leave blank if not registered.";
+    }
+    const pan = (values.invoice_pan ?? "").trim().toUpperCase();
+    if (pan && !PAN_RE.test(pan)) {
+      return "PAN format invalid (expected 10 chars, e.g. AAAPL1234C).";
+    }
+    const logo = (values.invoice_logo_url ?? "").trim();
+    if (logo && !/^https:\/\//i.test(logo)) {
+      return "Logo URL must start with https:// (or upload a file instead).";
+    }
+    return null;
+  };
+
   const handleSave = () => {
+    const err = validateInvoiceFields();
+    if (err) {
+      toast({ title: "Invalid invoice settings", description: err, variant: "destructive" });
+      return;
+    }
     const updates = [...SOCIAL_KEYS, ...URGENCY_KEYS, ...BOOK_KEYS, ...INVOICE_KEYS].map(({ key }) => ({ key, value: values[key] ?? "" }));
     mutation.mutate(updates);
+  };
+
+  const handleLogoUpload = async (file: File) => {
+    if (!LOGO_ALLOWED.includes(file.type)) {
+      toast({ title: "Unsupported file type", description: "Please upload PNG, JPG, or WEBP.", variant: "destructive" });
+      return;
+    }
+    if (file.size > LOGO_MAX_BYTES) {
+      toast({ title: "File too large", description: "Logo must be 2 MB or smaller.", variant: "destructive" });
+      return;
+    }
+    try {
+      setLogoUploading(true);
+      setLogoPreviewError(false);
+      const ext = file.name.split(".").pop()?.toLowerCase() ?? "png";
+      const path = `invoice-logos/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("book-covers")
+        .upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
+      if (upErr) throw upErr;
+      const { data } = supabase.storage.from("book-covers").getPublicUrl(path);
+      setValues((prev) => ({ ...prev, invoice_logo_url: data.publicUrl }));
+      toast({ title: "Logo uploaded", description: "Click 'Save All Settings' to apply." });
+    } catch (e: any) {
+      toast({ title: "Upload failed", description: e?.message ?? "Try again", variant: "destructive" });
+    } finally {
+      setLogoUploading(false);
+    }
+  };
+
+  const clearLogo = () => {
+    setValues((prev) => ({ ...prev, invoice_logo_url: "" }));
+    setLogoPreviewError(false);
   };
 
   return (

@@ -4,73 +4,74 @@
 
 @layer base {
   :root {
-    /* Warm off-white #FCFCFA for calm long-reading atmosphere */
+    /* Premium publishing palette — #FCFCFA base, #111827 ink, #C77B30 copper accent */
     --background: 60 20% 98.4%;
-    --foreground: 220 13% 18%;
+    --foreground: 221 39% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 20 15% 12%;
+    --card-foreground: 221 39% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 20 15% 12%;
+    --popover-foreground: 221 39% 11%;
 
-    /* Deep temple maroon */
-    --primary: 358 65% 34%;
-    --primary-foreground: 40 40% 97%;
-    --primary-glow: 358 70% 46%;
+    /* Copper accent — refined publishing house */
+    --primary: 28 61% 49%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 28 75% 62%;
 
-    /* Antique gold */
-    --secondary: 40 72% 52%;
-    --secondary-foreground: 20 20% 12%;
+    /* Warm brass — subtle secondary detail */
+    --secondary: 40 55% 52%;
+    --secondary-foreground: 221 39% 11%;
 
     --muted: 40 20% 96%;
-    --muted-foreground: 220 9% 34%;
+    --muted-foreground: 220 9% 46%;
 
-    --accent: 40 72% 52%;
-    --accent-foreground: 20 20% 12%;
+    --accent: 28 61% 49%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 74% 46%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 30 20% 88%;
-    --input: 30 20% 88%;
-    --ring: 358 65% 34%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 28 61% 49%;
 
     --radius: 0.75rem;
 
-    /* Extended editorial tokens */
-    --gold: 40 72% 52%;
-    --gold-glow: 44 88% 66%;
-    --gold-deep: 36 65% 40%;
-    --ink: 20 20% 10%;
-    --cream: 40 40% 97%;
-    --surface: 40 25% 96%;
+    /* Extended editorial tokens — brass, ink, cream */
+    --gold: 40 55% 52%;
+    --gold-glow: 44 78% 66%;
+    --gold-deep: 36 55% 42%;
+    --ink: 221 39% 11%;
+    --cream: 60 20% 98.4%;
+    --surface: 40 25% 97%;
 
-    /* Gradients */
-    --gradient-hero: radial-gradient(ellipse at 20% 0%, hsl(358 60% 24% / 0.85) 0%, hsl(358 70% 15%) 55%, hsl(20 30% 8%) 100%);
+    /* Gradients — softer, publisher-calm */
+    --gradient-hero: radial-gradient(ellipse at 20% 0%, hsl(28 45% 22% / 0.9) 0%, hsl(221 30% 12%) 55%, hsl(221 39% 8%) 100%);
     --gradient-gold: linear-gradient(135deg, hsl(var(--gold)) 0%, hsl(var(--gold-glow)) 100%);
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-glow)) 100%);
     --gradient-surface: linear-gradient(180deg, hsl(var(--surface)) 0%, hsl(var(--background)) 100%);
-    --gradient-cream: linear-gradient(180deg, hsl(40 40% 98%) 0%, hsl(40 25% 94%) 100%);
+    --gradient-cream: linear-gradient(180deg, hsl(60 20% 99%) 0%, hsl(40 22% 96%) 100%);
 
-    /* Shadows */
-    --shadow-elegant: 0 24px 60px -28px hsl(var(--primary) / 0.35), 0 8px 20px -12px hsl(20 20% 20% / 0.12);
-    --shadow-gold: 0 12px 32px -14px hsl(var(--gold) / 0.55);
-    --shadow-card: 0 1px 2px hsl(20 20% 20% / 0.04), 0 8px 24px -12px hsl(20 20% 20% / 0.08);
-    --shadow-lift: 0 20px 50px -20px hsl(20 30% 15% / 0.25);
+    /* Shadows — quieter, more premium */
+    --shadow-elegant: 0 24px 60px -30px hsl(221 39% 11% / 0.22), 0 8px 20px -14px hsl(221 39% 11% / 0.08);
+    --shadow-gold: 0 12px 32px -16px hsl(var(--primary) / 0.35);
+    --shadow-card: 0 1px 2px hsl(221 39% 11% / 0.04), 0 6px 20px -12px hsl(221 39% 11% / 0.06);
+    --shadow-lift: 0 20px 50px -24px hsl(221 39% 11% / 0.18);
 
     /* Motion */
     --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 
-    --sidebar-background: 40 30% 98%;
-    --sidebar-foreground: 20 15% 12%;
-    --sidebar-primary: 358 65% 34%;
-    --sidebar-primary-foreground: 40 40% 97%;
-    --sidebar-accent: 40 72% 52%;
-    --sidebar-accent-foreground: 20 20% 12%;
-    --sidebar-border: 30 20% 88%;
-    --sidebar-ring: 358 65% 34%;
+    --sidebar-background: 60 20% 98.4%;
+    --sidebar-foreground: 221 39% 11%;
+    --sidebar-primary: 28 61% 49%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 40 55% 52%;
+    --sidebar-accent-foreground: 221 39% 11%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 28 61% 49%;
   }
+
 
   .dark {
     --background: 20 20% 7%;
@@ -310,31 +311,33 @@
 
   body {
     @apply bg-background text-foreground font-sans;
-    font-family: 'Inter', 'Noto Serif Devanagari', 'Work Sans', system-ui, sans-serif;
-    font-size: 16px;
-    line-height: 1.7;
+    font-family: 'Inter', 'Manrope', 'Noto Serif Devanagari', system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.8;
     color: #111827;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   p {
-    line-height: 1.7;
-    color: #4B5563;
+    line-height: 1.8;
+    color: #374151;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Instrument Serif', 'Noto Serif Devanagari', 'Playfair Display', Georgia, serif;
-    letter-spacing: -0.01em;
-    font-weight: 600;
-    line-height: 1.25;
+    font-family: 'Manrope', 'Inter', 'Noto Serif Devanagari', system-ui, sans-serif;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+    line-height: 1.2;
     color: #111827;
   }
 
+
   /* Devanagari script preference for Hindi content */
   :lang(hi), [lang="hi"] {
-    font-family: 'Noto Serif Devanagari', 'Inter', serif;
+    font-family: 'Noto Serif Devanagari', 'Manrope', 'Inter', serif;
   }
+
 
 
   ::selection {

@@ -22,6 +22,8 @@ import AuthorCredibility from "@/components/AuthorCredibility";
 import BundleDecoy from "@/components/BundleDecoy";
 import RecentPurchasesToast from "@/components/RecentPurchasesToast";
 import { getReferrerId } from "@/hooks/useReferral";
+import { WhyBookMatters } from "@/components/BrandExperience";
+
 
 const BookDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -804,7 +806,10 @@ const BookDetail = () => {
           </Button>
         </div>
       )}
+      <WhyBookMatters title={book?.title} />
     </Layout>
+
+
   );
 };
 

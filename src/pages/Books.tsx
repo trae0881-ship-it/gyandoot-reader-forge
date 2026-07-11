@@ -14,6 +14,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { BooksJourneyIntro } from "@/components/BrandExperience";
+
 import {
   BookOpen,
   Search,
@@ -917,7 +919,9 @@ const Books = () => {
 
   return (
     <Layout>
+      <BooksJourneyIntro />
       <div
+
         style={{
           background: T.bg,
           color: T.text,

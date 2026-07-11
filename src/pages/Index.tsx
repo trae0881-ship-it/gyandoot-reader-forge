@@ -26,6 +26,18 @@ import {
   Ban,
   Cloud,
   Gift,
+  Landmark,
+  ScrollText,
+  Flame,
+  Music2,
+  Feather,
+  Baby,
+  Phone,
+  Mail,
+  MapPin,
+  MessageCircle,
+  Bookmark,
+  GraduationCap,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";

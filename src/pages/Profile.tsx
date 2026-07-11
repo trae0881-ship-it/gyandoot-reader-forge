@@ -77,9 +77,39 @@ const Profile = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from("reading_progress")
-        .select("book_id, chapter_number, scroll_percent, updated_at")
-        .eq("user_id", user!.id);
-      return data ?? [];
+        .select("book_id, chapter_id, chapter_number, scroll_percent, updated_at")
+        .eq("user_id", user!.id)
+        .order("updated_at", { ascending: false });
+      const rows = data ?? [];
+      if (!rows.length) return [] as any[];
+
+      const chapterIds = [...new Set(rows.map((r: any) => r.chapter_id).filter(Boolean))];
+      const bookIds = [...new Set(rows.map((r: any) => r.book_id))];
+
+      const [{ data: chapters }, { data: counts }] = await Promise.all([
+        chapterIds.length
+          ? supabase.from("book_chapters").select("id, slug, title, book_id").in("id", chapterIds)
+          : Promise.resolve({ data: [] as any[] }),
+        supabase.from("book_chapters").select("book_id").in("book_id", bookIds),
+      ]);
+
+      const totalByBook = new Map<string, number>();
+      (counts ?? []).forEach((c: any) => {
+        totalByBook.set(c.book_id, (totalByBook.get(c.book_id) ?? 0) + 1);
+      });
+
+      return rows.map((r: any) => {
+        const ch = (chapters ?? []).find((c: any) => c.id === r.chapter_id);
+        const total = totalByBook.get(r.book_id) ?? 0;
+        const chapterPct = total > 0 ? ((r.chapter_number - 1) / total) * 100 + (r.scroll_percent ?? 0) / total : 0;
+        return {
+          ...r,
+          chapter_slug: ch?.slug ?? null,
+          chapter_title: ch?.title ?? null,
+          total_chapters: total,
+          overall_percent: Math.min(100, Math.round(chapterPct)),
+        };
+      });
     },
   });
 

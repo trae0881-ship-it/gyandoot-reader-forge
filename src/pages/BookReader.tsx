@@ -74,10 +74,25 @@ const BookReader = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Reader settings
-  const [fontSize, setFontSize] = useState(18);
-  const [darkMode, setDarkMode] = useState(false);
+  // Reader settings (persisted)
+  type ReaderTheme = "light" | "sepia" | "dark";
+  const [fontSize, setFontSize] = useState<number>(() => {
+    if (typeof window === "undefined") return 19;
+    const v = parseInt(localStorage.getItem("reader:fontSize") ?? "");
+    return Number.isFinite(v) && v >= 14 && v <= 32 ? v : 19;
+  });
+  const [theme, setTheme] = useState<ReaderTheme>(() => {
+    if (typeof window === "undefined") return "light";
+    const v = localStorage.getItem("reader:theme") as ReaderTheme | null;
+    return v === "sepia" || v === "dark" || v === "light" ? v : "light";
+  });
+  const darkMode = theme === "dark";
   const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => { localStorage.setItem("reader:fontSize", String(fontSize)); }, [fontSize]);
+  useEffect(() => { localStorage.setItem("reader:theme", theme); }, [theme]);
+
+  const cycleTheme = () => setTheme((t) => (t === "light" ? "sepia" : t === "sepia" ? "dark" : "light"));
 
   // Panels
   const [showNotes, setShowNotes] = useState(false);

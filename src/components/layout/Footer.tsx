@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { BookOpen, Mail, Facebook, Linkedin, Youtube, Instagram, MessageCircle } from "lucide-react";
+import { Mail, Facebook, Linkedin, Youtube, Instagram, MessageCircle } from "lucide-react";
+import brandLogo from "@/assets/gyandootnova-logo.png.asset.json";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -51,9 +52,15 @@ const Footer = () => {
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-5">
           {/* Brand */}
           <div className="lg:col-span-1">
-            <Link to="/" className="flex items-center gap-2 mb-4" aria-label="Homepage">
-              <BookOpen className="h-6 w-6 text-gold" />
-              <span className="font-serif text-2xl">Gyandoot<span className="gradient-text-gold">Nova</span></span>
+            <Link to="/" className="inline-flex items-center mb-4" aria-label="GyandootNova homepage">
+              <img
+                src={brandLogo.url}
+                alt="GyandootNova logo"
+                width={200}
+                height={44}
+                className="h-10 w-auto"
+                loading="lazy"
+              />
             </Link>
             <p className="text-sm text-background/70 leading-relaxed">
               A trusted publishing home where timeless scriptures, modern ideas and thoughtful readers come together.

@@ -60,7 +60,7 @@ export const BrandPurpose = () => (
           <div className="relative group">
             <div className="absolute -inset-4 border-2 border-secondary/50 translate-x-4 translate-y-4 transition-transform duration-500 group-hover:translate-x-2 group-hover:translate-y-2" />
             <div className="relative w-64 h-80 md:w-72 md:h-96 bg-primary flex items-center justify-center shadow-2xl ring-1 ring-primary/20">
-              <Sparkles className="absolute h-40 w-40 text-primary-foreground/10" strokeWidth={0.5} />
+              <Sparkles className="absolute h-64 w-64 text-primary-foreground/15" strokeWidth={0.5} />
               <div className="relative text-center px-7">
                 <p
                   className="text-sm font-extrabold uppercase tracking-[0.16em] text-primary-foreground"

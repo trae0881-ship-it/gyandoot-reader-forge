@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
     const probes = await probeAll();
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const { data: logs } = await sb.from("seo_agent_logs")
-      .select("status, action, content_score, seo_score, error").gte("created_at", since);
+      .select("status, action, content_score, seo_score, error").gte("run_at", since);
     const rows = logs || [];
     const created = rows.filter((r: any) => r.status !== "error" && r.action === "created").length;
     const updated = rows.filter((r: any) => r.status !== "error" && r.action === "updated").length;

@@ -123,6 +123,8 @@ const AppContent = () => {
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/our-story" element={<OurStory />} />
+                <Route path="/story" element={<Navigate to="/our-story" replace />} />
                 <Route path="/services" element={<Services />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/faq" element={<FAQ />} />

@@ -1,9 +1,9 @@
 // Typed JSON-LD schema builders. Keep these output-only — no DOM, no React.
 // Consumers pass the returned object to useSEO({ jsonLd }).
 
-const SITE = "https://gyandootnova.in";
-const ORG_NAME = "GyandootNova";
-const ORG_LOGO = `${SITE}/og-default.jpg`;
+export const SITE = "https://gyandootnova.in";
+export const ORG_NAME = "GyandootNova";
+export const ORG_LOGO = `${SITE}/og-default.jpg`;
 
 export interface FAQItem {
   question: string;

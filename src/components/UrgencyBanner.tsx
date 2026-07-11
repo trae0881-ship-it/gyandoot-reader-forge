@@ -33,8 +33,12 @@ export default function UrgencyBanner() {
 
 
   useEffect(() => {
+    // Skip entirely during prerender (Playwright sets navigator.webdriver).
+    // This prevents the countdown from being baked into static HTML.
+    if (typeof navigator !== "undefined" && navigator.webdriver) return;
     setMounted(true);
     if (sessionStorage.getItem("gn_urgency_closed")) setClosed(true);
+
 
     (async () => {
       const { data } = await supabase

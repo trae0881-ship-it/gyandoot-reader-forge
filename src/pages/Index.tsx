@@ -637,21 +637,13 @@ const Index = () => {
                         <span className="inline-block rounded-md bg-primary/95 text-primary-foreground px-2 py-0.5 text-[10px] font-bold shadow">LIFETIME</span>
                       </div>
                     )}
-                    <div className="aspect-[3/4] bg-muted flex items-center justify-center overflow-hidden">
-                      {book.cover_url ? (
-                        <img
-                          src={book.cover_url}
-                          alt={book.title}
-                          width={300}
-                          height={400}
-                          decoding="async"
-                          loading="lazy"
-                          className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                        />
-
-                      ) : (
-                        <BookOpen className="h-12 w-12 text-muted-foreground/30" />
-                      )}
+                    <div className="aspect-[3/4] bg-gradient-to-br from-primary/90 via-primary to-primary/70 flex flex-col items-center justify-center overflow-hidden p-4 text-center relative">
+                      <div aria-hidden className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(circle at 30% 20%, hsl(var(--secondary)) 0%, transparent 55%)" }} />
+                      <BookOpen className="h-8 w-8 text-secondary/90 relative" />
+                      <div className="mt-3 h-px w-10 bg-secondary/60 relative" />
+                      <p className="mt-3 font-serif text-sm font-semibold text-primary-foreground line-clamp-3 leading-snug relative">
+                        {book.title}
+                      </p>
                     </div>
                     <CardContent className="p-3 md:p-4 flex flex-col flex-1">
                       <h3 className="font-serif font-semibold text-[15px] leading-snug text-card-foreground group-hover:text-primary transition-colors line-clamp-2 min-h-[2.6rem]">

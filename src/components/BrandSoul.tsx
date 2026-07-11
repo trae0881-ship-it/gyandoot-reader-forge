@@ -59,25 +59,25 @@ export const BrandPurpose = () => (
         <div className="lg:col-span-5 flex lg:justify-end">
           <div className="relative group">
             <div className="absolute -inset-4 border border-secondary/30 translate-x-4 translate-y-4 transition-transform duration-500 group-hover:translate-x-2 group-hover:translate-y-2" />
-            <div className="relative w-64 h-80 md:w-72 md:h-96 bg-primary flex items-center justify-center overflow-hidden">
-              <Sparkles className="absolute h-40 w-40 text-secondary/10" strokeWidth={0.5} />
+            <div className="relative w-64 h-80 md:w-72 md:h-96 bg-primary flex items-center justify-center overflow-hidden shadow-2xl">
+              <Sparkles className="absolute h-40 w-40 text-secondary/15" strokeWidth={0.5} />
               <div className="relative text-center px-6">
                 <p
-                  className="text-[10px] uppercase tracking-[0.4em] text-secondary/80"
+                  className="text-xs font-semibold uppercase tracking-[0.4em] text-secondary"
                   style={bodyFont}
                 >
                   Volume One
                 </p>
-                <div className="h-px w-8 mx-auto my-4 bg-secondary/40" />
+                <div className="h-px w-10 mx-auto my-5 bg-secondary" />
                 <p
-                  className="text-2xl italic text-primary-foreground/90 leading-snug"
+                  className="text-2xl md:text-[26px] italic text-white leading-snug"
                   style={displayFont}
                 >
                   The unhurried library
                 </p>
-                <div className="h-px w-8 mx-auto my-4 bg-secondary/40" />
+                <div className="h-px w-10 mx-auto my-5 bg-secondary" />
                 <p
-                  className="text-[10px] uppercase tracking-[0.4em] text-secondary/80"
+                  className="text-xs font-semibold uppercase tracking-[0.4em] text-secondary"
                   style={bodyFont}
                 >
                   Est. GyandootNova

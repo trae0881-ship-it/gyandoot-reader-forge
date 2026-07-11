@@ -659,8 +659,8 @@ const BookReader = () => {
       )}
 
       {/* Toolbar */}
-      <div className={`sticky top-0 z-40 border-b px-4 py-2 ${darkMode ? "border-gray-700 bg-gray-900/95" : "bg-background/95 backdrop-blur"}`}>
-        <div className="mx-auto flex max-w-3xl items-center justify-between">
+      <div className={`sticky top-0 z-40 border-b px-4 py-2 ${toolbarClass}`}>
+        <div className="mx-auto flex max-w-4xl items-center justify-between">
           <div className="flex items-center gap-1">
             {/* TOC button */}
             <Button

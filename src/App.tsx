@@ -42,6 +42,9 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Keywords = lazy(() => import("./pages/Keywords"));
 const Library = lazy(() => import("./pages/Library"));
+const OfferLanding = lazy(() => import("./pages/OfferLanding"));
+const ClaimPurchase = lazy(() => import("./pages/ClaimPurchase"));
+
 
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
@@ -65,6 +68,8 @@ const AdminIdentifiedVisitors = lazy(() => import("./pages/admin/AdminIdentified
 const AdminSeoCommand = lazy(() => import("./pages/admin/AdminSeoCommand"));
 const AdminTeam = lazy(() => import("./pages/admin/AdminTeam"));
 const AdminContentAudit = lazy(() => import("./pages/admin/AdminContentAudit"));
+const AdminSalesFunnel = lazy(() => import("./pages/admin/AdminSalesFunnel"));
+
 
 // SEO content — sacred text hubs, Hindi meaning pages, meditation guides
 const BhagavadGitaHub = lazy(() => import("./pages/texts/BhagavadGita"));
@@ -118,6 +123,9 @@ const AppContent = () => {
                 <Route path="/library" element={<Library />} />
 
                 <Route path="/books/:slug/read-file" element={<FileBookReader />} />
+                <Route path="/offer/:slug" element={<OfferLanding />} />
+                <Route path="/claim/:token" element={<ClaimPurchase />} />
+
                 <Route path="/books/:slug/:chapterSlug" element={<BookReader />} />
                 <Route path="/articles" element={<Articles />} />
                 <Route path="/articles/:slug" element={<ArticleDetail />} />
@@ -187,6 +195,8 @@ const AppContent = () => {
                   <Route path="team" element={<AdminTeam />} />
                   <Route path="content-audit" element={<AdminContentAudit />} />
                   <Route path="settings" element={<AdminSettings />} />
+                  <Route path="sales-funnel" element={<AdminSalesFunnel />} />
+
 
                 </Route>
                 <Route path="*" element={<NotFound />} />

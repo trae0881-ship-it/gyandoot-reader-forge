@@ -1,7 +1,7 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { BookOpen, FileText, Heart, ShoppingCart, LayoutDashboard, LogOut, ArrowLeft, Settings, Users, Tag, Share2, Sparkles, Code, KeyRound, Mail, Hash, FlaskConical, Globe2, UserCheck, Rocket, UsersRound, ShieldCheck } from "lucide-react";
+import { BookOpen, FileText, Heart, ShoppingCart, LayoutDashboard, LogOut, ArrowLeft, Settings, Users, Tag, Share2, Sparkles, Code, KeyRound, Mail, Hash, FlaskConical, Globe2, UserCheck, Rocket, UsersRound, ShieldCheck, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import AdminOtpGate, { isAdminOtpValid } from "@/components/admin/AdminOtpGate";
 
@@ -24,6 +24,8 @@ const navItems: NavItem[] = [
   { to: "/admin/coupons", label: "Coupons", icon: Tag, area: "payments" },
   { to: "/admin/donations", label: "Donations", icon: Heart, area: "payments" },
   { to: "/admin/purchases", label: "Purchases", icon: ShoppingCart, area: "payments" },
+  { to: "/admin/sales-funnel", label: "Sales Funnel", icon: TrendingUp, area: "payments" },
+
   { to: "/admin/enquiries", label: "Enquiries", icon: Mail, area: "users" },
   { to: "/admin/referrals", label: "Referrals", icon: Share2, area: "payments" },
   { to: "/admin/ai", label: "AI Assistant", icon: Sparkles, area: "isSuperAdmin" },

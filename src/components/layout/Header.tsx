@@ -23,6 +23,8 @@ const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
+  const { count: cartCount } = useCart();
+
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

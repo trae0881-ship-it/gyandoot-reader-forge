@@ -669,8 +669,8 @@ const BookReader = () => {
             <Button variant="ghost" size="icon" onClick={() => setFontSize((s) => Math.max(14, s - 2))}><Minus className="h-4 w-4" /></Button>
             <span className="text-xs w-6 text-center">{fontSize}</span>
             <Button variant="ghost" size="icon" onClick={() => setFontSize((s) => Math.min(28, s + 2))}><Plus className="h-4 w-4" /></Button>
-            <Button variant="ghost" size="icon" onClick={() => setDarkMode(!darkMode)}>
-              {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            <Button variant="ghost" size="icon" onClick={cycleTheme} title={`Theme: ${theme}`}>
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : theme === "sepia" ? <Palette className="h-4 w-4 text-amber-700" /> : <Moon className="h-4 w-4" />}
             </Button>
             {user && (
               <>

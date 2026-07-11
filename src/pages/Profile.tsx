@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,9 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import {
   BookOpen, Heart, User, Calendar, IndianRupee, PlayCircle,
-  Bookmark, StickyNote, Highlighter, Download, FileText, Share2, Copy
+  Bookmark, StickyNote, Highlighter, Download, FileText, Share2, Copy, Eye, Loader2
 } from "lucide-react";
 import useSEO from "@/hooks/useSEO";
 

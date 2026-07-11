@@ -42,6 +42,7 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Keywords = lazy(() => import("./pages/Keywords"));
 const Cart = lazy(() => import("./pages/Cart"));
+const Library = lazy(() => import("./pages/Library"));
 
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
@@ -116,6 +117,7 @@ const AppContent = () => {
                 <Route path="/books" element={<Books />} />
                 <Route path="/books/:slug" element={<BookDetail />} />
                 <Route path="/cart" element={<Cart />} />
+                <Route path="/library" element={<Library />} />
 
                 <Route path="/books/:slug/read-file" element={<FileBookReader />} />
                 <Route path="/books/:slug/:chapterSlug" element={<BookReader />} />

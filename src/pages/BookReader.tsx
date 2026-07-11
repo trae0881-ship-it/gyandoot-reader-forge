@@ -565,10 +565,21 @@ const BookReader = () => {
   const rawContent = (chapterContent ?? "") as string;
   const watermarkText = user?.email ? `GyandootNova • ${user.email}` : "GyandootNova • Protected";
 
+  const themeShellClass =
+    theme === "dark"
+      ? "bg-gray-900 text-gray-100"
+      : theme === "sepia"
+      ? "bg-[#f4ecd8] text-[#3a2a12]"
+      : "bg-background text-foreground";
+  const toolbarClass =
+    theme === "dark"
+      ? "border-gray-700 bg-gray-900/95"
+      : theme === "sepia"
+      ? "border-[#e6d9b8] bg-[#f4ecd8]/95 backdrop-blur"
+      : "bg-background/95 backdrop-blur";
+
   return (
-    <div
-      className={`min-h-screen transition-colors ${darkMode ? "bg-gray-900 text-gray-100" : "bg-background text-foreground"}`}
-    >
+    <div className={`min-h-screen transition-colors ${themeShellClass}`}>
       {/* Scroll progress bar */}
       <div className="fixed top-0 left-0 right-0 z-50">
         <Progress value={scrollProgress} className="h-1 rounded-none" />

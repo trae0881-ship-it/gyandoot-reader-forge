@@ -725,7 +725,7 @@ const BookReader = () => {
       {/* Notes panel */}
       {showNotes && user && (
         <div className={`sticky top-[49px] z-30 border-b px-4 py-3 ${darkMode ? "border-gray-700 bg-gray-800" : "bg-muted/60 backdrop-blur"}`}>
-          <div className="mx-auto max-w-3xl">
+          <div className="mx-auto max-w-4xl">
             <div className="flex items-center justify-between mb-2">
               <p className="text-sm font-medium flex items-center gap-1.5">
                 <StickyNote className="h-4 w-4 text-primary" /> My Notes — {chapter.title}
@@ -755,7 +755,7 @@ const BookReader = () => {
       {/* Highlights panel */}
       {showHighlightsPanel && user && highlights.length > 0 && (
         <div className={`sticky top-[49px] z-30 border-b px-4 py-3 ${darkMode ? "border-gray-700 bg-gray-800" : "bg-muted/60 backdrop-blur"}`}>
-          <div className="mx-auto max-w-3xl">
+          <div className="mx-auto max-w-4xl">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <Highlighter className="h-4 w-4 text-muted-foreground" />
@@ -819,7 +819,7 @@ const BookReader = () => {
       )}
 
       {/* Chapter content */}
-      <article className="mx-auto max-w-3xl px-6 py-10">
+      <article className="mx-auto max-w-4xl px-6 py-10">
         <div className="mb-2 text-sm text-muted-foreground">
           Chapter {chapter.chapter_number} of {totalChapters}
         </div>
@@ -854,7 +854,7 @@ const BookReader = () => {
       </article>
 
       {/* Book progress bar */}
-      <div className="mx-auto max-w-3xl px-6 pb-4">
+      <div className="mx-auto max-w-4xl px-6 pb-4">
         <div className="flex items-center gap-3 text-sm text-muted-foreground">
           <span className="shrink-0">Chapter {currentIndex + 1}/{totalChapters}</span>
           <Progress value={chapterProgress} className="flex-1 h-2" />
@@ -863,7 +863,7 @@ const BookReader = () => {
       </div>
 
       {/* Navigation */}
-      <div className="mx-auto max-w-3xl px-6 pb-10">
+      <div className="mx-auto max-w-4xl px-6 pb-10">
         <div className="flex justify-between">
           {prevChapter ? (
             <Button variant="outline" onClick={() => navigate(`/books/${slug}/${prevChapter.slug}`)}>

@@ -77,9 +77,39 @@ const Profile = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from("reading_progress")
-        .select("book_id, chapter_number, scroll_percent, updated_at")
-        .eq("user_id", user!.id);
-      return data ?? [];
+        .select("book_id, chapter_id, chapter_number, scroll_percent, updated_at")
+        .eq("user_id", user!.id)
+        .order("updated_at", { ascending: false });
+      const rows = data ?? [];
+      if (!rows.length) return [] as any[];
+
+      const chapterIds = [...new Set(rows.map((r: any) => r.chapter_id).filter(Boolean))];
+      const bookIds = [...new Set(rows.map((r: any) => r.book_id))];
+
+      const [{ data: chapters }, { data: counts }] = await Promise.all([
+        chapterIds.length
+          ? supabase.from("book_chapters").select("id, slug, title, book_id").in("id", chapterIds)
+          : Promise.resolve({ data: [] as any[] }),
+        supabase.from("book_chapters").select("book_id").in("book_id", bookIds),
+      ]);
+
+      const totalByBook = new Map<string, number>();
+      (counts ?? []).forEach((c: any) => {
+        totalByBook.set(c.book_id, (totalByBook.get(c.book_id) ?? 0) + 1);
+      });
+
+      return rows.map((r: any) => {
+        const ch = (chapters ?? []).find((c: any) => c.id === r.chapter_id);
+        const total = totalByBook.get(r.book_id) ?? 0;
+        const chapterPct = total > 0 ? ((r.chapter_number - 1) / total) * 100 + (r.scroll_percent ?? 0) / total : 0;
+        return {
+          ...r,
+          chapter_slug: ch?.slug ?? null,
+          chapter_title: ch?.title ?? null,
+          total_chapters: total,
+          overall_percent: Math.min(100, Math.round(chapterPct)),
+        };
+      });
     },
   });
 
@@ -206,10 +236,16 @@ const Profile = () => {
           ) : (
             <div className="grid sm:grid-cols-2 gap-4">
               {completedPurchases.map((p: any) => {
-                const progress = getBookProgress(p.book_id);
-                const progressPct = progress
-                  ? Math.min(Math.round((progress.chapter_number / 10) * 100), 100)
-                  : 0;
+                const progress: any = getBookProgress(p.book_id);
+                const progressPct = progress?.overall_percent ?? 0;
+                const resumeHref = p.book?.slug
+                  ? progress?.chapter_slug
+                    ? `/books/${p.book.slug}/${progress.chapter_slug}`
+                    : `/books/${p.book.slug}`
+                  : null;
+                const lastRead = progress?.updated_at
+                  ? new Date(progress.updated_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })
+                  : null;
                 return (
                   <Card key={p.id} className="flex flex-col p-4 gap-3">
                     <div className="flex items-start gap-4">
@@ -228,7 +264,6 @@ const Profile = () => {
                           {new Date(p.created_at).toLocaleDateString("en-IN")}
                         </p>
                         {(() => {
-                          // Show the amount actually paid (frozen at purchase time), not the current book price.
                           const paid = p.amount != null ? Number(p.amount) : (p.book?.price != null ? Number(p.book.price) : null);
                           if (paid == null || paid === 0) return null;
                           const currency = p.currency || "INR";
@@ -243,22 +278,29 @@ const Profile = () => {
                     {progress ? (
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <span>Chapter {progress.chapter_number}</span>
-                          <span>{progressPct}% complete</span>
+                          <span className="truncate pr-2">
+                            Ch {progress.chapter_number}
+                            {progress.total_chapters ? `/${progress.total_chapters}` : ""}
+                            {progress.chapter_title ? ` · ${progress.chapter_title}` : ""}
+                          </span>
+                          <span className="shrink-0">{progressPct}%</span>
                         </div>
                         <Progress value={progressPct} className="h-1.5" />
+                        {lastRead && (
+                          <p className="text-[11px] text-muted-foreground">Last read {lastRead} · {progress.scroll_percent ?? 0}% into chapter</p>
+                        )}
                       </div>
                     ) : (
                       <p className="text-xs text-muted-foreground">Not started yet</p>
                     )}
 
-                    {p.book?.slug && (
+                    {resumeHref && (
                       <Link
-                        to={`/books/${p.book.slug}`}
+                        to={resumeHref}
                         className="inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline"
                       >
                         <PlayCircle className="h-3.5 w-3.5" />
-                        {progress ? "Continue Reading" : "Start Reading"}
+                        {progress ? "Resume Reading" : "Start Reading"}
                       </Link>
                     )}
                   </Card>

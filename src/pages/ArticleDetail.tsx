@@ -302,6 +302,9 @@ const ArticleDetail = () => {
                 </ul>
               </div>
             </div>
+            <p className="mt-8 text-sm text-muted-foreground">
+              Return to <Link to="/" className="font-semibold text-primary hover:underline">GyandootNova</Link> — the home of Hindi spiritual texts, discourses, and sacred readings.
+            </p>
           </section>
         </div>
       </article>

@@ -661,7 +661,16 @@ const Books = () => {
     description:
       "GyandootNova — Hindu religious books online: Bhagavad Gita Hindi PDF, Geeta shlok, 4 Vedas, Upanishads, Ramayana, Hanuman Chalisa aur 50+ dharmik granth premium reader ke saath.",
     canonical: "/books",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "GyandootNova", item: "https://gyandootnova.in/" },
+        { "@type": "ListItem", position: 2, name: "Books", item: "https://gyandootnova.in/books" },
+      ],
+    },
   });
+
 
   // Page-local Inter font
   useEffect(() => {
@@ -915,7 +924,16 @@ const Books = () => {
         {/* Hero */}
         <section className="border-b" style={{ borderColor: T.border, background: "#fff" }}>
           <div className="container py-14 md:py-20">
+            {/* Breadcrumb — brand-entity link reinforcement in raw HTML */}
+            <nav aria-label="Breadcrumb" className="mb-6 text-sm" style={{ color: T.textMuted }}>
+              <ol className="flex flex-wrap items-center gap-1.5">
+                <li><Link to="/" className="hover:underline" style={{ color: T.text }}>GyandootNova</Link></li>
+                <li aria-hidden="true">/</li>
+                <li aria-current="page" style={{ color: T.text }}>Books</li>
+              </ol>
+            </nav>
             <Reveal>
+
               <p
                 className="mb-4 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em]"
                 style={{ borderColor: T.border, color: T.text, background: T.bg }}

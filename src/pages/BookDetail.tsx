@@ -768,6 +768,11 @@ const BookDetail = () => {
             </div>
           )}
         </div>
+        <div className="container mt-8">
+          <p className="text-sm text-muted-foreground">
+            Return to <Link to="/" className="font-semibold text-primary hover:underline">GyandootNova</Link> — India's home of authentic Hindi &amp; Sanskrit spiritual texts.
+          </p>
+        </div>
       </section>
 
       <SimilarBooks currentBookId={book.id} category={book.category} />

@@ -463,10 +463,16 @@ async function snapshotRoute(page, route) {
 }
 
 async function writeRouteFile(route, baseHtml, snapshot) {
+  // Strip any absolute localhost URLs the vite preview server injected into
+  // the captured head (e.g. dynamic <link rel="modulepreload"> tags). Left
+  // in place they leak dev URLs into production HTML.
+  const cleanHead = snapshot.head
+    .replace(/https?:\/\/localhost:\d+/g, "")
+    .replace(/https?:\/\/127\.0\.0\.1:\d+/g, "");
   // Replace the head content of the base index.html with the rendered head.
   let rewritten = baseHtml.replace(
     /<head>[\s\S]*?<\/head>/i,
-    `<head>\n${snapshot.head}\n</head>`
+    `<head>\n${cleanHead}\n</head>`
   );
   // Inject the rendered body content into #root so crawlers (and users with
   // JS disabled) see real text without executing JavaScript. React will
@@ -477,6 +483,7 @@ async function writeRouteFile(route, baseHtml, snapshot) {
       `<div id="root">${snapshot.rootHtml}</div>`
     );
   }
+
   const targets = outputTargetsForRoute(route);
   for (const target of targets) {
     await mkdir(dirname(target), { recursive: true });

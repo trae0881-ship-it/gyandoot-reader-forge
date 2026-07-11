@@ -26,6 +26,18 @@ import {
   Ban,
   Cloud,
   Gift,
+  Landmark,
+  ScrollText,
+  Flame,
+  Music2,
+  Feather,
+  Baby,
+  Phone,
+  Mail,
+  MapPin,
+  MessageCircle,
+  Bookmark,
+  GraduationCap,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -243,6 +255,92 @@ const Index = () => {
         </div>
       </section>
 
+      {/* ─── 1.05 CATEGORY-WISE BROWSING (Hindi-first, crawlable in SSR) ─── */}
+      <section aria-labelledby="granth-categories" className="bg-background py-16 md:py-20">
+        <div className="container">
+          <div className="mb-10 text-center">
+            <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-wider">
+              विषय अनुसार खोजें
+            </span>
+            <h2 id="granth-categories" className="mt-3 font-serif text-3xl font-bold md:text-4xl">
+              श्रेणी अनुसार ग्रंथ · <span className="text-primary">Browse by Category</span>
+            </h2>
+            <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
+              50+ पवित्र ग्रंथ — वेद, उपनिषद, इतिहास, भक्ति और स्तोत्र, सब एक ही पुस्तकालय में।
+            </p>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                icon: ScrollText,
+                title: "वेद व उपनिषद",
+                subtitle: "Vedic Texts",
+                desc: "ऋग्वेद, यजुर्वेद, सामवेद, अथर्ववेद और प्रमुख उपनिषदों का हिंदी अनुवाद।",
+                to: "/books?category=adhyatm",
+              },
+              {
+                icon: Landmark,
+                title: "इतिहास ग्रंथ",
+                subtitle: "Itihasa · Ramayana & Mahabharata",
+                desc: "रामायण, महाभारत, सुंदरकांड — मूल कथाएँ सरल हिंदी में।",
+                to: "/books?category=katha",
+              },
+              {
+                icon: Heart,
+                title: "भक्ति मार्ग",
+                subtitle: "Bhagavad Gita & Commentaries",
+                desc: "श्रीमद्भगवद्गीता और उस पर सरल भाष्य — रोज़ के जीवन के लिए।",
+                to: "/books?category=devta",
+              },
+              {
+                icon: Music2,
+                title: "स्तोत्र व मंत्र संग्रह",
+                subtitle: "Stotra & Mantra Sangrah",
+                desc: "विष्णु सहस्रनाम, हनुमान चालीसा, आरती और नित्य पाठ के मंत्र।",
+                to: "/books?category=devi",
+              },
+              {
+                icon: Flame,
+                title: "पुराण व कथाएँ",
+                subtitle: "Puranas & Devotional Stories",
+                desc: "श्रीमद्भागवत, विष्णु पुराण और भक्ति भाव से भरी कथाएँ।",
+                to: "/books?category=puran",
+              },
+              {
+                icon: Feather,
+                title: "योग व साधना",
+                subtitle: "Yoga & Sadhna Guides",
+                desc: "ध्यान, प्राणायाम और आध्यात्मिक साधना पर मार्गदर्शन।",
+                to: "/books?category=other",
+              },
+            ].map((cat) => (
+              <Link key={cat.title} to={cat.to} className="group block">
+                <Card className="h-full border-border p-6 transition-all hover:shadow-md hover:-translate-y-0.5 hover:border-primary/40">
+                  <div className="flex items-start gap-4">
+                    <div className="rounded-xl bg-primary/10 p-3 shrink-0">
+                      <cat.icon className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-serif text-lg font-semibold text-card-foreground group-hover:text-primary transition-colors">
+                        {cat.title}
+                      </h3>
+                      <p className="text-xs font-medium uppercase tracking-wider text-secondary mt-0.5">
+                        {cat.subtitle}
+                      </p>
+                      <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{cat.desc}</p>
+                      <span className="mt-3 inline-flex items-center text-xs font-semibold text-primary">
+                        पढ़ना शुरू करें <ArrowRight className="ml-1 h-3 w-3" />
+                      </span>
+                    </div>
+                  </div>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+
       {/* Brand entity confirmation — plain, crawlable text stating that
           "GyandootNova", "Gyandoot Nova" and "Gyandoot" all refer to the
           same site. Prerender captures this into the raw HTML. */}
@@ -401,8 +499,58 @@ const Index = () => {
         </div>
       </section>
 
+      {/* ─── 2.5 HAMARA UDDESHYA · Our Mission (3 pillars) ─── */}
+      <section aria-labelledby="our-mission" className="bg-muted/30 py-20">
+        <div className="container max-w-6xl">
+          <div className="mb-12 text-center">
+            <span className="inline-block rounded-full bg-secondary/20 px-3 py-1 text-xs font-semibold text-secondary-foreground uppercase tracking-wider">
+              हमारा उद्देश्य
+            </span>
+            <h2 id="our-mission" className="mt-3 font-serif text-3xl font-bold md:text-4xl">
+              Our Mission · <span className="text-primary">तीन संकल्प</span>
+            </h2>
+            <div className="mt-3 mx-auto h-1 w-16 rounded-full bg-secondary" />
+          </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            {[
+              {
+                icon: ScrollText,
+                pillar: "संरक्षण",
+                title: "प्राचीन शास्त्रों का शुद्ध संरक्षण",
+                desc: "संस्कृत और हिंदी के मूल ग्रंथों को उनकी शुद्धता के साथ, विद्वानों की देख-रेख में डिजिटल रूप में सुरक्षित रखना।",
+              },
+              {
+                icon: Globe,
+                pillar: "सुलभता",
+                title: "हर हिंदी पाठक तक धर्म-ज्ञान",
+                desc: "गाँव हो या विदेश — जहाँ भी इंटरनेट है, वहाँ हर पाठक को सच्चे धर्म-ग्रंथ नि:शुल्क या न्यूनतम मूल्य पर उपलब्ध हों।",
+              },
+              {
+                icon: Sparkles,
+                pillar: "आधुनिकता",
+                title: "प्राचीन ज्ञान, आज की तकनीक",
+                desc: "स्वच्छ रीडर, डार्क मोड, बुकमार्क और नोट्स — प्राचीन शास्त्रों को आज पढ़ना उतना ही सहज हो जितना एक अख़बार पढ़ना।",
+              },
+            ].map((p) => (
+              <div
+                key={p.title}
+                className="rounded-2xl border border-border bg-card p-7 text-center shadow-sm transition-shadow hover:shadow-md"
+              >
+                <div className="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                  <p.icon className="h-7 w-7 text-primary" />
+                </div>
+                <span className="text-xs font-semibold uppercase tracking-widest text-secondary">{p.pillar}</span>
+                <h3 className="mt-2 font-serif text-lg font-semibold text-card-foreground">{p.title}</h3>
+                <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{p.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ─── 3. FEATURED BOOKS ─── */}
       <section className="bg-muted/40 py-20">
+
         <div className="container">
           <div className="mb-10 text-center">
             <h2 className="font-serif text-3xl font-bold md:text-4xl">Readers' Favourites</h2>
@@ -495,7 +643,72 @@ const Index = () => {
       {/* ─── 3.5. COMPARE — printed vs PDF vs us ─── */}
       <CompareSection />
 
+      {/* ─── 3.7 HAMARI SEVAYEN · Our Offerings ─── */}
+      <section aria-labelledby="hamari-sevayen" className="bg-background py-20">
+        <div className="container max-w-6xl">
+          <div className="mb-10 text-center">
+            <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-wider">
+              हमारी सेवाएँ
+            </span>
+            <h2 id="hamari-sevayen" className="mt-3 font-serif text-3xl font-bold md:text-4xl">
+              Hamari Sevayen · <span className="text-primary">Our Offerings</span>
+            </h2>
+            <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
+              सिर्फ़ पुस्तकें नहीं — पढ़ने, समझने और आगे बढ़ने का पूरा साथ।
+            </p>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                icon: Bookmark,
+                title: "Premium Reader",
+                sub: "स्वच्छ रीडर",
+                desc: "डार्क मोड, बुकमार्क, नोट्स और रात-में-पढ़ने योग्य टाइपोग्राफी।",
+                to: "/books",
+              },
+              {
+                icon: MessageCircle,
+                title: "WhatsApp दैनिक श्लोक",
+                sub: "Daily Shlok",
+                desc: "हर सुबह एक श्लोक, उसका अर्थ और आज के जीवन से जुड़ाव — सीधे WhatsApp पर।",
+                to: "/contact",
+              },
+              {
+                icon: FileText,
+                title: "लेख व प्रवचन",
+                sub: "Articles & Discourses",
+                desc: "शास्त्र-आधारित लेख और चुनिंदा प्रवचन — रोज़ के प्रश्नों के सरल उत्तर।",
+                to: "/articles",
+              },
+              {
+                icon: GraduationCap,
+                title: "कार्यक्रम व कार्यशालाएँ",
+                sub: "Programs & Workshops",
+                desc: "मौन साधना, शास्त्र-अध्ययन और आत्म-जागरण की कार्यशालाएँ।",
+                to: "/articles",
+              },
+            ].map((s) => (
+              <Link key={s.title} to={s.to} className="group block">
+                <Card className="h-full border-border p-6 transition-all hover:shadow-md hover:-translate-y-0.5 hover:border-primary/40">
+                  <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-secondary/15">
+                    <s.icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="mt-4 font-serif text-base font-semibold text-card-foreground group-hover:text-primary transition-colors">
+                    {s.title}
+                  </h3>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-secondary mt-0.5">
+                    {s.sub}
+                  </p>
+                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ─── 4. PROGRAMS / DISCOURSES ─── */}
+
       <section className="py-20">
         <div className="container">
           <div className="mb-10 text-center">
@@ -629,8 +842,13 @@ const Index = () => {
       <section className="py-20">
         <div className="container">
           <div className="mb-10 text-center">
-            <h2 className="font-serif text-3xl font-bold md:text-4xl">In Our Readers' Own Words</h2>
-            <p className="mt-2 text-muted-foreground">Hear from the people who actually read here every day</p>
+            <span className="inline-block rounded-full bg-secondary/20 px-3 py-1 text-xs font-semibold text-secondary-foreground uppercase tracking-wider">
+              पाठकों की आवाज़ें
+            </span>
+            <h2 className="mt-3 font-serif text-3xl font-bold md:text-4xl">
+              हमारे पाठकों की <span className="text-primary">आस्था और भरोसे</span> की आवाज़ें
+            </h2>
+            <p className="mt-2 text-muted-foreground">Voices of faith and trust from our readers</p>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {[
@@ -678,7 +896,86 @@ const Index = () => {
         </div>
       </section>
 
+      {/* ─── 7.4 SAMPARK · Prominent Contact Block (trust signal) ─── */}
+      <section aria-labelledby="sampark" className="bg-primary/5 py-16">
+        <div className="container max-w-5xl">
+          <div className="rounded-2xl border border-primary/20 bg-card p-8 md:p-10 shadow-sm">
+            <div className="grid gap-8 md:grid-cols-[1.1fr_1fr] md:items-center">
+              <div>
+                <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-wider">
+                  संपर्क करें
+                </span>
+                <h2 id="sampark" className="mt-3 font-serif text-2xl md:text-3xl font-bold text-card-foreground">
+                  कोई प्रश्न, सुझाव या ग्रंथ की माँग?
+                </h2>
+                <p className="mt-3 text-muted-foreground leading-relaxed">
+                  GyandootNova एक असली, इंसानी टीम है। WhatsApp, फ़ोन या ईमेल — जिस माध्यम से भी लिखें, उसी दिन उत्तर मिलेगा।
+                </p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90">
+                    <Link to="/contact">
+                      <Mail className="mr-2 h-4 w-4" /> संदेश भेजें
+                    </Link>
+                  </Button>
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground"
+                  >
+                    <a href="https://wa.me/919161533353" target="_blank" rel="noopener noreferrer">
+                      <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
+                    </a>
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <a
+                  href="tel:+919161533353"
+                  className="flex items-start gap-4 rounded-xl border border-border p-4 hover:border-primary/40 transition-colors"
+                >
+                  <div className="rounded-lg bg-primary/10 p-2.5 shrink-0">
+                    <Phone className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">फ़ोन / WhatsApp</p>
+                    <p className="font-serif text-lg font-semibold text-card-foreground mt-0.5">+91 91615 33353</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">सोम–शनि · 10 AM – 6 PM (IST)</p>
+                  </div>
+                </a>
+                <a
+                  href="mailto:amrendra8765@gmail.com"
+                  className="flex items-start gap-4 rounded-xl border border-border p-4 hover:border-primary/40 transition-colors"
+                >
+                  <div className="rounded-lg bg-primary/10 p-2.5 shrink-0">
+                    <Mail className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">ईमेल</p>
+                    <p className="font-serif text-base font-semibold text-card-foreground mt-0.5 break-all">
+                      amrendra8765@gmail.com
+                    </p>
+                  </div>
+                </a>
+                <div className="flex items-start gap-4 rounded-xl border border-border p-4">
+                  <div className="rounded-lg bg-primary/10 p-2.5 shrink-0">
+                    <MapPin className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">कार्यालय</p>
+                    <p className="font-serif text-base font-semibold text-card-foreground mt-0.5">
+                      Bhagwan Khera, Unnao
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Uttar Pradesh 209863 · भारत</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ─── 7.5. GUARANTEE / TRUST ─── */}
+
       <GuaranteeSection />
 
       {/* ─── 7.7. FAQ STRIP ─── */}

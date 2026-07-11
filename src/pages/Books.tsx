@@ -690,7 +690,7 @@ const Books = () => {
   const { toast } = useToast();
 
   const [search, setSearch] = useState(searchParams.get("search") ?? "");
-  const [category, setCategory] = useState("all");
+  const [category, setCategory] = useState(searchParams.get("category") ?? "all");
   const [language, setLanguage] = useState("all");
   const [priceRange, setPriceRange] = useState("all");
   const [author, setAuthor] = useState("all");

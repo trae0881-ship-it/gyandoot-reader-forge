@@ -387,15 +387,15 @@ const BookCard = ({
         </div>
 
 
-        <div className="mt-4 flex items-end justify-between gap-2">
+        <div className="mt-6 flex items-end justify-between gap-2">
           <div className="flex items-baseline gap-2">
             {book.is_free ? (
-              <span className="text-[19px] font-bold" style={{ color: T.success }}>
+              <span className="text-[20px] font-bold" style={{ color: T.success }}>
                 Free
               </span>
             ) : (
               <>
-                <span className="text-[19px] font-bold" style={{ color: T.text }}>
+                <span className="text-[20px] font-bold" style={{ color: T.text }}>
                   ₹{book.price}
                 </span>
                 {original > (book.price ?? 0) && (
@@ -408,7 +408,7 @@ const BookCard = ({
           </div>
           {!book.is_free && saved > 0 && (
             <span
-              className="rounded-md px-2 py-0.5 text-[10.5px] font-semibold"
+              className="rounded-md px-2 py-0.5 text-[11px] font-semibold"
               style={{ background: T.primarySoft, color: "#92400E" }}
             >
               Save ₹{saved}
@@ -416,35 +416,36 @@ const BookCard = ({
           )}
         </div>
 
-        <p className="mt-2.5 flex items-center gap-1.5 text-[11.5px] font-medium" style={{ color: T.success }}>
+        <p className="mt-3 flex items-center gap-1.5 text-[12px] font-medium" style={{ color: T.success }}>
           <Check className="h-3.5 w-3.5" />
           In stock — instant lifetime access
         </p>
 
-        <div className="mt-auto pt-4">
-          <div className="grid grid-cols-2 gap-2 opacity-100 transition-opacity duration-300 md:opacity-90 md:group-hover:opacity-100">
+        <div className="mt-auto pt-6">
+          <div className="grid grid-cols-2 gap-3 opacity-100 transition-opacity duration-300 md:opacity-90 md:group-hover:opacity-100">
             <button
               type="button"
               onClick={() => onCart(book)}
-              className="flex items-center justify-center gap-1.5 rounded-xl border py-2.5 text-[12.5px] font-semibold transition-colors"
+              className="flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border py-3 text-[13px] font-semibold transition-colors"
               style={{ borderColor: T.border, color: T.text, background: "#fff" }}
               onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "#F9FAFB")}
               onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "#fff")}
             >
-              <ShoppingCart className="h-3.5 w-3.5" /> Add
+              <ShoppingCart className="h-4 w-4" /> Add
             </button>
             <Link
               to={`/books/${book.slug}`}
               onClick={() => onRecent(book)}
-              className="flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[12.5px] font-semibold transition-colors"
+              className="flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl py-3 text-[13px] font-semibold transition-colors"
               style={{ background: T.primary, color: "#fff" }}
               onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = T.primaryDark)}
               onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = T.primary)}
             >
-              <Zap className="h-3.5 w-3.5" /> Buy Now
+              <Zap className="h-4 w-4" /> Buy Now
             </Link>
           </div>
         </div>
+
       </div>
     </article>
   );

@@ -822,16 +822,9 @@ const Index = () => {
                 <Link key={post.id} to={`/articles/${post.slug}`}>
                   <article>
                     <Card className="group h-full border-border transition-all hover:shadow-lg hover:-translate-y-1">
-                      {post.cover_url && (
+                      {post.cover_url && false && (
                         <div className="aspect-video overflow-hidden">
-                          <img
-                            src={post.cover_url}
-                            alt={post.title}
-                            className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                            loading="lazy"
-                          />
-                        </div>
-                      )}
+                          {null}
                       <CardContent className="p-5">
                         <span className="text-xs font-semibold uppercase tracking-wider text-primary">
                           {post.post_type}

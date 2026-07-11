@@ -811,6 +811,32 @@ const BookDetail = () => {
       <SimilarBooks currentBookId={book.id} category={book.category} />
       {book && canRead && <AskScripture bookId={book.id} bookTitle={book.title} />}
 
+      {/* Reader reviews — social proof drives conversion */}
+      <section className="container py-12 md:py-16">
+        <div className="max-w-3xl">
+          <h2 className="font-serif text-2xl md:text-3xl font-bold mb-2">Reader reviews</h2>
+          <p className="text-sm text-muted-foreground mb-6">
+            Verified purchases badge un readers ke liye hai jinhone ye book actually kharidi.
+          </p>
+          <div className="grid gap-6 md:grid-cols-[1fr_320px]">
+            <BookReviewList bookId={book.id} />
+            <div>
+              <h3 className="font-semibold mb-2 text-sm">Share your experience</h3>
+              <BookReviewForm bookId={book.id} />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Guest checkout dialog */}
+      <GuestCheckoutDialog
+        open={guestDialogOpen}
+        onOpenChange={setGuestDialogOpen}
+        onContinue={(data) => runPayment(data)}
+        priceLabel={`₹${appliedCoupon ? appliedCoupon.final_amount : book.price}`}
+      />
+
+
       {/* Sticky Mobile Purchase CTA */}
       {!canRead && !book.is_free && (
         <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border shadow-2xl p-3 flex items-center gap-3">

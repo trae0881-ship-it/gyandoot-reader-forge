@@ -207,9 +207,12 @@ const Index = () => {
       <LiveReaderStrip />
       <RecentPurchasesToast />
       <ContinueReadingSection />
+      <BrandPurpose />
       <WhyWeExist />
+      <EmotionalConnection />
       <ReaderJourney />
       <TrustPillars />
+      <CalmFeeling />
       {/* ─── 1. HERO — calm publishing-house entrance ─── */}
 
       <section className="relative overflow-hidden bg-primary py-20 md:py-28 lg:py-32">

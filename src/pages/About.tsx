@@ -1,107 +1,253 @@
+import { Link } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
-import { BookOpen, Users, Globe, Award } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  BookOpen,
+  Compass,
+  Library,
+  Sparkles,
+  ShieldCheck,
+  HeartHandshake,
+  Users,
+  Feather,
+  ArrowRight,
+} from "lucide-react";
 import useSEO from "@/hooks/useSEO";
 
 const About = () => {
   useSEO({
-    title: "About Us — The Digital Home of Ancient Scriptures",
+    title: "About GyandootNova — A Home for Timeless Knowledge",
     description:
-      "The story, purpose and team behind GyandootNova (Gyandoot Nova) — bringing old manuscripts to today's readers. Learn how we started and where we are heading.",
+      "GyandootNova is a mission-driven publishing house dedicated to discovering, preserving and sharing meaningful books that bring timeless knowledge closer to every reader.",
     canonical: "/about",
   });
 
+  const values = [
+    {
+      icon: BookOpen,
+      title: "Knowledge",
+      text: "Books that expand understanding and stay with the reader long after the last page.",
+    },
+    {
+      icon: ShieldCheck,
+      title: "Authenticity",
+      text: "Meaningful, trustworthy content — reviewed with care before it ever reaches you.",
+    },
+    {
+      icon: HeartHandshake,
+      title: "Accessibility",
+      text: "Reading made available to everyone, in a form that feels welcoming and calm.",
+    },
+    {
+      icon: Users,
+      title: "Reader First",
+      text: "Every choice we make is measured against one question — is this good for the reader?",
+    },
+  ];
+
+  const pillars = [
+    {
+      icon: Library,
+      title: "Curated Book Collection",
+      text: "Thoughtfully selected titles across interests — chosen for depth, not for noise.",
+    },
+    {
+      icon: Feather,
+      title: "Quality Reading Experience",
+      text: "Typography, spacing and pacing designed for comfortable, unhurried discovery.",
+    },
+    {
+      icon: Sparkles,
+      title: "Growing Reader Community",
+      text: "A quiet, curious circle of readers connected by the books that shape them.",
+    },
+  ];
+
   return (
     <Layout>
-      <main className="container py-12 md:py-[72px] lg:py-24">
-        <section className="text-center mb-16 md:mb-24">
-          <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-wider">
-            Our Story
-          </span>
-          <h1 className="mt-4 font-serif text-4xl md:text-5xl font-bold text-primary">
-            A quiet home for timeless scriptures
-          </h1>
-          <p className="mt-6 prose-reading text-muted-foreground">
-            An honest effort to bring the scriptures locked away in grandparents' trunks
-            back into every reader's hands — with care, calm, and clarity.
-          </p>
-        </section>
-
-        <section className="grid md:grid-cols-2 gap-12 md:gap-16 mb-16 md:mb-24 max-w-5xl mx-auto">
-          <div>
-            <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-5">Why we started</h2>
-            <p className="text-muted-foreground leading-[1.8] mb-4">
-              A few years ago we opened an old family cupboard and found the pages of the
-              Ramayana yellowed, the Upanishads' bindings broken, and several books lost to
-              termites. It struck us that this is the reality in most homes — there are
-              readers, but readable, trustworthy scriptures are hard to come by.
-            </p>
-            <p className="text-muted-foreground leading-[1.8]">
-              GyandootNova was born from that thought — any reader, anywhere, anytime,
-              should be able to pick up their phone, log in, and start reading a reliable text.
-            </p>
-          </div>
-          <div>
-            <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground mb-5">Where we are headed</h2>
-            <p className="text-muted-foreground leading-[1.8] mb-4">
-              Over the next few years we want to build a digital library where the Vedangas,
-              stotras, Puranas and modern commentaries all live in one place — in Hindi,
-              Sanskrit and English. No ad clutter, no distractions.
-            </p>
-            <p className="text-muted-foreground leading-[1.8]">
-              The dream is simple — a true text, a faithful translation, and a calm reading
-              experience for every reader. The rest can wait.
-            </p>
-          </div>
-        </section>
-
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-6 mb-16 md:mb-24 max-w-5xl mx-auto">
-          {[
-            { icon: BookOpen, label: "Titles available", value: "500+" },
-            { icon: Users, label: "Readers joined", value: "24,000+" },
-            { icon: Globe, label: "Countries reached", value: "35+" },
-            { icon: Award, label: "Team experience", value: "12+ years" },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              className="text-center p-7 rounded-2xl bg-card border border-border/70 shadow-card transition-all hover:-translate-y-1 hover:shadow-lift"
-            >
-              <stat.icon className="h-8 w-8 text-primary mx-auto mb-3" />
-              <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
+      <main className="bg-background">
+        {/* 1. HERO */}
+        <section className="relative overflow-hidden">
+          <div
+            aria-hidden
+            className="absolute inset-0 -z-10 bg-gradient-to-b from-accent/10 via-background to-background"
+          />
+          <div className="container py-20 md:py-28 lg:py-32">
+            <div className="max-w-3xl mx-auto text-center">
+              <span className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/60 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                <Compass className="h-3.5 w-3.5 text-primary" />
+                About GyandootNova
+              </span>
+              <h1 className="mt-8 font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-[1.15] tracking-tight">
+                Bringing timeless knowledge closer to every reader
+              </h1>
+              <p className="mt-8 text-lg md:text-xl text-muted-foreground leading-[1.8] max-w-2xl mx-auto">
+                GyandootNova is a publishing house devoted to discovering, publishing and sharing
+                meaningful books — the kind that quietly stay with you, and gently change the way
+                you see the world.
+              </p>
             </div>
-          ))}
+          </div>
         </section>
 
-        <section className="max-w-5xl mx-auto">
-          <div className="text-center mb-10 md:mb-14">
-            <h2 className="font-serif text-2xl md:text-3xl font-bold text-foreground">
-              What we've built for you
+        {/* 2. OUR STORY */}
+        <section className="container py-16 md:py-24">
+          <div className="max-w-3xl mx-auto">
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-primary text-center">
+              Our Story
+            </p>
+            <h2 className="mt-4 font-serif text-3xl md:text-4xl font-bold text-foreground text-center leading-tight">
+              Why GyandootNova started
             </h2>
-            <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
-              Small, thoughtful choices — so reading a scripture feels calm again.
+            <div className="mt-10 space-y-6 text-lg text-muted-foreground leading-[1.9]">
+              <p>
+                It began with a simple ache — the feeling that so much of what truly matters is
+                slipping quietly out of reach. Books that once shaped generations were becoming
+                harder to find, harder to read, harder to return to.
+              </p>
+              <p>
+                We started GyandootNova because we believe knowledge is not a product. It is an
+                inheritance. It is meant to be carried forward — from a page to a reader, from a
+                reader to a life, from a life to the world around it.
+              </p>
+              <p>
+                Every book we publish is chosen with that thought in mind. Not to fill a shelf,
+                but to offer a reader something worth their time, their attention, and their
+                belief.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* 3. OUR MISSION & 4. OUR VISION */}
+        <section className="container pb-16 md:pb-24">
+          <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
+            <article className="rounded-3xl bg-card border border-border/70 p-10 md:p-12 shadow-card">
+              <span className="inline-block text-xs font-medium uppercase tracking-[0.18em] text-primary">
+                Our Mission
+              </span>
+              <h3 className="mt-4 font-serif text-2xl md:text-3xl font-bold text-foreground leading-tight">
+                Make valuable knowledge accessible to every reader
+              </h3>
+              <p className="mt-6 text-muted-foreground leading-[1.9]">
+                Through thoughtfully selected books and meaningful reading experiences, we want
+                learning, growth and quiet wisdom to feel within reach — for the student, the
+                seeker and the lifelong reader alike.
+              </p>
+            </article>
+
+            <article className="rounded-3xl bg-card border border-border/70 p-10 md:p-12 shadow-card">
+              <span className="inline-block text-xs font-medium uppercase tracking-[0.18em] text-primary">
+                Our Vision
+              </span>
+              <h3 className="mt-4 font-serif text-2xl md:text-3xl font-bold text-foreground leading-tight">
+                Where we want to go
+              </h3>
+              <p className="mt-6 text-muted-foreground leading-[1.9]">
+                To build a trusted destination where readers discover books that inspire, educate
+                and transform lives — a calm, lasting home for knowledge in a world that too often
+                rushes past it.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        {/* 5. OUR VALUES */}
+        <section className="bg-muted/30 border-y border-border/60">
+          <div className="container py-16 md:py-24">
+            <div className="max-w-2xl mx-auto text-center">
+              <p className="text-xs font-medium uppercase tracking-[0.18em] text-primary">
+                Our Values
+              </p>
+              <h2 className="mt-4 font-serif text-3xl md:text-4xl font-bold text-foreground leading-tight">
+                The principles that guide every book we publish
+              </h2>
+            </div>
+
+            <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+              {values.map(({ icon: Icon, title, text }) => (
+                <div
+                  key={title}
+                  className="rounded-2xl bg-card border border-border/70 p-8 shadow-card transition-all hover:-translate-y-1 hover:shadow-lift"
+                >
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="mt-6 font-serif text-xl font-semibold text-foreground">
+                    {title}
+                  </h3>
+                  <p className="mt-3 text-sm text-muted-foreground leading-[1.8]">{text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 6. WHY GYANDOOTNOVA */}
+        <section className="container py-16 md:py-24">
+          <div className="max-w-2xl mx-auto text-center">
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-primary">
+              Why GyandootNova
+            </p>
+            <h2 className="mt-4 font-serif text-3xl md:text-4xl font-bold text-foreground leading-tight">
+              A quieter, more considered place to read
+            </h2>
+            <p className="mt-6 text-muted-foreground leading-[1.9]">
+              We are not trying to be the largest bookstore. We are trying to be the one you
+              return to — when you want something worth reading.
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6 md:gap-8">
-            <div className="p-7 rounded-2xl border border-border/70 bg-card shadow-card transition-all hover:-translate-y-1 hover:shadow-lift">
-              <h3 className="font-serif text-lg font-semibold text-foreground mb-3">A calm reader</h3>
-              <p className="text-sm text-muted-foreground leading-[1.8]">
-                Adjustable font size, gentle dark mode, bookmarks, resume from the last page —
-                everything you need, in the browser, no app download required.
-              </p>
-            </div>
-            <div className="p-7 rounded-2xl border border-border/70 bg-card shadow-card transition-all hover:-translate-y-1 hover:shadow-lift">
-              <h3 className="font-serif text-lg font-semibold text-foreground mb-3">Trusted translations</h3>
-              <p className="text-sm text-muted-foreground leading-[1.8]">
-                Every text is first reviewed by Sanskrit scholars and then rendered into simple,
-                readable language. The original verse always sits alongside so you can check.
-              </p>
-            </div>
-            <div className="p-7 rounded-2xl border border-border/70 bg-card shadow-card transition-all hover:-translate-y-1 hover:shadow-lift">
-              <h3 className="font-serif text-lg font-semibold text-foreground mb-3">A living community</h3>
-              <p className="text-sm text-muted-foreground leading-[1.8]">
-                A question, a suggestion, or a text you want us to add — one WhatsApp message
-                is enough. Twelve new titles were added last month on reader requests alone.
-              </p>
+
+          <div className="mt-14 grid md:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto">
+            {pillars.map(({ icon: Icon, title, text }) => (
+              <div
+                key={title}
+                className="rounded-2xl border border-border/70 bg-card p-8 shadow-card transition-all hover:-translate-y-1 hover:shadow-lift"
+              >
+                <Icon className="h-6 w-6 text-primary" />
+                <h3 className="mt-5 font-serif text-lg font-semibold text-foreground">
+                  {title}
+                </h3>
+                <p className="mt-3 text-sm text-muted-foreground leading-[1.8]">{text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 7. READER EMOTIONAL QUOTE */}
+        <section className="bg-muted/40 border-y border-border/60">
+          <div className="container py-20 md:py-28">
+            <figure className="max-w-3xl mx-auto text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <Feather className="h-5 w-5" />
+              </div>
+              <blockquote className="mt-8 font-serif text-2xl md:text-4xl lg:text-[2.75rem] font-semibold text-foreground leading-[1.35] tracking-tight">
+                “Every book carries a story, every reader carries a journey.”
+              </blockquote>
+              <figcaption className="mt-8 text-sm uppercase tracking-[0.22em] text-muted-foreground">
+                The GyandootNova belief
+              </figcaption>
+            </figure>
+          </div>
+        </section>
+
+        {/* 8. FINAL CTA */}
+        <section className="container py-20 md:py-28">
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground leading-tight">
+              Begin your reading journey
+            </h2>
+            <p className="mt-6 text-muted-foreground leading-[1.9]">
+              Step into a quietly curated collection — and find the book that has been waiting
+              for you.
+            </p>
+            <div className="mt-10 flex justify-center">
+              <Button asChild size="lg" className="rounded-full px-8">
+                <Link to="/books" className="inline-flex items-center gap-2">
+                  Explore Books
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
             </div>
           </div>
         </section>

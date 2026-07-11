@@ -103,14 +103,14 @@ beforeEach(() => {
   cartStore.length = 0;
   bookMeta.clear();
   localStorage.clear();
-  currentUser = null;
+  currentUser.value = null;
   seedBook("book-1", "gita");
   seedBook("book-2", "vedas");
 });
 
 describe("useCart DB persistence", () => {
   it("mirrors adds to the database when signed in", async () => {
-    currentUser = { id: "user-a" };
+    currentUser.value = { id: "user-a" };
     const { result } = renderHook(() => useCart());
 
     await act(async () => {
@@ -147,7 +147,7 @@ describe("useCart DB persistence", () => {
     cartStore.push({ user_id: "user-a", book_id: "book-1", qty: 2 });
     cartStore.push({ user_id: "user-a", book_id: "book-2", qty: 5 });
 
-    currentUser = { id: "user-a" };
+    currentUser.value = { id: "user-a" };
     const { result } = renderHook(() => useCart());
 
     await waitFor(() => expect(result.current.items).toHaveLength(2));
@@ -174,7 +174,7 @@ describe("useCart DB persistence", () => {
     // Same book already in DB with qty 2 (from another session).
     cartStore.push({ user_id: "user-a", book_id: "book-1", qty: 2 });
 
-    currentUser = { id: "user-a" };
+    currentUser.value = { id: "user-a" };
     const { result } = renderHook(() => useCart());
 
     await waitFor(() =>
@@ -188,7 +188,7 @@ describe("useCart DB persistence", () => {
 
   it("keeps DB rows on sign-out and restores them on next sign-in (cross-device parity)", async () => {
     // ---- Session 1: sign in, add items ----
-    currentUser = { id: "user-a" };
+    currentUser.value = { id: "user-a" };
     const s1 = renderHook(() => useCart());
     await act(async () => {
       s1.result.current.addItem({
@@ -201,12 +201,12 @@ describe("useCart DB persistence", () => {
     await waitFor(() => expect(cartStore.length).toBe(2));
 
     // ---- Sign out: mimic what the app does — clear local session state. ----
-    currentUser = null;
+    currentUser.value = null;
     localStorage.clear(); // guest cart on this device is empty now
     s1.unmount();
 
     // ---- Session 2: another device / fresh browser, sign in again ----
-    currentUser = { id: "user-a" };
+    currentUser.value = { id: "user-a" };
     const s2 = renderHook(() => useCart());
 
     await waitFor(() => expect(s2.result.current.items).toHaveLength(2));
@@ -219,7 +219,7 @@ describe("useCart DB persistence", () => {
 
   it("does not leak another user's cart on sign-in", async () => {
     cartStore.push({ user_id: "someone-else", book_id: "book-1", qty: 9 });
-    currentUser = { id: "user-a" };
+    currentUser.value = { id: "user-a" };
     const { result } = renderHook(() => useCart());
     // Give the effect a tick.
     await new Promise((r) => setTimeout(r, 20));
@@ -227,7 +227,7 @@ describe("useCart DB persistence", () => {
   });
 
   it("clear() empties both local and DB carts", async () => {
-    currentUser = { id: "user-a" };
+    currentUser.value = { id: "user-a" };
     cartStore.push({ user_id: "user-a", book_id: "book-1", qty: 3 });
     const { result } = renderHook(() => useCart());
     await waitFor(() => expect(result.current.items).toHaveLength(1));

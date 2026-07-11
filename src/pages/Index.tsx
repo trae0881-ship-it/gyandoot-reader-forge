@@ -243,6 +243,25 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Brand entity confirmation — plain, crawlable text stating that
+          "GyandootNova", "Gyandoot Nova" and "Gyandoot" all refer to the
+          same site. Prerender captures this into the raw HTML. */}
+      <section aria-labelledby="about-brand" className="border-b border-border bg-background py-10">
+        <div className="container max-w-3xl text-center">
+          <h2 id="about-brand" className="font-serif text-xl md:text-2xl font-semibold text-foreground">
+            About <Link to="/" className="text-primary hover:underline">GyandootNova</Link>
+          </h2>
+          <p className="mt-3 text-sm md:text-base leading-relaxed text-muted-foreground">
+            <strong>GyandootNova</strong>, also known as <strong>Gyandoot Nova</strong> or <strong>Gyandoot</strong>,
+            is an online Hindi platform for reading sacred Hindu texts — including the Bhagavad Gita,
+            the four Vedas, the Upanishads, Ramayana, Hanuman Chalisa and Vishnu Sahasranama —
+            with a free, distraction-free reader. Visit <Link to="/" className="underline">gyandootnova.in</Link> to
+            browse the full library.
+          </p>
+        </div>
+      </section>
+
+
       {/* ─── 1.1 TRUST SECTION (C.2) ─── */}
       <section className="border-b border-border bg-background py-10 md:py-14">
         <div className="container max-w-5xl text-center">

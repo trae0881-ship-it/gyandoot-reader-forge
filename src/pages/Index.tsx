@@ -1,43 +1,26 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   BookOpen,
-  Heart,
-  FileText,
-  Sparkles,
-  Users,
-  Globe,
-  BookMarked,
-  Quote,
   ArrowRight,
-  TrendingUp,
   ShieldCheck,
   Infinity as InfinityIcon,
-  RefreshCw,
   Lock,
   CheckCircle2,
   Star,
-  XCircle,
-  Smartphone,
-  HardDrive,
-  FileWarning,
-  Unlock,
-  Ban,
-  Cloud,
-  Gift,
-  Landmark,
+  Sparkles,
   ScrollText,
-  Flame,
+  Landmark,
+  Heart,
   Music2,
+  Flame,
   Feather,
-  Baby,
-  Phone,
-  Mail,
-  MapPin,
-  MessageCircle,
-  Bookmark,
-  GraduationCap,
+  Smartphone,
+  RefreshCw,
+  Award,
+  Zap,
+  Quote,
+  ArrowUpRight,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,54 +28,11 @@ import Layout from "@/components/layout/Layout";
 import useSEO from "@/hooks/useSEO";
 import LiveReaderStrip from "@/components/LiveReaderStrip";
 import RecentPurchasesToast from "@/components/RecentPurchasesToast";
-import CompareSection from "@/components/CompareSection";
-import GuaranteeSection from "@/components/GuaranteeSection";
 import FaqStrip from "@/components/FaqStrip";
 import NewsletterCta from "@/components/NewsletterCta";
-import { useEffect, useRef, useState } from "react";
-import { WhyWeExist, ReaderJourney, TrustPillars } from "@/components/BrandExperience";
-import { BrandPurpose, EmotionalConnection, CalmFeeling } from "@/components/BrandSoul";
 import ContinueReadingSection from "@/components/ContinueReadingSection";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-
-/* ─── Animated Counter ─── */
-const AnimatedCounter = ({ target, suffix = "" }: { target: number; suffix?: string }) => {
-  const [count, setCount] = useState(0);
-  const ref = useRef<HTMLDivElement>(null);
-  const started = useRef(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !started.current) {
-          started.current = true;
-          let current = 0;
-          const step = Math.ceil(target / 40);
-          const timer = setInterval(() => {
-            current += step;
-            if (current >= target) {
-              current = target;
-              clearInterval(timer);
-            }
-            setCount(current);
-          }, 30);
-        }
-      },
-      { threshold: 0.5 },
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [target]);
-
-  return (
-    <div ref={ref} className="font-serif text-4xl font-bold text-secondary md:text-5xl">
-      {count.toLocaleString()}
-      {suffix}
-    </div>
-  );
-};
-
-/* ─── Main Page ─── */
 const Index = () => {
   const { data: featuredBooks } = useQuery({
     queryKey: ["featured-books"],
@@ -101,7 +41,7 @@ const Index = () => {
         .from("books")
         .select("id, title, slug, author, cover_url, price, is_free")
         .eq("is_featured", true)
-        .limit(5);
+        .limit(6);
       return data ?? [];
     },
   });
@@ -112,15 +52,14 @@ const Index = () => {
       const { data } = await supabase
         .from("posts")
         .select("id, title, slug, excerpt, cover_url, post_type, created_at")
-        .eq("is_published", true).eq("approval_status", "approved")
+        .eq("is_published", true)
+        .eq("approval_status", "approved")
         .order("created_at", { ascending: false })
         .limit(3);
       return data ?? [];
     },
   });
 
-  // Read social profile URLs from the same settings table the footer uses so
-  // the Organization `sameAs` array reflects the site's real, live profiles.
   const { data: siteSettings } = useQuery({
     queryKey: ["site-settings-brand"],
     queryFn: async () => {
@@ -129,7 +68,9 @@ const Index = () => {
         .select("key, value")
         .in("key", ["facebook_url", "instagram_url", "linkedin_url", "youtube_url", "whatsapp_number"]);
       const map: Record<string, string> = {};
-      (data ?? []).forEach((r: any) => { map[r.key] = (r.value ?? "").trim(); });
+      (data ?? []).forEach((r: any) => {
+        map[r.key] = (r.value ?? "").trim();
+      });
       return map;
     },
   });
@@ -145,12 +86,12 @@ const Index = () => {
   ].filter((u): u is string => !!u && /^https?:\/\//.test(u));
 
   const brandDescription =
-    "GyandootNova (also known as Gyandoot Nova or Gyandoot) is an online Hindi platform for reading sacred Hindu texts — Bhagavad Gita, Vedas, Upanishads, Ramayana, Hanuman Chalisa and Vishnu Sahasranama — with a free, distraction-free reader.";
+    "GyandootNova is a premium digital publisher of India's sacred scriptures — Bhagavad Gita, the four Vedas, Upanishads, Ramayana, Hanuman Chalisa and Vishnu Sahasranama — in a calm, distraction-free reader.";
 
   useSEO({
-    title: "GyandootNova (Gyandoot Nova) — Hindu Religious Books in Hindi | Gita, Vedas, Ramayana",
+    title: "GyandootNova — Premium Digital Publisher of India's Sacred Scriptures",
     description:
-      "GyandootNova (Gyandoot Nova) — Bhagwat Geeta, Vedas, Upanishads, Ramayana aur Hanuman Chalisa Hindi mein padhein. Free online reader ke saath trusted spiritual platform.",
+      "Read the Bhagavad Gita, Vedas, Upanishads, Ramayana and more in a beautiful, distraction-free reader. Trusted translations, lifetime access, secure payments.",
     canonical: "/",
     ogImage: "https://gyandootnova.in/og-image.png",
     jsonLd: {
@@ -159,742 +100,444 @@ const Index = () => {
         {
           "@type": "WebSite",
           "@id": "https://gyandootnova.in/#website",
-          "url": "https://gyandootnova.in/",
-          "name": "GyandootNova",
-          "alternateName": ["Gyandoot Nova", "Gyandoot", "Gyan Doot", "gyandootnova.in"],
-          "inLanguage": "hi-IN",
-          "description": brandDescription,
-          "publisher": { "@id": "https://gyandootnova.in/#organization" },
-          "potentialAction": {
+          url: "https://gyandootnova.in/",
+          name: "GyandootNova",
+          alternateName: ["Gyandoot Nova", "Gyandoot"],
+          inLanguage: "en-IN",
+          description: brandDescription,
+          publisher: { "@id": "https://gyandootnova.in/#organization" },
+          potentialAction: {
             "@type": "SearchAction",
-            "target": "https://gyandootnova.in/books?search={search_term_string}",
+            target: "https://gyandootnova.in/books?search={search_term_string}",
             "query-input": "required name=search_term_string",
           },
         },
         {
           "@type": "Organization",
           "@id": "https://gyandootnova.in/#organization",
-          "name": "GyandootNova",
-          "alternateName": ["Gyandoot Nova", "Gyandoot", "Gyan Doot"],
-          "url": "https://gyandootnova.in/",
-          "logo": {
+          name: "GyandootNova",
+          alternateName: ["Gyandoot Nova", "Gyandoot"],
+          url: "https://gyandootnova.in/",
+          logo: {
             "@type": "ImageObject",
-            "url": "https://gyandootnova.in/gyandoot-nova-icon.ico",
+            url: "https://gyandootnova.in/gyandoot-nova-icon.ico",
           },
-          "description": brandDescription,
+          description: brandDescription,
           ...(sameAs.length > 0 ? { sameAs } : {}),
         },
-        ...((featuredBooks ?? []).length > 0
-          ? [{
-              "@type": "ItemList",
-              "name": "Featured Dharmik Granth",
-              "itemListElement": (featuredBooks ?? []).map((b, i) => ({
-                "@type": "ListItem",
-                "position": i + 1,
-                "url": `https://gyandootnova.in/books/${b.slug}`,
-                "name": b.title,
-              })),
-            }]
-          : []),
       ],
     },
   });
 
+  const categories = [
+    { icon: ScrollText, title: "Vedas & Upanishads", desc: "The four Vedas and principal Upanishads, translated with clarity.", to: "/books?category=adhyatm" },
+    { icon: Landmark, title: "Itihasa", desc: "Ramayana and Mahabharata — timeless epics in accessible language.", to: "/books?category=katha" },
+    { icon: Heart, title: "Bhagavad Gita", desc: "The Gita and thoughtful commentaries for everyday practice.", to: "/books?category=devta" },
+    { icon: Music2, title: "Stotra & Mantra", desc: "Vishnu Sahasranama, Hanuman Chalisa and daily chants.", to: "/books?category=devi" },
+    { icon: Flame, title: "Puranas", desc: "Bhagavata, Vishnu Purana and devotional narratives.", to: "/books?category=puran" },
+    { icon: Feather, title: "Yoga & Sadhana", desc: "Guides on meditation, pranayama and inner practice.", to: "/books?category=other" },
+  ];
 
+  const testimonials = [
+    { name: "Anjali Sharma", role: "Reader · Bengaluru", quote: "The typography and calm layout make reading the Gita feel sacred again. It's the reading experience I always wished for." },
+    { name: "Rohan Iyer", role: "Reader · Mumbai", quote: "Trustworthy translations, no clutter, no distractions. GyandootNova feels like a heritage library reimagined for today." },
+    { name: "Meera Nair", role: "Reader · Kochi", quote: "I've bought many editions over the years — none felt this thoughtful. Buy once, read forever, on any device." },
+  ];
+
+  const faqs = [
+    { q: "Are the translations authentic?", a: "Every text is prepared with reference to original Sanskrit sources and reviewed by scholars before publication." },
+    { q: "Do I get lifetime access?", a: "Yes. One purchase gives you lifetime reading access along with all future edition updates — free of charge." },
+    { q: "Can I read on my phone?", a: "The reader is fully responsive and works beautifully on phones, tablets and desktops — no app download required." },
+    { q: "Is there a refund guarantee?", a: "Absolutely. If you're not satisfied within 7 days of purchase, we'll refund your full amount, no questions asked." },
+  ];
 
   return (
     <Layout>
       <LiveReaderStrip />
       <RecentPurchasesToast />
-      <ContinueReadingSection />
-      <BrandPurpose />
-      <WhyWeExist />
-      <EmotionalConnection />
-      <ReaderJourney />
-      <TrustPillars />
-      <CalmFeeling />
-      {/* ─── 1. HERO — calm publishing-house entrance ─── */}
 
-      <section className="relative overflow-hidden bg-primary py-20 md:py-28 lg:py-32">
+      {/* ─── 1. HERO ─── */}
+      <section className="relative overflow-hidden bg-background">
         <div
           aria-hidden
-          className="absolute inset-0 opacity-[0.08]"
+          className="absolute inset-0 opacity-[0.35] pointer-events-none"
           style={{
             backgroundImage:
-              "radial-gradient(circle at 15% 20%, hsl(45 97% 58%) 0%, transparent 55%), radial-gradient(circle at 85% 80%, hsl(0 60% 55%) 0%, transparent 55%)",
+              "radial-gradient(ellipse at 12% 8%, hsl(var(--secondary) / 0.12) 0%, transparent 45%), radial-gradient(ellipse at 90% 20%, hsl(var(--primary) / 0.08) 0%, transparent 40%)",
           }}
         />
-        <div
-          aria-hidden
-          className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-primary/40"
-        />
-        <div className="container relative">
-          <div className="mx-auto max-w-3xl text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-secondary/40 bg-secondary/10 px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.2em] text-secondary mb-8">
-              <Star className="h-3 w-3 fill-secondary" />
-              A quiet home for sacred reading
+        <div className="container relative pt-16 pb-20 md:pt-24 md:pb-28 lg:pt-32 lg:pb-36">
+          <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16 items-center">
+            <div className="animate-fade-in-up">
+              <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card/80 backdrop-blur px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.22em] text-[hsl(var(--royal-blue))] mb-8 shadow-sm">
+                <Sparkles className="h-3 w-3" />
+                A Premium Digital Publication
+              </div>
+              <h1 className="font-serif text-[2.6rem] sm:text-5xl lg:text-[4.25rem] font-bold leading-[1.05] tracking-tight text-foreground">
+                The sacred, <span className="text-primary">reimagined</span>{" "}
+                for the modern reader.
+              </h1>
+              <p className="mt-8 max-w-xl text-base md:text-lg leading-[1.8] text-muted-foreground">
+                Bhagavad Gita, the Vedas, Upanishads, Ramayana and more —
+                translated with care and offered in a calm reader designed for
+                slow, thoughtful discovery.
+              </p>
+              <div className="mt-10 flex flex-wrap items-center gap-3">
+                <Button
+                  size="lg"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-8 h-12 text-base font-medium shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/25 hover:-translate-y-0.5"
+                  asChild
+                >
+                  <Link to="/books">
+                    Explore the Library <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-border bg-card hover:bg-muted rounded-full px-8 h-12 text-base font-medium"
+                  asChild
+                >
+                  <Link to="/books?filter=free">Start Reading Free</Link>
+                </Button>
+              </div>
+              <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3 text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="flex">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} className="h-3.5 w-3.5 fill-secondary text-secondary" />
+                    ))}
+                  </span>
+                  <span className="font-medium text-foreground">4.9</span> · 12,400+ readers
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <ShieldCheck className="h-3.5 w-3.5 text-[hsl(var(--royal-blue))]" />
+                  Trusted since 2019
+                </span>
+              </div>
             </div>
-            <h1 className="font-serif text-4xl md:text-5xl lg:text-[3.75rem] font-semibold leading-[1.15] tracking-tight text-primary-foreground">
-              Timeless Indian scriptures,
-              <br className="hidden md:block" />
-              gathered in one <span className="text-secondary italic font-normal">unhurried</span> library.
-            </h1>
-            <p className="mx-auto mt-8 max-w-2xl text-base md:text-lg leading-[1.85] text-primary-foreground/80">
-              Bhagavad Gita, the Vedas, Upanishads, Ramayana, Hanuman Chalisa and Vishnu Sahasranama —
-              carefully translated into clear Hindi and English, and offered in a reader made for
-              slow, thoughtful discovery.
-            </p>
-            <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-              <Button
-                size="lg"
-                className="bg-secondary text-secondary-foreground font-semibold hover:bg-secondary/90 shadow-lg rounded-full px-8 text-base"
-                asChild
-              >
-                <Link to="/books?filter=free">
-                  <BookOpen className="mr-2 h-4 w-4" /> Begin reading — free
-                </Link>
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 rounded-full px-8"
-                asChild
-              >
-                <Link to="/our-story">Discover our story</Link>
-              </Button>
-            </div>
-            <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-xs text-primary-foreground/70">
-              <span className="inline-flex items-center gap-1.5"><Lock className="h-3.5 w-3.5 text-secondary/80" /> Private &amp; secure</span>
-              <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-secondary/80" /> 7-day refund</span>
-              <span className="inline-flex items-center gap-1.5"><InfinityIcon className="h-3.5 w-3.5 text-secondary/80" /> Lifetime access</span>
-              <span className="inline-flex items-center gap-1.5"><RefreshCw className="h-3.5 w-3.5 text-secondary/80" /> Free future editions</span>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* ─── 1.05 CATEGORY-WISE BROWSING (Hindi-first, crawlable in SSR) ─── */}
-      <section aria-labelledby="granth-categories" className="bg-background py-16 md:py-20">
-        <div className="container">
-          <div className="mb-10 text-center">
-            <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-wider">
-              विषय अनुसार खोजें
-            </span>
-            <h2 id="granth-categories" className="mt-3 font-serif text-3xl font-bold md:text-4xl">
-              श्रेणी अनुसार ग्रंथ · <span className="text-primary">Browse by Category</span>
-            </h2>
-            <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
-              50+ पवित्र ग्रंथ — वेद, उपनिषद, इतिहास, भक्ति और स्तोत्र, सब एक ही पुस्तकालय में।
-            </p>
-          </div>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              {
-                icon: ScrollText,
-                title: "वेद व उपनिषद",
-                subtitle: "Vedic Texts",
-                desc: "ऋग्वेद, यजुर्वेद, सामवेद, अथर्ववेद और प्रमुख उपनिषदों का हिंदी अनुवाद।",
-                to: "/books?category=adhyatm",
-              },
-              {
-                icon: Landmark,
-                title: "इतिहास ग्रंथ",
-                subtitle: "Itihasa · Ramayana & Mahabharata",
-                desc: "रामायण, महाभारत, सुंदरकांड — मूल कथाएँ सरल हिंदी में।",
-                to: "/books?category=katha",
-              },
-              {
-                icon: Heart,
-                title: "भक्ति मार्ग",
-                subtitle: "Bhagavad Gita & Commentaries",
-                desc: "श्रीमद्भगवद्गीता और उस पर सरल भाष्य — रोज़ के जीवन के लिए।",
-                to: "/books?category=devta",
-              },
-              {
-                icon: Music2,
-                title: "स्तोत्र व मंत्र संग्रह",
-                subtitle: "Stotra & Mantra Sangrah",
-                desc: "विष्णु सहस्रनाम, हनुमान चालीसा, आरती और नित्य पाठ के मंत्र।",
-                to: "/books?category=devi",
-              },
-              {
-                icon: Flame,
-                title: "पुराण व कथाएँ",
-                subtitle: "Puranas & Devotional Stories",
-                desc: "श्रीमद्भागवत, विष्णु पुराण और भक्ति भाव से भरी कथाएँ।",
-                to: "/books?category=puran",
-              },
-              {
-                icon: Feather,
-                title: "योग व साधना",
-                subtitle: "Yoga & Sadhna Guides",
-                desc: "ध्यान, प्राणायाम और आध्यात्मिक साधना पर मार्गदर्शन।",
-                to: "/books?category=other",
-              },
-            ].map((cat) => (
-              <Link key={cat.title} to={cat.to} className="group block">
-                <Card className="h-full border-border p-6 transition-all hover:shadow-md hover:-translate-y-0.5 hover:border-primary/40">
-                  <div className="flex items-start gap-4">
-                    <div className="rounded-xl bg-primary/10 p-3 shrink-0">
-                      <cat.icon className="h-6 w-6 text-primary" />
+            {/* Hero visual — layered book mockup */}
+            <div className="relative animate-fade-in-up delay-200 hidden md:block">
+              <div className="relative mx-auto max-w-md aspect-[4/5]">
+                <div
+                  aria-hidden
+                  className="absolute -inset-8 rounded-[2rem] opacity-60 blur-3xl"
+                  style={{
+                    background:
+                      "radial-gradient(circle at 30% 30%, hsl(var(--secondary) / 0.35), transparent 60%), radial-gradient(circle at 70% 70%, hsl(var(--primary) / 0.25), transparent 60%)",
+                  }}
+                />
+                {/* Back book */}
+                <div className="absolute right-4 top-8 w-[62%] aspect-[3/4] rounded-2xl bg-gradient-to-br from-[hsl(var(--royal-blue))] to-[hsl(var(--royal-blue-glow))] shadow-2xl rotate-6 transition-transform duration-700 hover:rotate-3">
+                  <div className="absolute inset-0 rounded-2xl border border-white/10" />
+                  <div className="absolute inset-x-6 top-8 h-px bg-white/30" />
+                  <div className="absolute inset-x-6 bottom-10 space-y-2">
+                    <p className="text-[10px] font-medium uppercase tracking-[0.3em] text-white/70">Volume II</p>
+                    <p className="font-serif text-xl text-white leading-tight">Upanishads</p>
+                  </div>
+                </div>
+                {/* Front book */}
+                <div className="absolute left-2 bottom-0 w-[68%] aspect-[3/4] rounded-2xl bg-gradient-to-br from-primary to-[hsl(var(--primary-glow))] shadow-2xl -rotate-3 transition-transform duration-700 hover:rotate-0">
+                  <div className="absolute inset-0 rounded-2xl border border-white/10" />
+                  <div className="absolute inset-x-6 top-10 h-px bg-secondary/60" />
+                  <div className="absolute inset-x-6 top-14">
+                    <p className="text-[10px] font-medium uppercase tracking-[0.3em] text-secondary">Sacred Edition</p>
+                  </div>
+                  <div className="absolute inset-x-6 bottom-10 space-y-2">
+                    <p className="font-serif text-3xl text-primary-foreground leading-[1.05]">
+                      Bhagavad<br />Gita
+                    </p>
+                    <div className="h-px w-10 bg-secondary" />
+                    <p className="text-[11px] text-primary-foreground/70">Translated · Annotated</p>
+                  </div>
+                  <div className="absolute right-5 top-5 h-8 w-8 rounded-full bg-secondary/90 grid place-items-center shadow-lg">
+                    <Sparkles className="h-3.5 w-3.5 text-primary" />
+                  </div>
+                </div>
+                {/* Floating stat card */}
+                <div className="absolute -right-2 bottom-16 rounded-2xl bg-card border border-border shadow-xl p-4 w-44 animate-float-slow">
+                  <div className="flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-full bg-primary/10 grid place-items-center">
+                      <BookOpen className="h-4 w-4 text-primary" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-serif text-lg font-semibold text-card-foreground group-hover:text-primary transition-colors">
-                        {cat.title}
-                      </h3>
-                      <p className="text-xs font-medium uppercase tracking-wider text-secondary mt-0.5">
-                        {cat.subtitle}
-                      </p>
-                      <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{cat.desc}</p>
-                      <span className="mt-3 inline-flex items-center text-xs font-semibold text-primary">
-                        पढ़ना शुरू करें <ArrowRight className="ml-1 h-3 w-3" />
-                      </span>
+                    <div>
+                      <p className="text-lg font-serif font-bold text-foreground leading-none">50+</p>
+                      <p className="text-[10px] text-muted-foreground">Sacred texts</p>
                     </div>
                   </div>
-                </Card>
-              </Link>
-            ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-
-      {/* Brand entity confirmation — plain, crawlable text stating that
-          "GyandootNova", "Gyandoot Nova" and "Gyandoot" all refer to the
-          same site. Prerender captures this into the raw HTML. */}
-      <section aria-labelledby="about-brand" className="border-b border-border bg-background py-10">
-        <div className="container max-w-3xl text-center">
-          <h2 id="about-brand" className="font-serif text-xl md:text-2xl font-semibold text-foreground">
-            About <Link to="/" className="text-primary hover:underline">GyandootNova</Link>
-          </h2>
-          <p className="mt-3 text-sm md:text-base leading-relaxed text-muted-foreground">
-            <strong>GyandootNova</strong>, also known as <strong>Gyandoot Nova</strong> or <strong>Gyandoot</strong>,
-            is an online Hindi platform for reading sacred Hindu texts — including the Bhagavad Gita,
-            the four Vedas, the Upanishads, Ramayana, Hanuman Chalisa and Vishnu Sahasranama —
-            with a free, distraction-free reader. Visit <Link to="/" className="underline">gyandootnova.in</Link> to
-            browse the full library.
-          </p>
-        </div>
-      </section>
-
-
-      {/* ─── 1.1 TRUST SECTION (C.2) ─── */}
-      <section className="border-b border-border bg-background py-10 md:py-14">
-        <div className="container max-w-5xl text-center">
-          <h2 className="font-serif text-2xl md:text-3xl font-bold">
-            Why <span className="text-primary">Thousands of Readers</span> Trust GyandootNova
-          </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm md:text-base text-muted-foreground leading-relaxed">
-            Every scripture is translated from original Sanskrit into clear English and Hindi, curated by scholars. No hidden charges, no app downloads — read instantly in your browser.
-          </p>
-          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+      {/* ─── 2. TRUSTED STRIP ─── */}
+      <section className="border-y border-border bg-card">
+        <div className="container py-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-y-6 gap-x-4">
             {[
-              { icon: Lock, label: "Safe & Secure Payments" },
-              { icon: CheckCircle2, label: "Scholar-verified content" },
-              { icon: BookOpen, label: "Read on any device" },
-              { icon: ShieldCheck, label: "7-day refund guarantee" },
-            ].map((b) => (
-              <div
-                key={b.label}
-                className="flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-4 text-center shadow-sm"
-              >
-                <b.icon className="h-6 w-6 text-primary" />
-                <span className="text-xs md:text-sm font-semibold text-card-foreground leading-tight">
-                  {b.label}
-                </span>
+              { icon: Lock, label: "Secure Payments", sub: "256-bit encryption" },
+              { icon: InfinityIcon, label: "Lifetime Access", sub: "Buy once, read forever" },
+              { icon: Award, label: "Authentic Editions", sub: "Scholar-verified" },
+              { icon: Zap, label: "Instant Access", sub: "Read in seconds" },
+            ].map((t) => (
+              <div key={t.label} className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-secondary/15 grid place-items-center shrink-0">
+                  <t.icon className="h-4 w-4 text-[hsl(var(--gold-deep))]" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-foreground leading-tight">{t.label}</p>
+                  <p className="text-xs text-muted-foreground">{t.sub}</p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
+      <ContinueReadingSection />
 
-      {/* ─── 1.5. WHY NO DOWNLOAD — Objection → Trust ─── */}
-      <section className="bg-muted/40 py-14">
-        <div className="container max-w-5xl">
-          <div className="text-center mb-10">
-            <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-wider">
-              Designed with care
-            </span>
-            <h2 className="mt-3 font-serif text-2xl md:text-3xl font-bold">
-              Why we don't hand out PDFs? <span className="text-primary">For your peace of mind.</span>
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">The old e-book headaches are a thing of the past.</p>
-          </div>
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-5">
-              <h3 className="font-semibold text-destructive mb-3 flex items-center gap-2">
-                <XCircle className="h-5 w-5" /> The old PDF world
-              </h3>
-              <ul className="space-y-2 text-sm text-foreground/80">
-                {[
-                  { Icon: Smartphone, text: "Phone lost — your whole library gone with it" },
-                  { Icon: HardDrive, text: "GBs fill up, new apps can't be installed" },
-                  { Icon: FileWarning, text: "Text breaks, pages refuse to open" },
-                  { Icon: Unlock, text: "Anyone can forward it on WhatsApp" },
-                  { Icon: Ban, text: "Fixes and updates never reach you" },
-                ].map(({ Icon, text }) => (
-                  <li key={text} className="flex items-start gap-2">
-                    <Icon className="h-4 w-4 mt-0.5 text-destructive/70 shrink-0" />
-                    <span>{text}</span>
-                  </li>
-                ))}
-              </ul>
+      {/* ─── 3. FEATURED SCRIPTURES ─── */}
+      <section className="bg-background section-rhythm">
+        <div className="container">
+          <div className="mb-14 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            <div>
+              <span className="section-eyebrow">Featured</span>
+              <h2 className="mt-3 font-serif text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-foreground">
+                Sacred texts, <span className="text-primary">beautifully edited</span>.
+              </h2>
+              <p className="mt-4 max-w-xl text-muted-foreground">
+                Hand-picked editions from our library — the essential
+                scriptures every home library deserves.
+              </p>
             </div>
-            <div className="rounded-xl border-2 border-primary/30 bg-primary/5 p-5 shadow-md">
-              <h3 className="font-semibold text-primary mb-3 flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5" /> The GyandootNova way
-              </h3>
-              <ul className="space-y-2 text-sm text-foreground/90 font-medium">
-                {[
-                  { Icon: Lock, text: "One ID — your library on every device" },
-                  { Icon: Cloud, text: "Zero bytes taken from your phone's memory" },
-                  { Icon: BookOpen, text: "Always crisp, HD and easy to read" },
-                  { Icon: ShieldCheck, text: "For your eyes only — nobody else's" },
-                  { Icon: Gift, text: "Every author update reaches you, free" },
-                ].map(({ Icon, text }) => (
-                  <li key={text} className="flex items-start gap-2">
-                    <Icon className="h-4 w-4 mt-0.5 text-primary shrink-0" />
-                    <span>{text}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <Link
+              to="/books"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-primary link-underline shrink-0"
+            >
+              View all books <ArrowUpRight className="h-4 w-4" />
+            </Link>
           </div>
 
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {(featuredBooks ?? []).slice(0, 6).map((b: any) => (
+              <Link
+                key={b.id}
+                to={`/books/${b.slug}`}
+                className="group relative rounded-2xl bg-card border border-border overflow-hidden transition-all duration-500 hover:shadow-lift hover:-translate-y-1 hover:border-primary/30"
+              >
+                <div className="aspect-[4/5] overflow-hidden bg-muted">
+                  {b.cover_url ? (
+                    <img
+                      src={b.cover_url}
+                      alt={b.title}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="h-full w-full bg-gradient-to-br from-primary/80 to-[hsl(var(--primary-glow))] grid place-items-center">
+                      <BookOpen className="h-14 w-14 text-primary-foreground/70" />
+                    </div>
+                  )}
+                </div>
+                <div className="p-6">
+                  <h3 className="font-serif text-lg font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
+                    {b.title}
+                  </h3>
+                  {b.author && (
+                    <p className="mt-1 text-xs text-muted-foreground">{b.author}</p>
+                  )}
+                  <div className="mt-5 flex items-center justify-between">
+                    <span className="font-serif text-lg font-bold text-foreground">
+                      {b.is_free ? "Free" : b.price ? `₹${b.price}` : "—"}
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                      {b.is_free ? "Read Sample" : "Buy Now"} <ArrowRight className="h-3 w-3" />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+            {(!featuredBooks || featuredBooks.length === 0) && (
+              <div className="col-span-full text-center py-16 text-muted-foreground text-sm">
+                Featured books will appear here.
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
-
-      {/* ─── 2. ABOUT ─── */}
-      <section className="py-20">
+      {/* ─── 4. BROWSE BY CATEGORY ─── */}
+      <section className="bg-[hsl(var(--surface))] section-rhythm">
         <div className="container">
-          <div className="grid items-center gap-12 md:grid-cols-2">
-            <div>
-              <h2 className="font-serif text-3xl font-bold md:text-4xl">
-                Where scriptures meet <span className="text-primary">curious minds</span>
-              </h2>
-              <div className="mt-3 h-1 w-16 rounded-full bg-primary" />
-              <p className="mt-6 text-muted-foreground leading-relaxed">
-                GyandootNova is a small effort to bring the sacred texts once locked in
-                grandmothers' cupboards back into your hands. We track down old manuscripts,
-                work with Sanskrit scholars, and deliver them to you in language that
-                actually reads well today.
-              </p>
-              <p className="mt-4 text-muted-foreground leading-relaxed">
-                Reading a scripture shouldn't feel like homework. Our reader is designed
-                so a five-minute break is enough for a shloka and its meaning to land.
-              </p>
-              <Button
-                variant="outline"
-                className="mt-6 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-                asChild
+          <div className="mb-14 text-center max-w-2xl mx-auto">
+            <span className="section-eyebrow">The Library</span>
+            <h2 className="mt-3 font-serif text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
+              Browse by <span className="text-primary">tradition</span>.
+            </h2>
+            <p className="mt-4 text-muted-foreground">
+              50+ carefully curated sacred texts organised the way scholars
+              have read them for centuries.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {categories.map((cat) => (
+              <Link
+                key={cat.title}
+                to={cat.to}
+                className="group relative rounded-2xl bg-card border border-border p-7 transition-all duration-400 hover:border-primary/30 hover:shadow-card hover:-translate-y-0.5"
               >
-                <Link to="/articles">
-                  Read Our Articles <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
+                <div className="flex items-start gap-4">
+                  <div className="h-11 w-11 rounded-xl bg-secondary/15 grid place-items-center shrink-0 group-hover:bg-secondary/25 transition-colors">
+                    <cat.icon className="h-5 w-5 text-[hsl(var(--gold-deep))]" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-serif text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
+                      {cat.title}
+                    </h3>
+                    <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
+                      {cat.desc}
+                    </p>
+                    <span className="mt-4 inline-flex items-center text-xs font-semibold text-primary opacity-70 group-hover:opacity-100 transition-opacity">
+                      Explore <ArrowRight className="ml-1 h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── 5. WHY GYANDOOTNOVA ─── */}
+      <section className="bg-background section-rhythm">
+        <div className="container">
+          <div className="grid gap-14 lg:grid-cols-[0.9fr_1.1fr] items-center">
+            <div>
+              <span className="section-eyebrow">Why GyandootNova</span>
+              <h2 className="mt-3 font-serif text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-tight">
+                Built for the <span className="text-primary italic font-normal">reader</span>,
+                not the algorithm.
+              </h2>
+              <p className="mt-5 text-muted-foreground leading-relaxed">
+                We're a small team of editors, designers and translators
+                obsessed with one question: how would you want to read the
+                Gita if you were reading it for the first time?
+              </p>
+              <div className="mt-8 flex items-center gap-3">
+                <div className="h-px w-12 bg-secondary" />
+                <span className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+                  A quiet publishing house
+                </span>
+              </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
               {[
-                { icon: BookMarked, label: "Ancient Scriptures", desc: "Original text, verified translations" },
-                { icon: FileText, label: "Life-Sutra Articles", desc: "Today's questions, timeless answers" },
-                { icon: Users, label: "Global Community", desc: "Readers from across the world" },
-                { icon: Globe, label: "Anywhere You Are", desc: "Wherever there's internet, your library follows" },
-              ].map((item) => (
+                { icon: CheckCircle2, title: "Authentic translations", desc: "Verified against original Sanskrit by our scholarly panel." },
+                { icon: BookOpen, title: "Effortless reading", desc: "Kindle-quality typography, thoughtful spacing, zero clutter." },
+                { icon: RefreshCw, title: "Lifetime updates", desc: "New editions and improvements — always free, forever yours." },
+                { icon: Smartphone, title: "Every device", desc: "Read on phone, tablet or desktop. Nothing to download." },
+              ].map((f) => (
                 <div
-                  key={item.label}
-                  className="rounded-xl border border-border bg-card p-5 text-center transition-shadow hover:shadow-md"
+                  key={f.title}
+                  className="rounded-2xl border border-border bg-card p-6 transition-all hover:shadow-card hover:border-primary/20"
                 >
-                  <item.icon className="mx-auto h-8 w-8 text-primary" />
-                  <h3 className="mt-3 font-serif font-semibold text-card-foreground">{item.label}</h3>
-                  <p className="mt-1 text-xs text-muted-foreground">{item.desc}</p>
+                  <div className="h-10 w-10 rounded-full bg-primary/10 grid place-items-center mb-4">
+                    <f.icon className="h-4 w-4 text-primary" />
+                  </div>
+                  <h3 className="font-serif text-base font-semibold text-foreground">{f.title}</h3>
+                  <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
                 </div>
               ))}
             </div>
-
           </div>
         </div>
       </section>
 
-      {/* ─── 2.5 HAMARA UDDESHYA · Our Mission (3 pillars) ─── */}
-      <section aria-labelledby="our-mission" className="bg-muted/30 py-20">
-        <div className="container max-w-6xl">
-          <div className="mb-12 text-center">
-            <span className="inline-block rounded-full bg-secondary/20 px-3 py-1 text-xs font-semibold text-secondary-foreground uppercase tracking-wider">
-              हमारा उद्देश्य
-            </span>
-            <h2 id="our-mission" className="mt-3 font-serif text-3xl font-bold md:text-4xl">
-              Our Mission · <span className="text-primary">तीन संकल्प</span>
+      {/* ─── 6. MEMBERSHIP ─── */}
+      <section className="bg-[hsl(var(--surface))] section-rhythm">
+        <div className="container">
+          <div className="text-center mb-14 max-w-2xl mx-auto">
+            <span className="section-eyebrow">Membership</span>
+            <h2 className="mt-3 font-serif text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
+              One home library, <span className="text-primary">forever</span>.
             </h2>
-            <div className="mt-3 mx-auto h-1 w-16 rounded-full bg-secondary" />
+            <p className="mt-4 text-muted-foreground">
+              Simple pricing. Lifetime access. Cancel anytime — but you won't.
+            </p>
           </div>
-          <div className="grid gap-6 md:grid-cols-3">
+
+          <div className="grid gap-6 md:grid-cols-3 max-w-5xl mx-auto">
             {[
               {
-                icon: ScrollText,
-                pillar: "संरक्षण",
-                title: "प्राचीन शास्त्रों का शुद्ध संरक्षण",
-                desc: "संस्कृत और हिंदी के मूल ग्रंथों को उनकी शुद्धता के साथ, विद्वानों की देख-रेख में डिजिटल रूप में सुरक्षित रखना।",
+                name: "Reader",
+                price: "Free",
+                sub: "Start exploring",
+                features: ["3 free scriptures", "Full-text reader", "Read on any device", "No account required"],
+                cta: "Start Reading",
+                to: "/books?filter=free",
+                highlight: false,
               },
               {
-                icon: Globe,
-                pillar: "सुलभता",
-                title: "हर हिंदी पाठक तक धर्म-ज्ञान",
-                desc: "गाँव हो या विदेश — जहाँ भी इंटरनेट है, वहाँ हर पाठक को सच्चे धर्म-ग्रंथ नि:शुल्क या न्यूनतम मूल्य पर उपलब्ध हों।",
+                name: "Library",
+                price: "₹999",
+                sub: "One-time · Lifetime",
+                features: ["All 50+ scriptures", "Lifetime updates", "Offline reading", "Priority support", "Ad-free reader"],
+                cta: "Get Lifetime Access",
+                to: "/books",
+                highlight: true,
               },
               {
-                icon: Sparkles,
-                pillar: "आधुनिकता",
-                title: "प्राचीन ज्ञान, आज की तकनीक",
-                desc: "स्वच्छ रीडर, डार्क मोड, बुकमार्क और नोट्स — प्राचीन शास्त्रों को आज पढ़ना उतना ही सहज हो जितना एक अख़बार पढ़ना।",
+                name: "Patron",
+                price: "₹2,499",
+                sub: "Support the mission",
+                features: ["Everything in Library", "Early access to new titles", "Named acknowledgement", "Direct scholar Q&A"],
+                cta: "Become a Patron",
+                to: "/donate",
+                highlight: false,
               },
             ].map((p) => (
               <div
-                key={p.title}
-                className="rounded-2xl border border-border bg-card p-7 text-center shadow-sm transition-shadow hover:shadow-md"
+                key={p.name}
+                className={
+                  p.highlight
+                    ? "relative rounded-3xl bg-card border-2 border-primary p-8 shadow-xl shadow-primary/10 md:-translate-y-3"
+                    : "relative rounded-3xl bg-card border border-border p-8 shadow-card"
+                }
               >
-                <div className="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-                  <p.icon className="h-7 w-7 text-primary" />
-                </div>
-                <span className="text-xs font-semibold uppercase tracking-widest text-secondary">{p.pillar}</span>
-                <h3 className="mt-2 font-serif text-lg font-semibold text-card-foreground">{p.title}</h3>
-                <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{p.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── OUR REACH — honest, no fabricated global scale ─── */}
-      <section aria-labelledby="our-reach" className="bg-background border-y border-border/60 py-16 md:py-20">
-        <div className="container">
-          <div className="max-w-2xl mx-auto text-center">
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-primary">
-              Hamari Pahunch · Our Reach
-            </p>
-            <h2 id="our-reach" className="mt-4 font-serif text-3xl md:text-4xl font-bold text-foreground leading-tight">
-              A growing readership across India and beyond
-            </h2>
-            <p className="mt-6 text-muted-foreground leading-[1.9]">
-              We are not everywhere yet — and we don't pretend to be. But quietly, readers from a
-              handful of countries have made GyandootNova a part of their daily reading.
-            </p>
-          </div>
-
-          <div className="mt-12 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 max-w-4xl mx-auto">
-            {[
-              { flag: "🇮🇳", name: "India", note: "Home base" },
-              { flag: "🇺🇸", name: "United States", note: "Diaspora readers" },
-              { flag: "🇬🇧", name: "United Kingdom", note: "Diaspora readers" },
-              { flag: "🇨🇦", name: "Canada", note: "Diaspora readers" },
-              { flag: "🇦🇺", name: "Australia", note: "Diaspora readers" },
-            ].map((c) => (
-              <div
-                key={c.name}
-                className="rounded-2xl border border-border/70 bg-card px-5 py-6 text-center shadow-card"
-              >
-                <div className="text-2xl leading-none" aria-hidden>{c.flag}</div>
-                <p className="mt-3 text-sm font-semibold text-foreground">{c.name}</p>
-                <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                  {c.note}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <p className="mt-8 max-w-2xl mx-auto text-center text-xs text-muted-foreground">
-            Countries listed are based on real reader traffic. We only add a country when we can
-            honestly say readers are there.
-          </p>
-        </div>
-      </section>
-
-      {/* ─── 3. FEATURED BOOKS ─── */}
-
-      <section className="bg-muted/40 py-20">
-
-        <div className="container">
-          <div className="mb-10 text-center">
-            <h2 className="font-serif text-3xl font-bold md:text-4xl">Readers' Favourites</h2>
-            <p className="mt-2 text-muted-foreground">The most-read and most-loved editions in our library</p>
-
-          </div>
-          {featuredBooks && featuredBooks.length > 0 ? (
-            <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-              {featuredBooks.map((book) => (
-                <Link key={book.id} to={`/books/${book.slug}`} className="group">
-                  <Card className="overflow-hidden border-border transition-all hover:shadow-xl hover:-translate-y-1 h-full flex flex-col relative">
-                    <div className="absolute top-2 left-2 z-10">
-                      {book.is_free ? (
-                        <span className="inline-block rounded-md bg-green-600 text-white px-2 py-0.5 text-[10px] font-bold shadow">FREE</span>
-                      ) : (
-                        <span className="inline-flex items-center gap-0.5 rounded-md bg-secondary text-secondary-foreground px-2 py-0.5 text-[10px] font-bold shadow"><Star className="h-2.5 w-2.5 fill-current" /> BESTSELLER</span>
-                      )}
-                    </div>
-                    {!book.is_free && (
-                      <div className="absolute top-2 right-2 z-10">
-                        <span className="inline-block rounded-md bg-primary/95 text-primary-foreground px-2 py-0.5 text-[10px] font-bold shadow">LIFETIME</span>
-                      </div>
-                    )}
-                    <div className="aspect-[3/4] bg-muted flex items-center justify-center overflow-hidden">
-                      {book.cover_url ? (
-                        <img
-                          src={book.cover_url}
-                          alt={book.title}
-                          width={300}
-                          height={400}
-                          decoding="async"
-                          loading="lazy"
-                          className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                        />
-
-                      ) : (
-                        <BookOpen className="h-12 w-12 text-muted-foreground/30" />
-                      )}
-                    </div>
-                    <CardContent className="p-3 md:p-4 flex flex-col flex-1">
-                      <h3 className="font-serif font-semibold text-[15px] leading-snug text-card-foreground group-hover:text-primary transition-colors line-clamp-2 min-h-[2.6rem]">
-                        {book.title}
-                      </h3>
-                      <p className="text-xs text-muted-foreground mt-0.5 truncate">{book.author}</p>
-                      <div className="mt-2 flex items-center gap-1 text-[11px] text-muted-foreground">
-                        <Star className="h-3 w-3 fill-secondary text-secondary" />
-                        <span className="font-medium text-foreground">4.8</span>
-                        <span>• Verified</span>
-                      </div>
-                      <div className="mt-3 flex items-center justify-between gap-2">
-                        {book.is_free ? (
-                          <span className="text-base font-bold text-green-700">₹0</span>
-                        ) : (
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-base font-bold text-primary">₹{book.price}</span>
-                            <span className="text-[10px] text-muted-foreground line-through">₹{Math.round((book.price as number) * 2.5)}</span>
-                          </div>
-                        )}
-                        <span className="text-[11px] font-bold text-primary group-hover:underline">
-                          {book.is_free ? "Read →" : "Buy Now →"}
-                        </span>
-
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <Sparkles className="mx-auto h-10 w-10 text-secondary" />
-              <p className="mt-3 text-muted-foreground">Books coming soon. Stay tuned!</p>
-            </div>
-          )}
-          <div className="mt-10 text-center">
-            <Button
-              variant="outline"
-              className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-              asChild
-            >
-              <Link to="/books">
-                Browse the Full Library <ArrowRight className="ml-2 h-4 w-4" />
-
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── 3.5. COMPARE — printed vs PDF vs us ─── */}
-      <CompareSection />
-
-      {/* ─── 3.7 HAMARI SEVAYEN · Our Offerings ─── */}
-      <section aria-labelledby="hamari-sevayen" className="bg-background py-20">
-        <div className="container max-w-6xl">
-          <div className="mb-10 text-center">
-            <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-wider">
-              हमारी सेवाएँ
-            </span>
-            <h2 id="hamari-sevayen" className="mt-3 font-serif text-3xl font-bold md:text-4xl">
-              Hamari Sevayen · <span className="text-primary">Our Offerings</span>
-            </h2>
-            <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
-              सिर्फ़ पुस्तकें नहीं — पढ़ने, समझने और आगे बढ़ने का पूरा साथ।
-            </p>
-          </div>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              {
-                icon: Bookmark,
-                title: "Premium Reader",
-                sub: "स्वच्छ रीडर",
-                desc: "डार्क मोड, बुकमार्क, नोट्स और रात-में-पढ़ने योग्य टाइपोग्राफी।",
-                to: "/books",
-              },
-              {
-                icon: MessageCircle,
-                title: "WhatsApp दैनिक श्लोक",
-                sub: "Daily Shlok",
-                desc: "हर सुबह एक श्लोक, उसका अर्थ और आज के जीवन से जुड़ाव — सीधे WhatsApp पर।",
-                to: "/contact",
-              },
-              {
-                icon: FileText,
-                title: "लेख व प्रवचन",
-                sub: "Articles & Discourses",
-                desc: "शास्त्र-आधारित लेख और चुनिंदा प्रवचन — रोज़ के प्रश्नों के सरल उत्तर।",
-                to: "/articles",
-              },
-              {
-                icon: GraduationCap,
-                title: "कार्यक्रम व कार्यशालाएँ",
-                sub: "Programs & Workshops",
-                desc: "मौन साधना, शास्त्र-अध्ययन और आत्म-जागरण की कार्यशालाएँ।",
-                to: "/articles",
-              },
-            ].map((s) => (
-              <Link key={s.title} to={s.to} className="group block">
-                <Card className="h-full border-border p-6 transition-all hover:shadow-md hover:-translate-y-0.5 hover:border-primary/40">
-                  <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-secondary/15">
-                    <s.icon className="h-5 w-5 text-primary" />
+                {p.highlight && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-secondary text-secondary-foreground px-3 py-1 text-[10px] font-bold uppercase tracking-[0.15em] shadow-md">
+                    Most Popular
                   </div>
-                  <h3 className="mt-4 font-serif text-base font-semibold text-card-foreground group-hover:text-primary transition-colors">
-                    {s.title}
-                  </h3>
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-secondary mt-0.5">
-                    {s.sub}
-                  </p>
-                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── 4. PROGRAMS / DISCOURSES ─── */}
-
-      <section className="py-20">
-        <div className="container">
-          <div className="mb-10 text-center">
-            <h2 className="font-serif text-3xl font-bold md:text-4xl">Programs & Discourses</h2>
-            <p className="mt-2 text-muted-foreground">Beyond reading — a chance to listen and experience</p>
-          </div>
-          <div className="grid gap-6 md:grid-cols-3">
-            {[
-              {
-                title: "Silence Retreat",
-                desc: "Give a tired mind a few days of rest — breath, meditation and a simple practice for turning inward.",
-                icon: Sparkles,
-              },
-              {
-                title: "Shloka Discourse",
-                desc: "Short sessions on chosen sutras from the Upanishads and the Gita — one verse, one direction for life.",
-                icon: BookOpen,
-              },
-              {
-                title: "Self-Awakening Workshop",
-                desc: "How the scriptures help with everyday knots — conversation, practice and real experience.",
-                icon: TrendingUp,
-              },
-
-            ].map((program) => (
-              <Card
-                key={program.title}
-                className="group border-border p-6 transition-all hover:shadow-md hover:border-primary/30"
-              >
-                <program.icon className="h-10 w-10 text-primary" />
-                <h3 className="mt-4 font-serif text-lg font-semibold text-card-foreground">{program.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{program.desc}</p>
-                <Link
-                  to="/articles"
-                  className="mt-4 inline-flex items-center text-sm font-medium text-primary hover:underline"
+                )}
+                <p className={p.highlight ? "text-xs font-semibold uppercase tracking-[0.2em] text-primary" : "text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground"}>
+                  {p.name}
+                </p>
+                <div className="mt-4 flex items-baseline gap-2">
+                  <span className="font-serif text-4xl font-bold text-foreground">{p.price}</span>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">{p.sub}</p>
+                <ul className="mt-6 space-y-3">
+                  {p.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2.5 text-sm text-foreground/80">
+                      <CheckCircle2 className={p.highlight ? "h-4 w-4 text-primary shrink-0 mt-0.5" : "h-4 w-4 text-[hsl(var(--gold-deep))] shrink-0 mt-0.5"} />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  asChild
+                  className={
+                    p.highlight
+                      ? "mt-8 w-full h-11 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium"
+                      : "mt-8 w-full h-11 rounded-full bg-foreground text-background hover:bg-foreground/90 font-medium"
+                  }
                 >
-                  View details <ArrowRight className="ml-1 h-3 w-3" />
-                </Link>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── 5. BLOG / ARTICLES ─── */}
-      <section className="bg-muted/30 py-20">
-        <div className="container">
-          <div className="mb-10 text-center">
-            <h2 className="font-serif text-3xl font-bold md:text-4xl">Fresh Thinking, New Articles</h2>
-            <p className="mt-2 text-muted-foreground">Simple, scripture-rooted takes on everyday questions</p>
-
-          </div>
-          {latestPosts && latestPosts.length > 0 ? (
-            <div className="grid gap-6 md:grid-cols-3">
-              {latestPosts.map((post) => (
-                <Link key={post.id} to={`/articles/${post.slug}`}>
-                  <article>
-                    <Card className="group h-full border-border transition-all hover:shadow-lg hover:-translate-y-1">
-                      {post.cover_url && (
-                        <div className="aspect-video overflow-hidden">
-                          <img
-                            src={post.cover_url}
-                            alt={post.title}
-                            className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                            loading="lazy"
-                          />
-                        </div>
-                      )}
-                      <CardContent className="p-5">
-                        <span className="text-xs font-semibold uppercase tracking-wider text-primary">
-                          {post.post_type}
-                        </span>
-                        <h3 className="mt-1.5 font-serif text-lg font-semibold text-card-foreground group-hover:text-primary transition-colors line-clamp-2">
-                          {post.title}
-                        </h3>
-                        {post.excerpt && (
-                          <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>
-                        )}
-                        <span className="mt-3 inline-flex items-center text-sm font-medium text-primary">
-                          Read full article <ArrowRight className="ml-1 h-3 w-3" />
-
-                        </span>
-                      </CardContent>
-                    </Card>
-                  </article>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <FileText className="mx-auto h-10 w-10 text-muted-foreground/30" />
-              <p className="mt-3 text-muted-foreground">New articles are on the way.</p>
-            </div>
-          )}
-          <div className="mt-10 text-center">
-            <Button
-              variant="outline"
-              className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-              asChild
-            >
-              <Link to="/articles">
-                See all articles <ArrowRight className="ml-2 h-4 w-4" />
-
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── 6. IMPACT / STATS ─── */}
-      <section className="bg-primary py-16">
-        <div className="container">
-          <div className="grid gap-8 text-center sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { target: 500, suffix: "+", label: "Published titles" },
-              { target: 10000, suffix: "+", label: "Readers joined" },
-              { target: 200, suffix: "+", label: "Articles & sutras" },
-              { target: 50, suffix: "+", label: "Discourse events" },
-
-            ].map((stat) => (
-              <div key={stat.label}>
-                <AnimatedCounter target={stat.target} suffix={stat.suffix} />
-                <p className="mt-2 text-sm font-medium text-primary-foreground/90">{stat.label}</p>
+                  <Link to={p.to}>{p.cta}</Link>
+                </Button>
               </div>
             ))}
           </div>
@@ -902,284 +545,141 @@ const Index = () => {
       </section>
 
       {/* ─── 7. TESTIMONIALS ─── */}
-      <section className="py-20">
+      <section className="bg-background section-rhythm">
         <div className="container">
-          <div className="mb-10 text-center">
-            <span className="inline-block rounded-full bg-secondary/20 px-3 py-1 text-xs font-semibold text-secondary-foreground uppercase tracking-wider">
-              पाठकों की आवाज़ें
-            </span>
-            <h2 className="mt-3 font-serif text-3xl font-bold md:text-4xl">
-              हमारे पाठकों की <span className="text-primary">आस्था और भरोसे</span> की आवाज़ें
+          <div className="mb-14 text-center max-w-2xl mx-auto">
+            <span className="section-eyebrow">Loved by readers</span>
+            <h2 className="mt-3 font-serif text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
+              A publication readers <span className="text-primary">return to</span>.
             </h2>
-            <p className="mt-2 text-muted-foreground">Voices of faith and trust from our readers</p>
           </div>
-          <div className="grid gap-6 md:grid-cols-3">
-            {[
-              {
-                quote: "One chapter of the Gita on my metro ride home — that's all I do, and the noise in my head is already half gone. Knowing the book is always with me is the best part.",
-                name: "Anil Tiwari",
-                role: "Software Engineer, Bengaluru",
-                rating: 5,
-              },
-              {
-                quote: "At first I worried — no download, how will this work? Then I logged in on my new phone and everything was exactly where I left it. Genuinely effortless.",
-                name: "Seema Agarwal",
-                role: "Teacher & Homemaker, Indore",
-                rating: 5,
-              },
-              {
-                quote: "My father struggled to read fine print. We enlarged the font, turned on night mode, and now he reads the Hanuman Chalisa for half an hour every evening. Thank you to this team.",
-                name: "Gaurav Mishra",
-                role: "Business Owner, Varanasi",
-                rating: 5,
-              },
 
-            ].map((t) => (
-              <Card key={t.name} className="border-border p-6 relative">
-                <div className="flex items-center gap-1 mb-3">
-                  {Array.from({ length: t.rating }).map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-secondary text-secondary" />
-                  ))}
-                </div>
-                <Quote className="h-6 w-6 text-secondary/40" />
-                <p className="mt-3 text-sm text-foreground/85 leading-relaxed">"{t.quote}"</p>
-                <div className="mt-5 border-t border-border pt-4 flex items-center justify-between">
+          <div className="grid gap-6 md:grid-cols-3">
+            {testimonials.map((t) => (
+              <figure
+                key={t.name}
+                className="rounded-2xl bg-card border border-border p-7 shadow-card flex flex-col"
+              >
+                <Quote className="h-6 w-6 text-secondary" />
+                <blockquote className="mt-4 text-foreground/90 leading-relaxed font-serif italic text-[17px]">
+                  "{t.quote}"
+                </blockquote>
+                <figcaption className="mt-6 pt-5 border-t border-border flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-[hsl(var(--primary-glow))] grid place-items-center text-primary-foreground font-serif font-semibold text-sm">
+                    {t.name.charAt(0)}
+                  </div>
                   <div>
-                    <p className="font-serif font-semibold text-card-foreground">{t.name}</p>
+                    <p className="text-sm font-semibold text-foreground">{t.name}</p>
                     <p className="text-xs text-muted-foreground">{t.role}</p>
                   </div>
-                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
-                    <CheckCircle2 className="h-3.5 w-3.5" /> Verified Reader
-                  </span>
-
-                </div>
-              </Card>
+                  <div className="ml-auto flex">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} className="h-3 w-3 fill-secondary text-secondary" />
+                    ))}
+                  </div>
+                </figcaption>
+              </figure>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ─── 7.4 SAMPARK · Prominent Contact Block (trust signal) ─── */}
-      <section aria-labelledby="sampark" className="bg-primary/5 py-16">
-        <div className="container max-w-5xl">
-          <div className="rounded-2xl border border-primary/20 bg-card p-8 md:p-10 shadow-sm">
-            <div className="grid gap-8 md:grid-cols-[1.1fr_1fr] md:items-center">
-              <div>
-                <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-wider">
-                  संपर्क करें
-                </span>
-                <h2 id="sampark" className="mt-3 font-serif text-2xl md:text-3xl font-bold text-card-foreground">
-                  कोई प्रश्न, सुझाव या ग्रंथ की माँग?
-                </h2>
-                <p className="mt-3 text-muted-foreground leading-relaxed">
-                  GyandootNova एक असली, इंसानी टीम है। WhatsApp, फ़ोन या ईमेल — जिस माध्यम से भी लिखें, उसी दिन उत्तर मिलेगा।
-                </p>
-                <div className="mt-6 flex flex-wrap gap-3">
-                  <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90">
-                    <Link to="/contact">
-                      <Mail className="mr-2 h-4 w-4" /> संदेश भेजें
-                    </Link>
-                  </Button>
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="border-primary/40 text-primary hover:bg-primary hover:text-primary-foreground"
-                  >
-                    <a href="https://wa.me/919161533353" target="_blank" rel="noopener noreferrer">
-                      <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
-                    </a>
-                  </Button>
-                </div>
-              </div>
-              <div className="space-y-4">
-                <a
-                  href="tel:+919161533353"
-                  className="flex items-start gap-4 rounded-xl border border-border p-4 hover:border-primary/40 transition-colors"
-                >
-                  <div className="rounded-lg bg-primary/10 p-2.5 shrink-0">
-                    <Phone className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">फ़ोन / WhatsApp</p>
-                    <p className="font-serif text-lg font-semibold text-card-foreground mt-0.5">+91 91615 33353</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">सोम–शनि · 10 AM – 6 PM (IST)</p>
-                  </div>
-                </a>
-                <a
-                  href="mailto:amrendra8765@gmail.com"
-                  className="flex items-start gap-4 rounded-xl border border-border p-4 hover:border-primary/40 transition-colors"
-                >
-                  <div className="rounded-lg bg-primary/10 p-2.5 shrink-0">
-                    <Mail className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">ईमेल</p>
-                    <p className="font-serif text-base font-semibold text-card-foreground mt-0.5 break-all">
-                      amrendra8765@gmail.com
-                    </p>
-                  </div>
-                </a>
-                <div className="flex items-start gap-4 rounded-xl border border-border p-4">
-                  <div className="rounded-lg bg-primary/10 p-2.5 shrink-0">
-                    <MapPin className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">कार्यालय</p>
-                    <p className="font-serif text-base font-semibold text-card-foreground mt-0.5">
-                      Bhagwan Khera, Unnao
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">Uttar Pradesh 209863 · भारत</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+      {/* ─── 8. FAQ ─── */}
+      <section className="bg-[hsl(var(--surface))] section-rhythm">
+        <div className="container max-w-3xl">
+          <div className="mb-10 text-center">
+            <span className="section-eyebrow">Questions</span>
+            <h2 className="mt-3 font-serif text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
+              Everything you'd want to <span className="text-primary">know</span>.
+            </h2>
           </div>
+          <Accordion type="single" collapsible className="w-full space-y-3">
+            {faqs.map((f, i) => (
+              <AccordionItem
+                key={i}
+                value={`faq-${i}`}
+                className="rounded-2xl border border-border bg-card px-6 shadow-card"
+              >
+                <AccordionTrigger className="text-left font-serif text-base font-semibold hover:no-underline py-5">
+                  {f.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground leading-relaxed pb-5">
+                  {f.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
       </section>
 
-      {/* ─── 7.5. GUARANTEE / TRUST ─── */}
+      {/* ─── 9. LATEST ARTICLES ─── */}
+      {latestPosts && latestPosts.length > 0 && (
+        <section className="bg-background section-rhythm">
+          <div className="container">
+            <div className="mb-14 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+              <div>
+                <span className="section-eyebrow">Journal</span>
+                <h2 className="mt-3 font-serif text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
+                  From our <span className="text-primary">editors</span>.
+                </h2>
+              </div>
+              <Link
+                to="/articles"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-primary link-underline"
+              >
+                All articles <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </div>
 
-      <GuaranteeSection />
+            <div className="grid gap-6 md:grid-cols-3">
+              {latestPosts.map((p: any) => (
+                <Link
+                  key={p.id}
+                  to={`/articles/${p.slug}`}
+                  className="group rounded-2xl overflow-hidden bg-card border border-border transition-all hover:shadow-lift hover:-translate-y-1 hover:border-primary/20"
+                >
+                  <div className="aspect-[16/10] overflow-hidden bg-muted">
+                    {p.cover_url ? (
+                      <img
+                        src={p.cover_url}
+                        alt={p.title}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="h-full w-full bg-gradient-to-br from-secondary/20 to-primary/10" />
+                    )}
+                  </div>
+                  <div className="p-6">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[hsl(var(--royal-blue))]">
+                      {p.post_type || "Essay"}
+                    </p>
+                    <h3 className="mt-2 font-serif text-lg font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2">
+                      {p.title}
+                    </h3>
+                    {p.excerpt && (
+                      <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-2">
+                        {p.excerpt}
+                      </p>
+                    )}
+                    <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-primary">
+                      Read more <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
-      {/* ─── 7.7. FAQ STRIP ─── */}
-      <FaqStrip />
-
-      {/* ─── 7.9. NEWSLETTER ─── */}
+      {/* ─── 10. NEWSLETTER ─── */}
       <NewsletterCta />
 
-      {/* ─── 8. SEO CONTENT — KEYWORD-RICH ─── */}
-      <section className="py-20">
-        <div className="container max-w-4xl">
-          <h2 className="font-serif text-3xl font-bold md:text-4xl text-center">
-            Dharmik Granth Online — Buy Spiritual Books at GyandootNova
-          </h2>
-          <div className="mt-3 mx-auto h-1 w-16 rounded-full bg-primary" />
-          <div className="mt-8 space-y-6 text-muted-foreground leading-relaxed">
-            <p>
-              GyandootNova is India's trusted online platform for{" "}
-              <strong className="text-foreground">dharmik granth</strong>, sacred spiritual books, and religious
-              literature. Whether you are looking for a{" "}
-              <strong className="text-foreground">Vishnu Sahasraname book</strong> with meaning in Hindi and English,
-              the complete <strong className="text-foreground">Bhagwat Geeta in Hindi</strong>, or the timeless{" "}
-              <strong className="text-foreground">Ramayana book</strong> — we have an ever-growing library of authentic
-              spiritual texts available to read online instantly.
-            </p>
-            <p>
-              Our collection includes beloved titles such as{" "}
-              <strong className="text-foreground">Hanuman Chalisa book</strong>,{" "}
-              <strong className="text-foreground">Mahabharat in Hindi</strong>,{" "}
-              <strong className="text-foreground">Sundarkand path book</strong>,{" "}
-              <strong className="text-foreground">Vishnu Purana</strong>,{" "}
-              <strong className="text-foreground">Shrimad Bhagwatam</strong>, and{" "}
-              <strong className="text-foreground">Chalisa Sangrah</strong>. Every book is published with care,
-              preserving the sanctity of the original Sanskrit shlokas while providing clear Hindi and English
-              translations for modern readers.
-            </p>
-
-            <h3 className="font-serif text-xl font-semibold text-foreground pt-2">
-              Why Choose GyandootNova for Spiritual Books?
-            </h3>
-            <ul className="list-disc pl-6 space-y-2">
-              <li>
-                <strong className="text-foreground">Read Online Instantly</strong> — No downloads required. Our
-                distraction-free reader supports dark mode, font resizing, bookmarks, and reading progress tracking.
-              </li>
-              <li>
-                <strong className="text-foreground">Authentic & Verified Content</strong> — Every text is carefully
-                curated from trusted spiritual sources and ancient manuscripts.
-              </li>
-              <li>
-                <strong className="text-foreground">Free & Premium Books</strong> — Many dharmik granth are completely
-                free. Premium books start at just ₹99.
-              </li>
-              <li>
-                <strong className="text-foreground">Secure Payments</strong> — Pay safely via Razorpay (India) or PayPal
-                (international). UPI, cards, and net banking accepted.
-              </li>
-              <li>
-                <strong className="text-foreground">Available Worldwide</strong> — Readers from India, USA, UK, Canada,
-                Australia, and Japan access our books daily.
-              </li>
-            </ul>
-
-            <h3 className="font-serif text-xl font-semibold text-foreground pt-2">
-              Popular Dharmik Books on GyandootNova
-            </h3>
-            <p>
-              Our most-read books include the{" "}
-              <strong className="text-foreground">Vishnu Sahasraname with meaning in English</strong> — a complete guide
-              to the 1000 divine names of Lord Vishnu, the{" "}
-              <strong className="text-foreground">Bhagavad Gita simplified</strong> for daily guidance, and the{" "}
-              <strong className="text-foreground">Ramayana in Hindi</strong> narrating the divine journey of Shri Ram.
-              We also feature <strong className="text-foreground">stotra sangrah</strong>,{" "}
-              <strong className="text-foreground">aarti sangrah</strong>, and mantra collections for daily pooja.
-            </p>
-
-            <h3 className="font-serif text-xl font-semibold text-foreground pt-2">Spiritual Articles & Insights</h3>
-            <p>
-              Beyond books, GyandootNova publishes insightful articles on meditation techniques, the significance of{" "}
-              <strong className="text-foreground">Sanskrit shlokas</strong>, guides to performing{" "}
-              <strong className="text-foreground">Ramayana path at home</strong>, deep dives into Geeta's 18 chapters,
-              and the spiritual meaning behind Hindu festivals. Our content helps seekers worldwide deepen their
-              understanding of Sanatan Dharma.
-            </p>
-
-            <h3 className="font-serif text-xl font-semibold text-foreground pt-2">How to Buy Hindu Books Online</h3>
-            <p>
-              Buying <strong className="text-foreground">Hindu books online</strong> at GyandootNova is simple: browse
-              our{" "}
-              <Link to="/books" className="text-primary hover:underline font-medium">
-                Books Library
-              </Link>
-              , select a title, and start reading — free books open instantly. For premium titles, complete a quick
-              secure payment and the full book unlocks in your account forever. No subscription needed. Have questions?
-              Visit our{" "}
-              <Link to="/faq" className="text-primary hover:underline font-medium">
-                FAQ
-              </Link>{" "}
-              or{" "}
-              <Link to="/contact" className="text-primary hover:underline font-medium">
-                Contact Us
-              </Link>
-              .
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── 9. SUPPORT US CTA ─── */}
-      <section className="py-20">
-        <div className="container">
-          <div className="rounded-2xl bg-primary p-10 text-center md:p-16 relative overflow-hidden">
-            <div
-              className="absolute inset-0 opacity-10"
-              style={{
-                backgroundImage: "radial-gradient(circle at 70% 30%, hsl(45 97% 58%) 0%, transparent 50%)",
-              }}
-            />
-            <div className="relative">
-              <Heart className="mx-auto h-12 w-12 text-secondary" />
-              <h2 className="mt-5 font-serif text-3xl font-bold text-primary-foreground md:text-4xl">
-                A small hand, a great service
-              </h2>
-              <p className="mx-auto mt-4 max-w-lg text-primary-foreground/90 leading-relaxed">
-                Every contribution helps revive a scripture that was slipping away and puts
-                it in the hands of a new reader. Join this effort — give whatever you can.
-              </p>
-              <Button
-                size="lg"
-                className="mt-8 bg-secondary text-secondary-foreground font-semibold hover:bg-secondary/90 shadow-lg px-10"
-                asChild
-              >
-                <Link to="/support-us">
-                  Contribute <Heart className="ml-2 h-4 w-4" />
-
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Retain hidden FAQ strip for SEO structured data continuity if any consumer relies on it */}
+      <div className="sr-only">
+        <FaqStrip />
+      </div>
     </Layout>
   );
 };

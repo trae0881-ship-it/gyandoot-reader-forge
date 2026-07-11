@@ -255,6 +255,92 @@ const Index = () => {
         </div>
       </section>
 
+      {/* ─── 1.05 CATEGORY-WISE BROWSING (Hindi-first, crawlable in SSR) ─── */}
+      <section aria-labelledby="granth-categories" className="bg-background py-16 md:py-20">
+        <div className="container">
+          <div className="mb-10 text-center">
+            <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary uppercase tracking-wider">
+              विषय अनुसार खोजें
+            </span>
+            <h2 id="granth-categories" className="mt-3 font-serif text-3xl font-bold md:text-4xl">
+              श्रेणी अनुसार ग्रंथ · <span className="text-primary">Browse by Category</span>
+            </h2>
+            <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
+              50+ पवित्र ग्रंथ — वेद, उपनिषद, इतिहास, भक्ति और स्तोत्र, सब एक ही पुस्तकालय में।
+            </p>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                icon: ScrollText,
+                title: "वेद व उपनिषद",
+                subtitle: "Vedic Texts",
+                desc: "ऋग्वेद, यजुर्वेद, सामवेद, अथर्ववेद और प्रमुख उपनिषदों का हिंदी अनुवाद।",
+                to: "/books?category=adhyatm",
+              },
+              {
+                icon: Landmark,
+                title: "इतिहास ग्रंथ",
+                subtitle: "Itihasa · Ramayana & Mahabharata",
+                desc: "रामायण, महाभारत, सुंदरकांड — मूल कथाएँ सरल हिंदी में।",
+                to: "/books?category=katha",
+              },
+              {
+                icon: Heart,
+                title: "भक्ति मार्ग",
+                subtitle: "Bhagavad Gita & Commentaries",
+                desc: "श्रीमद्भगवद्गीता और उस पर सरल भाष्य — रोज़ के जीवन के लिए।",
+                to: "/books?category=devta",
+              },
+              {
+                icon: Music2,
+                title: "स्तोत्र व मंत्र संग्रह",
+                subtitle: "Stotra & Mantra Sangrah",
+                desc: "विष्णु सहस्रनाम, हनुमान चालीसा, आरती और नित्य पाठ के मंत्र।",
+                to: "/books?category=devi",
+              },
+              {
+                icon: Flame,
+                title: "पुराण व कथाएँ",
+                subtitle: "Puranas & Devotional Stories",
+                desc: "श्रीमद्भागवत, विष्णु पुराण और भक्ति भाव से भरी कथाएँ।",
+                to: "/books?category=puran",
+              },
+              {
+                icon: Feather,
+                title: "योग व साधना",
+                subtitle: "Yoga & Sadhna Guides",
+                desc: "ध्यान, प्राणायाम और आध्यात्मिक साधना पर मार्गदर्शन।",
+                to: "/books?category=other",
+              },
+            ].map((cat) => (
+              <Link key={cat.title} to={cat.to} className="group block">
+                <Card className="h-full border-border p-6 transition-all hover:shadow-md hover:-translate-y-0.5 hover:border-primary/40">
+                  <div className="flex items-start gap-4">
+                    <div className="rounded-xl bg-primary/10 p-3 shrink-0">
+                      <cat.icon className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-serif text-lg font-semibold text-card-foreground group-hover:text-primary transition-colors">
+                        {cat.title}
+                      </h3>
+                      <p className="text-xs font-medium uppercase tracking-wider text-secondary mt-0.5">
+                        {cat.subtitle}
+                      </p>
+                      <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{cat.desc}</p>
+                      <span className="mt-3 inline-flex items-center text-xs font-semibold text-primary">
+                        पढ़ना शुरू करें <ArrowRight className="ml-1 h-3 w-3" />
+                      </span>
+                    </div>
+                  </div>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+
       {/* Brand entity confirmation — plain, crawlable text stating that
           "GyandootNova", "Gyandoot Nova" and "Gyandoot" all refer to the
           same site. Prerender captures this into the raw HTML. */}

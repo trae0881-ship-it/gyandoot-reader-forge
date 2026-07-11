@@ -842,8 +842,13 @@ const Index = () => {
       <section className="py-20">
         <div className="container">
           <div className="mb-10 text-center">
-            <h2 className="font-serif text-3xl font-bold md:text-4xl">In Our Readers' Own Words</h2>
-            <p className="mt-2 text-muted-foreground">Hear from the people who actually read here every day</p>
+            <span className="inline-block rounded-full bg-secondary/20 px-3 py-1 text-xs font-semibold text-secondary-foreground uppercase tracking-wider">
+              पाठकों की आवाज़ें
+            </span>
+            <h2 className="mt-3 font-serif text-3xl font-bold md:text-4xl">
+              हमारे पाठकों की <span className="text-primary">आस्था और भरोसे</span> की आवाज़ें
+            </h2>
+            <p className="mt-2 text-muted-foreground">Voices of faith and trust from our readers</p>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {[

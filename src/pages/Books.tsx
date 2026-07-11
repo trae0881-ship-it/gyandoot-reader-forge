@@ -389,7 +389,7 @@ const BookCard = ({
           by <span className="font-medium" style={{ color: "#374151" }}>{book.author}</span>
         </p>
 
-        <div className="mt-5 flex items-center gap-2">
+        <div className="mt-5 flex items-center gap-2 flex-wrap">
           <Stars value={rating} />
           <span className="text-[13px] font-semibold" style={{ color: T.text }}>
             {rating.toFixed(1)}
@@ -397,7 +397,16 @@ const BookCard = ({
           <span className="text-[12px]" style={{ color: T.textMuted }}>
             ({reviews.toLocaleString()} reviews)
           </span>
+          {verifiedFor(book.id) > 0 && (
+            <span
+              className="inline-flex items-center gap-0.5 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700"
+              title={`${verifiedFor(book.id)} verified purchases`}
+            >
+              ✓ {verifiedFor(book.id)} verified
+            </span>
+          )}
         </div>
+
 
 
         <div className="mt-6 flex items-end justify-between gap-2">

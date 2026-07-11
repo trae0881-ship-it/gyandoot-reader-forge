@@ -15,6 +15,9 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { BooksJourneyIntro } from "@/components/BrandExperience";
+import SalesTrustBar from "@/components/SalesTrustBar";
+import LaunchOfferBanner from "@/components/LaunchOfferBanner";
+import { useTrackOnMount, trackSalesEvent } from "@/hooks/useAnalytics";
 
 import {
   BookOpen,
@@ -935,8 +938,15 @@ const Books = () => {
                 Curated Hindu scriptures, spiritual classics and modern reflections — with a calm reader designed for depth, instant access, and lifetime reading.
               </p>
             </Reveal>
+
+            {/* Launch offer + trust bar — conversion boosters */}
+            <div className="mt-10 space-y-5">
+              <LaunchOfferBanner />
+              <SalesTrustBar />
+            </div>
           </div>
         </section>
+
 
         {/* Featured */}
         {featured.length > 0 && (

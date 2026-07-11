@@ -97,16 +97,14 @@ const OfferLanding = () => {
         name: guest?.name,
         email: guest?.email,
       } as any,
-      (() => {
+      (info) => {
         trackSalesEvent("payment_success", { book_id: book.id, source: "offer_landing" });
         setBuying(false);
         setGuestOpen(false);
-        // For logged-in users we send to dashboard; guest flow is completed
-        // by verify-payment redirect via URL params (claim_token) added below.
-        const urlToken = new URLSearchParams(window.location.search).get("claim_token");
-        if (urlToken) navigate(`/claim/${urlToken}`);
+        if (info?.claim_token) navigate(`/claim/${info.claim_token}`);
         else navigate("/dashboard");
-      }) as unknown as () => void,
+      },
+
 
       (err) => {
         trackSalesEvent("payment_failed", { book_id: book.id, error: err });

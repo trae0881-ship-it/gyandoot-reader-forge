@@ -20,6 +20,13 @@ interface CreateOrderParams {
   // Buyer's display currency + live INR→currency rate (for PayPal international pricing)
   buyer_currency?: string;
   buyer_fx_rate?: number;
+  // Guest checkout — when the user is not logged in.
+  guest_email?: string;
+  guest_name?: string;
+}
+
+export interface PaymentSuccessInfo {
+  claim_token?: string;
 }
 
 function loadRazorpayScript(): Promise<void> {
@@ -35,27 +42,19 @@ function loadRazorpayScript(): Promise<void> {
 
 export async function initiatePayment(
   params: CreateOrderParams,
-  onSuccess: () => void,
+  onSuccess: (info?: PaymentSuccessInfo) => void,
   onFailure: (error: string) => void
 ) {
   const gateway = params.gateway || "razorpay";
 
   try {
-    // For purchases, session is required. For donations, it's optional.
     const { data: { session } } = await supabase.auth.getSession();
 
-    if (params.type === "purchase" && !session) {
-      onFailure("Please log in to purchase books");
+    // Guest checkout: purchase without login requires guest_email
+    if (params.type === "purchase" && !session && !params.guest_email) {
+      onFailure("Please log in or provide an email to purchase");
       return;
     }
-
-    // Invoke edge function — pass auth header only if logged in
-    const invokeOptions = session
-      ? { body: { ...params, gateway } }
-      : {
-          body: { ...params, gateway },
-          headers: { Authorization: "Bearer anonymous" },
-        };
 
     const res = await supabase.functions.invoke("create-order", {
       body: { ...params, gateway },
@@ -83,7 +82,7 @@ async function handleRazorpayCheckout(
   orderData: any,
   params: CreateOrderParams,
   accessToken: string | null,
-  onSuccess: () => void,
+  onSuccess: (info?: PaymentSuccessInfo) => void,
   onFailure: (error: string) => void
 ) {
   await loadRazorpayScript();
@@ -110,12 +109,12 @@ async function handleRazorpayCheckout(
       if (verifyRes.error || !verifyRes.data?.success) {
         onFailure("Payment verification failed");
       } else {
-        onSuccess();
+        onSuccess({ claim_token: orderData.claim_token });
       }
     },
     prefill: {
-      name: params.name || "",
-      email: params.email || "",
+      name: params.name || params.guest_name || "",
+      email: params.email || params.guest_email || "",
     },
     theme: { color: "#B71C1C" },
     modal: {
@@ -131,7 +130,7 @@ function handlePaypalCheckout(
   orderData: any,
   params: CreateOrderParams,
   accessToken: string | null,
-  onSuccess: () => void,
+  onSuccess: (info?: PaymentSuccessInfo) => void,
   onFailure: (error: string) => void
 ) {
   if (!orderData.approve_url) {
@@ -156,7 +155,7 @@ function handlePaypalCheckout(
       if (verifyRes.error || !verifyRes.data?.success) {
         onFailure("Payment verification failed or was cancelled");
       } else {
-        onSuccess();
+        onSuccess({ claim_token: orderData.claim_token });
       }
     }
   }, 1000);

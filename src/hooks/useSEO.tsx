@@ -123,7 +123,7 @@ const useSEO = ({ title, description, canonical, ogImage, ogType, jsonLd, hrefla
       scriptEls.forEach((s) => s.remove());
       hreflangEls.forEach((l) => l.remove());
     };
-  }, [title, description, canonical, ogImage, ogType, jsonLd, hreflang]);
+  }, [title, description, canonical, ogImage, ogType, jsonLd, hreflang, noindex]);
 };
 
 export default useSEO;

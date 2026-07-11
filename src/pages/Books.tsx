@@ -1201,7 +1201,7 @@ const Books = () => {
 
                 {hasMore ? (
                   <div ref={loaderRef} className="mt-14 flex flex-col items-center gap-4">
-                    <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    <div className="grid w-full grid-cols-1 gap-x-5 gap-y-5 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-10 xl:grid-cols-4">
                       {Array.from({ length: 4 }).map((_, i) => (
                         <CardSkeleton key={i} />
                       ))}

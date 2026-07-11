@@ -56,9 +56,9 @@ const Footer = () => {
               <img
                 src={brandLogo.url}
                 alt="GyandootNova logo"
-                width={200}
-                height={44}
-                className="h-10 w-auto"
+                width={260}
+                height={60}
+                className="h-14 w-auto rounded-md"
                 loading="lazy"
               />
             </Link>

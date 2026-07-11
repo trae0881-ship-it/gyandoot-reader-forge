@@ -17,16 +17,13 @@ Deno.serve(async () => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY")!
   );
 
-  const [booksRes, postsRes, chaptersRes] = await Promise.all([
+  const [booksRes, postsRes] = await Promise.all([
     supabase.from("books").select("id, slug, updated_at").order("created_at", { ascending: false }),
     supabase.from("posts").select("slug, updated_at").eq("is_published", true).order("created_at", { ascending: false }),
-    supabase.from("book_chapters").select("book_id, slug, updated_at, is_preview, chapter_number").order("chapter_number", { ascending: true }),
   ]);
 
   const books = booksRes.data ?? [];
   const posts = postsRes.data ?? [];
-  const chapters = chaptersRes.data ?? [];
-  const bookSlugById = new Map((books as Array<{ id?: string; slug?: string }>).filter((b) => b.id && b.slug).map((b) => [b.id!, b.slug!]));
 
   const staticPages = [
     { loc: "/", priority: "1.0", changefreq: "daily" },
@@ -60,12 +57,10 @@ Deno.serve(async () => {
     urls.push(`  <url><loc>${BASE_URL}${encPath(`/books/${book.slug}`)}</loc><lastmod>${lastmod}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>`);
   }
 
-  for (const chapter of chapters) {
-    const bookSlug = bookSlugById.get(chapter.book_id);
-    if (!bookSlug || !chapter.slug) continue;
-    const lastmod = chapter.updated_at ? chapter.updated_at.split("T")[0] : today;
-    urls.push(`  <url><loc>${BASE_URL}${encPath(`/books/${bookSlug}/${chapter.slug}`)}</loc><lastmod>${lastmod}</lastmod><changefreq>weekly</changefreq><priority>${chapter.is_preview ? "0.65" : "0.5"}</priority></url>`);
-  }
+  // Chapter reader URLs are intentionally omitted from the sitemap — chapter
+  // content is premium and should not rank; only the book detail page should
+  // appear in search. The reader itself also emits <meta name="robots" noindex>.
+
 
   for (const post of posts) {
     const lastmod = post.updated_at ? post.updated_at.split("T")[0] : today;

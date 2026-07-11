@@ -9,6 +9,8 @@ interface SEOProps {
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
   /** If true, emits hreflang link tags for en-US/GB/AU/CA/IN + hi-IN + x-default pointing at the current canonical URL. */
   hreflang?: boolean;
+  /** If true, emits <meta name="robots" content="noindex, nofollow"> so search engines skip this page. Used for premium chapter reader URLs. */
+  noindex?: boolean;
 }
 
 const BASE_URL = "https://gyandootnova.in";
@@ -29,7 +31,7 @@ const getOrCreateMeta = (attr: string, value: string): HTMLMetaElement => {
   return el;
 };
 
-const useSEO = ({ title, description, canonical, ogImage, ogType, jsonLd, hreflang }: SEOProps) => {
+const useSEO = ({ title, description, canonical, ogImage, ogType, jsonLd, hreflang, noindex }: SEOProps) => {
   useEffect(() => {
     // Title
     document.title = title.includes("GyandootNova") ? title : `${title} | GyandootNova`;
@@ -38,6 +40,10 @@ const useSEO = ({ title, description, canonical, ogImage, ogType, jsonLd, hrefla
     if (description) {
       getOrCreateMeta("name", "description").content = description;
     }
+
+    // Robots — noindex premium/reader pages so book listings rank instead of chapters.
+    const robotsEl = getOrCreateMeta("name", "robots");
+    robotsEl.content = noindex ? "noindex, nofollow" : "index, follow";
 
     // Resolve og:image
     const rawImage = ogImage && ogImage.trim().length > 0 ? ogImage : DEFAULT_OG;
@@ -117,7 +123,7 @@ const useSEO = ({ title, description, canonical, ogImage, ogType, jsonLd, hrefla
       scriptEls.forEach((s) => s.remove());
       hreflangEls.forEach((l) => l.remove());
     };
-  }, [title, description, canonical, ogImage, ogType, jsonLd, hreflang]);
+  }, [title, description, canonical, ogImage, ogType, jsonLd, hreflang, noindex]);
 };
 
 export default useSEO;

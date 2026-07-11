@@ -138,14 +138,9 @@ async function main() {
       changefreq: "weekly",
       priority: "0.7",
     }));
-  const readerEntries = readerRows
-    .filter((r) => r.book_slug && r.chapter_slug)
-    .map((r) => ({
-      path: encPath(`/books/${r.book_slug}/${r.chapter_slug}`),
-      lastmod: r.updated_at?.slice(0, 10),
-      changefreq: "weekly",
-      priority: r.is_excerpt ? "0.5" : "0.65",
-    }));
+  // Chapter reader URLs are intentionally excluded — chapter content is premium.
+  // Only book detail pages should rank in search; chapter pages emit noindex.
+  const readerEntries = [];
 
   const all = [...STATIC, ...bookEntries, ...readerEntries, ...postEntries];
   const xml = [

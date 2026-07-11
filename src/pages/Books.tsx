@@ -470,7 +470,7 @@ const CardSkeleton = () => (
 // ==============================
 // Horizontal book row
 // ==============================
-const BookRow = ({
+const BookCarousel = ({
   title,
   subtitle,
   books,
@@ -968,14 +968,14 @@ const Books = () => {
         )}
 
         <div className="container">
-          <BookRow
+          <BookCarousel
             title="Best Sellers"
             subtitle="The volumes readers return to again and again."
             books={bestSellers}
             render={renderCard}
           />
 
-          <BookRow
+          <BookCarousel
             title="New Arrivals"
             subtitle="Fresh titles just added to the shelves."
             books={newArrivals}
@@ -1200,7 +1200,7 @@ const Books = () => {
         {/* Recently viewed */}
         {recentBooks.length > 0 && (
           <div className="container">
-            <BookRow
+            <BookCarousel
               title="Recently Viewed"
               subtitle="Pick up where you left off."
               books={recentBooks}
@@ -1212,7 +1212,7 @@ const Books = () => {
         {/* Related */}
         {relatedBooks.length > 0 && (
           <div className="container">
-            <BookRow
+            <BookCarousel
               title="You Might Also Enjoy"
               subtitle="Chosen from the shelves closest to your interests."
               books={relatedBooks}

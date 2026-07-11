@@ -499,8 +499,58 @@ const Index = () => {
         </div>
       </section>
 
+      {/* ─── 2.5 HAMARA UDDESHYA · Our Mission (3 pillars) ─── */}
+      <section aria-labelledby="our-mission" className="bg-muted/30 py-20">
+        <div className="container max-w-6xl">
+          <div className="mb-12 text-center">
+            <span className="inline-block rounded-full bg-secondary/20 px-3 py-1 text-xs font-semibold text-secondary-foreground uppercase tracking-wider">
+              हमारा उद्देश्य
+            </span>
+            <h2 id="our-mission" className="mt-3 font-serif text-3xl font-bold md:text-4xl">
+              Our Mission · <span className="text-primary">तीन संकल्प</span>
+            </h2>
+            <div className="mt-3 mx-auto h-1 w-16 rounded-full bg-secondary" />
+          </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            {[
+              {
+                icon: ScrollText,
+                pillar: "संरक्षण",
+                title: "प्राचीन शास्त्रों का शुद्ध संरक्षण",
+                desc: "संस्कृत और हिंदी के मूल ग्रंथों को उनकी शुद्धता के साथ, विद्वानों की देख-रेख में डिजिटल रूप में सुरक्षित रखना।",
+              },
+              {
+                icon: Globe,
+                pillar: "सुलभता",
+                title: "हर हिंदी पाठक तक धर्म-ज्ञान",
+                desc: "गाँव हो या विदेश — जहाँ भी इंटरनेट है, वहाँ हर पाठक को सच्चे धर्म-ग्रंथ नि:शुल्क या न्यूनतम मूल्य पर उपलब्ध हों।",
+              },
+              {
+                icon: Sparkles,
+                pillar: "आधुनिकता",
+                title: "प्राचीन ज्ञान, आज की तकनीक",
+                desc: "स्वच्छ रीडर, डार्क मोड, बुकमार्क और नोट्स — प्राचीन शास्त्रों को आज पढ़ना उतना ही सहज हो जितना एक अख़बार पढ़ना।",
+              },
+            ].map((p) => (
+              <div
+                key={p.title}
+                className="rounded-2xl border border-border bg-card p-7 text-center shadow-sm transition-shadow hover:shadow-md"
+              >
+                <div className="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                  <p.icon className="h-7 w-7 text-primary" />
+                </div>
+                <span className="text-xs font-semibold uppercase tracking-widest text-secondary">{p.pillar}</span>
+                <h3 className="mt-2 font-serif text-lg font-semibold text-card-foreground">{p.title}</h3>
+                <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{p.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ─── 3. FEATURED BOOKS ─── */}
       <section className="bg-muted/40 py-20">
+
         <div className="container">
           <div className="mb-10 text-center">
             <h2 className="font-serif text-3xl font-bold md:text-4xl">Readers' Favourites</h2>

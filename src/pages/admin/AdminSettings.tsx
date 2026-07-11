@@ -47,6 +47,8 @@ const AdminSettings = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [values, setValues] = useState<Record<string, string>>({});
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [logoPreviewError, setLogoPreviewError] = useState(false);
 
   const { data: settings, isLoading } = useQuery({
     queryKey: ["admin-settings"],

@@ -183,7 +183,63 @@ const About = () => {
           </div>
         </section>
 
+        {/* 5b. HAMARI TEEM — Our Team (honest, role-based) */}
+        <section className="container py-16 md:py-24">
+          <div className="max-w-2xl mx-auto text-center">
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-primary">
+              Hamari Teem · Our Team
+            </p>
+            <h2 className="mt-4 font-serif text-3xl md:text-4xl font-bold text-foreground leading-tight">
+              A small, dedicated circle behind every book
+            </h2>
+            <p className="mt-6 text-muted-foreground leading-[1.9]">
+              GyandootNova is a small effort — not a large corporation. What you read here has passed
+              through the care of a few committed hands, each of them attentive to a different part of
+              the work.
+            </p>
+          </div>
+
+          <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            {[
+              {
+                role: "Scripture reviewers",
+                text: "Readers of Sanskrit and Hindi who check every translation against the source text before it goes online.",
+              },
+              {
+                role: "Content curators",
+                text: "The quiet work of tracking down authentic manuscripts, editions and lineage-verified sources.",
+              },
+              {
+                role: "Design & reading experience",
+                text: "A small development effort focused on one goal — a calm, distraction-free reader that respects your time.",
+              },
+              {
+                role: "Reader support",
+                text: "Personal replies on WhatsApp and email — usually the founder himself, not a ticketing system.",
+              },
+            ].map((m) => (
+              <div
+                key={m.role}
+                className="rounded-2xl bg-card border border-border/70 p-8 shadow-card"
+              >
+                <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-primary">
+                  Role
+                </p>
+                <h3 className="mt-3 font-serif text-lg font-semibold text-foreground">
+                  {m.role}
+                </h3>
+                <p className="mt-4 text-sm text-muted-foreground leading-[1.8]">{m.text}</p>
+              </div>
+            ))}
+          </div>
+
+          <p className="mt-10 max-w-2xl mx-auto text-center text-sm text-muted-foreground italic">
+            We deliberately keep the team small so the reader stays at the centre of every decision.
+          </p>
+        </section>
+
         {/* 6. WHY GYANDOOTNOVA */}
+
         <section className="container py-16 md:py-24">
           <div className="max-w-2xl mx-auto text-center">
             <p className="text-xs font-medium uppercase tracking-[0.18em] text-primary">
@@ -214,7 +270,69 @@ const About = () => {
           </div>
         </section>
 
+        {/* 6b. WHERE WE'RE HEADED — future vision, honest */}
+        <section className="bg-muted/30 border-y border-border/60">
+          <div className="container py-16 md:py-24">
+            <div className="max-w-2xl mx-auto text-center">
+              <p className="text-xs font-medium uppercase tracking-[0.18em] text-primary">
+                Aage Ki Raah · Where We're Headed
+              </p>
+              <h2 className="mt-4 font-serif text-3xl md:text-4xl font-bold text-foreground leading-tight">
+                Quiet plans, taken one at a time
+              </h2>
+              <p className="mt-6 text-muted-foreground leading-[1.9]">
+                We are not in a hurry. Each of these is being built with the same care as the books
+                themselves — some are already live, others are gently on their way.
+              </p>
+            </div>
+
+            <div className="mt-14 grid md:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto">
+              {[
+                {
+                  tag: "Live now",
+                  tagTone: "text-primary bg-primary/10 border-primary/20",
+                  title: "Daily shlok on WhatsApp",
+                  text: "A single verse each morning, sent to readers who have asked to receive it — no ads, no forwarded noise.",
+                },
+                {
+                  tag: "In progress",
+                  tagTone: "text-foreground bg-muted border-border",
+                  title: "Audio narration of scriptures",
+                  text: "Slow, unhurried recitations of key texts — meant for the morning walk or the last hour of the day.",
+                },
+                {
+                  tag: "Coming soon",
+                  tagTone: "text-foreground bg-muted border-border",
+                  title: "A dedicated reading app",
+                  text: "The same calm reader you already know — carried into a lighter, offline-first mobile experience.",
+                },
+              ].map((p) => (
+                <div
+                  key={p.title}
+                  className="rounded-2xl bg-card border border-border/70 p-8 shadow-card"
+                >
+                  <span
+                    className={`inline-flex items-center rounded-full border px-3 py-1 text-[10px] font-medium uppercase tracking-[0.16em] ${p.tagTone}`}
+                  >
+                    {p.tag}
+                  </span>
+                  <h3 className="mt-5 font-serif text-lg font-semibold text-foreground">
+                    {p.title}
+                  </h3>
+                  <p className="mt-3 text-sm text-muted-foreground leading-[1.8]">{p.text}</p>
+                </div>
+              ))}
+            </div>
+
+            <p className="mt-10 max-w-2xl mx-auto text-center text-sm text-muted-foreground italic">
+              If something you'd like to see is missing here, write to us — many of our best decisions
+              have started as a reader's message.
+            </p>
+          </div>
+        </section>
+
         {/* 7. READER EMOTIONAL QUOTE */}
+
         <section className="bg-muted/40 border-y border-border/60">
           <div className="container py-20 md:py-28">
             <figure className="max-w-3xl mx-auto text-center">

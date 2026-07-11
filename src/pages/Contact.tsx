@@ -2,7 +2,7 @@ import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, MapPin, Phone, Loader2, ExternalLink } from "lucide-react";
+import { Mail, MapPin, Phone, Loader2, ExternalLink, BookMarked, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -83,6 +83,68 @@ const Contact = () => {
           </p>
         </section>
 
+        {/* Quick actions — Suggest a text / Book a specific scripture request */}
+        <section aria-labelledby="quick-actions" className="max-w-5xl mx-auto mb-14">
+          <div className="grid md:grid-cols-2 gap-6">
+            <a
+              href="#contact-form"
+              onClick={(e) => {
+                e.preventDefault();
+                const s = document.getElementById("contact-subject") as HTMLInputElement | null;
+                const m = document.getElementById("contact-message") as HTMLTextAreaElement | null;
+                if (s) s.value = "Suggest a text / Scripture request";
+                if (m) m.value = "मैं यह पाठ / ग्रंथ देखना चाहूँगा:\n\n(Title, edition or tradition — anything helps)";
+                setForm((f) => ({
+                  ...f,
+                  subject: "Suggest a text / Scripture request",
+                  message: "मैं यह पाठ / ग्रंथ देखना चाहूँगा:\n\n(Title, edition or tradition — anything helps)",
+                }));
+                s?.focus();
+                s?.scrollIntoView({ behavior: "smooth", block: "center" });
+              }}
+              className="group rounded-2xl border border-border/70 bg-card p-7 shadow-card transition-all hover:-translate-y-0.5 hover:shadow-lift"
+            >
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <BookMarked className="h-5 w-5" />
+              </div>
+              <h3 className="mt-5 font-serif text-lg font-semibold text-foreground">
+                Suggest a text · कोई ग्रंथ सुझाइए
+              </h3>
+              <p className="mt-3 text-sm text-muted-foreground leading-[1.8]">
+                Twelve of last month's twelve new titles came from reader requests alone. Ask for a
+                scripture, an edition, or a translation — we take every note seriously.
+              </p>
+              <p className="mt-4 text-xs uppercase tracking-[0.14em] text-primary">
+                Opens the form pre-filled →
+              </p>
+            </a>
+
+            <a
+              href="https://wa.me/919161533353?text=Namaste%20GyandootNova%2C%20I%20have%20a%20question."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group rounded-2xl border border-border/70 bg-card p-7 shadow-card transition-all hover:-translate-y-0.5 hover:shadow-lift"
+            >
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <MessageCircle className="h-5 w-5" />
+              </div>
+              <h3 className="mt-5 font-serif text-lg font-semibold text-foreground">
+                Quick chat on WhatsApp
+              </h3>
+              <p className="mt-3 text-sm text-muted-foreground leading-[1.8]">
+                For anything quick — a book question, an order, or just a hello. We usually reply
+                within a few hours, in Hindi or English.
+              </p>
+              <p className="mt-4 text-xs uppercase tracking-[0.14em] text-primary">
+                Opens WhatsApp →
+              </p>
+            </a>
+          </div>
+        </section>
+
+
+
+
 
         <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
           {/* Contact Info */}
@@ -128,10 +190,11 @@ const Contact = () => {
             </div>
           </div>
 
-          <div>
+          <div id="contact-form">
             <h2 className="font-serif text-2xl font-bold text-foreground mb-6">Fill in the form</h2>
 
             <form onSubmit={handleSubmit} className="space-y-4" aria-label="Contact form">
+
               <Input
                 id="contact-name"
                 name="name"

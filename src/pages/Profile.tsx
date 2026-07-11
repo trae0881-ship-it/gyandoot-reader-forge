@@ -361,9 +361,15 @@ const Profile = () => {
                         size="sm"
                         variant="outline"
                         className="h-7 gap-1.5 text-xs"
-                        onClick={() => downloadInvoice(p.id, p.book?.title)}
+                        onClick={() => openInvoicePreview(p.id, p.book?.title)}
+                        disabled={invoiceLoadingId === p.id}
                       >
-                        <Download className="h-3.5 w-3.5" /> Invoice
+                        {invoiceLoadingId === p.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Eye className="h-3.5 w-3.5" />
+                        )}
+                        Invoice
                       </Button>
                     </div>
                   </Card>

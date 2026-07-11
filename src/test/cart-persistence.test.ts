@@ -1,18 +1,94 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/react";
 
-// ---- Mocks ----
-// A tiny in-memory implementation of the supabase.from("cart_items") chain
-// that useCart uses. Keyed by user_id so we can simulate "another device":
-// two sessions writing under the same user_id share this store.
-type Row = { user_id: string; book_id: string; qty: number };
-const cartStore: Row[] = [];
+// Hoisted state so the (hoisted) vi.mock factory can reach it safely.
+const state = vi.hoisted(() => {
+  type Row = { user_id: string; book_id: string; qty: number };
+  type Book = {
+    id: string; slug: string; title: string;
+    author: string | null; cover_url: string | null;
+    price: number; is_free: boolean;
+  };
+  const cartStore: Row[] = [];
+  const bookMeta = new Map<string, Book>();
+  const currentUser: { value: { id: string } | null } = { value: null };
+  return { cartStore, bookMeta, currentUser };
+});
 
-const bookMeta = new Map<string, {
-  id: string; slug: string; title: string;
-  author: string | null; cover_url: string | null;
-  price: number; is_free: boolean;
-}>();
+vi.mock("@/integrations/supabase/client", () => {
+  const { cartStore, bookMeta } = state;
+
+  function selectBuilder() {
+    return {
+      eq(_col: string, value: string) {
+        const rows = cartStore
+          .filter((r) => r.user_id === value)
+          .map((r) => ({
+            qty: r.qty,
+            book_id: r.book_id,
+            books: bookMeta.get(r.book_id) ?? null,
+          }));
+        return Promise.resolve({ data: rows, error: null });
+      },
+    };
+  }
+
+  function deleteBuilder() {
+    const filters: Record<string, string> = {};
+    const apply = () => {
+      for (let i = cartStore.length - 1; i >= 0; i--) {
+        const r = cartStore[i];
+        if (Object.entries(filters).every(([k, v]) => (r as any)[k] === v)) {
+          cartStore.splice(i, 1);
+        }
+      }
+    };
+    const builder: any = {
+      eq(col: string, value: string) {
+        filters[col] = value;
+        return new Proxy(builder, {
+          get(target, prop) {
+            if (prop === "then") {
+              return (resolve: any) => {
+                apply();
+                resolve({ error: null });
+              };
+            }
+            return (target as any)[prop];
+          },
+        });
+      },
+    };
+    return builder;
+  }
+
+  const supabase = {
+    from(_table: string) {
+      return {
+        select: () => selectBuilder(),
+        upsert(row: { user_id: string; book_id: string; qty: number }) {
+          const existing = cartStore.find(
+            (r) => r.user_id === row.user_id && r.book_id === row.book_id,
+          );
+          if (existing) existing.qty = row.qty;
+          else cartStore.push({ ...row });
+          return Promise.resolve({ error: null });
+        },
+        delete: () => deleteBuilder(),
+      };
+    },
+  };
+  return { supabase };
+});
+
+vi.mock("@/hooks/useAuth", () => ({
+  useAuth: () => ({ user: state.currentUser.value }),
+}));
+
+// Import AFTER mocks are registered.
+import { useCart } from "@/hooks/useCart";
+
+const { cartStore, bookMeta, currentUser } = state;
 
 function seedBook(book_id: string, slug: string) {
   bookMeta.set(book_id, {
@@ -22,82 +98,6 @@ function seedBook(book_id: string, slug: string) {
   });
 }
 
-function makeSelectBuilder(userId?: string) {
-  return {
-    eq(_col: string, value: string) {
-      const rows = cartStore
-        .filter((r) => r.user_id === (userId ?? value))
-        .map((r) => ({
-          qty: r.qty,
-          book_id: r.book_id,
-          books: bookMeta.get(r.book_id) ?? null,
-        }));
-      return Promise.resolve({ data: rows, error: null });
-    },
-  };
-}
-
-function makeDeleteBuilder() {
-  const filters: Record<string, string> = {};
-  const builder: any = {
-    eq(col: string, value: string) {
-      filters[col] = value;
-      // Return same builder so chained .eq() works, but also thenable
-      // so a single .eq() resolves like a promise.
-      return new Proxy(builder, {
-        get(target, prop) {
-          if (prop === "then") {
-            return (resolve: any) => {
-              apply();
-              resolve({ error: null });
-            };
-          }
-          return (target as any)[prop];
-        },
-      });
-    },
-  };
-  function apply() {
-    for (let i = cartStore.length - 1; i >= 0; i--) {
-      const r = cartStore[i];
-      if (Object.entries(filters).every(([k, v]) => (r as any)[k] === v)) {
-        cartStore.splice(i, 1);
-      }
-    }
-  }
-  return builder;
-}
-
-const supabaseMock = {
-  from(_table: string) {
-    return {
-      select() {
-        return makeSelectBuilder();
-      },
-      upsert(row: Row) {
-        const existing = cartStore.find(
-          (r) => r.user_id === row.user_id && r.book_id === row.book_id,
-        );
-        if (existing) existing.qty = row.qty;
-        else cartStore.push({ ...row });
-        return Promise.resolve({ error: null });
-      },
-      delete() {
-        return makeDeleteBuilder();
-      },
-    };
-  },
-};
-
-vi.mock("@/integrations/supabase/client", () => ({ supabase: supabaseMock }));
-
-let currentUser: { id: string } | null = null;
-vi.mock("@/hooks/useAuth", () => ({
-  useAuth: () => ({ user: currentUser }),
-}));
-
-// Import after mocks are registered.
-import { useCart } from "@/hooks/useCart";
 
 beforeEach(() => {
   cartStore.length = 0;

@@ -40,10 +40,10 @@ const SecureRichReader = ({ content, fontSize, darkMode, theme, watermarkText }:
   return (
     <div className="relative" data-secure-reader="true">
       <div
-        className={`secure-rich-reader ${darkMode ? "is-dark" : ""}`}
+        className={`secure-rich-reader is-${resolvedTheme}`}
         style={{
           fontSize: `${fontSize}px`,
-          lineHeight: 1.95,
+          lineHeight: 1.85,
           userSelect: "text",
           WebkitUserSelect: "text",
           position: "relative",

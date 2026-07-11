@@ -1052,7 +1052,8 @@ const Books = () => {
 
         {/* Quote */}
         <Reveal>
-          <section className="container pt-20 md:pt-28">
+          <section className="container py-12 md:py-[72px] lg:py-24">
+
             <div
               className="mx-auto max-w-4xl rounded-3xl border p-10 md:p-16 text-center"
               style={{ borderColor: T.border, background: "#fff" }}

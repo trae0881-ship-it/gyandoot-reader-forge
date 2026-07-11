@@ -353,16 +353,16 @@ const BookCard = ({
         </div>
       </Link>
 
-      <div className="flex flex-1 flex-col p-5">
+      <div className="flex flex-1 flex-col p-6 md:p-7">
         <p
-          className="mb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em]"
+          className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em]"
           style={{ color: T.textMuted }}
         >
           {CATEGORIES.find((c) => c.value === book.category)?.label ?? "Spiritual"}
         </p>
         <h3
-          className="line-clamp-2 min-h-[2.7rem] text-[16px] font-semibold leading-snug"
-          style={{ color: T.text, letterSpacing: "-0.01em" }}
+          className="line-clamp-2 min-h-[3.15rem] text-[18px] font-semibold"
+          style={{ color: T.text, letterSpacing: "-0.01em", lineHeight: 1.4 }}
         >
           <Link
             to={`/books/${book.slug}`}
@@ -372,29 +372,30 @@ const BookCard = ({
             {book.title}
           </Link>
         </h3>
-        <p className="mt-1 truncate text-[13px]" style={{ color: T.textMuted }}>
+        <p className="mt-3 truncate text-[14px]" style={{ color: "#6B7280", lineHeight: 1.5 }}>
           by <span className="font-medium" style={{ color: "#374151" }}>{book.author}</span>
         </p>
 
-        <div className="mt-3 flex items-center gap-2">
+        <div className="mt-5 flex items-center gap-2">
           <Stars value={rating} />
-          <span className="text-[12px] font-semibold" style={{ color: T.text }}>
+          <span className="text-[13px] font-semibold" style={{ color: T.text }}>
             {rating.toFixed(1)}
           </span>
-          <span className="text-[11.5px]" style={{ color: T.textMuted }}>
+          <span className="text-[12px]" style={{ color: T.textMuted }}>
             ({reviews.toLocaleString()} reviews)
           </span>
         </div>
 
-        <div className="mt-4 flex items-end justify-between gap-2">
+
+        <div className="mt-6 flex items-end justify-between gap-2">
           <div className="flex items-baseline gap-2">
             {book.is_free ? (
-              <span className="text-[19px] font-bold" style={{ color: T.success }}>
+              <span className="text-[20px] font-bold" style={{ color: T.success }}>
                 Free
               </span>
             ) : (
               <>
-                <span className="text-[19px] font-bold" style={{ color: T.text }}>
+                <span className="text-[20px] font-bold" style={{ color: T.text }}>
                   ₹{book.price}
                 </span>
                 {original > (book.price ?? 0) && (
@@ -407,7 +408,7 @@ const BookCard = ({
           </div>
           {!book.is_free && saved > 0 && (
             <span
-              className="rounded-md px-2 py-0.5 text-[10.5px] font-semibold"
+              className="rounded-md px-2 py-0.5 text-[11px] font-semibold"
               style={{ background: T.primarySoft, color: "#92400E" }}
             >
               Save ₹{saved}
@@ -415,35 +416,36 @@ const BookCard = ({
           )}
         </div>
 
-        <p className="mt-2.5 flex items-center gap-1.5 text-[11.5px] font-medium" style={{ color: T.success }}>
+        <p className="mt-3 flex items-center gap-1.5 text-[12px] font-medium" style={{ color: T.success }}>
           <Check className="h-3.5 w-3.5" />
           In stock — instant lifetime access
         </p>
 
-        <div className="mt-auto pt-4">
-          <div className="grid grid-cols-2 gap-2 opacity-100 transition-opacity duration-300 md:opacity-90 md:group-hover:opacity-100">
+        <div className="mt-auto pt-6">
+          <div className="grid grid-cols-2 gap-3 opacity-100 transition-opacity duration-300 md:opacity-90 md:group-hover:opacity-100">
             <button
               type="button"
               onClick={() => onCart(book)}
-              className="flex items-center justify-center gap-1.5 rounded-xl border py-2.5 text-[12.5px] font-semibold transition-colors"
+              className="flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border py-3 text-[13px] font-semibold transition-colors"
               style={{ borderColor: T.border, color: T.text, background: "#fff" }}
               onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "#F9FAFB")}
               onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "#fff")}
             >
-              <ShoppingCart className="h-3.5 w-3.5" /> Add
+              <ShoppingCart className="h-4 w-4" /> Add
             </button>
             <Link
               to={`/books/${book.slug}`}
               onClick={() => onRecent(book)}
-              className="flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[12.5px] font-semibold transition-colors"
+              className="flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl py-3 text-[13px] font-semibold transition-colors"
               style={{ background: T.primary, color: "#fff" }}
               onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = T.primaryDark)}
               onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = T.primary)}
             >
-              <Zap className="h-3.5 w-3.5" /> Buy Now
+              <Zap className="h-4 w-4" /> Buy Now
             </Link>
           </div>
         </div>
+
       </div>
     </article>
   );
@@ -487,7 +489,8 @@ const BookCarousel = ({
   if (books.length === 0) return null;
   return (
     <Reveal>
-      <section className="pt-16 md:pt-24">
+      <section className="py-12 md:py-[72px] lg:py-24">
+
         <div className="mb-6 flex items-end justify-between gap-4">
           <div>
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ color: T.text, letterSpacing: "-0.02em" }}>
@@ -518,7 +521,7 @@ const BookCarousel = ({
         </div>
         <div
           ref={ref}
-          className="scrollbar-hide -mx-4 flex gap-5 overflow-x-auto px-4 pb-3 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          className="scrollbar-hide -mx-4 flex gap-5 overflow-x-auto px-4 pb-3 snap-x snap-mandatory md:gap-6 lg:gap-8 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
         >
           {books.map((b) => (
             <div key={b.id} className="w-[240px] shrink-0 snap-start sm:w-[260px]">
@@ -923,7 +926,7 @@ const Books = () => {
       >
         {/* Hero */}
         <section className="border-b" style={{ borderColor: T.border, background: "#fff" }}>
-          <div className="container py-14 md:py-20">
+          <div className="container py-12 md:py-[72px] lg:py-24">
             {/* Breadcrumb — brand-entity link reinforcement in raw HTML */}
             <nav aria-label="Breadcrumb" className="mb-6 text-sm" style={{ color: T.textMuted }}>
               <ol className="flex flex-wrap items-center gap-1.5">
@@ -957,16 +960,17 @@ const Books = () => {
         {/* Featured */}
         {featured.length > 0 && (
           <Reveal>
-            <section className="container pt-16 md:pt-24">
-              <div className="mb-8">
+            <section className="container py-12 md:py-[72px] lg:py-24">
+              <div className="mb-10">
                 <h2 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ letterSpacing: "-0.02em" }}>
                   Featured Editions
                 </h2>
-                <p className="mt-1.5 text-sm md:text-[15px]" style={{ color: T.textMuted }}>
+                <p className="mt-2 text-[15px] md:text-base" style={{ color: T.textMuted, lineHeight: 1.7 }}>
                   Handpicked by our editors this season.
                 </p>
               </div>
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-x-5 gap-y-5 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-10">
+
                 {featured.map((b, i) => (
                   <Reveal key={b.id} delay={i * 80}>
                     <BookCard
@@ -1004,18 +1008,19 @@ const Books = () => {
         {/* Popular Authors */}
         {popularAuthors.length > 0 && (
           <Reveal>
-            <section className="container pt-16 md:pt-24">
-              <div className="mb-8 flex items-end justify-between">
+            <section className="container py-12 md:py-[72px] lg:py-24">
+              <div className="mb-10 flex items-end justify-between">
                 <div>
                   <h2 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ letterSpacing: "-0.02em" }}>
                     Voices We Love
                   </h2>
-                  <p className="mt-1.5 text-sm md:text-[15px]" style={{ color: T.textMuted }}>
+                  <p className="mt-2 text-[15px] md:text-base" style={{ color: T.textMuted, lineHeight: 1.7 }}>
                     Authors and translators shaping our library.
                   </p>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+              <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:gap-6 lg:grid-cols-6 lg:gap-8">
+
                 {popularAuthors.map((a) => (
                   <button
                     key={a.author}
@@ -1047,7 +1052,8 @@ const Books = () => {
 
         {/* Quote */}
         <Reveal>
-          <section className="container pt-20 md:pt-28">
+          <section className="container py-12 md:py-[72px] lg:py-24">
+
             <div
               className="mx-auto max-w-4xl rounded-3xl border p-10 md:p-16 text-center"
               style={{ borderColor: T.border, background: "#fff" }}
@@ -1067,7 +1073,7 @@ const Books = () => {
         </Reveal>
 
         {/* Toolbar + library */}
-        <section id="library" className="container pt-20 md:pt-28">
+        <section id="library" className="container py-12 md:py-[72px] lg:py-24">
           <Reveal>
             <div className="mb-6">
               <h2 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ letterSpacing: "-0.02em" }}>
@@ -1161,13 +1167,14 @@ const Books = () => {
           </Reveal>
 
           {/* Grid */}
-          <div className="pt-8 pb-20">
+          <div className="pt-10 md:pt-14">
             {isLoading ? (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-1 gap-x-5 gap-y-5 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-10 xl:grid-cols-4">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <CardSkeleton key={i} />
                 ))}
               </div>
+
             ) : isError ? (
               <EmptyState
                 icon={<AlertTriangle className="h-10 w-10" style={{ color: "#EF4444" }} />}
@@ -1184,7 +1191,7 @@ const Books = () => {
               />
             ) : (
               <>
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div className="grid grid-cols-1 gap-x-5 gap-y-5 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-10 xl:grid-cols-4">
                   {paged.map((b, i) => (
                     <Reveal key={b.id} delay={Math.min(i, 8) * 40}>
                       {renderCard(b)}
@@ -1194,7 +1201,7 @@ const Books = () => {
 
                 {hasMore ? (
                   <div ref={loaderRef} className="mt-14 flex flex-col items-center gap-4">
-                    <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    <div className="grid w-full grid-cols-1 gap-x-5 gap-y-5 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-10 xl:grid-cols-4">
                       {Array.from({ length: 4 }).map((_, i) => (
                         <CardSkeleton key={i} />
                       ))}
@@ -1241,26 +1248,27 @@ const Books = () => {
 
         {/* Testimonials */}
         <Reveal>
-          <section className="container pt-20 md:pt-28">
-            <div className="mb-10 text-center">
+          <section className="container py-12 md:py-[72px] lg:py-24">
+            <div className="mb-12 text-center">
               <h2 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ letterSpacing: "-0.02em" }}>
                 Loved by thoughtful readers
               </h2>
-              <p className="mt-1.5 text-sm md:text-[15px]" style={{ color: T.textMuted }}>
+              <p className="mt-2 text-[15px] md:text-base" style={{ color: T.textMuted, lineHeight: 1.7 }}>
                 Real words from the GyandootNova community.
               </p>
             </div>
-            <div className="grid gap-5 md:grid-cols-3">
+            <div className="grid gap-x-5 gap-y-5 md:grid-cols-3 md:gap-6 lg:gap-x-8 lg:gap-y-10">
               {TESTIMONIALS.map((t, i) => (
                 <Reveal key={t.name} delay={i * 80}>
                   <figure
-                    className="flex h-full flex-col rounded-2xl border p-7"
+                    className="flex h-full flex-col rounded-2xl border p-8 md:p-9"
                     style={{ borderColor: T.border, background: "#fff" }}
                   >
                     <Stars value={5} size={16} />
-                    <blockquote className="mt-4 flex-1 text-[15px] leading-relaxed" style={{ color: "#374151" }}>
+                    <blockquote className="mt-5 flex-1 text-[15px] md:text-base" style={{ color: "#374151", lineHeight: 1.7 }}>
                       "{t.quote}"
                     </blockquote>
+
                     <figcaption className="mt-6">
                       <p className="text-sm font-semibold" style={{ color: T.text }}>{t.name}</p>
                       <p className="text-xs" style={{ color: T.textMuted }}>{t.role}</p>
@@ -1274,7 +1282,7 @@ const Books = () => {
 
         {/* Newsletter */}
         <Reveal>
-          <section className="container pt-20 md:pt-28 pb-24 md:pb-32">
+          <section className="container py-12 md:py-[72px] lg:py-24">
             <div
               className="relative overflow-hidden rounded-3xl border p-10 md:p-16 text-center"
               style={{

@@ -82,7 +82,7 @@ async def seed_reading_progress(page, book_slug: str) -> dict | None:
             .select('id, slug').eq('slug', slug).maybeSingle();
           if (!book) return { error: 'no book' };
           const { data: chapter } = await supabase.from('book_chapters')
-            .select('id, slug, chapter_number')
+            .select('id, slug, chapter_number, title')
             .eq('book_id', book.id).order('chapter_number').limit(1).maybeSingle();
           if (!chapter) return { error: 'no chapter' };
           await supabase.from('reading_progress').upsert({
@@ -98,12 +98,39 @@ async def seed_reading_progress(page, book_slug: str) -> dict | None:
     )
 
 
-async def check_resume_from_home(page, book_slug: str, chapter_slug: str) -> bool:
+async def assert_chapter_rendered(page, expected_title: str | None) -> bool:
+    """Confirm the reader rendered the expected chapter by matching its title
+    inside a heading. Falls back to scanning the reader body text when the
+    chapter has no title."""
+    if not expected_title:
+        # No title on record — just verify the reader shell rendered content.
+        body_len = await page.evaluate("() => (document.body.innerText || '').length")
+        return body_len > 500
+    heading_ok = await page.evaluate(
+        """(t) => {
+          const norm = (s) => (s || '').replace(/\\s+/g, ' ').trim().toLowerCase();
+          const needle = norm(t);
+          if (!needle) return true;
+          const nodes = Array.from(document.querySelectorAll('h1, h2, h3, [data-chapter-title]'));
+          return nodes.some(n => norm(n.textContent).includes(needle));
+        }""",
+        expected_title,
+    )
+    return bool(heading_ok)
+
+
+async def check_resume_from_home(page, book_slug: str, chapter_slug: str, chapter_title: str | None) -> bool:
     await page.goto(BASE_URL, wait_until="networkidle")
     await page.screenshot(path=str(SCREENSHOTS / "1_home_continue_reading.png"))
     section = page.locator("section[aria-labelledby='continue-reading']")
     await section.wait_for(state="visible", timeout=10_000)
-    # Click a Resume link that points at this chapter.
+    # The Continue Reading card must show the expected chapter reference.
+    if chapter_title:
+        card_has_title = await section.evaluate(
+            """(el, t) => (el.innerText || '').toLowerCase().includes(t.toLowerCase())""",
+            chapter_title,
+        )
+        print(f"[home card] mentions chapter title? {card_has_title}")
     target = section.locator(f"a[href='/books/{book_slug}/{chapter_slug}']").first
     await target.wait_for(state="visible")
     await target.click()
@@ -113,16 +140,19 @@ async def check_resume_from_home(page, book_slug: str, chapter_slug: str) -> boo
     scroll_y = await page.evaluate("() => window.scrollY")
     doc_h = await page.evaluate("() => document.documentElement.scrollHeight - window.innerHeight")
     percent = 0 if doc_h <= 0 else (scroll_y / doc_h) * 100
+    title_ok = await assert_chapter_rendered(page, chapter_title)
     await page.screenshot(path=str(SCREENSHOTS / "2_after_home_resume.png"))
-    print(f"[home->reader] url={page.url}  scrollY={scroll_y}  approx%={percent:.1f}")
-    return page.url.endswith(f"/books/{book_slug}/{chapter_slug}") and percent >= TARGET_PERCENT - 10
+    print(f"[home->reader] url={page.url}  scrollY={scroll_y}  approx%={percent:.1f}  title_ok={title_ok}")
+    return (
+        page.url.endswith(f"/books/{book_slug}/{chapter_slug}")
+        and title_ok
+        and percent >= TARGET_PERCENT - 10
+    )
 
 
-async def check_resume_from_book_detail(page, book_slug: str, chapter_slug: str) -> bool:
+async def check_resume_from_book_detail(page, book_slug: str, chapter_slug: str, chapter_title: str | None) -> bool:
     await page.goto(f"{BASE_URL}/books/{book_slug}", wait_until="networkidle")
     await page.screenshot(path=str(SCREENSHOTS / "3_book_detail.png"))
-    # BookDetail's WhyBookMatters + reader entry: any link to the exact saved
-    # chapter counts. Falls back to a "Resume" button if present.
     resume = page.locator(
         f"a[href='/books/{book_slug}/{chapter_slug}'], "
         f"a[href*='/books/{book_slug}/']:has-text('Resume')"
@@ -138,9 +168,14 @@ async def check_resume_from_book_detail(page, book_slug: str, chapter_slug: str)
     scroll_y = await page.evaluate("() => window.scrollY")
     doc_h = await page.evaluate("() => document.documentElement.scrollHeight - window.innerHeight")
     percent = 0 if doc_h <= 0 else (scroll_y / doc_h) * 100
+    title_ok = await assert_chapter_rendered(page, chapter_title)
     await page.screenshot(path=str(SCREENSHOTS / "4_after_detail_resume.png"))
-    print(f"[detail->reader] url={page.url}  scrollY={scroll_y}  approx%={percent:.1f}")
-    return page.url.endswith(f"/books/{book_slug}/{chapter_slug}") and percent >= TARGET_PERCENT - 10
+    print(f"[detail->reader] url={page.url}  scrollY={scroll_y}  approx%={percent:.1f}  title_ok={title_ok}")
+    return (
+        page.url.endswith(f"/books/{book_slug}/{chapter_slug}")
+        and title_ok
+        and percent >= TARGET_PERCENT - 10
+    )
 
 
 async def main():
@@ -168,9 +203,10 @@ async def main():
             await browser.close()
             return 3
         chapter_slug = seeded["chapter"]["slug"]
+        chapter_title = seeded["chapter"].get("title")
 
-        ok_home = await check_resume_from_home(page, slug, chapter_slug)
-        ok_detail = await check_resume_from_book_detail(page, slug, chapter_slug)
+        ok_home = await check_resume_from_home(page, slug, chapter_slug, chapter_title)
+        ok_detail = await check_resume_from_book_detail(page, slug, chapter_slug, chapter_title)
 
         await browser.close()
         if ok_home and ok_detail:

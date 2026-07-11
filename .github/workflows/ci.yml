@@ -26,6 +26,10 @@ jobs:
       - name: Unit tests (JSON-LD schema + cart persistence)
         # These block merges on any JSON-LD or cart-persistence regression.
         run: bun run test
+      - name: Verify sitemap.xml + robots.txt cover required public routes
+        # Regenerates sitemap.xml and asserts /articles, /library, /cart, etc.
+        # are listed and not blocked by robots.txt.
+        run: node scripts/verify-sitemap-routes.mjs
       - name: Build (runs prerender + SEO check via postbuild)
         run: bun run build
         env:

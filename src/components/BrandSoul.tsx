@@ -60,7 +60,7 @@ export const BrandPurpose = () => (
           <div className="relative group">
             <div className="absolute -inset-4 border-2 border-secondary/50 translate-x-4 translate-y-4 transition-transform duration-500 group-hover:translate-x-2 group-hover:translate-y-2" />
             <div className="relative w-64 h-80 md:w-72 md:h-96 bg-primary flex items-center justify-center shadow-2xl ring-1 ring-primary/20">
-              <Sparkles className="absolute h-40 w-40 text-primary-foreground/10" strokeWidth={0.5} />
+              <Sparkles className="absolute h-64 w-64 text-primary-foreground/15" strokeWidth={0.5} />
               <div className="relative text-center px-7">
                 <p
                   className="text-sm font-extrabold uppercase tracking-[0.16em] text-primary-foreground"
@@ -157,7 +157,7 @@ export const EmotionalConnection = () => (
           >
             <div className="flex items-start justify-between">
               <Icon
-                className={dark ? "h-8 w-8 text-secondary" : "h-8 w-8 text-secondary"}
+                className={dark ? "h-14 w-14 text-secondary" : "h-14 w-14 text-secondary"}
                 strokeWidth={1.5}
               />
               <span
@@ -210,7 +210,7 @@ export const EmotionalConnection = () => (
           style={bodyFont}
         >
           Read more reader stories
-          <ArrowRight className="h-3.5 w-3.5" />
+          <ArrowRight className="h-5 w-5" />
         </Link>
       </div>
     </div>
@@ -245,7 +245,7 @@ export const CalmFeeling = () => (
         className="text-xs font-extrabold uppercase tracking-[0.16em] text-secondary inline-flex items-center gap-3 mb-10"
         style={bodyFont}
       >
-        <Leaf className="h-3 w-3" />
+        <Leaf className="h-5 w-5" />
         Chapter III · A Calm Feeling
       </span>
 
@@ -259,7 +259,7 @@ export const CalmFeeling = () => (
 
       <div className="my-10 flex items-center justify-center gap-4">
         <div className="h-px w-16 bg-secondary/40" />
-        <Layers className="h-4 w-4 text-secondary" strokeWidth={1.5} />
+        <Layers className="h-7 w-7 text-secondary" strokeWidth={1.5} />
         <div className="h-px w-16 bg-secondary/40" />
       </div>
 
@@ -299,7 +299,7 @@ export const CalmFeeling = () => (
           className="inline-flex items-center gap-3 px-10 py-4 bg-secondary text-secondary-foreground text-xs font-bold uppercase tracking-[0.28em] hover:bg-secondary/90 transition-colors shadow-xl"
           style={bodyFont}
         >
-          <HeartHandshake className="h-4 w-4" />
+          <HeartHandshake className="h-6 w-6" />
           Begin your journey
         </Link>
       </div>

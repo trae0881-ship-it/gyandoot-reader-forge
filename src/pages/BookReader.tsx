@@ -377,6 +377,67 @@ const BookReader = () => {
     };
   }, [handleScroll]);
 
+  // Keyboard shortcuts: ← / → chapter nav, j/k page scroll, +/- font, t theme cycle, b bookmark, / TOC
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+      switch (e.key) {
+        case "ArrowRight":
+        case "n":
+          if (nextChapter) { e.preventDefault(); navigate(`/books/${slug}/${nextChapter.slug}`); }
+          break;
+        case "ArrowLeft":
+        case "p":
+          if (prevChapter) { e.preventDefault(); navigate(`/books/${slug}/${prevChapter.slug}`); }
+          break;
+        case "j":
+          e.preventDefault();
+          window.scrollBy({ top: window.innerHeight * 0.85, behavior: "smooth" });
+          break;
+        case "k":
+          e.preventDefault();
+          window.scrollBy({ top: -window.innerHeight * 0.85, behavior: "smooth" });
+          break;
+        case "+":
+        case "=":
+          e.preventDefault();
+          setFontSize((s) => Math.min(32, s + 1));
+          break;
+        case "-":
+        case "_":
+          e.preventDefault();
+          setFontSize((s) => Math.max(14, s - 1));
+          break;
+        case "0":
+          e.preventDefault();
+          setFontSize(19);
+          break;
+        case "t":
+          e.preventDefault();
+          cycleTheme();
+          break;
+        case "b":
+          if (user) { e.preventDefault(); toggleBookmarkMutation.mutate(); }
+          break;
+        case "/":
+          e.preventDefault();
+          setShowTOC((v) => !v);
+          break;
+        case "Escape":
+          setShowTOC(false);
+          setShowNotes(false);
+          setShowHighlightsPanel(false);
+          break;
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nextChapter?.slug, prevChapter?.slug, slug, user, theme]);
+
   // Restore saved scroll position when a chapter loads. If this chapter matches
   // the user's last-read chapter for this book AND we have content, jump to
   // the saved percent. Otherwise start at the top.

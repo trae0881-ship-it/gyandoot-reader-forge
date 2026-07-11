@@ -263,7 +263,7 @@ const BookCard = ({
         className="relative block overflow-hidden"
         style={{ background: "#F6F5F1" }}
       >
-        <div className={size === "featured" ? "aspect-[4/5]" : "aspect-[3/4]"}>
+        <div className="aspect-[3/4]">
           {book.cover_url ? (
             <img
               src={book.cover_url}

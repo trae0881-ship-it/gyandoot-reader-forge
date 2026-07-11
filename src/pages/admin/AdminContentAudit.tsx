@@ -65,7 +65,7 @@ const AdminContentAudit = () => {
         .select("id, title, approval_status, originality_score, originality_report, originality_checked_at, source_type, source_citation, permission_notes, approval_notes, last_edited_at, updated_at, author")
         .order("updated_at", { ascending: false })
         .limit(300);
-      return (data ?? []).map((r) => ({ ...r, entity_type: "post" as const })) as EntityRow[];
+      return (data ?? []).map((r: any) => ({ ...r, entity_type: "post" as const })) as EntityRow[];
     },
   });
 
@@ -77,7 +77,7 @@ const AdminContentAudit = () => {
         .select("id, title, approval_status, originality_score, originality_report, originality_checked_at, source_type, source_citation, permission_notes, approval_notes, last_edited_at, updated_at, book_id")
         .order("updated_at", { ascending: false })
         .limit(300);
-      return (data ?? []).map((r) => ({ ...r, entity_type: "chapter" as const })) as EntityRow[];
+      return (data ?? []).map((r: any) => ({ ...r, entity_type: "chapter" as const })) as EntityRow[];
     },
   });
 

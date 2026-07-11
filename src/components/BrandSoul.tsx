@@ -245,7 +245,7 @@ export const CalmFeeling = () => (
         className="text-xs font-extrabold uppercase tracking-[0.16em] text-secondary inline-flex items-center gap-3 mb-10"
         style={bodyFont}
       >
-        <Leaf className="h-3 w-3" />
+        <Leaf className="h-5 w-5" />
         Chapter III · A Calm Feeling
       </span>
 

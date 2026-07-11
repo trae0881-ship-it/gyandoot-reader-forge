@@ -960,16 +960,17 @@ const Books = () => {
         {/* Featured */}
         {featured.length > 0 && (
           <Reveal>
-            <section className="container pt-16 md:pt-24">
-              <div className="mb-8">
+            <section className="container py-12 md:py-[72px] lg:py-24">
+              <div className="mb-10">
                 <h2 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ letterSpacing: "-0.02em" }}>
                   Featured Editions
                 </h2>
-                <p className="mt-1.5 text-sm md:text-[15px]" style={{ color: T.textMuted }}>
+                <p className="mt-2 text-[15px] md:text-base" style={{ color: T.textMuted, lineHeight: 1.7 }}>
                   Handpicked by our editors this season.
                 </p>
               </div>
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-x-5 gap-y-5 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-10">
+
                 {featured.map((b, i) => (
                   <Reveal key={b.id} delay={i * 80}>
                     <BookCard

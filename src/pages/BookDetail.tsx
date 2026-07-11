@@ -278,14 +278,28 @@ const BookDetail = () => {
     ]
   } : undefined;
 
+  // BreadcrumbList links this book detail page back to Home ("GyandootNova")
+  // and the /books listing — helps SERP breadcrumbs and reinforces the brand
+  // entity across the site.
+  const breadcrumbJsonLd = book ? {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "GyandootNova", "item": "https://gyandootnova.in/" },
+      { "@type": "ListItem", "position": 2, "name": "Books", "item": "https://gyandootnova.in/books" },
+      { "@type": "ListItem", "position": 3, "name": book.title, "item": `https://gyandootnova.in/books/${book.slug}` },
+    ],
+  } : undefined;
+
   useSEO({
     title: bookMetaTitle,
     description: bookDescription,
     canonical: book ? `/books/${book.slug}` : undefined,
     ogImage: book?.cover_url ?? undefined,
     ogType: "book",
-    jsonLd: bookJsonLd && faqJsonLd ? [bookJsonLd, faqJsonLd] : bookJsonLd,
+    jsonLd: book ? [bookJsonLd!, faqJsonLd!, breadcrumbJsonLd!] : undefined,
   });
+
 
   if (isLoading) {
     return (

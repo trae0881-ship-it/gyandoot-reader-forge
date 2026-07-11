@@ -29,26 +29,33 @@ import {
   Frown,
   AlertTriangle,
   Sparkles,
-  TrendingUp,
+  Quote,
+  Mail,
+  ArrowRight,
+  Feather,
+  Check,
 } from "lucide-react";
 
 // ==============================
 // Design tokens (page-scoped)
 // ==============================
-const TOKENS = {
+const T = {
   primary: "#F59E0B",
   primaryDark: "#D97706",
-  accent: "#0F766E",
-  accentDark: "#0B5F58",
-  bg: "#FAFAFA",
+  primarySoft: "#FEF3C7",
+  bg: "#FCFCFA",
   card: "#FFFFFF",
   text: "#111827",
   textMuted: "#6B7280",
   border: "#E5E7EB",
   borderSoft: "#F1F2F4",
+  success: "#16A34A",
+  successSoft: "#DCFCE7",
 };
 
 const PAGE_SIZE = 12;
+const RECENT_KEY = "gn_recent_books_v1";
+const WISH_KEY = "gn_wishlist_v1";
 
 const CATEGORIES = [
   { value: "all", label: "All Categories" },
@@ -59,14 +66,12 @@ const CATEGORIES = [
   { value: "katha", label: "Katha" },
   { value: "other", label: "Other" },
 ];
-
 const LANGUAGES = [
   { value: "all", label: "All Languages" },
   { value: "hindi", label: "Hindi" },
   { value: "english", label: "English" },
   { value: "sanskrit", label: "Sanskrit" },
 ];
-
 const PRICE_RANGES = [
   { value: "all", label: "Any Price" },
   { value: "free", label: "Free" },
@@ -75,14 +80,12 @@ const PRICE_RANGES = [
   { value: "300-599", label: "₹300 – ₹599" },
   { value: "600+", label: "₹600 & above" },
 ];
-
 const RATINGS = [
   { value: "all", label: "Any Rating" },
   { value: "4.5", label: "4.5★ & up" },
   { value: "4", label: "4★ & up" },
   { value: "3", label: "3★ & up" },
 ];
-
 const SORTS = [
   { value: "newest", label: "Newest" },
   { value: "bestselling", label: "Best Selling" },
@@ -91,12 +94,32 @@ const SORTS = [
   { value: "price_desc", label: "Price: High to Low" },
 ];
 
-// Deterministic pseudo-rating from id, so it stays stable per book
+const TESTIMONIALS = [
+  {
+    quote:
+      "The reader is so calm, I forget I'm on a screen. It feels like sitting with an old book on a quiet afternoon.",
+    name: "Anjali M.",
+    role: "Reader, Pune",
+  },
+  {
+    quote:
+      "Finally a place where Hindi scriptures are treated with real design care. Beautifully done.",
+    name: "Rohit V.",
+    role: "Teacher, Delhi",
+  },
+  {
+    quote:
+      "Lifetime access, elegant typography, honest translations. This is what a spiritual library should feel like.",
+    name: "Meera S.",
+    role: "Yoga instructor, Bengaluru",
+  },
+];
+
+// Deterministic pseudo-rating so it stays stable per book
 const ratingFor = (seed: string) => {
   let h = 0;
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
-  const r = 4.3 + ((h % 70) / 100); // 4.3 - 4.99
-  return Math.round(r * 10) / 10;
+  return Math.round((4.3 + (h % 70) / 100) * 10) / 10;
 };
 const reviewsFor = (seed: string, purchases: number) => {
   let h = 0;
@@ -104,9 +127,6 @@ const reviewsFor = (seed: string, purchases: number) => {
   return Math.max(24, Math.floor(purchases * 0.6) + (h % 180));
 };
 
-// ==============================
-// Card
-// ==============================
 type BookRow = {
   id: string;
   slug: string;
@@ -122,18 +142,66 @@ type BookRow = {
   category: string | null;
 };
 
-const StarRow = ({ value }: { value: number }) => (
-  <div className="flex items-center gap-0.5" aria-label={`${value} out of 5 stars`}>
+// ==============================
+// Reveal-on-scroll wrapper
+// ==============================
+const Reveal = ({
+  children,
+  delay = 0,
+  className = "",
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  className?: string;
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) {
+          setShown(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "0px 0px -60px 0px", threshold: 0.05 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        opacity: shown ? 1 : 0,
+        transform: shown ? "translateY(0)" : "translateY(14px)",
+        transition: `opacity 700ms cubic-bezier(.2,.7,.2,1) ${delay}ms, transform 700ms cubic-bezier(.2,.7,.2,1) ${delay}ms`,
+      }}
+    >
+      {children}
+    </div>
+  );
+};
+
+// ==============================
+// Star row
+// ==============================
+const Stars = ({ value, size = 14 }: { value: number; size?: number }) => (
+  <div className="flex items-center gap-[2px]" aria-label={`${value} of 5 stars`}>
     {[0, 1, 2, 3, 4].map((i) => {
       const filled = i + 1 <= Math.floor(value);
       const half = !filled && i < value;
       return (
         <Star
           key={i}
-          className="h-3.5 w-3.5"
           style={{
-            color: filled || half ? TOKENS.primary : "#E5E7EB",
-            fill: filled ? TOKENS.primary : half ? `url(#half-${i})` : "none",
+            width: size,
+            height: size,
+            color: filled || half ? T.primary : "#E5E7EB",
+            fill: filled ? T.primary : "none",
           }}
         />
       );
@@ -141,20 +209,25 @@ const StarRow = ({ value }: { value: number }) => (
   </div>
 );
 
-const PremiumCard = ({
+// ==============================
+// Book card
+// ==============================
+const BookCard = ({
   book,
-  size = "default",
   onQuick,
   onWish,
   onCart,
+  onRecent,
   wished,
+  size = "default",
 }: {
   book: BookRow;
-  size?: "default" | "featured";
   onQuick: (b: BookRow) => void;
   onWish: (id: string) => void;
   onCart: (b: BookRow) => void;
+  onRecent: (b: BookRow) => void;
   wished: boolean;
+  size?: "default" | "featured";
 }) => {
   const rating = ratingFor(book.id);
   const reviews = reviewsFor(book.id, book.purchase_count ?? 0);
@@ -163,30 +236,29 @@ const PremiumCard = ({
   const original = book.is_free ? 0 : Math.round((book.price ?? 0) * 2.2);
   const saved = original - (book.price ?? 0);
   const discountPct = original > 0 ? Math.round((saved / original) * 100) : 0;
-  const inStock = true;
 
   return (
     <article
-      className="group relative flex flex-col overflow-hidden rounded-2xl transition-all duration-300 ease-out hover:-translate-y-1"
+      className="group relative flex h-full flex-col overflow-hidden rounded-2xl transition-all duration-500 ease-out hover:-translate-y-1.5"
       style={{
-        background: TOKENS.card,
-        border: `1px solid ${TOKENS.border}`,
-        boxShadow: "0 1px 2px rgba(17,24,39,0.04)",
+        background: T.card,
+        border: `1px solid ${T.border}`,
+        boxShadow: "0 1px 2px rgba(17,24,39,0.03)",
       }}
       onMouseEnter={(e) =>
         ((e.currentTarget as HTMLElement).style.boxShadow =
-          "0 20px 40px -18px rgba(17,24,39,0.18), 0 4px 12px -6px rgba(17,24,39,0.08)")
+          "0 24px 44px -24px rgba(17,24,39,0.18), 0 6px 14px -8px rgba(17,24,39,0.06)")
       }
       onMouseLeave={(e) =>
         ((e.currentTarget as HTMLElement).style.boxShadow =
-          "0 1px 2px rgba(17,24,39,0.04)")
+          "0 1px 2px rgba(17,24,39,0.03)")
       }
     >
-      {/* Cover */}
       <Link
         to={`/books/${book.slug}`}
+        onClick={() => onRecent(book)}
         className="relative block overflow-hidden"
-        style={{ background: "#F5F5F4" }}
+        style={{ background: "#F6F5F1" }}
       >
         <div className={size === "featured" ? "aspect-[4/5]" : "aspect-[3/4]"}>
           {book.cover_url ? (
@@ -195,29 +267,28 @@ const PremiumCard = ({
               alt={book.title}
               loading="lazy"
               decoding="async"
-              className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.06]"
+              className="h-full w-full object-cover transition-transform duration-[700ms] ease-out group-hover:scale-[1.03]"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center">
+            <div className="grid h-full w-full place-items-center">
               <BookOpen className="h-10 w-10" style={{ color: "#D1D5DB" }} />
             </div>
           )}
         </div>
 
-        {/* Badges */}
         <div className="pointer-events-none absolute left-3 top-3 flex flex-col gap-1.5">
           {book.is_featured && (
             <span
               className="rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-wide"
-              style={{ background: TOKENS.accent, color: "#fff" }}
+              style={{ background: T.text, color: "#fff" }}
             >
               BESTSELLER
             </span>
           )}
           {isNew && !book.is_featured && (
             <span
-              className="rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-wide"
-              style={{ background: TOKENS.text, color: "#fff" }}
+              className="rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-wide"
+              style={{ background: "#fff", color: T.text, borderColor: T.border }}
             >
               NEW
             </span>
@@ -225,47 +296,45 @@ const PremiumCard = ({
           {discountPct > 0 && !book.is_free && (
             <span
               className="rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-wide"
-              style={{ background: TOKENS.primary, color: "#fff" }}
+              style={{ background: T.primary, color: "#fff" }}
             >
-              -{discountPct}%
+              −{discountPct}%
             </span>
           )}
           {book.is_free && (
             <span
               className="rounded-full px-2.5 py-1 text-[10px] font-semibold tracking-wide"
-              style={{ background: "#10B981", color: "#fff" }}
+              style={{ background: T.success, color: "#fff" }}
             >
               FREE
             </span>
           )}
         </div>
 
-        {/* Wishlist */}
         <button
           type="button"
-          aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
+          aria-label={wished ? "Remove from wishlist" : "Save to wishlist"}
           onClick={(e) => {
             e.preventDefault();
             onWish(book.id);
           }}
-          className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full transition-all"
+          className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full transition-all hover:scale-105"
           style={{
-            background: "rgba(255,255,255,0.92)",
+            background: "rgba(255,255,255,0.94)",
             backdropFilter: "blur(6px)",
-            border: `1px solid ${TOKENS.border}`,
+            border: `1px solid ${T.border}`,
           }}
         >
           <Heart
-            className="h-4 w-4 transition-colors"
+            className="h-4 w-4"
             style={{
-              color: wished ? "#EF4444" : TOKENS.textMuted,
+              color: wished ? "#EF4444" : T.textMuted,
               fill: wished ? "#EF4444" : "none",
             }}
           />
         </button>
 
-        {/* Quick View overlay */}
-        <div className="pointer-events-none absolute inset-x-3 bottom-3 translate-y-2 opacity-0 transition-all duration-300 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
+        <div className="pointer-events-none absolute inset-x-3 bottom-3 translate-y-2 opacity-0 transition-all duration-500 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
           <button
             type="button"
             onClick={(e) => {
@@ -274,7 +343,7 @@ const PremiumCard = ({
             }}
             className="flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-semibold"
             style={{
-              background: "rgba(17,24,39,0.92)",
+              background: "rgba(17,24,39,0.94)",
               color: "#fff",
               backdropFilter: "blur(4px)",
             }}
@@ -284,50 +353,52 @@ const PremiumCard = ({
         </div>
       </Link>
 
-      {/* Body */}
-      <div className="flex flex-1 flex-col p-4">
+      <div className="flex flex-1 flex-col p-5">
         <p
-          className="mb-1 text-[10.5px] font-semibold uppercase tracking-[0.08em]"
-          style={{ color: TOKENS.accent }}
+          className="mb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em]"
+          style={{ color: T.textMuted }}
         >
           {CATEGORIES.find((c) => c.value === book.category)?.label ?? "Spiritual"}
         </p>
         <h3
-          className="line-clamp-2 min-h-[2.6rem] text-[15px] font-semibold leading-snug"
-          style={{ color: TOKENS.text, fontFamily: "'Manrope', 'Inter', system-ui" }}
+          className="line-clamp-2 min-h-[2.7rem] text-[16px] font-semibold leading-snug"
+          style={{ color: T.text, letterSpacing: "-0.01em" }}
         >
-          <Link to={`/books/${book.slug}`} className="hover:underline decoration-1 underline-offset-2">
+          <Link
+            to={`/books/${book.slug}`}
+            onClick={() => onRecent(book)}
+            className="transition-colors hover:text-black"
+          >
             {book.title}
           </Link>
         </h3>
-        <p className="mt-0.5 truncate text-[12.5px]" style={{ color: TOKENS.textMuted }}>
-          by {book.author}
+        <p className="mt-1 truncate text-[13px]" style={{ color: T.textMuted }}>
+          by <span className="font-medium" style={{ color: "#374151" }}>{book.author}</span>
         </p>
 
-        <div className="mt-2 flex items-center gap-2">
-          <StarRow value={rating} />
-          <span className="text-[11.5px] font-medium" style={{ color: TOKENS.text }}>
+        <div className="mt-3 flex items-center gap-2">
+          <Stars value={rating} />
+          <span className="text-[12px] font-semibold" style={{ color: T.text }}>
             {rating.toFixed(1)}
           </span>
-          <span className="text-[11px]" style={{ color: TOKENS.textMuted }}>
-            ({reviews.toLocaleString()})
+          <span className="text-[11.5px]" style={{ color: T.textMuted }}>
+            ({reviews.toLocaleString()} reviews)
           </span>
         </div>
 
-        {/* Price */}
-        <div className="mt-3 flex items-end justify-between gap-2">
+        <div className="mt-4 flex items-end justify-between gap-2">
           <div className="flex items-baseline gap-2">
             {book.is_free ? (
-              <span className="text-lg font-bold" style={{ color: "#10B981" }}>
+              <span className="text-[19px] font-bold" style={{ color: T.success }}>
                 Free
               </span>
             ) : (
               <>
-                <span className="text-lg font-bold" style={{ color: TOKENS.text }}>
+                <span className="text-[19px] font-bold" style={{ color: T.text }}>
                   ₹{book.price}
                 </span>
                 {original > (book.price ?? 0) && (
-                  <span className="text-xs line-through" style={{ color: TOKENS.textMuted }}>
+                  <span className="text-xs line-through" style={{ color: T.textMuted }}>
                     ₹{original}
                   </span>
                 )}
@@ -337,49 +408,41 @@ const PremiumCard = ({
           {!book.is_free && saved > 0 && (
             <span
               className="rounded-md px-2 py-0.5 text-[10.5px] font-semibold"
-              style={{ background: "#FEF3C7", color: "#92400E" }}
+              style={{ background: T.primarySoft, color: "#92400E" }}
             >
               Save ₹{saved}
             </span>
           )}
         </div>
 
-        <p
-          className="mt-2 text-[11px] font-medium"
-          style={{ color: inStock ? TOKENS.accent : "#EF4444" }}
-        >
-          <span
-            className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full align-middle"
-            style={{ background: inStock ? TOKENS.accent : "#EF4444" }}
-          />
-          {inStock ? "In stock — instant access" : "Currently unavailable"}
+        <p className="mt-2.5 flex items-center gap-1.5 text-[11.5px] font-medium" style={{ color: T.success }}>
+          <Check className="h-3.5 w-3.5" />
+          In stock — instant lifetime access
         </p>
 
-        {/* CTAs */}
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => onCart(book)}
-            className="flex items-center justify-center gap-1.5 rounded-xl border py-2 text-[12px] font-semibold transition-colors"
-            style={{
-              borderColor: TOKENS.border,
-              color: TOKENS.text,
-              background: "#fff",
-            }}
-            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "#F9FAFB")}
-            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "#fff")}
-          >
-            <ShoppingCart className="h-3.5 w-3.5" /> Add
-          </button>
-          <Link
-            to={`/books/${book.slug}`}
-            className="flex items-center justify-center gap-1.5 rounded-xl py-2 text-[12px] font-semibold transition-transform"
-            style={{ background: TOKENS.primary, color: "#fff" }}
-            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = TOKENS.primaryDark)}
-            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = TOKENS.primary)}
-          >
-            <Zap className="h-3.5 w-3.5" /> Buy Now
-          </Link>
+        <div className="mt-auto pt-4">
+          <div className="grid grid-cols-2 gap-2 opacity-100 transition-opacity duration-300 md:opacity-90 md:group-hover:opacity-100">
+            <button
+              type="button"
+              onClick={() => onCart(book)}
+              className="flex items-center justify-center gap-1.5 rounded-xl border py-2.5 text-[12.5px] font-semibold transition-colors"
+              style={{ borderColor: T.border, color: T.text, background: "#fff" }}
+              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = "#F9FAFB")}
+              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = "#fff")}
+            >
+              <ShoppingCart className="h-3.5 w-3.5" /> Add
+            </button>
+            <Link
+              to={`/books/${book.slug}`}
+              onClick={() => onRecent(book)}
+              className="flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-[12.5px] font-semibold transition-colors"
+              style={{ background: T.primary, color: "#fff" }}
+              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = T.primaryDark)}
+              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = T.primary)}
+            >
+              <Zap className="h-3.5 w-3.5" /> Buy Now
+            </Link>
+          </div>
         </div>
       </div>
     </article>
@@ -392,17 +455,81 @@ const PremiumCard = ({
 const CardSkeleton = () => (
   <div
     className="overflow-hidden rounded-2xl"
-    style={{ background: TOKENS.card, border: `1px solid ${TOKENS.border}` }}
+    style={{ background: T.card, border: `1px solid ${T.border}` }}
   >
-    <div className="aspect-[3/4] animate-pulse" style={{ background: "#F1F2F4" }} />
-    <div className="space-y-2 p-4">
-      <div className="h-3 w-1/3 animate-pulse rounded" style={{ background: "#F1F2F4" }} />
-      <div className="h-4 w-4/5 animate-pulse rounded" style={{ background: "#F1F2F4" }} />
-      <div className="h-3 w-1/2 animate-pulse rounded" style={{ background: "#F1F2F4" }} />
-      <div className="h-8 w-full animate-pulse rounded-xl" style={{ background: "#F1F2F4" }} />
+    <div className="aspect-[3/4] animate-pulse" style={{ background: T.borderSoft }} />
+    <div className="space-y-2.5 p-5">
+      <div className="h-3 w-1/3 animate-pulse rounded" style={{ background: T.borderSoft }} />
+      <div className="h-4 w-4/5 animate-pulse rounded" style={{ background: T.borderSoft }} />
+      <div className="h-3 w-1/2 animate-pulse rounded" style={{ background: T.borderSoft }} />
+      <div className="h-9 w-full animate-pulse rounded-xl" style={{ background: T.borderSoft }} />
     </div>
   </div>
 );
+
+// ==============================
+// Horizontal book row
+// ==============================
+const BookRow = ({
+  title,
+  subtitle,
+  books,
+  render,
+}: {
+  title: string;
+  subtitle: string;
+  books: BookRow[];
+  render: (b: BookRow) => React.ReactNode;
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const scroll = (dir: -1 | 1) =>
+    ref.current?.scrollBy({ left: dir * 360, behavior: "smooth" });
+  if (books.length === 0) return null;
+  return (
+    <Reveal>
+      <section className="pt-16 md:pt-24">
+        <div className="mb-6 flex items-end justify-between gap-4">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ color: T.text, letterSpacing: "-0.02em" }}>
+              {title}
+            </h2>
+            <p className="mt-1.5 text-sm md:text-[15px]" style={{ color: T.textMuted }}>
+              {subtitle}
+            </p>
+          </div>
+          <div className="hidden gap-2 sm:flex">
+            <button
+              onClick={() => scroll(-1)}
+              aria-label="Scroll left"
+              className="grid h-10 w-10 place-items-center rounded-full border transition-colors hover:bg-black/[.03]"
+              style={{ borderColor: T.border, background: "#fff" }}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => scroll(1)}
+              aria-label="Scroll right"
+              className="grid h-10 w-10 place-items-center rounded-full border transition-colors hover:bg-black/[.03]"
+              style={{ borderColor: T.border, background: "#fff" }}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+        <div
+          ref={ref}
+          className="scrollbar-hide -mx-4 flex gap-5 overflow-x-auto px-4 pb-3 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {books.map((b) => (
+            <div key={b.id} className="w-[240px] shrink-0 snap-start sm:w-[260px]">
+              {render(b)}
+            </div>
+          ))}
+        </div>
+      </section>
+    </Reveal>
+  );
+};
 
 // ==============================
 // Quick View modal
@@ -420,7 +547,11 @@ const QuickView = ({
     if (!book) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
   }, [book, onClose]);
 
   if (!book) return null;
@@ -431,24 +562,24 @@ const QuickView = ({
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200"
-      style={{ background: "rgba(17,24,39,0.55)", backdropFilter: "blur(6px)" }}
+      style={{ background: "rgba(17,24,39,0.55)", backdropFilter: "blur(8px)" }}
       onClick={onClose}
     >
       <div
-        className="relative flex w-full max-w-3xl overflow-hidden rounded-2xl bg-white"
-        style={{ boxShadow: "0 24px 60px -12px rgba(0,0,0,0.35)" }}
+        className="relative flex max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-2xl bg-white"
+        style={{ boxShadow: "0 32px 80px -12px rgba(0,0,0,0.35)" }}
         onClick={(e) => e.stopPropagation()}
       >
         <button
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-full bg-white/90 shadow"
+          className="absolute right-3 top-3 z-10 grid h-9 w-9 place-items-center rounded-full bg-white/95 shadow"
         >
-          <X className="h-4 w-4" style={{ color: TOKENS.text }} />
+          <X className="h-4 w-4" style={{ color: T.text }} />
         </button>
 
-        <div className="hidden w-2/5 shrink-0 sm:block" style={{ background: "#F5F5F4" }}>
+        <div className="hidden w-2/5 shrink-0 sm:block" style={{ background: "#F6F5F1" }}>
           {book.cover_url ? (
             <img src={book.cover_url} alt={book.title} className="h-full w-full object-cover" />
           ) : (
@@ -458,46 +589,34 @@ const QuickView = ({
           )}
         </div>
 
-        <div className="flex-1 p-6 sm:p-8">
-          <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: TOKENS.accent }}>
+        <div className="flex-1 overflow-y-auto p-6 sm:p-8">
+          <p className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: T.textMuted }}>
             {CATEGORIES.find((c) => c.value === book.category)?.label ?? "Spiritual"}
           </p>
-          <h3
-            className="mt-1 text-2xl font-bold leading-tight"
-            style={{ color: TOKENS.text, fontFamily: "'Manrope', 'Inter', system-ui" }}
-          >
+          <h3 className="mt-1.5 text-2xl md:text-3xl font-bold leading-tight" style={{ color: T.text, letterSpacing: "-0.02em" }}>
             {book.title}
           </h3>
-          <p className="mt-1 text-sm" style={{ color: TOKENS.textMuted }}>
-            by {book.author}
+          <p className="mt-1 text-sm" style={{ color: T.textMuted }}>
+            by <span style={{ color: "#374151" }}>{book.author}</span>
           </p>
           <div className="mt-3 flex items-center gap-2">
-            <StarRow value={rating} />
-            <span className="text-sm font-semibold" style={{ color: TOKENS.text }}>
-              {rating.toFixed(1)}
-            </span>
-            <span className="text-xs" style={{ color: TOKENS.textMuted }}>
-              ({reviews.toLocaleString()} reviews)
-            </span>
+            <Stars value={rating} />
+            <span className="text-sm font-semibold" style={{ color: T.text }}>{rating.toFixed(1)}</span>
+            <span className="text-xs" style={{ color: T.textMuted }}>({reviews.toLocaleString()} reviews)</span>
           </div>
-          <p className="mt-4 line-clamp-5 text-sm leading-relaxed" style={{ color: "#374151" }}>
-            {book.description ?? "A carefully curated spiritual text — read on any device with a premium reader experience, lifetime access, and 7-day money-back guarantee."}
+          <p className="mt-5 line-clamp-6 text-[14.5px] leading-relaxed" style={{ color: "#374151" }}>
+            {book.description ??
+              "A carefully curated spiritual text — read on any device with a premium reader, lifetime access, and 7-day money-back guarantee."}
           </p>
 
-          <div className="mt-5 flex items-baseline gap-3">
+          <div className="mt-6 flex items-baseline gap-3">
             {book.is_free ? (
-              <span className="text-3xl font-bold" style={{ color: "#10B981" }}>
-                Free
-              </span>
+              <span className="text-3xl font-bold" style={{ color: T.success }}>Free</span>
             ) : (
               <>
-                <span className="text-3xl font-bold" style={{ color: TOKENS.text }}>
-                  ₹{book.price}
-                </span>
+                <span className="text-3xl font-bold" style={{ color: T.text }}>₹{book.price}</span>
                 {original > (book.price ?? 0) && (
-                  <span className="text-base line-through" style={{ color: TOKENS.textMuted }}>
-                    ₹{original}
-                  </span>
+                  <span className="text-base line-through" style={{ color: T.textMuted }}>₹{original}</span>
                 )}
               </>
             )}
@@ -508,23 +627,23 @@ const QuickView = ({
               type="button"
               onClick={() => onCart(book)}
               className="flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold"
-              style={{ borderColor: TOKENS.border, color: TOKENS.text }}
+              style={{ borderColor: T.border, color: T.text }}
             >
               <ShoppingCart className="h-4 w-4" /> Add to Cart
             </button>
             <Link
               to={`/books/${book.slug}`}
               className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold"
-              style={{ background: TOKENS.primary, color: "#fff" }}
+              style={{ background: T.primary, color: "#fff" }}
             >
               <Zap className="h-4 w-4" /> Buy Now
             </Link>
             <Link
               to={`/books/${book.slug}`}
               className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold"
-              style={{ background: TOKENS.accent, color: "#fff" }}
+              style={{ background: T.text, color: "#fff" }}
             >
-              View Full Details
+              View Full Details <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
@@ -540,18 +659,18 @@ const Books = () => {
   useSEO({
     title: "Hindu Religious Books — Gita, Vedas, Ramayana PDF",
     description:
-      "GyandootNova — Hindu religious books online: Bhagavad Gita Hindi PDF, Geeta shlok, 4 Vedas, Upanishads, Ramayana, Hanuman Chalisa, Vishnu Sahasranama aur 50+ dharmik granth premium reader ke saath.",
+      "GyandootNova — Hindu religious books online: Bhagavad Gita Hindi PDF, Geeta shlok, 4 Vedas, Upanishads, Ramayana, Hanuman Chalisa aur 50+ dharmik granth premium reader ke saath.",
     canonical: "/books",
   });
 
-  // Load Inter + Manrope for this page only
+  // Page-local Inter font
   useEffect(() => {
     if (document.getElementById("books-page-fonts")) return;
     const link = document.createElement("link");
     link.id = "books-page-fonts";
     link.rel = "stylesheet";
     link.href =
-      "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap";
+      "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap";
     document.head.appendChild(link);
   }, []);
 
@@ -566,9 +685,26 @@ const Books = () => {
   const [rating, setRating] = useState("all");
   const [sort, setSort] = useState("newest");
   const [page, setPage] = useState(1);
-  const [wishlist, setWishlist] = useState<Set<string>>(new Set());
   const [quick, setQuick] = useState<BookRow | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [email, setEmail] = useState("");
+
+  const [wishlist, setWishlist] = useState<Set<string>>(() => {
+    try {
+      const raw = localStorage.getItem(WISH_KEY);
+      return new Set(raw ? (JSON.parse(raw) as string[]) : []);
+    } catch {
+      return new Set();
+    }
+  });
+  const [recent, setRecent] = useState<string[]>(() => {
+    try {
+      const raw = localStorage.getItem(RECENT_KEY);
+      return raw ? (JSON.parse(raw) as string[]) : [];
+    } catch {
+      return [];
+    }
+  });
 
   const { data: books, isLoading, isError, refetch } = useQuery({
     queryKey: ["books-premium"],
@@ -588,6 +724,18 @@ const Books = () => {
     const set = new Set<string>();
     (books ?? []).forEach((b) => b.author && set.add(b.author));
     return ["all", ...Array.from(set).sort()];
+  }, [books]);
+
+  const popularAuthors = useMemo(() => {
+    const map = new Map<string, { author: string; count: number; sample: BookRow }>();
+    (books ?? []).forEach((b) => {
+      if (!b.author) return;
+      const cur = map.get(b.author) ?? { author: b.author, count: 0, sample: b };
+      cur.count += 1;
+      if ((b.purchase_count ?? 0) > (cur.sample.purchase_count ?? 0)) cur.sample = b;
+      map.set(b.author, cur);
+    });
+    return Array.from(map.values()).sort((a, b) => b.count - a.count).slice(0, 6);
   }, [books]);
 
   const filtered = useMemo(() => {
@@ -618,7 +766,6 @@ const Books = () => {
       const min = parseFloat(rating);
       list = list.filter((b) => ratingFor(b.id) >= min);
     }
-    // Language filter: heuristic on title / description
     if (language !== "all") {
       list = list.filter((b) => {
         const t = `${b.title} ${b.description ?? ""}`;
@@ -628,7 +775,6 @@ const Books = () => {
         return true;
       });
     }
-
     const sorted = [...list];
     switch (sort) {
       case "bestselling":
@@ -644,9 +790,7 @@ const Books = () => {
         sorted.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
         break;
       default:
-        sorted.sort(
-          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
+        sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }
     return sorted;
   }, [books, search, category, author, priceRange, rating, language, sort]);
@@ -655,10 +799,17 @@ const Books = () => {
     () => (books ?? []).filter((b) => b.is_featured).slice(0, 3),
     [books]
   );
-  const popular = useMemo(
+  const bestSellers = useMemo(
     () =>
       [...(books ?? [])]
         .sort((a, b) => (b.purchase_count ?? 0) - (a.purchase_count ?? 0))
+        .slice(0, 10),
+    [books]
+  );
+  const newArrivals = useMemo(
+    () =>
+      [...(books ?? [])]
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
         .slice(0, 10),
     [books]
   );
@@ -667,29 +818,19 @@ const Books = () => {
   const paged = filtered.slice(0, page * PAGE_SIZE);
   const hasMore = page < totalPages;
 
-  useEffect(() => {
-    setPage(1);
-  }, [search, category, author, priceRange, rating, language, sort]);
+  useEffect(() => setPage(1), [search, category, author, priceRange, rating, language, sort]);
 
-  // Infinite scroll
   const loaderRef = useRef<HTMLDivElement>(null);
   const loadMore = useCallback(() => hasMore && setPage((p) => p + 1), [hasMore]);
   useEffect(() => {
     const el = loaderRef.current;
     if (!el) return;
-    const obs = new IntersectionObserver(
-      ([e]) => e.isIntersecting && loadMore(),
-      { rootMargin: "300px" }
-    );
+    const obs = new IntersectionObserver(([e]) => e.isIntersecting && loadMore(), {
+      rootMargin: "400px",
+    });
     obs.observe(el);
     return () => obs.disconnect();
   }, [loadMore]);
-
-  // Carousel scroll
-  const carouselRef = useRef<HTMLDivElement>(null);
-  const scrollCarousel = (dir: -1 | 1) => {
-    carouselRef.current?.scrollBy({ left: dir * 340, behavior: "smooth" });
-  };
 
   const toggleWish = (id: string) => {
     setWishlist((prev) => {
@@ -701,10 +842,22 @@ const Books = () => {
         next.add(id);
         toast({ title: "Saved to wishlist" });
       }
+      try {
+        localStorage.setItem(WISH_KEY, JSON.stringify(Array.from(next)));
+      } catch {}
       return next;
     });
   };
-  const addToCart = (b: BookRow) => toast({ title: `Added to cart`, description: b.title });
+  const addToCart = (b: BookRow) => toast({ title: "Added to cart", description: b.title });
+  const pushRecent = (b: BookRow) => {
+    setRecent((prev) => {
+      const next = [b.id, ...prev.filter((x) => x !== b.id)].slice(0, 8);
+      try {
+        localStorage.setItem(RECENT_KEY, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
 
   const clearAll = () => {
     setSearch("");
@@ -717,279 +870,448 @@ const Books = () => {
     setSearchParams({});
   };
 
+  const activeChips = useMemo(() => {
+    const chips: { key: string; label: string; onClear: () => void }[] = [];
+    if (search) chips.push({ key: "s", label: `"${search}"`, onClear: () => setSearch("") });
+    if (category !== "all") chips.push({ key: "c", label: CATEGORIES.find((x) => x.value === category)!.label, onClear: () => setCategory("all") });
+    if (language !== "all") chips.push({ key: "l", label: LANGUAGES.find((x) => x.value === language)!.label, onClear: () => setLanguage("all") });
+    if (priceRange !== "all") chips.push({ key: "p", label: PRICE_RANGES.find((x) => x.value === priceRange)!.label, onClear: () => setPriceRange("all") });
+    if (author !== "all") chips.push({ key: "a", label: author, onClear: () => setAuthor("all") });
+    if (rating !== "all") chips.push({ key: "r", label: RATINGS.find((x) => x.value === rating)!.label, onClear: () => setRating("all") });
+    return chips;
+  }, [search, category, language, priceRange, author, rating]);
+
+  const bookById = useMemo(() => new Map((books ?? []).map((b) => [b.id, b])), [books]);
+  const recentBooks = recent.map((id) => bookById.get(id)).filter(Boolean) as BookRow[];
+  const relatedBooks = useMemo(() => {
+    if (recentBooks.length === 0) return [];
+    const cats = new Set(recentBooks.map((b) => b.category));
+    const ids = new Set(recentBooks.map((b) => b.id));
+    return (books ?? [])
+      .filter((b) => cats.has(b.category) && !ids.has(b.id))
+      .slice(0, 8);
+  }, [recentBooks, books]);
+
+  const renderCard = (b: BookRow) => (
+    <BookCard
+      book={b}
+      onQuick={setQuick}
+      onWish={toggleWish}
+      onCart={addToCart}
+      onRecent={pushRecent}
+      wished={wishlist.has(b.id)}
+    />
+  );
+
   return (
     <Layout>
       <div
         style={{
-          background: TOKENS.bg,
-          color: TOKENS.text,
+          background: T.bg,
+          color: T.text,
           fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
         }}
       >
-        {/* Page header */}
-        <section className="border-b" style={{ borderColor: TOKENS.border, background: "#fff" }}>
-          <div className="container py-10 md:py-14">
-            <p
-              className="mb-3 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-widest"
-              style={{ borderColor: TOKENS.border, color: TOKENS.accent, background: "#F0FDFA" }}
-            >
-              <Sparkles className="h-3 w-3" /> The GyandootNova Library
-            </p>
-            <h1
-              className="text-3xl md:text-5xl font-bold tracking-tight"
-              style={{ fontFamily: "'Manrope', 'Inter', system-ui", color: TOKENS.text }}
-            >
-              A quiet corner for timeless books.
-            </h1>
-            <p className="mt-3 max-w-2xl text-sm md:text-base" style={{ color: TOKENS.textMuted }}>
-              Curated Hindu scriptures, spiritual classics and modern reflections — with instant access, lifetime reading, and a calm reader designed for depth.
-            </p>
+        {/* Hero */}
+        <section className="border-b" style={{ borderColor: T.border, background: "#fff" }}>
+          <div className="container py-14 md:py-20">
+            <Reveal>
+              <p
+                className="mb-4 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em]"
+                style={{ borderColor: T.border, color: T.text, background: T.bg }}
+              >
+                <Feather className="h-3 w-3" style={{ color: T.primary }} />
+                The GyandootNova Library
+              </p>
+              <h1
+                className="max-w-3xl text-4xl md:text-6xl font-bold leading-[1.05] tracking-tight"
+                style={{ color: T.text, letterSpacing: "-0.03em" }}
+              >
+                A quiet library for<br className="hidden md:block" /> timeless books.
+              </h1>
+              <p className="mt-5 max-w-2xl text-base md:text-lg leading-relaxed" style={{ color: T.textMuted }}>
+                Curated Hindu scriptures, spiritual classics and modern reflections — with a calm reader designed for depth, instant access, and lifetime reading.
+              </p>
+            </Reveal>
           </div>
         </section>
 
         {/* Featured */}
         {featured.length > 0 && (
-          <section className="container pt-10 md:pt-14">
-            <div className="mb-5 flex items-end justify-between">
-              <div>
-                <h2
-                  className="text-xl md:text-2xl font-bold tracking-tight"
-                  style={{ fontFamily: "'Manrope', 'Inter', system-ui" }}
-                >
+          <Reveal>
+            <section className="container pt-16 md:pt-24">
+              <div className="mb-8">
+                <h2 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ letterSpacing: "-0.02em" }}>
                   Featured Editions
                 </h2>
-                <p className="mt-1 text-sm" style={{ color: TOKENS.textMuted }}>
+                <p className="mt-1.5 text-sm md:text-[15px]" style={{ color: T.textMuted }}>
                   Handpicked by our editors this season.
                 </p>
               </div>
-            </div>
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {featured.map((b) => (
-                <PremiumCard
-                  key={b.id}
-                  book={b}
-                  size="featured"
-                  onQuick={setQuick}
-                  onWish={toggleWish}
-                  onCart={addToCart}
-                  wished={wishlist.has(b.id)}
-                />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Popular carousel */}
-        {popular.length > 0 && (
-          <section className="container pt-14">
-            <div className="mb-5 flex items-end justify-between gap-4">
-              <div>
-                <h2
-                  className="flex items-center gap-2 text-xl md:text-2xl font-bold tracking-tight"
-                  style={{ fontFamily: "'Manrope', 'Inter', system-ui" }}
-                >
-                  <TrendingUp className="h-5 w-5" style={{ color: TOKENS.primary }} />
-                  Most Popular This Week
-                </h2>
-                <p className="mt-1 text-sm" style={{ color: TOKENS.textMuted }}>
-                  What our readers are opening most right now.
-                </p>
-              </div>
-              <div className="hidden gap-2 sm:flex">
-                <button
-                  onClick={() => scrollCarousel(-1)}
-                  aria-label="Scroll left"
-                  className="grid h-9 w-9 place-items-center rounded-full border transition-colors"
-                  style={{ borderColor: TOKENS.border, background: "#fff" }}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => scrollCarousel(1)}
-                  aria-label="Scroll right"
-                  className="grid h-9 w-9 place-items-center rounded-full border transition-colors"
-                  style={{ borderColor: TOKENS.border, background: "#fff" }}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-            <div
-              ref={carouselRef}
-              className="scrollbar-hide flex gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden snap-x snap-mandatory"
-            >
-              {popular.map((b) => (
-                <div key={b.id} className="w-[240px] shrink-0 snap-start sm:w-[260px]">
-                  <PremiumCard
-                    book={b}
-                    onQuick={setQuick}
-                    onWish={toggleWish}
-                    onCart={addToCart}
-                    wished={wishlist.has(b.id)}
-                  />
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Toolbar */}
-        <section className="container pt-14">
-          <div
-            className="sticky top-16 z-30 rounded-2xl border p-3 md:p-4"
-            style={{
-              background: "rgba(255,255,255,0.85)",
-              backdropFilter: "blur(10px)",
-              borderColor: TOKENS.border,
-              boxShadow: "0 4px 20px -12px rgba(17,24,39,0.15)",
-            }}
-          >
-            <div className="flex flex-wrap items-center gap-2 md:gap-3">
-              <div className="relative min-w-[220px] flex-1">
-                <Search
-                  className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2"
-                  style={{ color: TOKENS.textMuted }}
-                />
-                <Input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search titles, authors, topics…"
-                  className="h-11 rounded-xl border-0 bg-white pl-10 text-sm shadow-none focus-visible:ring-1"
-                  style={{ boxShadow: `inset 0 0 0 1px ${TOKENS.border}` }}
-                />
-              </div>
-
-              <div className="hidden flex-wrap items-center gap-2 lg:flex">
-                <FilterSelect value={category} onChange={setCategory} options={CATEGORIES} />
-                <FilterSelect value={language} onChange={setLanguage} options={LANGUAGES} />
-                <FilterSelect value={priceRange} onChange={setPriceRange} options={PRICE_RANGES} />
-                <FilterSelect
-                  value={author}
-                  onChange={setAuthor}
-                  options={authors.map((a) => ({
-                    value: a,
-                    label: a === "all" ? "All Authors" : a,
-                  }))}
-                />
-                <FilterSelect value={rating} onChange={setRating} options={RATINGS} />
-              </div>
-
-              <div className="ml-auto flex items-center gap-2">
-                <FilterSelect value={sort} onChange={setSort} options={SORTS} accent />
-                <Button
-                  variant="outline"
-                  className="h-11 rounded-xl lg:hidden"
-                  onClick={() => setShowFilters((s) => !s)}
-                  style={{ borderColor: TOKENS.border }}
-                >
-                  <SlidersHorizontal className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            {showFilters && (
-              <div className="mt-3 grid grid-cols-2 gap-2 lg:hidden">
-                <FilterSelect value={category} onChange={setCategory} options={CATEGORIES} />
-                <FilterSelect value={language} onChange={setLanguage} options={LANGUAGES} />
-                <FilterSelect value={priceRange} onChange={setPriceRange} options={PRICE_RANGES} />
-                <FilterSelect
-                  value={author}
-                  onChange={setAuthor}
-                  options={authors.map((a) => ({
-                    value: a,
-                    label: a === "all" ? "All Authors" : a,
-                  }))}
-                />
-                <FilterSelect value={rating} onChange={setRating} options={RATINGS} />
-              </div>
-            )}
-          </div>
-
-          <div className="mt-4 flex items-center justify-between text-sm" style={{ color: TOKENS.textMuted }}>
-            <p>
-              Showing <span className="font-semibold" style={{ color: TOKENS.text }}>{paged.length}</span> of{" "}
-              <span className="font-semibold" style={{ color: TOKENS.text }}>{filtered.length}</span> books
-            </p>
-            {(search ||
-              category !== "all" ||
-              language !== "all" ||
-              priceRange !== "all" ||
-              author !== "all" ||
-              rating !== "all") && (
-              <button
-                onClick={clearAll}
-                className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold transition-colors hover:bg-black/5"
-                style={{ color: TOKENS.accent }}
-              >
-                <X className="h-3 w-3" /> Clear all filters
-              </button>
-            )}
-          </div>
-        </section>
-
-        {/* Grid / states */}
-        <section className="container pb-24 pt-6">
-          {isLoading ? (
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <CardSkeleton key={i} />
-              ))}
-            </div>
-          ) : isError ? (
-            <EmptyState
-              icon={<AlertTriangle className="h-10 w-10" style={{ color: "#EF4444" }} />}
-              title="Something went off-key"
-              desc="We couldn't load the library right now. Please try again in a moment."
-              cta={{ label: "Retry", onClick: () => refetch() }}
-            />
-          ) : paged.length === 0 ? (
-            <EmptyState
-              icon={<Frown className="h-10 w-10" style={{ color: TOKENS.textMuted }} />}
-              title="No books match those filters"
-              desc="Try loosening a filter or searching a different keyword — there are plenty of gems in the library."
-              cta={{ label: "Reset filters", onClick: clearAll }}
-            />
-          ) : (
-            <>
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {paged.map((b, i) => (
-                  <div
-                    key={b.id}
-                    className="animate-in fade-in slide-in-from-bottom-2"
-                    style={{ animationDelay: `${Math.min(i, 8) * 40}ms`, animationDuration: "400ms", animationFillMode: "backwards" }}
-                  >
-                    <PremiumCard
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {featured.map((b, i) => (
+                  <Reveal key={b.id} delay={i * 80}>
+                    <BookCard
                       book={b}
+                      size="featured"
                       onQuick={setQuick}
                       onWish={toggleWish}
                       onCart={addToCart}
+                      onRecent={pushRecent}
                       wished={wishlist.has(b.id)}
                     />
-                  </div>
+                  </Reveal>
                 ))}
               </div>
+            </section>
+          </Reveal>
+        )}
 
-              {hasMore ? (
-                <div ref={loaderRef} className="mt-12 flex flex-col items-center gap-3">
-                  <div className="grid grid-cols-1 gap-5 w-full sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {Array.from({ length: 4 }).map((_, i) => (
-                      <CardSkeleton key={i} />
-                    ))}
-                  </div>
-                  <button
-                    onClick={loadMore}
-                    className="mt-4 rounded-xl px-6 py-2.5 text-sm font-semibold"
-                    style={{ background: TOKENS.text, color: "#fff" }}
-                  >
-                    Load more books
-                  </button>
+        <div className="container">
+          <BookRow
+            title="Best Sellers"
+            subtitle="The volumes readers return to again and again."
+            books={bestSellers}
+            render={renderCard}
+          />
+
+          <BookRow
+            title="New Arrivals"
+            subtitle="Fresh titles just added to the shelves."
+            books={newArrivals}
+            render={renderCard}
+          />
+        </div>
+
+        {/* Popular Authors */}
+        {popularAuthors.length > 0 && (
+          <Reveal>
+            <section className="container pt-16 md:pt-24">
+              <div className="mb-8 flex items-end justify-between">
+                <div>
+                  <h2 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ letterSpacing: "-0.02em" }}>
+                    Voices We Love
+                  </h2>
+                  <p className="mt-1.5 text-sm md:text-[15px]" style={{ color: T.textMuted }}>
+                    Authors and translators shaping our library.
+                  </p>
                 </div>
-              ) : (
-                <Pagination page={page} totalPages={totalPages} onPage={setPage} />
+              </div>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+                {popularAuthors.map((a) => (
+                  <button
+                    key={a.author}
+                    onClick={() => {
+                      setAuthor(a.author);
+                      window.scrollTo({ top: document.getElementById("library")?.offsetTop ?? 0, behavior: "smooth" });
+                    }}
+                    className="group flex flex-col items-center rounded-2xl border p-5 text-center transition-all hover:-translate-y-0.5"
+                    style={{ borderColor: T.border, background: "#fff" }}
+                  >
+                    <div
+                      className="grid h-16 w-16 place-items-center rounded-full text-lg font-bold"
+                      style={{ background: T.bg, color: T.text, border: `1px solid ${T.border}` }}
+                    >
+                      {a.author.split(" ").map((w) => w[0]).slice(0, 2).join("")}
+                    </div>
+                    <p className="mt-3 text-[13.5px] font-semibold" style={{ color: T.text }}>
+                      {a.author}
+                    </p>
+                    <p className="mt-0.5 text-[11.5px]" style={{ color: T.textMuted }}>
+                      {a.count} {a.count === 1 ? "book" : "books"}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            </section>
+          </Reveal>
+        )}
+
+        {/* Quote */}
+        <Reveal>
+          <section className="container pt-20 md:pt-28">
+            <div
+              className="mx-auto max-w-4xl rounded-3xl border p-10 md:p-16 text-center"
+              style={{ borderColor: T.border, background: "#fff" }}
+            >
+              <Quote className="mx-auto h-8 w-8" style={{ color: T.primary }} />
+              <blockquote
+                className="mt-6 text-2xl md:text-4xl font-semibold leading-[1.25] tracking-tight"
+                style={{ color: T.text, letterSpacing: "-0.02em" }}
+              >
+                "A room without books is like a body without a soul."
+              </blockquote>
+              <p className="mt-6 text-sm font-medium tracking-widest uppercase" style={{ color: T.textMuted }}>
+                — Marcus Tullius Cicero
+              </p>
+            </div>
+          </section>
+        </Reveal>
+
+        {/* Toolbar + library */}
+        <section id="library" className="container pt-20 md:pt-28">
+          <Reveal>
+            <div className="mb-6">
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ letterSpacing: "-0.02em" }}>
+                Browse the full library
+              </h2>
+              <p className="mt-1.5 text-sm md:text-[15px]" style={{ color: T.textMuted }}>
+                Search, filter and discover — take your time.
+              </p>
+            </div>
+
+            <div
+              className="sticky top-16 z-30 rounded-2xl border p-3 md:p-4"
+              style={{
+                background: "rgba(252,252,250,0.9)",
+                backdropFilter: "blur(12px)",
+                borderColor: T.border,
+                boxShadow: "0 8px 30px -20px rgba(17,24,39,0.15)",
+              }}
+            >
+              <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                <div className="relative min-w-[220px] flex-1">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: T.textMuted }} />
+                  <Input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search titles, authors, topics…"
+                    className="h-11 rounded-xl border-0 bg-white pl-10 text-sm shadow-none focus-visible:ring-1"
+                    style={{ boxShadow: `inset 0 0 0 1px ${T.border}` }}
+                  />
+                </div>
+
+                <div className="hidden flex-wrap items-center gap-2 lg:flex">
+                  <FilterSelect value={category} onChange={setCategory} options={CATEGORIES} />
+                  <FilterSelect value={author} onChange={setAuthor} options={authors.map((a) => ({ value: a, label: a === "all" ? "All Authors" : a }))} />
+                  <FilterSelect value={language} onChange={setLanguage} options={LANGUAGES} />
+                  <FilterSelect value={priceRange} onChange={setPriceRange} options={PRICE_RANGES} />
+                  <FilterSelect value={rating} onChange={setRating} options={RATINGS} />
+                </div>
+
+                <div className="ml-auto flex items-center gap-2">
+                  <FilterSelect value={sort} onChange={setSort} options={SORTS} accent />
+                  <Button
+                    variant="outline"
+                    className="h-11 rounded-xl lg:hidden"
+                    onClick={() => setShowFilters((s) => !s)}
+                    style={{ borderColor: T.border }}
+                  >
+                    <SlidersHorizontal className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {showFilters && (
+                <div className="mt-3 grid grid-cols-2 gap-2 lg:hidden">
+                  <FilterSelect value={category} onChange={setCategory} options={CATEGORIES} />
+                  <FilterSelect value={author} onChange={setAuthor} options={authors.map((a) => ({ value: a, label: a === "all" ? "All Authors" : a }))} />
+                  <FilterSelect value={language} onChange={setLanguage} options={LANGUAGES} />
+                  <FilterSelect value={priceRange} onChange={setPriceRange} options={PRICE_RANGES} />
+                  <FilterSelect value={rating} onChange={setRating} options={RATINGS} />
+                </div>
               )}
-            </>
-          )}
+            </div>
+
+            {/* Active chips + count */}
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <p className="mr-2 text-sm" style={{ color: T.textMuted }}>
+                <span className="font-semibold" style={{ color: T.text }}>{paged.length}</span> of{" "}
+                <span className="font-semibold" style={{ color: T.text }}>{filtered.length}</span> books
+              </p>
+              {activeChips.map((c) => (
+                <button
+                  key={c.key}
+                  onClick={c.onClear}
+                  className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors hover:bg-black/[.03]"
+                  style={{ borderColor: T.border, background: "#fff", color: T.text }}
+                >
+                  {c.label}
+                  <X className="h-3 w-3" style={{ color: T.textMuted }} />
+                </button>
+              ))}
+              {activeChips.length > 0 && (
+                <button
+                  onClick={clearAll}
+                  className="ml-1 text-xs font-semibold underline underline-offset-2"
+                  style={{ color: T.text }}
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
+          </Reveal>
+
+          {/* Grid */}
+          <div className="pt-8 pb-20">
+            {isLoading ? (
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <CardSkeleton key={i} />
+                ))}
+              </div>
+            ) : isError ? (
+              <EmptyState
+                icon={<AlertTriangle className="h-10 w-10" style={{ color: "#EF4444" }} />}
+                title="Something went off-key"
+                desc="We couldn't load the library right now. Please try again in a moment."
+                cta={{ label: "Retry", onClick: () => refetch() }}
+              />
+            ) : paged.length === 0 ? (
+              <EmptyState
+                icon={<Frown className="h-10 w-10" style={{ color: T.textMuted }} />}
+                title="No books match those filters"
+                desc="Try loosening a filter or searching a different keyword — there are plenty of gems in the library."
+                cta={{ label: "Reset filters", onClick: clearAll }}
+              />
+            ) : (
+              <>
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {paged.map((b, i) => (
+                    <Reveal key={b.id} delay={Math.min(i, 8) * 40}>
+                      {renderCard(b)}
+                    </Reveal>
+                  ))}
+                </div>
+
+                {hasMore ? (
+                  <div ref={loaderRef} className="mt-14 flex flex-col items-center gap-4">
+                    <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                      {Array.from({ length: 4 }).map((_, i) => (
+                        <CardSkeleton key={i} />
+                      ))}
+                    </div>
+                    <button
+                      onClick={loadMore}
+                      className="mt-2 rounded-xl px-6 py-2.5 text-sm font-semibold"
+                      style={{ background: T.text, color: "#fff" }}
+                    >
+                      Load more books
+                    </button>
+                  </div>
+                ) : (
+                  <Pagination page={page} totalPages={totalPages} onPage={setPage} />
+                )}
+              </>
+            )}
+          </div>
         </section>
+
+        {/* Recently viewed */}
+        {recentBooks.length > 0 && (
+          <div className="container">
+            <BookRow
+              title="Recently Viewed"
+              subtitle="Pick up where you left off."
+              books={recentBooks}
+              render={renderCard}
+            />
+          </div>
+        )}
+
+        {/* Related */}
+        {relatedBooks.length > 0 && (
+          <div className="container">
+            <BookRow
+              title="You Might Also Enjoy"
+              subtitle="Chosen from the shelves closest to your interests."
+              books={relatedBooks}
+              render={renderCard}
+            />
+          </div>
+        )}
+
+        {/* Testimonials */}
+        <Reveal>
+          <section className="container pt-20 md:pt-28">
+            <div className="mb-10 text-center">
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ letterSpacing: "-0.02em" }}>
+                Loved by thoughtful readers
+              </h2>
+              <p className="mt-1.5 text-sm md:text-[15px]" style={{ color: T.textMuted }}>
+                Real words from the GyandootNova community.
+              </p>
+            </div>
+            <div className="grid gap-5 md:grid-cols-3">
+              {TESTIMONIALS.map((t, i) => (
+                <Reveal key={t.name} delay={i * 80}>
+                  <figure
+                    className="flex h-full flex-col rounded-2xl border p-7"
+                    style={{ borderColor: T.border, background: "#fff" }}
+                  >
+                    <Stars value={5} size={16} />
+                    <blockquote className="mt-4 flex-1 text-[15px] leading-relaxed" style={{ color: "#374151" }}>
+                      "{t.quote}"
+                    </blockquote>
+                    <figcaption className="mt-6">
+                      <p className="text-sm font-semibold" style={{ color: T.text }}>{t.name}</p>
+                      <p className="text-xs" style={{ color: T.textMuted }}>{t.role}</p>
+                    </figcaption>
+                  </figure>
+                </Reveal>
+              ))}
+            </div>
+          </section>
+        </Reveal>
+
+        {/* Newsletter */}
+        <Reveal>
+          <section className="container pt-20 md:pt-28 pb-24 md:pb-32">
+            <div
+              className="relative overflow-hidden rounded-3xl border p-10 md:p-16 text-center"
+              style={{
+                borderColor: T.border,
+                background:
+                  "radial-gradient(120% 100% at 50% 0%, rgba(245,158,11,0.08) 0%, rgba(252,252,250,1) 55%)",
+              }}
+            >
+              <div
+                className="mx-auto mb-5 grid h-12 w-12 place-items-center rounded-full"
+                style={{ background: T.primarySoft, color: T.primaryDark }}
+              >
+                <Mail className="h-5 w-5" />
+              </div>
+              <h2
+                className="mx-auto max-w-2xl text-3xl md:text-4xl font-bold tracking-tight"
+                style={{ color: T.text, letterSpacing: "-0.02em" }}
+              >
+                A slow letter for careful readers.
+              </h2>
+              <p className="mx-auto mt-4 max-w-xl text-[15px]" style={{ color: T.textMuted }}>
+                One considered email each month — new arrivals, editor notes, and quiet reading recommendations. No noise, unsubscribe anytime.
+              </p>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!email.includes("@")) return;
+                  toast({ title: "You're subscribed", description: "We'll write soon." });
+                  setEmail("");
+                }}
+                className="mx-auto mt-7 flex max-w-md flex-col gap-2 sm:flex-row"
+              >
+                <Input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="h-12 rounded-xl border-0 bg-white text-sm shadow-none"
+                  style={{ boxShadow: `inset 0 0 0 1px ${T.border}` }}
+                />
+                <button
+                  type="submit"
+                  className="h-12 rounded-xl px-6 text-sm font-semibold transition-colors"
+                  style={{ background: T.text, color: "#fff" }}
+                >
+                  Subscribe
+                </button>
+              </form>
+              <p className="mt-3 text-[11.5px]" style={{ color: T.textMuted }}>
+                Join 24,000+ readers. We treat your inbox like a library.
+              </p>
+            </div>
+          </section>
+        </Reveal>
       </div>
 
       <QuickView book={quick} onClose={() => setQuick(null)} onCart={addToCart} />
@@ -1015,8 +1337,8 @@ const FilterSelect = ({
     <SelectTrigger
       className="h-11 min-w-[140px] rounded-xl border-0 bg-white text-sm font-medium shadow-none"
       style={{
-        boxShadow: `inset 0 0 0 1px ${TOKENS.border}`,
-        color: accent ? TOKENS.accent : TOKENS.text,
+        boxShadow: `inset 0 0 0 1px ${T.border}`,
+        color: accent ? T.text : T.text,
       }}
     >
       <SelectValue />
@@ -1043,29 +1365,26 @@ const EmptyState = ({
   cta?: { label: string; onClick: () => void };
 }) => (
   <div
-    className="mx-auto flex max-w-lg flex-col items-center rounded-2xl border p-10 text-center"
-    style={{ borderColor: TOKENS.border, background: "#fff" }}
+    className="mx-auto flex max-w-lg flex-col items-center rounded-2xl border p-12 text-center"
+    style={{ borderColor: T.border, background: "#fff" }}
   >
     <div
-      className="mb-4 grid h-20 w-20 place-items-center rounded-full"
-      style={{ background: "#FAFAFA", border: `1px solid ${TOKENS.border}` }}
+      className="mb-5 grid h-20 w-20 place-items-center rounded-full"
+      style={{ background: T.bg, border: `1px solid ${T.border}` }}
     >
       {icon}
     </div>
-    <h3
-      className="text-lg font-bold"
-      style={{ color: TOKENS.text, fontFamily: "'Manrope', 'Inter', system-ui" }}
-    >
+    <h3 className="text-xl font-bold" style={{ color: T.text, letterSpacing: "-0.01em" }}>
       {title}
     </h3>
-    <p className="mt-2 text-sm" style={{ color: TOKENS.textMuted }}>
+    <p className="mt-2 text-sm" style={{ color: T.textMuted }}>
       {desc}
     </p>
     {cta && (
       <button
         onClick={cta.onClick}
-        className="mt-5 rounded-xl px-5 py-2.5 text-sm font-semibold"
-        style={{ background: TOKENS.primary, color: "#fff" }}
+        className="mt-6 rounded-xl px-5 py-2.5 text-sm font-semibold"
+        style={{ background: T.primary, color: "#fff" }}
       >
         {cta.label}
       </button>
@@ -1083,26 +1402,26 @@ const Pagination = ({
   onPage: (p: number) => void;
 }) => {
   if (totalPages <= 1) return null;
-  const window = 2;
+  const win = 2;
   const pages: (number | "…")[] = [];
   for (let i = 1; i <= totalPages; i++) {
-    if (i === 1 || i === totalPages || Math.abs(i - page) <= window) pages.push(i);
+    if (i === 1 || i === totalPages || Math.abs(i - page) <= win) pages.push(i);
     else if (pages[pages.length - 1] !== "…") pages.push("…");
   }
   return (
-    <div className="mt-14 flex items-center justify-center gap-1.5">
+    <div className="mt-16 flex items-center justify-center gap-1.5">
       <button
         onClick={() => onPage(Math.max(1, page - 1))}
         disabled={page === 1}
         className="grid h-10 w-10 place-items-center rounded-xl border transition-colors disabled:opacity-40"
-        style={{ borderColor: TOKENS.border, background: "#fff" }}
+        style={{ borderColor: T.border, background: "#fff" }}
         aria-label="Previous page"
       >
         <ChevronLeft className="h-4 w-4" />
       </button>
       {pages.map((p, i) =>
         p === "…" ? (
-          <span key={`e-${i}`} className="px-2 text-sm" style={{ color: TOKENS.textMuted }}>
+          <span key={`e-${i}`} className="px-2 text-sm" style={{ color: T.textMuted }}>
             …
           </span>
         ) : (
@@ -1112,8 +1431,8 @@ const Pagination = ({
             className="grid h-10 min-w-[2.5rem] place-items-center rounded-xl px-3 text-sm font-semibold transition-colors"
             style={
               p === page
-                ? { background: TOKENS.text, color: "#fff" }
-                : { border: `1px solid ${TOKENS.border}`, background: "#fff", color: TOKENS.text }
+                ? { background: T.text, color: "#fff" }
+                : { border: `1px solid ${T.border}`, background: "#fff", color: T.text }
             }
           >
             {p}
@@ -1124,7 +1443,7 @@ const Pagination = ({
         onClick={() => onPage(Math.min(totalPages, page + 1))}
         disabled={page === totalPages}
         className="grid h-10 w-10 place-items-center rounded-xl border transition-colors disabled:opacity-40"
-        style={{ borderColor: TOKENS.border, background: "#fff" }}
+        style={{ borderColor: T.border, background: "#fff" }}
         aria-label="Next page"
       >
         <ChevronRight className="h-4 w-4" />

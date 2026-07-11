@@ -23,6 +23,9 @@ jobs:
         run: bun run typecheck
       - name: Lint
         run: bun run lint
+      - name: Unit tests (JSON-LD schema + cart persistence)
+        # These block merges on any JSON-LD or cart-persistence regression.
+        run: bun run test
       - name: Build (runs prerender + SEO check via postbuild)
         run: bun run build
         env:

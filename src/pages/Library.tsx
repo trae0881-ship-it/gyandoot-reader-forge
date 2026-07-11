@@ -1,6 +1,5 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import { BookOpen, ArrowRight, Trash2 } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { BookOpen, ArrowRight, Trash2, LogIn, Lock, Loader2 } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import useSEO from "@/hooks/useSEO";
@@ -13,7 +12,7 @@ import { SITE } from "@/lib/jsonLd";
 
 const Library = () => {
   const { user, loading } = useAuth();
-  const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const { data, isLoading } = useContinueReading(50);
 
@@ -32,10 +31,6 @@ const Library = () => {
     },
   });
 
-  useEffect(() => {
-    if (!loading && !user) navigate("/auth?redirect=/library");
-  }, [loading, user, navigate]);
-
   const removeEntry = async (book_id: string) => {
     if (!user) return;
     const { error } = await supabase
@@ -50,6 +45,9 @@ const Library = () => {
     toast({ title: "Removed from your library" });
     queryClient.invalidateQueries({ queryKey: ["continue-reading"] });
   };
+
+  const signInHref = `/auth?redirect=${encodeURIComponent(location.pathname)}`;
+
 
   return (
     <Layout>
@@ -81,10 +79,52 @@ const Library = () => {
 
       <section className="py-12 md:py-16">
         <div className="container max-w-5xl px-4">
-          {isLoading ? (
-            <div className="py-24 text-center text-muted-foreground">Loading your library…</div>
+          {loading ? (
+            <div className="flex items-center justify-center py-24 text-muted-foreground">
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading…
+            </div>
+          ) : !user ? (
+            <div
+              role="region"
+              aria-label="Sign in required"
+              data-testid="library-guest"
+              className="surface-card p-12 md:p-16 text-center"
+            >
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <Lock className="h-6 w-6" />
+              </div>
+              <h2 className="font-serif text-2xl md:text-3xl">Sign in to view your library</h2>
+              <p className="mx-auto mt-2 max-w-md text-muted-foreground">
+                Apni Path-yatra ka record dekhne ke liye sign in karein. Your saved chapters,
+                reading progress and library are private to your account.
+              </p>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                <Button asChild size="lg">
+                  <Link to={signInHref}>
+                    <LogIn className="mr-2 h-4 w-4" /> Sign in to view
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="lg">
+                  <Link to="/books">Browse books instead</Link>
+                </Button>
+              </div>
+              <p className="mt-4 text-xs text-muted-foreground">
+                New here?{" "}
+                <Link to={signInHref} className="text-primary underline underline-offset-2">
+                  Create a free account
+                </Link>{" "}
+                — it takes under a minute.
+              </p>
+            </div>
+          ) : isLoading ? (
+            <div className="flex items-center justify-center py-24 text-muted-foreground">
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Loading your library…
+            </div>
           ) : !data || data.length === 0 ? (
-            <div className="surface-card p-12 md:p-16 text-center">
+            <div
+              data-testid="library-empty"
+              className="surface-card p-12 md:p-16 text-center"
+            >
               <BookOpen className="mx-auto h-10 w-10 text-primary" />
               <h2 className="mt-4 font-serif text-2xl">Aapki library abhi khali hai</h2>
               <p className="mt-2 text-muted-foreground">
@@ -94,6 +134,7 @@ const Library = () => {
                 <Link to="/books">Browse books <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
               </Button>
             </div>
+
           ) : (
             <ul className="grid gap-4 md:grid-cols-2">
               {data.map((row) => {

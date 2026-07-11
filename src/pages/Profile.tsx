@@ -19,6 +19,36 @@ import useSEO from "@/hooks/useSEO";
 const Profile = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const downloadInvoice = async (purchaseId: string, bookTitle?: string) => {
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) {
+        toast({ title: "Please sign in again", variant: "destructive" });
+        return;
+      }
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const url = `https://${projectId}.supabase.co/functions/v1/generate-invoice?purchase_id=${purchaseId}`;
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(err || "Failed to generate invoice");
+      }
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      a.download = `invoice-${(bookTitle ?? "gyandootnova").replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch (e: any) {
+      toast({ title: "Invoice download failed", description: e?.message ?? "Try again", variant: "destructive" });
+    }
+  };
 
   useSEO({
     title: "My Profile — Purchased Books & Reading | GyandootNova",

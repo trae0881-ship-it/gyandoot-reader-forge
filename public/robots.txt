@@ -167,6 +167,7 @@ Disallow: /profile
 Disallow: /checkout
 Disallow: /api/
 Disallow: /*?ref=
+Disallow: /books/*/*   # premium chapter reader URLs — book pages rank, chapters do not
 
 Sitemap: https://gyandootnova.in/sitemap.xml
 Sitemap: https://vrzngahawxtbpwrgxtmb.supabase.co/functions/v1/sitemap

@@ -353,16 +353,16 @@ const BookCard = ({
         </div>
       </Link>
 
-      <div className="flex flex-1 flex-col p-5">
+      <div className="flex flex-1 flex-col p-6 md:p-7">
         <p
-          className="mb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em]"
+          className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em]"
           style={{ color: T.textMuted }}
         >
           {CATEGORIES.find((c) => c.value === book.category)?.label ?? "Spiritual"}
         </p>
         <h3
-          className="line-clamp-2 min-h-[2.7rem] text-[16px] font-semibold leading-snug"
-          style={{ color: T.text, letterSpacing: "-0.01em" }}
+          className="line-clamp-2 min-h-[3.15rem] text-[18px] font-semibold"
+          style={{ color: T.text, letterSpacing: "-0.01em", lineHeight: 1.4 }}
         >
           <Link
             to={`/books/${book.slug}`}
@@ -372,19 +372,20 @@ const BookCard = ({
             {book.title}
           </Link>
         </h3>
-        <p className="mt-1 truncate text-[13px]" style={{ color: T.textMuted }}>
+        <p className="mt-3 truncate text-[14px]" style={{ color: "#6B7280", lineHeight: 1.5 }}>
           by <span className="font-medium" style={{ color: "#374151" }}>{book.author}</span>
         </p>
 
-        <div className="mt-3 flex items-center gap-2">
+        <div className="mt-5 flex items-center gap-2">
           <Stars value={rating} />
-          <span className="text-[12px] font-semibold" style={{ color: T.text }}>
+          <span className="text-[13px] font-semibold" style={{ color: T.text }}>
             {rating.toFixed(1)}
           </span>
-          <span className="text-[11.5px]" style={{ color: T.textMuted }}>
+          <span className="text-[12px]" style={{ color: T.textMuted }}>
             ({reviews.toLocaleString()} reviews)
           </span>
         </div>
+
 
         <div className="mt-4 flex items-end justify-between gap-2">
           <div className="flex items-baseline gap-2">

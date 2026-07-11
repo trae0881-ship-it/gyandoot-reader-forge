@@ -524,6 +524,7 @@ const BookDetail = () => {
                     className="w-full text-base font-semibold"
                     onClick={() => {
                       addToCart({
+                        book_id: book.id,
                         slug: book.slug,
                         title: book.title,
                         cover_url: book.cover_url,

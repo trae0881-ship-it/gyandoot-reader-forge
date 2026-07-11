@@ -151,7 +151,7 @@ export const EmotionalConnection = () => (
             className={[
               "group relative min-h-[380px] p-8 flex flex-col justify-between transition-all duration-500",
               dark
-                ? "bg-ink text-primary-foreground shadow-2xl md:mt-12"
+                ? "bg-primary text-primary-foreground shadow-2xl md:mt-12"
                 : "bg-card border border-secondary/15 hover:-translate-y-2 hover:shadow-[0_24px_60px_-20px_hsl(var(--primary)/0.25)]",
             ].join(" ")}
           >
@@ -228,7 +228,7 @@ const calmPromises = [
 ];
 
 export const CalmFeeling = () => (
-  <section className="relative bg-ink overflow-hidden">
+  <section className="relative bg-primary overflow-hidden">
     <div
       aria-hidden
       className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full blur-[120px] -mr-48 -mt-48"
@@ -275,7 +275,7 @@ export const CalmFeeling = () => (
         {calmPromises.map((p) => (
           <div
             key={p.title}
-            className="bg-ink px-4 py-6 transition-colors hover:bg-primary-foreground/[0.03]"
+            className="bg-primary px-4 py-6 transition-colors hover:bg-primary-foreground/[0.03]"
           >
             <p
               className="text-lg md:text-xl text-primary-foreground"

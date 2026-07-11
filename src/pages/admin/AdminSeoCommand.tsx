@@ -108,7 +108,7 @@ const AdminSeoCommand = () => {
   const load = async () => {
     const [{ data: p }, { data: l }, { data: q }, { data: k }, { data: r }, { data: j }, { data: n }] = await Promise.all([
       supabase.from("posts").select("*").eq("post_type", "article").order("updated_at", { ascending: false }).limit(80),
-      supabase.from("seo_agent_logs").select("*").order("created_at", { ascending: false }).limit(80),
+      supabase.from("seo_agent_logs").select("*").order("run_at", { ascending: false }).limit(80),
       supabase.from("seo_keyword_queue").select("*").order("opportunity_score", { ascending: false }).limit(50),
       supabase.from("book_knowledge").select("book_id,title,topics,keywords,updated_at").order("updated_at", { ascending: false }),
       supabase.from("daily_run_log").select("*").order("started_at", { ascending: false }).limit(60),

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en-IN">
+<html lang="en-IN" translate="no" class="notranslate">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,6 +7,18 @@
          titles like "कादरनाथ" or "Rigved Part 1" don't get mangled into Swedish/etc. -->
     <meta name="google" content="notranslate" />
     <meta http-equiv="Content-Language" content="en-IN" />
+    <script>
+      (function () {
+        var cookieName = ["goog", "trans"].join("");
+        var expire = cookieName + "=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        document.cookie = expire;
+        document.cookie = expire + "; domain=" + location.hostname;
+        var parts = location.hostname.split(".");
+        if (parts.length > 1) document.cookie = expire + "; domain=." + parts.slice(-2).join(".");
+        document.documentElement.setAttribute("translate", "no");
+        document.documentElement.classList.add("notranslate");
+      })();
+    </script>
     <title>GyandootNova — Bhagavad Gita, Vedas & Ramayana Online in English</title>
     <meta name="description" content="Read the Bhagavad Gita, Vedas, Upanishads, Ramayana and Hanuman Chalisa in English on GyandootNova — a trusted spiritual publisher with a free online reader." />
     <meta name="author" content="GyandootNova (Gyandoot Nova)" />

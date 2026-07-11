@@ -954,6 +954,8 @@ const Books = () => {
     <Layout>
       <BooksJourneyIntro />
       <div
+        translate="no"
+        className="notranslate"
 
         style={{
           background: T.bg,

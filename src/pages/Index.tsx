@@ -147,11 +147,19 @@ const Index = () => {
     },
   });
 
+  const toAbsoluteUrl = (raw?: string | null): string | null => {
+    const trimmed = raw?.trim();
+    if (!trimmed) return null;
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    if (trimmed.startsWith("//")) return `https:${trimmed}`;
+    return `https://${trimmed.replace(/^\/+/, "")}`;
+  };
+
   const sameAs = [
-    siteSettings?.facebook_url,
-    siteSettings?.instagram_url,
-    siteSettings?.linkedin_url,
-    siteSettings?.youtube_url,
+    toAbsoluteUrl(siteSettings?.facebook_url),
+    toAbsoluteUrl(siteSettings?.instagram_url),
+    toAbsoluteUrl(siteSettings?.linkedin_url),
+    toAbsoluteUrl(siteSettings?.youtube_url),
     siteSettings?.whatsapp_number
       ? `https://wa.me/${siteSettings.whatsapp_number.replace(/\s+/g, "").replace(/^\+/, "")}`
       : null,

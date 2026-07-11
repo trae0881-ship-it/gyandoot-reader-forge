@@ -215,6 +215,9 @@ const AdminPosts = () => {
       social_excerpt: p.social_excerpt ?? "",
       canonical_url: p.canonical_url ?? "",
       schema_type: p.schema_type ?? "BlogPosting",
+      source_type: (p.source_type ?? "original") as any,
+      source_citation: p.source_citation ?? "",
+      permission_notes: p.permission_notes ?? "",
     });
     setView("form");
   };

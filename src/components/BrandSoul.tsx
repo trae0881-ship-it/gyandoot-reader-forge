@@ -151,7 +151,7 @@ export const EmotionalConnection = () => (
             className={[
               "group relative min-h-[380px] p-8 flex flex-col justify-between transition-all duration-500",
               dark
-                ? "bg-primary text-primary-foreground shadow-2xl md:mt-12"
+                ? "bg-ink text-primary-foreground shadow-2xl md:mt-12"
                 : "bg-card border border-secondary/15 hover:-translate-y-2 hover:shadow-[0_24px_60px_-20px_hsl(var(--primary)/0.25)]",
             ].join(" ")}
           >

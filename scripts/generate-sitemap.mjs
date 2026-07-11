@@ -20,6 +20,9 @@ const STATIC = [
   { path: "/", changefreq: "daily", priority: "1.0" },
   { path: "/books", changefreq: "daily", priority: "0.9" },
   { path: "/articles", changefreq: "daily", priority: "0.9" },
+  { path: "/our-story", changefreq: "monthly", priority: "0.7" },
+  { path: "/cart", changefreq: "weekly", priority: "0.4" },
+
   { path: "/about", changefreq: "monthly", priority: "0.7" },
   { path: "/services", changefreq: "monthly", priority: "0.7" },
   { path: "/contact", changefreq: "monthly", priority: "0.6" },

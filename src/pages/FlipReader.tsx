@@ -20,42 +20,42 @@ const themeStyles: Record<Theme, { bg: string; fg: string; page: string }> = {
 
 /** Split HTML into fixed-height "pages" using an off-screen measuring element. */
 function useHtmlPages(html: string, pageHeight: number, pageWidth: number, fontSize: number) {
-  return useMemo(() => {
-    if (typeof window === "undefined" || !html) return [] as string[];
+  const [pages, setPages] = useState<string[]>([]);
+  useEffect(() => {
+    if (typeof window === "undefined" || !html) { setPages([]); return; }
     const measurer = document.createElement("div");
     measurer.style.cssText = `position:absolute;visibility:hidden;left:-9999px;top:0;width:${pageWidth - 64}px;font-size:${fontSize}px;line-height:1.75;font-family:'Playfair Display',Georgia,serif;`;
     measurer.innerHTML = html;
     document.body.appendChild(measurer);
-    // Split into block-level pieces
     const blocks = Array.from(measurer.children) as HTMLElement[];
-    // If content wasn't wrapped in blocks, wrap raw text
     if (blocks.length === 0) {
       const p = document.createElement("p");
       p.innerHTML = html;
       measurer.appendChild(p);
       blocks.push(p);
     }
-    const pages: string[] = [];
+    const out: string[] = [];
     let currentHTML = "";
     const test = document.createElement("div");
     test.style.cssText = `position:absolute;visibility:hidden;left:-9999px;top:0;width:${pageWidth - 64}px;font-size:${fontSize}px;line-height:1.75;font-family:'Playfair Display',Georgia,serif;`;
     document.body.appendChild(test);
     const targetHeight = pageHeight - 100;
     for (const block of blocks) {
-      const html = block.outerHTML;
-      test.innerHTML = currentHTML + html;
+      const h = block.outerHTML;
+      test.innerHTML = currentHTML + h;
       if (test.getBoundingClientRect().height > targetHeight && currentHTML) {
-        pages.push(currentHTML);
-        currentHTML = html;
+        out.push(currentHTML);
+        currentHTML = h;
       } else {
-        currentHTML += html;
+        currentHTML += h;
       }
     }
-    if (currentHTML) pages.push(currentHTML);
+    if (currentHTML) out.push(currentHTML);
     document.body.removeChild(measurer);
     document.body.removeChild(test);
-    return pages;
+    setPages(out);
   }, [html, pageHeight, pageWidth, fontSize]);
+  return pages;
 }
 
 const FlipReader = () => {

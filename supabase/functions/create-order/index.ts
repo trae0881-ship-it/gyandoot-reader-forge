@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { convertInr, PAYPAL_SUPPORTED as _PP_SUPPORTED } from "../_shared/fx.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

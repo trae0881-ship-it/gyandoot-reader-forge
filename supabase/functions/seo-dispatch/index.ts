@@ -5,6 +5,7 @@
 //  - in-app admin notifications on completion / failure
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2.45.0";
+import { assertSeoAuthorized } from "../_shared/seo-auth.ts";
 
 const ALLOWED = new Set([
   "seo-daily-publisher",

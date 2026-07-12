@@ -255,12 +255,12 @@ const Index = () => {
               <Star className="h-3 w-3 fill-secondary" />
               A quiet home for sacred reading
             </div>
-            <h1 className="font-serif text-4xl md:text-5xl lg:text-[3.75rem] font-semibold leading-[1.15] tracking-tight text-primary-foreground">
+            <h1 style={{ fontFamily: "'Noto Serif', 'Noto Serif Devanagari', Georgia, serif" }} className="text-5xl md:text-6xl lg:text-7xl font-semibold leading-[1.15] tracking-tight text-primary-foreground">
               Timeless Indian scriptures,
               <br className="hidden md:block" />
               gathered in one <span className="text-secondary italic font-normal">unhurried</span> library.
             </h1>
-            <p className="mx-auto mt-8 max-w-2xl text-base md:text-lg leading-[1.85] text-primary-foreground/80">
+            <p style={{ fontFamily: "'Noto Serif', 'Noto Serif Devanagari', Georgia, serif" }} className="mx-auto mt-8 max-w-2xl text-lg md:text-xl lg:text-2xl leading-[1.85] text-primary-foreground/85">
               Bhagavad Gita, the Vedas, Upanishads, Ramayana, Hanuman Chalisa and Vishnu Sahasranama —
               carefully translated into clear Hindi and English, and offered in a reader made for
               slow, thoughtful discovery.

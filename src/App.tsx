@@ -24,6 +24,10 @@ import { MyReviews, MyBookmarks } from "./pages/dashboard/CommunityPages";
 import { SpiritualHome, MeditationTimer, FestivalCalendar } from "./pages/dashboard/SpiritualPages";
 import { NotificationsPage, SupportPage, PersonalizedPage } from "./pages/dashboard/MiscPages";
 import { ReadingGoals, BirthdaySettings, SpiritualJourney, ReadingChallenge } from "./pages/dashboard/Phase2Pages";
+import {
+  FamilyLibrary, AudioBookPlayer, OfflineReading, BookQRCodes,
+  ReadingInsights, ExclusiveContent,
+} from "./pages/dashboard/Phase3Pages";
 
 // Lazy load all other pages for faster initial load
 const Books = lazy(() => import("./pages/Books"));
@@ -184,6 +188,13 @@ const AppContent = () => {
                   <Route path="spiritual/meditation" element={<MeditationTimer />} />
                   <Route path="spiritual/festivals" element={<FestivalCalendar />} />
                   <Route path="spiritual/journey" element={<SpiritualJourney />} />
+
+                  <Route path="family" element={<FamilyLibrary />} />
+                  <Route path="audio" element={<AudioBookPlayer />} />
+                  <Route path="offline" element={<OfflineReading />} />
+                  <Route path="qr-codes" element={<BookQRCodes />} />
+                  <Route path="insights" element={<ReadingInsights />} />
+                  <Route path="exclusive" element={<ExclusiveContent />} />
 
                   <Route path="notifications" element={<NotificationsPage />} />
                   <Route path="support" element={<SupportPage />} />

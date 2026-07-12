@@ -44,6 +44,17 @@ const Keywords = lazy(() => import("./pages/Keywords"));
 const Library = lazy(() => import("./pages/Library"));
 const OfferLanding = lazy(() => import("./pages/OfferLanding"));
 const ClaimPurchase = lazy(() => import("./pages/ClaimPurchase"));
+const FlipReader = lazy(() => import("./pages/FlipReader"));
+
+// Dashboard
+const DashboardLayout = lazy(() => import("./pages/dashboard/DashboardLayout"));
+const DashboardHome = lazy(() => import("./pages/dashboard/DashboardHome"));
+const DashLibraryPages = lazy(() => import("./pages/dashboard/LibraryPages"));
+const DashOrderPages = lazy(() => import("./pages/dashboard/OrderPages"));
+const DashReadingPages = lazy(() => import("./pages/dashboard/ReadingPages"));
+const DashCommunityPages = lazy(() => import("./pages/dashboard/CommunityPages"));
+const DashSpiritualPages = lazy(() => import("./pages/dashboard/SpiritualPages"));
+const DashMiscPages = lazy(() => import("./pages/dashboard/MiscPages"));
 
 
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));

@@ -63,7 +63,7 @@ const TermsConditions = () => {
 
         <h2>9. Contact</h2>
         <p>
-          For questions, contact us at <a href="mailto:contact@gyandootnova.com" className="text-primary">contact@gyandootnova.com</a>.
+          For questions, contact us at <a href="mailto:amrendra8765@gmail.com" className="text-primary">amrendra8765@gmail.com</a>.
         </p>
       </main>
     </Layout>

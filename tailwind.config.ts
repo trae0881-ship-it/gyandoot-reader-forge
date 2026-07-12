@@ -18,10 +18,11 @@ export default {
     },
     extend: {
       fontFamily: {
-        serif: ["'Manrope'", "'Inter'", "'Noto Serif Devanagari'", "system-ui", "sans-serif"],
-        display: ["'Manrope'", "'Inter'", "'Noto Serif Devanagari'", "system-ui", "sans-serif"],
+        serif: ["'Noto Serif'", "'Manrope'", "'Inter'", "'Noto Serif Devanagari'", "system-ui", "serif"],
+        display: ["'Noto Serif'", "'Manrope'", "'Inter'", "'Noto Serif Devanagari'", "system-ui", "serif"],
         sans: ["'Inter'", "'Manrope'", "'Noto Serif Devanagari'", "system-ui", "sans-serif"],
-        devanagari: ["'Noto Serif Devanagari'", "'Manrope'", "serif"],
+        devanagari: ["'Noto Serif Devanagari'", "'Noto Serif'", "'Manrope'", "serif"],
+        "noto-serif": ["'Noto Serif'", "'Noto Serif Devanagari'", "serif"],
       },
 
 

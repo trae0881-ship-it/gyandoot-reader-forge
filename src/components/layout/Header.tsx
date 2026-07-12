@@ -64,19 +64,19 @@ const Header = () => {
       <div className="w-full max-w-screen-2xl mx-auto flex h-[68px] md:h-[76px] items-center justify-between px-3 md:px-6">
         {/* Logo */}
         <Link to="/" className="group flex items-center gap-3 shrink-0" aria-label="Go to homepage">
-          <div className="relative h-10 w-10 shrink-0">
-            <div className="absolute inset-0 rounded-full bg-gradient-gold opacity-70 blur-md transition-opacity group-hover:opacity-100" />
+          <div className="relative h-12 w-12 md:h-14 md:w-14 shrink-0">
+            <div className="absolute -inset-1 rounded-full bg-gradient-gold opacity-30 blur-sm transition-opacity group-hover:opacity-50" />
             <img
               src={logoImg}
               alt="GyandootNova logo"
-              width={40}
-              height={40}
+              width={56}
+              height={56}
               {...({ fetchpriority: "high" } as any)}
-              className="relative h-10 w-10 rounded-full object-cover shadow-elegant ring-2 ring-gold/60 transition-transform duration-500 group-hover:scale-105 group-hover:rotate-3"
+              className="relative h-12 w-12 md:h-14 md:w-14 rounded-full object-cover bg-white shadow-elegant ring-2 ring-gold transition-transform duration-500 group-hover:scale-105 group-hover:rotate-3"
             />
           </div>
           <span className="hidden sm:flex flex-col leading-tight">
-            <span className="font-serif text-xl tracking-tight text-foreground">
+            <span className="font-serif text-xl md:text-2xl tracking-tight text-foreground font-semibold">
               Gyandoot<span className="gradient-text-gold">Nova</span>
             </span>
             <span className="mt-0.5 font-sans text-[11px] md:text-[12px] font-medium tracking-[0.08em] text-[#6B7280]">
@@ -84,6 +84,7 @@ const Header = () => {
             </span>
           </span>
         </Link>
+
 
 
         {/* Desktop nav */}

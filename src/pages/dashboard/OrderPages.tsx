@@ -75,7 +75,7 @@ export const MyOrders = () => {
                   <div className="text-[11px] text-muted-foreground">Order #{p.id.slice(0,8)} • {new Date(p.created_at).toLocaleDateString()}</div>
                   <div className="mt-1 flex items-center gap-2">
                     <Badge variant={p.status === "completed" ? "default" : "secondary"} className="text-[10px]">{p.status}</Badge>
-                    <span className="text-xs text-muted-foreground">{p.currency ? formatMoney(p.amount, p.currency) : `₹${p.amount}`}</span>
+                    <span className="text-xs text-muted-foreground">{p.currency && p.currency !== "INR" ? `${p.currency} ${p.amount}` : formatPrice(p.amount)}</span>
                   </div>
                 </div>
                 <div className="flex flex-col gap-1.5">

@@ -65,9 +65,27 @@ const groups: {
     label: "Reading",
     items: [
       { title: "Reading Dashboard", url: "/dashboard/reading", icon: BarChart3 },
+      { title: "Reading Goals", url: "/dashboard/reading/goals", icon: Compass },
+      { title: "Reading Challenge", url: "/dashboard/reading/challenge", icon: Trophy },
       { title: "Achievement Badges", url: "/dashboard/reading/badges", icon: Trophy },
       { title: "Reading Calendar", url: "/dashboard/reading/calendar", icon: BarChart3 },
       { title: "Certificates", url: "/dashboard/reading/certificates", icon: Trophy },
+    ],
+  },
+  {
+    label: "Community",
+    items: [
+      { title: "My Reviews", url: "/dashboard/community/reviews", icon: Users },
+      { title: "My Bookmarks", url: "/dashboard/community/bookmarks", icon: Users },
+    ],
+  },
+  {
+    label: "Spiritual",
+    items: [
+      { title: "Today's Quote", url: "/dashboard/spiritual", icon: Compass },
+      { title: "Meditation Timer", url: "/dashboard/spiritual/meditation", icon: Compass },
+      { title: "Festival Calendar", url: "/dashboard/spiritual/festivals", icon: Compass },
+      { title: "Spiritual Journey", url: "/dashboard/spiritual/journey", icon: Sparkles },
     ],
   },
   {

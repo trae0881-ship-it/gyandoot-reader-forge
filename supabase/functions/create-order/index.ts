@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { convertInr, PAYPAL_SUPPORTED as _PP_SUPPORTED } from "../_shared/fx.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -136,7 +137,7 @@ Deno.serve(async (req) => {
     if (gateway === "razorpay") {
       return await handleRazorpay(supabase, user, verifiedAmount, type, book_id, name, email, coupon_id, referrer_id, guest_email, guest_name);
     } else if (gateway === "paypal") {
-      return await handlePaypal(supabase, user, verifiedAmount, type, book_id, name, email, coupon_id, referrer_id, buyer_currency, buyer_fx_rate, guest_email, guest_name);
+      return await handlePaypal(supabase, user, verifiedAmount, type, book_id, name, email, coupon_id, referrer_id, buyer_currency, guest_email, guest_name);
     } else {
       return new Response(JSON.stringify({ error: "Unsupported gateway" }), {
         status: 400,
@@ -232,15 +233,12 @@ async function handleRazorpay(
   );
 }
 
-const PAYPAL_SUPPORTED = new Set(["USD", "EUR", "GBP", "AUD", "CAD", "SGD", "HKD", "JPY", "NZD", "CHF", "SEK", "NOK", "DKK", "PLN", "CZK", "HUF", "ILS", "MXN", "PHP", "THB", "TWD", "BRL"]);
-const FALLBACK_FX: Record<string, number> = {
-  USD: 0.012, EUR: 0.011, GBP: 0.0095, AUD: 0.018, CAD: 0.016, SGD: 0.016, HKD: 0.094, JPY: 1.8,
-};
+const PAYPAL_SUPPORTED = _PP_SUPPORTED;
 
 async function handlePaypal(
   supabase: any, user: any, amount: number, type: string,
   book_id?: string, name?: string, email?: string, coupon_id?: string, referrer_id?: string,
-  buyer_currency?: string, buyer_fx_rate?: number,
+  buyer_currency?: string,
   guest_email?: string, guest_name?: string,
 ) {
   const clientId = Deno.env.get("PAYPAL_CLIENT_ID");
@@ -271,14 +269,11 @@ async function handlePaypal(
 
   const { access_token } = await tokenRes.json();
 
-  const requested = (buyer_currency || "USD").toUpperCase();
-  const currency = PAYPAL_SUPPORTED.has(requested) ? requested : "USD";
-  const rate = (buyer_fx_rate && buyer_fx_rate > 0)
-    ? buyer_fx_rate
-    : (FALLBACK_FX[currency] ?? FALLBACK_FX.USD);
-  const zeroDecimal = currency === "JPY";
-  const converted = amount * rate;
-  const paypalValue = zeroDecimal ? Math.round(converted).toString() : converted.toFixed(2);
+  // SECURITY: server-side FX only. Ignore any client-supplied rate — a hostile
+  // buyer would otherwise send `buyer_fx_rate: 0.00001` and pay pennies.
+  const { rate: _rate, formatted: paypalValue, currency } =
+    await convertInr(amount, buyer_currency || "USD");
+
 
   const orderRes = await fetch("https://api-m.paypal.com/v2/checkout/orders", {
     method: "POST",

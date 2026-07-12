@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -107,6 +108,10 @@ const AnimatedCounter = ({ target, suffix = "" }: { target: number; suffix?: str
 
 /* ─── Main Page ─── */
 const Index = () => {
+  const { user, loading: authLoading } = useAuth();
+  if (!authLoading && user) {
+    return <Navigate to="/dashboard" replace />;
+  }
   const { data: featuredBooks } = useQuery({
     queryKey: ["featured-books"],
     queryFn: async () => {

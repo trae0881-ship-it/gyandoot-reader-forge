@@ -63,27 +63,34 @@ const Header = () => {
       <div className="pointer-events-none absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-transparent via-gold/50 to-transparent" />
       <div className="w-full max-w-screen-2xl mx-auto flex h-[68px] md:h-[76px] items-center justify-between px-3 md:px-6">
         {/* Logo */}
-        <Link to="/" className="group flex items-center gap-3 shrink-0" aria-label="Go to homepage">
-          <div className="relative h-12 w-12 md:h-14 md:w-14 shrink-0">
-            <div className="absolute -inset-1 rounded-full bg-gradient-gold opacity-30 blur-sm transition-opacity group-hover:opacity-50" />
+        <Link
+          to="/"
+          className="group flex items-center gap-2 sm:gap-3 shrink-0 py-1"
+          aria-label="GyandootNova — Go to homepage"
+        >
+          <div className="relative flex items-center justify-center h-11 w-11 sm:h-12 sm:w-12 md:h-14 md:w-14 max-h-14 max-w-14 shrink-0">
+            <div className="absolute -inset-1 rounded-full bg-gradient-gold opacity-30 blur-sm transition-opacity group-hover:opacity-50" aria-hidden="true" />
             <img
               src={logoImg}
               alt="GyandootNova logo"
               width={56}
               height={56}
+              loading="eager"
+              decoding="async"
               {...({ fetchpriority: "high" } as any)}
-              className="relative h-12 w-12 md:h-14 md:w-14 rounded-full object-contain p-0.5 bg-white shadow-elegant ring-2 ring-gold transition-transform duration-500 group-hover:scale-105 group-hover:rotate-3"
+              className="relative block h-full w-full max-h-full max-w-full rounded-full object-contain p-0.5 bg-white shadow-elegant ring-2 ring-gold transition-transform duration-500 group-hover:scale-105 group-hover:rotate-3"
             />
           </div>
           <span className="hidden sm:flex flex-col leading-tight">
-            <span className="font-serif text-xl md:text-2xl tracking-tight text-foreground font-semibold">
+            <span className="font-serif text-lg md:text-2xl tracking-tight text-foreground font-semibold">
               Gyandoot<span className="gradient-text-gold">Nova</span>
             </span>
-            <span className="mt-0.5 font-sans text-[11px] md:text-[12px] font-medium tracking-[0.08em] text-[#6B7280]">
-              Modern Design <span className="opacity-50">•</span> Trust <span className="opacity-50">•</span> Usability
+            <span className="mt-0.5 font-sans text-[10px] md:text-[12px] font-medium tracking-[0.08em] text-muted-foreground">
+              Modern Design <span className="opacity-50" aria-hidden="true">•</span> Trust <span className="opacity-50" aria-hidden="true">•</span> Usability
             </span>
           </span>
         </Link>
+
 
 
 

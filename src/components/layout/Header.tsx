@@ -157,8 +157,9 @@ const Header = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => navigate("/library")}>My Library</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/profile")}>My Profile</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/dashboard")}>My Dashboard</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/dashboard/library")}>My Library</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>My Profile</DropdownMenuItem>
                 <DropdownMenuItem onClick={signOut}>
                   <LogOut className="mr-2 h-4 w-4" /> Sign Out
                 </DropdownMenuItem>

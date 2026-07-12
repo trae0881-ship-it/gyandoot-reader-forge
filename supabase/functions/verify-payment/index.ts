@@ -371,7 +371,82 @@ async function verifyPaypal(supabase: any, user: any, orderId: string, type: str
     });
   }
 
-  const captureId = captureData.purchase_units?.[0]?.payments?.captures?.[0]?.id || "";
+  // SECURITY: cross-check the captured amount against the expected converted
+  // book/donation price so a tampered client-side FX rate cannot unlock paid
+  // content for pennies. Reject if the captured amount is materially below
+  // what the server would have quoted.
+  const capture = captureData.purchase_units?.[0]?.payments?.captures?.[0];
+  const capturedAmountStr = capture?.amount?.value;
+  const capturedCurrency = capture?.amount?.currency_code;
+  const capturedAmount = capturedAmountStr ? Number(capturedAmountStr) : NaN;
+
+  if (!capturedAmount || !capturedCurrency) {
+    return new Response(JSON.stringify({ error: "Payment amount missing" }), {
+      status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // Resolve the expected INR base amount for this order.
+  let expectedInr = 0;
+  if (type === "purchase") {
+    const { data: pRow } = await supabase
+      .from("purchases")
+      .select("book_id, coupon_id")
+      .eq("razorpay_order_id", orderId)
+      .maybeSingle();
+    if (pRow?.book_id) {
+      const { data: book } = await supabase
+        .from("books")
+        .select("price")
+        .eq("id", pRow.book_id)
+        .maybeSingle();
+      expectedInr = Number(book?.price ?? 0);
+      // If a coupon was applied at order creation, honour it as an upper bound.
+      if (pRow.coupon_id) {
+        const { data: coupon } = await supabase
+          .from("coupons")
+          .select("discount_type, discount_value")
+          .eq("id", pRow.coupon_id)
+          .maybeSingle();
+        if (coupon) {
+          const disc = coupon.discount_type === "percent"
+            ? Math.round((expectedInr * Number(coupon.discount_value)) / 100)
+            : Number(coupon.discount_value);
+          expectedInr = Math.max(1, expectedInr - disc);
+        }
+      }
+    }
+  } else {
+    const { data: dRow } = await supabase
+      .from("donations")
+      .select("amount")
+      .eq("razorpay_order_id", orderId)
+      .maybeSingle();
+    expectedInr = Number(dRow?.amount ?? 0);
+  }
+
+  if (expectedInr > 0) {
+    const { converted: expectedForeign } = await convertInr(expectedInr, capturedCurrency);
+    // Allow a 15% tolerance for FX drift between order creation and capture,
+    // plus any minor rounding differences.
+    const minAcceptable = expectedForeign * 0.85;
+    if (capturedAmount < minAcceptable) {
+      console.error("PayPal amount mismatch", {
+        orderId,
+        expectedInr,
+        expectedForeign,
+        capturedAmount,
+        capturedCurrency,
+      });
+      return new Response(
+        JSON.stringify({ error: "Payment amount does not match order total" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+  }
+
+  const captureId = capture?.id || "";
   const table = type === "purchase" ? "purchases" : "donations";
 
   let updateQuery = supabase

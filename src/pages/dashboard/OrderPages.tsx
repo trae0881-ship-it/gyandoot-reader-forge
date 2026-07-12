@@ -18,10 +18,14 @@ const useMyOrders = () => {
       const { data: purchases } = await supabase.rpc("get_user_purchases", { _user_id: user!.id });
       const ids = (purchases ?? []).map((p: any) => p.book_id);
       const { data: books } = ids.length
-        ? await supabase.from("books").select("id, title, slug, cover_url").in("id", ids)
+        ? await supabase.from("books").select("id, title, slug, cover_url, price").in("id", ids)
         : { data: [] as any[] };
       const bookMap = new Map((books ?? []).map((b) => [b.id, b]));
-      return (purchases ?? []).map((p: any) => ({ ...p, book: bookMap.get(p.book_id) }));
+      return (purchases ?? []).map((p: any) => ({
+        ...p,
+        amount: p.amount ?? bookMap.get(p.book_id)?.price ?? 0,
+        book: bookMap.get(p.book_id),
+      }));
     },
   });
 };

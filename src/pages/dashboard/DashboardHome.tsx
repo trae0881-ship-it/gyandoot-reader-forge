@@ -5,8 +5,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  BookOpen, ShoppingBag, Trophy, Flame, Clock, Bell, Sparkles, ArrowRight, Compass, Bookmark, Star,
+  BookOpen, ShoppingBag, Trophy, Flame, Clock, Bell, Sparkles, ArrowRight, Compass, Bookmark, Star, Cake, Target,
 } from "lucide-react";
+import { useProfilePrefs } from "@/pages/dashboard/Phase2Pages";
+import useFestivalTheme, { FestivalBanner } from "@/hooks/useFestivalTheme";
 
 const useDashboardStats = () => {
   const { user } = useAuth();

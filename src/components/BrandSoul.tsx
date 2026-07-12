@@ -228,7 +228,7 @@ const calmPromises = [
 ];
 
 export const CalmFeeling = () => (
-  <section className="relative bg-ink overflow-hidden">
+  <section className="relative overflow-hidden" style={{ backgroundColor: "#C3D7D6" }}>
     {/* Maroon radial glow from center */}
     <div
       aria-hidden

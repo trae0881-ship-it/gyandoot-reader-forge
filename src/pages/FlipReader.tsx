@@ -137,13 +137,13 @@ const FlipReader = () => {
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") flipInstance?.pageFlip()?.flipNext();
-      if (e.key === "ArrowLeft") flipInstance?.pageFlip()?.flipPrev();
+      if (e.key === "ArrowRight") flipRef.current?.pageFlip()?.flipNext();
+      if (e.key === "ArrowLeft") flipRef.current?.pageFlip()?.flipPrev();
       if (e.key === "Escape") setShowTOC(false);
     };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
-  }, [flipInstance]);
+  }, []);
 
   if (!slug) return <Navigate to="/books" replace />;
 
@@ -207,7 +207,7 @@ const FlipReader = () => {
               drawShadow
               usePortrait
               startPage={0}
-              ref={(el: any) => setFlipInstance(el)}
+              ref={flipRef}
               onFlip={(e: any) => setPageIdx(e.data)}
               className="reader-flipbook"
               style={{}}
@@ -236,7 +236,7 @@ const FlipReader = () => {
 
       {/* Bottom bar */}
       <footer className="sticky bottom-0 z-40 flex items-center justify-between gap-2 px-3 py-2 border-t" style={{ borderColor: `${t.fg}22`, background: `${t.bg}ee`, backdropFilter: "blur(8px)" }}>
-        <Button size="sm" variant="ghost" onClick={() => flipInstance?.pageFlip()?.flipPrev()}><ChevronLeft className="h-4 w-4 mr-1"/>Piche</Button>
+        <Button size="sm" variant="ghost" onClick={() => flipRef.current?.pageFlip()?.flipPrev()}><ChevronLeft className="h-4 w-4 mr-1"/>Piche</Button>
         <div className="flex-1 mx-2">
           <div className="h-1 rounded-full" style={{ background: `${t.fg}22` }}>
             <div className="h-full rounded-full transition-all" style={{ width: `${pages.length ? ((pageIdx+1)/pages.length)*100 : 0}%`, background: t.fg }}/>
@@ -246,7 +246,7 @@ const FlipReader = () => {
           {prevChapter && <Button asChild size="sm" variant="outline"><Link to={`/read/${slug}/flip?chapter=${prevChapter.slug}`}>◄ Ch {prevChapter.chapter_number}</Link></Button>}
           {nextChapter && <Button asChild size="sm" variant="outline"><Link to={`/read/${slug}/flip?chapter=${nextChapter.slug}`}>Ch {nextChapter.chapter_number} ►</Link></Button>}
         </div>
-        <Button size="sm" variant="ghost" onClick={() => flipInstance?.pageFlip()?.flipNext()}>Aage<ChevronRight className="h-4 w-4 ml-1"/></Button>
+        <Button size="sm" variant="ghost" onClick={() => flipRef.current?.pageFlip()?.flipNext()}>Aage<ChevronRight className="h-4 w-4 ml-1"/></Button>
       </footer>
 
       {/* TOC drawer */}

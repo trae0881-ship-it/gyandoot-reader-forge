@@ -57,6 +57,9 @@ const notify = async (
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const unauthorized = await assertSeoAuthorized(req);
+  if (unauthorized) return unauthorized;
+
 
   let payload: { fn?: string; body?: unknown; force?: boolean } = {};
   try { payload = await req.json(); } catch { /* empty body ok */ }

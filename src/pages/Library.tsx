@@ -16,6 +16,16 @@ const Library = () => {
   const queryClient = useQueryClient();
   const { data, isLoading } = useContinueReading(50);
 
+  const { data: purchasedIds } = useQuery({
+    queryKey: ["library-purchased-ids", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_user_purchases", { _user_id: user!.id });
+      if (error) throw error;
+      return new Set((data ?? []).filter((p: any) => p.status === "completed").map((p: any) => p.book_id));
+    },
+  });
+
   useSEO({
     title: "My Library — Continue Reading | GyandootNova",
     description:

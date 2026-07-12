@@ -43,56 +43,33 @@ export function useVisitorTracker() {
           if (r.ok) geo = await r.json();
         } catch {}
 
-        // Pull identity from current auth session + profile
-        let user_id: string | null = null;
-        let user_email: string | null = null;
-        let user_name: string | null = null;
-        let user_phone: string | null = null;
-        try {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (user) {
-            user_id = user.id;
-            user_email = user.email ?? null;
-            user_phone = user.phone ?? null;
-            const { data: prof } = await supabase
-              .from("profiles")
-              .select("display_name, phone")
-              .eq("user_id", user.id)
-              .maybeSingle();
-            if (prof) {
-              user_name = (prof as any).display_name ?? null;
-              user_phone = user_phone ?? (prof as any).phone ?? null;
-            }
-          }
-        } catch {}
-
-        await supabase.from("visitor_logs").insert({
-          user_id,
-          user_email,
-          user_name,
-          user_phone,
-          ip_address: geo.ip ?? null,
-          country: geo.country_name ?? null,
-          country_code: geo.country_code ?? null,
-          region: geo.region ?? null,
-          city: geo.city ?? null,
-          latitude: geo.latitude ?? null,
-          longitude: geo.longitude ?? null,
-          timezone: geo.timezone ?? null,
-          isp: geo.org ?? null,
-          user_agent: ua,
-          device_type: detectDevice(ua),
-          browser: detectBrowser(ua),
-          os: detectOS(ua),
-          referrer: document.referrer || null,
-          landing_path: window.location.pathname + window.location.search,
-          language: navigator.language || null,
-          screen: `${window.screen.width}x${window.screen.height}`,
+        // Identity is derived server-side from the JWT. We never send
+        // user_id / email / phone from the browser — the edge function
+        // ignores them regardless.
+        await supabase.functions.invoke("track-visit", {
+          body: {
+            country: geo.country_name ?? null,
+            country_code: geo.country_code ?? null,
+            region: geo.region ?? null,
+            city: geo.city ?? null,
+            latitude: geo.latitude ?? null,
+            longitude: geo.longitude ?? null,
+            timezone: geo.timezone ?? null,
+            isp: geo.org ?? null,
+            ip_address: geo.ip ?? null,
+            user_agent: ua,
+            device_type: detectDevice(ua),
+            browser: detectBrowser(ua),
+            os: detectOS(ua),
+            referrer: document.referrer || null,
+            landing_path: window.location.pathname + window.location.search,
+            language: navigator.language || null,
+            screen: `${window.screen.width}x${window.screen.height}`,
+          },
         });
-      } catch (e) {
+      } catch {
         // silent fail
       }
     })();
-
   }, []);
 }

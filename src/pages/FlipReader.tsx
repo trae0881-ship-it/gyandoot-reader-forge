@@ -68,7 +68,7 @@ const FlipReader = () => {
   const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem("reader:theme") as Theme) || "sepia");
   const [fontSize, setFontSize] = useState<number>(() => parseInt(localStorage.getItem("reader:fontSize") || "18"));
   const [showTOC, setShowTOC] = useState(false);
-  const [flipInstance, setFlipInstance] = useState<any>(null);
+  const flipRef = useRef<any>(null);
   const [pageIdx, setPageIdx] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const [dims, setDims] = useState({ w: 500, h: 700 });

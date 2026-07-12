@@ -201,6 +201,7 @@ const FlipReader = () => {
           <div className="shadow-2xl">
             {/* @ts-ignore */}
             <HTMLFlipBook
+              key={`${progressKey}:${fontSize}:${dims.w}x${dims.h}:${pages.length}`}
               width={dims.w}
               height={dims.h}
               size="fixed"
@@ -213,9 +214,12 @@ const FlipReader = () => {
               flippingTime={700}
               drawShadow
               usePortrait
-              startPage={0}
+              startPage={Math.min(savedPage, Math.max(0, pages.length - 1))}
               ref={flipRef}
-              onFlip={(e: any) => setPageIdx(e.data)}
+              onFlip={(e: any) => {
+                setPageIdx(e.data);
+                if (progressKey) localStorage.setItem(progressKey, String(e.data));
+              }}
               className="reader-flipbook"
               style={{}}
               startZIndex={0}

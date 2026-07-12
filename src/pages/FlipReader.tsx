@@ -241,6 +241,9 @@ const FlipReader = () => {
           <div className="h-1 rounded-full" style={{ background: `${t.fg}22` }}>
             <div className="h-full rounded-full transition-all" style={{ width: `${pages.length ? ((pageIdx+1)/pages.length)*100 : 0}%`, background: t.fg }}/>
           </div>
+          <div className="mt-1 text-[11px] tabular-nums text-center opacity-75">
+            Panna {pages.length ? pageIdx + 1 : 0} / {pages.length} {chapter ? `· Adhyay ${chapter.chapter_number}` : ""}{chapters?.length ? ` (kul ${chapters.length} adhyay)` : ""}
+          </div>
         </div>
         <div className="flex items-center gap-2">
           {prevChapter && <Button asChild size="sm" variant="outline"><Link to={`/read/${slug}/flip?chapter=${prevChapter.slug}`}>◄ Ch {prevChapter.chapter_number}</Link></Button>}

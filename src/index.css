@@ -517,3 +517,26 @@
     text-align: center;
   }
 }
+
+/* ─── Festival themes: subtle accent-glow layers applied to <html> ────── */
+.theme-diwali::before,
+.theme-holi::before,
+.theme-navratri::before,
+.theme-janmashtami::before,
+.theme-sankranti::before,
+.theme-shivratri::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.35;
+  mix-blend-mode: multiply;
+}
+.theme-diwali::before      { background: radial-gradient(1200px 500px at 15% 0%, hsl(45 96% 55% / 0.35), transparent 60%), radial-gradient(900px 500px at 85% 100%, hsl(15 90% 55% / 0.30), transparent 60%); }
+.theme-holi::before        { background: radial-gradient(700px 500px at 10% 10%, hsl(330 90% 65% / 0.25), transparent 60%), radial-gradient(700px 500px at 90% 20%, hsl(180 80% 55% / 0.22), transparent 60%), radial-gradient(700px 500px at 50% 90%, hsl(60 90% 60% / 0.22), transparent 60%); }
+.theme-navratri::before    { background: radial-gradient(900px 500px at 20% 10%, hsl(280 60% 55% / 0.22), transparent 60%), radial-gradient(900px 500px at 80% 90%, hsl(30 90% 55% / 0.22), transparent 60%); }
+.theme-janmashtami::before { background: radial-gradient(900px 500px at 30% 20%, hsl(220 80% 55% / 0.22), transparent 60%), radial-gradient(900px 500px at 70% 80%, hsl(45 95% 55% / 0.22), transparent 60%); }
+.theme-sankranti::before   { background: radial-gradient(1000px 600px at 50% 0%, hsl(35 95% 55% / 0.30), transparent 65%); }
+.theme-shivratri::before   { background: radial-gradient(1000px 600px at 50% 0%, hsl(210 40% 40% / 0.30), transparent 65%); }
+

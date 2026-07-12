@@ -8,6 +8,7 @@ import { Loader2, Download, Receipt } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLocale } from "@/hooks/useLocale";
 
+
 const useMyOrders = () => {
   const { user } = useAuth();
   return useQuery({

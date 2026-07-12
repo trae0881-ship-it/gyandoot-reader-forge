@@ -3,6 +3,7 @@
 // with publish_status='scheduled' and staggered scheduled_at dates.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { assertSeoAuthorized } from "../_shared/seo-auth.ts";
 
 const MIN_SCHEDULED = 30;
 const MAX_PER_RUN = 5; // safety: don't burn tokens in one shot

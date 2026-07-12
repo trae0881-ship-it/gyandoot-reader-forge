@@ -76,6 +76,13 @@ const FlipReader = () => {
   useEffect(() => { localStorage.setItem("reader:theme", theme); }, [theme]);
   useEffect(() => { localStorage.setItem("reader:fontSize", String(fontSize)); }, [fontSize]);
 
+  const progressKey = slug && sp.get("chapter") ? `reader:flip:progress:${slug}:${sp.get("chapter")}` : "";
+  const savedPage = useMemo(() => {
+    if (!progressKey) return 0;
+    const v = parseInt(localStorage.getItem(progressKey) || "0", 10);
+    return isNaN(v) ? 0 : v;
+  }, [progressKey]);
+
   const { data: book } = useQuery({
     queryKey: ["flip-book", slug],
     queryFn: async () => {

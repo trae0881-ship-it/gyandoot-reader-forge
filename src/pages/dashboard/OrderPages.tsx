@@ -51,7 +51,7 @@ const downloadInvoice = (p: any) => {
 
 export const MyOrders = () => {
   const { data, isLoading } = useMyOrders();
-  const { formatMoney } = useLocale();
+  const { formatPrice } = useLocale();
   return (
     <div className="space-y-4">
       <h1 className="font-serif text-2xl md:text-3xl">My Orders</h1>

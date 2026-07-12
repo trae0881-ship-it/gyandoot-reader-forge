@@ -61,7 +61,7 @@ const Auth = () => {
 
   useEffect(() => {
     if (!authLoading && user) {
-      navigate("/profile", { replace: true });
+      navigate("/dashboard", { replace: true });
     }
   }, [user, authLoading, navigate]);
 

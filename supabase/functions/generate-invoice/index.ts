@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
       "invoice_footer_note",
     ];
     const [{ data: book }, { data: profile }, { data: coupon }, { data: settingsRows }] = await Promise.all([
-      admin.from("books").select("title, author").eq("id", purchase.book_id).maybeSingle(),
+      admin.from("books").select("title, author, price").eq("id", purchase.book_id).maybeSingle(),
       admin.from("profiles").select("display_name").eq("user_id", userId).maybeSingle(),
       purchase.coupon_id
         ? admin.from("coupons").select("code, discount_type, discount_value").eq("id", purchase.coupon_id).maybeSingle()

@@ -51,7 +51,7 @@ export const SupportPage = () => (
       {[
         { icon: HelpCircle, title: "FAQ", desc: "Aksar puchhe jaane wale prashn.", to: "/faq" },
         { icon: MessageCircle, title: "Contact Form", desc: "Hume likh bhejein.", to: "/contact" },
-        { icon: Mail, title: "Email support", desc: "support@gyandootnova.in", to: "mailto:support@gyandootnova.in" },
+        { icon: Mail, title: "Email support", desc: "amrendra8765@gmail.com", to: "mailto:amrendra8765@gmail.com" },
         { icon: LifeBuoy, title: "Help Center", desc: "Guides aur troubleshooting.", to: "/support" },
       ].map((c) => (
         <Card key={c.title} className="surface-card">

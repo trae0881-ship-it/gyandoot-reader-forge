@@ -14,6 +14,16 @@ import { lazy, Suspense } from "react";
 // Only eagerly load the homepage
 import Index from "./pages/Index";
 
+// Dashboard sub-pages (small, imported eagerly to avoid lazy-default issue)
+import {
+  PurchasedBooks, FreeBooks, ContinueReading, Favorites, RecentlyViewed, ReadingHistory,
+} from "./pages/dashboard/LibraryPages";
+import { MyOrders, InvoicesPage, RefundStatus } from "./pages/dashboard/OrderPages";
+import { ReadingDashboard, BadgesPage, ReadingCalendar, CertificatesPage } from "./pages/dashboard/ReadingPages";
+import { MyReviews, MyBookmarks } from "./pages/dashboard/CommunityPages";
+import { SpiritualHome, MeditationTimer, FestivalCalendar } from "./pages/dashboard/SpiritualPages";
+import { NotificationsPage, SupportPage, PersonalizedPage } from "./pages/dashboard/MiscPages";
+
 // Lazy load all other pages for faster initial load
 const Books = lazy(() => import("./pages/Books"));
 const BookDetail = lazy(() => import("./pages/BookDetail"));

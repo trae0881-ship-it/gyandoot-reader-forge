@@ -59,14 +59,6 @@ const FlipReader = lazy(() => import("./pages/FlipReader"));
 // Dashboard
 const DashboardLayout = lazy(() => import("./pages/dashboard/DashboardLayout"));
 const DashboardHome = lazy(() => import("./pages/dashboard/DashboardHome"));
-import {
-  PurchasedBooks, FreeBooks, ContinueReading, Favorites, RecentlyViewed, ReadingHistory,
-} from "./pages/dashboard/LibraryPages";
-import { MyOrders, InvoicesPage, RefundStatus } from "./pages/dashboard/OrderPages";
-import { ReadingDashboard, BadgesPage, ReadingCalendar, CertificatesPage } from "./pages/dashboard/ReadingPages";
-import { MyReviews, MyBookmarks } from "./pages/dashboard/CommunityPages";
-import { SpiritualHome, MeditationTimer, FestivalCalendar } from "./pages/dashboard/SpiritualPages";
-import { NotificationsPage, SupportPage, PersonalizedPage } from "./pages/dashboard/MiscPages";
 
 
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));

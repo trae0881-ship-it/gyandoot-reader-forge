@@ -192,13 +192,15 @@ const Library = () => {
                             </p>
                           )}
                         </div>
-                        <button
-                          onClick={() => removeEntry(row.book_id)}
-                          aria-label="Remove from library"
-                          className="text-muted-foreground hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        {!purchasedIds?.has(row.book_id) && (
+                          <button
+                            onClick={() => removeEntry(row.book_id)}
+                            aria-label="Remove from library"
+                            className="text-muted-foreground hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
 
                       <p className="mt-2 text-xs text-primary">

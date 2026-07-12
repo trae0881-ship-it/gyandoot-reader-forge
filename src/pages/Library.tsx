@@ -6,7 +6,7 @@ import useSEO from "@/hooks/useSEO";
 import { useAuth } from "@/hooks/useAuth";
 import { useContinueReading } from "@/components/ContinueReadingSection";
 import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { SITE } from "@/lib/jsonLd";
 
@@ -15,6 +15,16 @@ const Library = () => {
   const location = useLocation();
   const queryClient = useQueryClient();
   const { data, isLoading } = useContinueReading(50);
+
+  const { data: purchasedIds } = useQuery({
+    queryKey: ["library-purchased-ids", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_user_purchases", { _user_id: user!.id });
+      if (error) throw error;
+      return new Set((data ?? []).filter((p: any) => p.status === "completed").map((p: any) => p.book_id));
+    },
+  });
 
   useSEO({
     title: "My Library — Continue Reading | GyandootNova",
@@ -182,13 +192,15 @@ const Library = () => {
                             </p>
                           )}
                         </div>
-                        <button
-                          onClick={() => removeEntry(row.book_id)}
-                          aria-label="Remove from library"
-                          className="text-muted-foreground hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        {!purchasedIds?.has(row.book_id) && (
+                          <button
+                            onClick={() => removeEntry(row.book_id)}
+                            aria-label="Remove from library"
+                            className="text-muted-foreground hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
 
                       <p className="mt-2 text-xs text-primary">

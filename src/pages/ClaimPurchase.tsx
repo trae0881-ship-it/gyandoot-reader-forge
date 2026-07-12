@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { BookOpen, Download, Loader2, CheckCircle2, Mail } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import useSEO from "@/hooks/useSEO";
 
 const ClaimPurchase = () => {
+  useSEO({ title: "Claim Your Purchase | GyandootNova", canonical: "/", noindex: true });
   const { token } = useParams<{ token: string }>();
   const { toast } = useToast();
   const [downloading, setDownloading] = useState(false);

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useSearchParams, useNavigate, Link, Navigate } from "react-router-dom";
 import HTMLFlipBook from "react-pageflip";
 import { useQuery } from "@tanstack/react-query";
@@ -20,42 +20,42 @@ const themeStyles: Record<Theme, { bg: string; fg: string; page: string }> = {
 
 /** Split HTML into fixed-height "pages" using an off-screen measuring element. */
 function useHtmlPages(html: string, pageHeight: number, pageWidth: number, fontSize: number) {
-  return useMemo(() => {
-    if (typeof window === "undefined" || !html) return [] as string[];
+  const [pages, setPages] = useState<string[]>([]);
+  useEffect(() => {
+    if (typeof window === "undefined" || !html) { setPages([]); return; }
     const measurer = document.createElement("div");
     measurer.style.cssText = `position:absolute;visibility:hidden;left:-9999px;top:0;width:${pageWidth - 64}px;font-size:${fontSize}px;line-height:1.75;font-family:'Playfair Display',Georgia,serif;`;
     measurer.innerHTML = html;
     document.body.appendChild(measurer);
-    // Split into block-level pieces
     const blocks = Array.from(measurer.children) as HTMLElement[];
-    // If content wasn't wrapped in blocks, wrap raw text
     if (blocks.length === 0) {
       const p = document.createElement("p");
       p.innerHTML = html;
       measurer.appendChild(p);
       blocks.push(p);
     }
-    const pages: string[] = [];
+    const out: string[] = [];
     let currentHTML = "";
     const test = document.createElement("div");
     test.style.cssText = `position:absolute;visibility:hidden;left:-9999px;top:0;width:${pageWidth - 64}px;font-size:${fontSize}px;line-height:1.75;font-family:'Playfair Display',Georgia,serif;`;
     document.body.appendChild(test);
     const targetHeight = pageHeight - 100;
     for (const block of blocks) {
-      const html = block.outerHTML;
-      test.innerHTML = currentHTML + html;
+      const h = block.outerHTML;
+      test.innerHTML = currentHTML + h;
       if (test.getBoundingClientRect().height > targetHeight && currentHTML) {
-        pages.push(currentHTML);
-        currentHTML = html;
+        out.push(currentHTML);
+        currentHTML = h;
       } else {
-        currentHTML += html;
+        currentHTML += h;
       }
     }
-    if (currentHTML) pages.push(currentHTML);
+    if (currentHTML) out.push(currentHTML);
     document.body.removeChild(measurer);
     document.body.removeChild(test);
-    return pages;
+    setPages(out);
   }, [html, pageHeight, pageWidth, fontSize]);
+  return pages;
 }
 
 const FlipReader = () => {
@@ -68,7 +68,7 @@ const FlipReader = () => {
   const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem("reader:theme") as Theme) || "sepia");
   const [fontSize, setFontSize] = useState<number>(() => parseInt(localStorage.getItem("reader:fontSize") || "18"));
   const [showTOC, setShowTOC] = useState(false);
-  const [flipInstance, setFlipInstance] = useState<any>(null);
+  const flipRef = useRef<any>(null);
   const [pageIdx, setPageIdx] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const [dims, setDims] = useState({ w: 500, h: 700 });
@@ -137,13 +137,13 @@ const FlipReader = () => {
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") flipInstance?.pageFlip()?.flipNext();
-      if (e.key === "ArrowLeft") flipInstance?.pageFlip()?.flipPrev();
+      if (e.key === "ArrowRight") flipRef.current?.pageFlip()?.flipNext();
+      if (e.key === "ArrowLeft") flipRef.current?.pageFlip()?.flipPrev();
       if (e.key === "Escape") setShowTOC(false);
     };
     window.addEventListener("keydown", h);
     return () => window.removeEventListener("keydown", h);
-  }, [flipInstance]);
+  }, []);
 
   if (!slug) return <Navigate to="/books" replace />;
 
@@ -207,7 +207,7 @@ const FlipReader = () => {
               drawShadow
               usePortrait
               startPage={0}
-              ref={(el: any) => setFlipInstance(el)}
+              ref={flipRef}
               onFlip={(e: any) => setPageIdx(e.data)}
               className="reader-flipbook"
               style={{}}
@@ -236,7 +236,7 @@ const FlipReader = () => {
 
       {/* Bottom bar */}
       <footer className="sticky bottom-0 z-40 flex items-center justify-between gap-2 px-3 py-2 border-t" style={{ borderColor: `${t.fg}22`, background: `${t.bg}ee`, backdropFilter: "blur(8px)" }}>
-        <Button size="sm" variant="ghost" onClick={() => flipInstance?.pageFlip()?.flipPrev()}><ChevronLeft className="h-4 w-4 mr-1"/>Piche</Button>
+        <Button size="sm" variant="ghost" onClick={() => flipRef.current?.pageFlip()?.flipPrev()}><ChevronLeft className="h-4 w-4 mr-1"/>Piche</Button>
         <div className="flex-1 mx-2">
           <div className="h-1 rounded-full" style={{ background: `${t.fg}22` }}>
             <div className="h-full rounded-full transition-all" style={{ width: `${pages.length ? ((pageIdx+1)/pages.length)*100 : 0}%`, background: t.fg }}/>
@@ -246,7 +246,7 @@ const FlipReader = () => {
           {prevChapter && <Button asChild size="sm" variant="outline"><Link to={`/read/${slug}/flip?chapter=${prevChapter.slug}`}>◄ Ch {prevChapter.chapter_number}</Link></Button>}
           {nextChapter && <Button asChild size="sm" variant="outline"><Link to={`/read/${slug}/flip?chapter=${nextChapter.slug}`}>Ch {nextChapter.chapter_number} ►</Link></Button>}
         </div>
-        <Button size="sm" variant="ghost" onClick={() => flipInstance?.pageFlip()?.flipNext()}>Aage<ChevronRight className="h-4 w-4 ml-1"/></Button>
+        <Button size="sm" variant="ghost" onClick={() => flipRef.current?.pageFlip()?.flipNext()}>Aage<ChevronRight className="h-4 w-4 ml-1"/></Button>
       </footer>
 
       {/* TOC drawer */}

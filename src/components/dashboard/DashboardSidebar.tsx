@@ -22,6 +22,10 @@ import {
   LifeBuoy,
   Trophy,
   Compass,
+  Headphones,
+  WifiOff,
+  QrCode,
+  Lock,
 } from "lucide-react";
 
 const groups: {
@@ -86,6 +90,17 @@ const groups: {
       { title: "Meditation Timer", url: "/dashboard/spiritual/meditation", icon: Compass },
       { title: "Festival Calendar", url: "/dashboard/spiritual/festivals", icon: Compass },
       { title: "Spiritual Journey", url: "/dashboard/spiritual/journey", icon: Sparkles },
+    ],
+  },
+  {
+    label: "Premium",
+    items: [
+      { title: "Family Library", url: "/dashboard/family", icon: Users },
+      { title: "Audio Book Player", url: "/dashboard/audio", icon: Headphones },
+      { title: "Offline Reading", url: "/dashboard/offline", icon: WifiOff },
+      { title: "Book QR Codes", url: "/dashboard/qr-codes", icon: QrCode },
+      { title: "Reading Insights", url: "/dashboard/insights", icon: BarChart3 },
+      { title: "Exclusive Content", url: "/dashboard/exclusive", icon: Lock },
     ],
   },
   {

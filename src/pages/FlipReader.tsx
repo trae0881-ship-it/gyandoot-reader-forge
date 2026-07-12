@@ -59,7 +59,7 @@ function useHtmlPages(html: string, pageHeight: number, pageWidth: number, fontS
 }
 
 const FlipReader = () => {
-  useAntiCopy();
+  // useAntiCopy intentionally not used here — its watermark grid made text unreadable.
   const { slug } = useParams<{ slug: string }>();
   const [sp] = useSearchParams();
   const navigate = useNavigate();

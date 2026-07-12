@@ -100,6 +100,9 @@ const DashboardHome = () => {
         <p className="mt-2 max-w-xl text-muted-foreground">
           Aaj ki path-yatra shuru karein. Aapki library, progress aur daily wisdom, ek hi jagah.
         </p>
+        {prefs?.spiritual_intention && (
+          <p className="mt-3 text-sm italic text-primary/90">"{prefs.spiritual_intention}"</p>
+        )}
         <div className="mt-4 flex flex-wrap gap-2">
           <Button asChild size="sm">
             <Link to="/dashboard/library/continue">Continue Reading <ArrowRight className="ml-1 h-4 w-4" /></Link>
@@ -107,8 +110,12 @@ const DashboardHome = () => {
           <Button asChild size="sm" variant="outline">
             <Link to="/dashboard/spiritual">Today's Quote</Link>
           </Button>
+          <Button asChild size="sm" variant="outline">
+            <Link to="/dashboard/reading/challenge">Reading Challenge</Link>
+          </Button>
         </div>
       </div>
+
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">

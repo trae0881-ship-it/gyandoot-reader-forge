@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { useAntiCopy } from "@/hooks/useAntiCopy";
+// Note: heavy anti-copy watermark disabled here — it was obscuring page text.
 import useSEO from "@/hooks/useSEO";
 import {
   ChevronLeft, ChevronRight, ArrowLeft, Sun, Moon, Palette, Minus, Plus, List, Loader2, X, BookOpen,
@@ -59,7 +59,7 @@ function useHtmlPages(html: string, pageHeight: number, pageWidth: number, fontS
 }
 
 const FlipReader = () => {
-  useAntiCopy();
+  // useAntiCopy intentionally not used here — its watermark grid made text unreadable.
   const { slug } = useParams<{ slug: string }>();
   const [sp] = useSearchParams();
   const navigate = useNavigate();

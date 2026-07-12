@@ -162,7 +162,7 @@ function buildInvoicePdf({
   const margin = 48;
   const currency = purchase.currency || "INR";
   const sym = currencySymbol(currency);
-  const amount = Number(purchase.amount ?? 0);
+  const amount = Number(purchase.amount ?? book?.price ?? 0);
   const invoiceNo = makeInvoiceNumber(purchase.id, purchase.created_at);
   const dateStr = new Date(purchase.created_at).toLocaleDateString("en-IN", {
     day: "2-digit", month: "short", year: "numeric",

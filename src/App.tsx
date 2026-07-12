@@ -23,6 +23,7 @@ import { ReadingDashboard, BadgesPage, ReadingCalendar, CertificatesPage } from 
 import { MyReviews, MyBookmarks } from "./pages/dashboard/CommunityPages";
 import { SpiritualHome, MeditationTimer, FestivalCalendar } from "./pages/dashboard/SpiritualPages";
 import { NotificationsPage, SupportPage, PersonalizedPage } from "./pages/dashboard/MiscPages";
+import { ReadingGoals, BirthdaySettings, SpiritualJourney, ReadingChallenge } from "./pages/dashboard/Phase2Pages";
 
 // Lazy load all other pages for faster initial load
 const Books = lazy(() => import("./pages/Books"));

@@ -89,21 +89,6 @@ const groups: {
     ],
   },
   {
-    label: "Community",
-    items: [
-      { title: "My Reviews", url: "/dashboard/community/reviews", icon: Users },
-      { title: "My Bookmarks", url: "/dashboard/community/bookmarks", icon: Users },
-    ],
-  },
-  {
-    label: "Spiritual",
-    items: [
-      { title: "Today's Quote", url: "/dashboard/spiritual", icon: Compass },
-      { title: "Meditation Timer", url: "/dashboard/spiritual/meditation", icon: Compass },
-      { title: "Festival Calendar", url: "/dashboard/spiritual/festivals", icon: Compass },
-    ],
-  },
-  {
     label: "System",
     items: [
       { title: "Notifications", url: "/dashboard/notifications", icon: Bell },

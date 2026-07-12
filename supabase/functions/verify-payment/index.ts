@@ -104,8 +104,6 @@ async function sendReceipt(
       } else {
         (globalThis as any).__claimUrl = "";
       }
-    }
-
     } else {
       const { data: donation } = await supabase
         .from("donations")

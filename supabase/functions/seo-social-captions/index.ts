@@ -1,6 +1,7 @@
 // Generate platform-specific social captions + hashtags for a post using Lovable AI.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { assertSeoAuthorized } from "../_shared/seo-auth.ts";
 
 const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-2.5-flash";
@@ -8,6 +9,8 @@ const SITE = "https://gyandootnova.in";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const unauthorized = await assertSeoAuthorized(req);
+  if (unauthorized) return unauthorized;
   const apiKey = Deno.env.get("LOVABLE_API_KEY");
   if (!apiKey) return new Response(JSON.stringify({ error: "LOVABLE_API_KEY missing" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 

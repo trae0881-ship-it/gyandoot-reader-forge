@@ -1,6 +1,7 @@
 // Sync last-28d GSC metrics into posts + return aggregated stats for dashboard.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { assertSeoAuthorized } from "../_shared/seo-auth.ts";
 
 const GATEWAY = "https://connector-gateway.lovable.dev";
 const SITE = "https://gyandootnova.in";
@@ -8,6 +9,8 @@ const GSC_SITE_URL = "https://gyandootnova.in/";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const unauthorized = await assertSeoAuthorized(req);
+  if (unauthorized) return unauthorized;
 
   const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   const lovableKey = Deno.env.get("LOVABLE_API_KEY");

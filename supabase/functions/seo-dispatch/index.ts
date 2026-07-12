@@ -5,6 +5,7 @@
 //  - in-app admin notifications on completion / failure
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { createClient } from "npm:@supabase/supabase-js@2.45.0";
+import { assertSeoAuthorized } from "../_shared/seo-auth.ts";
 
 const ALLOWED = new Set([
   "seo-daily-publisher",
@@ -56,6 +57,9 @@ const notify = async (
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const unauthorized = await assertSeoAuthorized(req);
+  if (unauthorized) return unauthorized;
+
 
   let payload: { fn?: string; body?: unknown; force?: boolean } = {};
   try { payload = await req.json(); } catch { /* empty body ok */ }

@@ -3,6 +3,7 @@
 // daily blog automation. Uses Lovable AI Gateway (Gemini flash).
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { assertSeoAuthorized } from "../_shared/seo-auth.ts";
 
 const MODEL = "google/gemini-2.5-flash";
 
@@ -64,6 +65,8 @@ Return JSON with this exact shape:
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const unauthorized = await assertSeoAuthorized(req);
+  if (unauthorized) return unauthorized;
   const url = Deno.env.get("SUPABASE_URL")!;
   const svc = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const sb = createClient(url, svc);

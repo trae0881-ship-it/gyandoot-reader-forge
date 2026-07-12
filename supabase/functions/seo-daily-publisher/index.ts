@@ -9,6 +9,7 @@
 // 8. Ensure queue top-up for tomorrow
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { assertSeoAuthorized } from "../_shared/seo-auth.ts";
 
 const MIN_QUEUE = 30;
 
@@ -48,6 +49,8 @@ async function invokeFn(url: string, svc: string, name: string, body: any) {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const unauthorized = await assertSeoAuthorized(req);
+  if (unauthorized) return unauthorized;
   const url = Deno.env.get("SUPABASE_URL")!;
   const svc = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const sb = createClient(url, svc);

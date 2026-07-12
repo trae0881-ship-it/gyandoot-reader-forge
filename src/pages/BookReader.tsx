@@ -122,6 +122,7 @@ const BookReader = () => {
       return data;
     },
     enabled: !!slug,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: chapters, isLoading: chaptersLoading } = useQuery({
@@ -131,19 +132,25 @@ const BookReader = () => {
       return data ?? [];
     },
     enabled: !!book?.id,
+    staleTime: 5 * 60 * 1000,
   });
 
+  const chapter = chapters?.find((c) => c.slug === chapterSlug);
+  const isPreviewChapter = !!chapter && (
+    chapter.is_preview || chapter.chapter_number <= (book?.preview_chapters ?? 0)
+  );
+  const purchaseRequired = !!book && !book.is_free && !isPreviewChapter;
 
-  const { data: hasPurchased } = useQuery({
+
+  const { data: hasPurchased, isLoading: purchaseLoading } = useQuery({
     queryKey: ["purchase-check", book?.id, user?.id],
     queryFn: async () => {
       const { data } = await supabase.rpc("has_purchased_book", { _user_id: user!.id, _book_id: book!.id });
       return !!data;
     },
-    enabled: !!book?.id && !!user?.id && !book?.is_free,
+    enabled: !!book?.id && !!user?.id && purchaseRequired,
+    staleTime: 60 * 1000,
   });
-
-  const chapter = chapters?.find((c) => c.slug === chapterSlug);
 
   // Saved reading progress for this book (single row per user+book).
   const { data: savedProgress } = useQuery({
@@ -171,8 +178,10 @@ const BookReader = () => {
       const row = Array.isArray(data) ? data[0] : data;
       return (row?.content ?? "") as string;
     },
-    enabled: !!chapter?.id,
+    enabled: !!chapter?.id && (!!book?.is_free || isPreviewChapter || !!user),
     retry: false,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
   const currentIndex = chapters?.findIndex((c) => c.slug === chapterSlug) ?? -1;
   const prevChapter = currentIndex > 0 ? chapters?.[currentIndex - 1] : null;
@@ -567,7 +576,7 @@ const BookReader = () => {
   };
 
   /* ─── Access check ─────────────────────────────────────────────────── */
-  const canRead = book?.is_free || chapter?.is_preview || hasPurchased;
+  const canRead = !!book?.is_free || isPreviewChapter || !!hasPurchased;
 
   // Loading state — while book/chapters are being fetched
   if (bookLoading || (book && chaptersLoading)) {
@@ -607,6 +616,15 @@ const BookReader = () => {
   }
 
 
+  if (purchaseRequired && user && purchaseLoading) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        <p className="text-sm text-muted-foreground">Reading access check ho raha hai…</p>
+      </div>
+    );
+  }
+
   if (!canRead) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4">
@@ -620,8 +638,26 @@ const BookReader = () => {
 
   if (contentLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      <div className="min-h-screen bg-background text-foreground">
+        <div className="sticky top-0 z-40 border-b bg-background/95 px-4 py-2 backdrop-blur">
+          <div className="mx-auto flex max-w-4xl items-center justify-between">
+            <Button variant="ghost" size="sm" asChild>
+              <Link to={`/books/${slug}`}><ArrowLeft className="mr-1 h-4 w-4" />{book.title}</Link>
+            </Button>
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          </div>
+        </div>
+        <article className="mx-auto max-w-4xl px-6 py-10">
+          <div className="mb-2 text-sm text-muted-foreground">Chapter {chapter.chapter_number} of {totalChapters}</div>
+          <h1 className="mb-6 font-serif text-3xl font-bold">{chapter.title}</h1>
+          <div className="space-y-4" aria-label="Chapter loading">
+            <div className="h-4 w-full animate-pulse rounded bg-muted" />
+            <div className="h-4 w-11/12 animate-pulse rounded bg-muted" />
+            <div className="h-4 w-10/12 animate-pulse rounded bg-muted" />
+            <div className="h-4 w-full animate-pulse rounded bg-muted" />
+            <div className="h-4 w-8/12 animate-pulse rounded bg-muted" />
+          </div>
+        </article>
       </div>
     );
   }

@@ -241,7 +241,7 @@ export const CalmFeeling = () => (
 
     <div className="container relative max-w-5xl px-4 py-24 md:py-32 text-center">
       <span
-        className="text-xs font-extrabold uppercase tracking-[0.28em] text-secondary inline-flex items-center gap-3 mb-8"
+        className="text-xs font-extrabold uppercase tracking-[0.28em] text-primary inline-flex items-center gap-3 mb-8"
         style={bodyFont}
       >
         <Leaf className="h-4 w-4" />
@@ -249,21 +249,21 @@ export const CalmFeeling = () => (
       </span>
 
       <h2
-        className="text-4xl md:text-6xl lg:text-7xl font-light leading-[1.1] text-primary-foreground max-w-3xl mx-auto"
+        className="text-4xl md:text-6xl lg:text-7xl font-light leading-[1.1] text-ink max-w-3xl mx-auto"
         style={displayFont}
       >
-        An island of <span className="italic text-secondary">stillness</span>
+        An island of <span className="italic text-primary">stillness</span>
         <br className="hidden md:block" /> in a sea of noise.
       </h2>
 
       <div className="my-10 flex items-center justify-center gap-4">
-        <div className="h-px w-14 bg-secondary/30" />
-        <div className="w-2.5 h-2.5 rotate-45 border border-secondary bg-primary" />
-        <div className="h-px w-14 bg-secondary/30" />
+        <div className="h-px w-14 bg-ink/30" />
+        <div className="w-2.5 h-2.5 rotate-45 border border-primary bg-primary" />
+        <div className="h-px w-14 bg-ink/30" />
       </div>
 
       <p
-        className="mx-auto max-w-2xl text-lg leading-[1.85] text-primary-foreground/70 font-light"
+        className="mx-auto max-w-2xl text-lg leading-[1.85] text-ink/80 font-medium"
         style={bodyFont}
       >
         We built a reader that quietly steps back — so nothing stands between
@@ -274,26 +274,26 @@ export const CalmFeeling = () => (
         {calmPromises.map((p, i) => (
           <div
             key={p.title}
-            className="group relative p-8 border border-secondary/20 bg-primary-foreground/[0.02] backdrop-blur-sm text-left transition-all duration-300 hover:border-secondary/50 hover:bg-primary-foreground/[0.04] overflow-hidden"
+            className="group relative p-8 border border-ink/15 bg-white/40 backdrop-blur-sm text-left transition-all duration-300 hover:border-primary/50 hover:bg-white/60 overflow-hidden"
           >
             <span
-              className="absolute top-3 right-5 text-6xl text-secondary/10 select-none pointer-events-none group-hover:text-secondary/20 transition-colors font-light"
+              className="absolute top-3 right-5 text-6xl text-ink/10 select-none pointer-events-none group-hover:text-primary/20 transition-colors font-light"
               style={displayFont}
             >
               {String(i + 1).padStart(2, "0")}
             </span>
             <div className="relative">
-              <div className="w-10 h-10 rounded-full border border-primary/70 bg-primary/20 flex items-center justify-center mb-5">
-                <div className="w-1.5 h-1.5 bg-secondary rounded-full" />
+              <div className="w-10 h-10 rounded-full border border-primary/70 bg-primary/10 flex items-center justify-center mb-5">
+                <div className="w-1.5 h-1.5 bg-primary rounded-full" />
               </div>
               <h3
-                className="text-2xl text-primary-foreground mb-1.5"
+                className="text-2xl text-ink mb-1.5"
                 style={displayFont}
               >
                 {p.title}
               </h3>
               <p
-                className="text-xs font-semibold uppercase tracking-[0.14em] text-secondary/80"
+                className="text-xs font-semibold uppercase tracking-[0.14em] text-primary/80"
                 style={bodyFont}
               >
                 {p.sub}
@@ -302,6 +302,7 @@ export const CalmFeeling = () => (
           </div>
         ))}
       </div>
+
 
       <div className="mt-16">
         <Link

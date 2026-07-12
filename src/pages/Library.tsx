@@ -6,7 +6,7 @@ import useSEO from "@/hooks/useSEO";
 import { useAuth } from "@/hooks/useAuth";
 import { useContinueReading } from "@/components/ContinueReadingSection";
 import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { SITE } from "@/lib/jsonLd";
 

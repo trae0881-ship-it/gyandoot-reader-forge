@@ -22,6 +22,7 @@ const ResetPassword = () => {
     title: "Reset Your Password | GyandootNova",
     description: "Apna GyandootNova account password securely reset karein — naya password set karke sign in karein.",
     canonical: "/reset-password",
+    noindex: true,
   });
 
   useEffect(() => {

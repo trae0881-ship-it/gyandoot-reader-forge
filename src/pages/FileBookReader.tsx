@@ -9,9 +9,11 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import SecurePdfViewer from "@/components/SecurePdfViewer";
 import { useAntiCopy } from "@/hooks/useAntiCopy";
 import logoImg from "@/assets/logo.jpeg";
+import useSEO from "@/hooks/useSEO";
 
 const FileBookReader = () => {
   useAntiCopy();
+  useSEO({ title: "Read Book | GyandootNova", canonical: "/", noindex: true });
   const { slug } = useParams<{ slug: string }>();
   const { user, loading: authLoading } = useAuth();
   const [darkMode, setDarkMode] = useState(false);

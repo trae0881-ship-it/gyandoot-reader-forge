@@ -39,6 +39,7 @@ const groups: {
     label: "Account",
     items: [
       { title: "My Profile", url: "/dashboard/profile", icon: User },
+      { title: "Birthday & Blessing", url: "/dashboard/profile/birthday", icon: Sparkles },
     ],
   },
   {

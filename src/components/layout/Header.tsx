@@ -72,7 +72,7 @@ const Header = () => {
               width={56}
               height={56}
               {...({ fetchpriority: "high" } as any)}
-              className="relative h-12 w-12 md:h-14 md:w-14 rounded-full object-cover bg-white shadow-elegant ring-2 ring-gold transition-transform duration-500 group-hover:scale-105 group-hover:rotate-3"
+              className="relative h-12 w-12 md:h-14 md:w-14 rounded-full object-contain p-0.5 bg-white shadow-elegant ring-2 ring-gold transition-transform duration-500 group-hover:scale-105 group-hover:rotate-3"
             />
           </div>
           <span className="hidden sm:flex flex-col leading-tight">

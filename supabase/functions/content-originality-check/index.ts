@@ -160,6 +160,19 @@ Deno.serve(async (req) => {
     const userId = userData.user.id;
     const userEmail = userData.user.email ?? null;
 
+    // Role check: must be admin / seo_manager / books_manager
+    const svcRole = createClient(supabaseUrl, serviceKey);
+    const [{ data: isAdmin }, { data: isSeo }, { data: isBooks }] = await Promise.all([
+      svcRole.rpc("has_role", { _user_id: userId, _role: "admin" }),
+      svcRole.rpc("has_role", { _user_id: userId, _role: "seo_manager" }),
+      svcRole.rpc("has_role", { _user_id: userId, _role: "books_manager" }),
+    ]);
+    if (!(isAdmin === true || isSeo === true || isBooks === true)) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const body: ReqBody = await req.json();
     if (!body?.entity_type || !body?.entity_id) {
       return new Response(JSON.stringify({ error: "entity_type and entity_id required" }), {

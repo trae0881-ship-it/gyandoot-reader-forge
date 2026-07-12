@@ -23,6 +23,7 @@ import { ReadingDashboard, BadgesPage, ReadingCalendar, CertificatesPage } from 
 import { MyReviews, MyBookmarks } from "./pages/dashboard/CommunityPages";
 import { SpiritualHome, MeditationTimer, FestivalCalendar } from "./pages/dashboard/SpiritualPages";
 import { NotificationsPage, SupportPage, PersonalizedPage } from "./pages/dashboard/MiscPages";
+import { ReadingGoals, BirthdaySettings, SpiritualJourney, ReadingChallenge } from "./pages/dashboard/Phase2Pages";
 
 // Lazy load all other pages for faster initial load
 const Books = lazy(() => import("./pages/Books"));
@@ -155,6 +156,7 @@ const AppContent = () => {
                 <Route path="/dashboard" element={<DashboardLayout />}>
                   <Route index element={<DashboardHome />} />
                   <Route path="profile" element={<Profile />} />
+                  <Route path="profile/birthday" element={<BirthdaySettings />} />
                   <Route path="personalized" element={<PersonalizedPage />} />
 
                   <Route path="library" element={<PurchasedBooks />} />
@@ -169,6 +171,8 @@ const AppContent = () => {
                   <Route path="orders/refunds" element={<RefundStatus />} />
 
                   <Route path="reading" element={<ReadingDashboard />} />
+                  <Route path="reading/goals" element={<ReadingGoals />} />
+                  <Route path="reading/challenge" element={<ReadingChallenge />} />
                   <Route path="reading/badges" element={<BadgesPage />} />
                   <Route path="reading/calendar" element={<ReadingCalendar />} />
                   <Route path="reading/certificates" element={<CertificatesPage />} />
@@ -179,6 +183,7 @@ const AppContent = () => {
                   <Route path="spiritual" element={<SpiritualHome />} />
                   <Route path="spiritual/meditation" element={<MeditationTimer />} />
                   <Route path="spiritual/festivals" element={<FestivalCalendar />} />
+                  <Route path="spiritual/journey" element={<SpiritualJourney />} />
 
                   <Route path="notifications" element={<NotificationsPage />} />
                   <Route path="support" element={<SupportPage />} />

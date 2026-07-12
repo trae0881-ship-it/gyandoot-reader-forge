@@ -5,8 +5,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  BookOpen, ShoppingBag, Trophy, Flame, Clock, Bell, Sparkles, ArrowRight, Compass, Bookmark, Star,
+  BookOpen, ShoppingBag, Trophy, Flame, Clock, Bell, Sparkles, ArrowRight, Compass, Bookmark, Star, Cake, Target,
 } from "lucide-react";
+import { useProfilePrefs } from "@/pages/dashboard/Phase2Pages";
+import useFestivalTheme, { FestivalBanner } from "@/hooks/useFestivalTheme";
 
 const useDashboardStats = () => {
   const { user } = useAuth();
@@ -61,14 +63,33 @@ const StatCard = ({ icon: Icon, label, value, hint }: any) => (
 );
 
 const DashboardHome = () => {
+  useFestivalTheme();
   const { user } = useAuth();
   const { data: stats } = useDashboardStats();
-  const name = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Reader";
+  const { data: prefs } = useProfilePrefs();
+  const name = prefs?.display_name || user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Reader";
   const hour = new Date().getHours();
   const greeting = hour < 5 ? "Shubh raatri" : hour < 12 ? "Suprabhat" : hour < 17 ? "Namaste" : hour < 20 ? "Shubh sandhya" : "Shubh raatri";
 
+  const today = new Date();
+  const bday = prefs?.birthday ? new Date(prefs.birthday) : null;
+  const isBirthday = !!bday && bday.getMonth() === today.getMonth() && bday.getDate() === today.getDate();
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      {isBirthday && (
+        <Card className="surface-card border-primary/40 bg-gradient-cream">
+          <CardContent className="p-5 flex items-center gap-4">
+            <Cake className="h-8 w-8 text-primary shrink-0"/>
+            <div>
+              <div className="font-serif text-xl">Janmadin ki hardik shubhkamnayein, {name}!</div>
+              <div className="text-xs text-muted-foreground mt-0.5">॥ आयुष्मान् भव, यशस्वी भव, विद्यावान् भव ॥</div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      <FestivalBanner />
+
       {/* Hero */}
       <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-cream p-6 md:p-8">
         <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/10 blur-3xl" />
@@ -79,6 +100,9 @@ const DashboardHome = () => {
         <p className="mt-2 max-w-xl text-muted-foreground">
           Aaj ki path-yatra shuru karein. Aapki library, progress aur daily wisdom, ek hi jagah.
         </p>
+        {prefs?.spiritual_intention && (
+          <p className="mt-3 text-sm italic text-primary/90">"{prefs.spiritual_intention}"</p>
+        )}
         <div className="mt-4 flex flex-wrap gap-2">
           <Button asChild size="sm">
             <Link to="/dashboard/library/continue">Continue Reading <ArrowRight className="ml-1 h-4 w-4" /></Link>
@@ -86,8 +110,12 @@ const DashboardHome = () => {
           <Button asChild size="sm" variant="outline">
             <Link to="/dashboard/spiritual">Today's Quote</Link>
           </Button>
+          <Button asChild size="sm" variant="outline">
+            <Link to="/dashboard/reading/challenge">Reading Challenge</Link>
+          </Button>
         </div>
       </div>
+
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -103,11 +131,14 @@ const DashboardHome = () => {
       <div className="grid md:grid-cols-3 gap-4">
         {[
           { to: "/dashboard/library", title: "My Library", desc: "Purchased & free books.", icon: BookOpen },
-          { to: "/dashboard/orders", title: "My Orders", desc: "Invoices, refunds & history.", icon: ShoppingBag },
-          { to: "/dashboard/reading", title: "Reading Insights", desc: "Streaks, badges, calendar.", icon: Trophy },
+          { to: "/dashboard/reading/challenge", title: "Reading Challenge", desc: "12 books in a year sankalp.", icon: Trophy },
+          { to: "/dashboard/reading/goals", title: "Goals & Sankalp", desc: "Daily lakshya set karein.", icon: Target },
           { to: "/dashboard/spiritual/meditation", title: "Meditation Timer", desc: "Silent bell after your session.", icon: Compass },
-          { to: "/dashboard/notifications", title: "Notifications", desc: "Order & reader updates.", icon: Bell },
+          { to: "/dashboard/spiritual/journey", title: "Spiritual Journey", desc: "Aapki path-yatra ka timeline.", icon: Sparkles },
           { to: "/dashboard/personalized", title: "AI Recommendations", desc: "Books picked for you.", icon: Sparkles },
+          { to: "/dashboard/orders", title: "My Orders", desc: "Invoices, refunds & history.", icon: ShoppingBag },
+          { to: "/dashboard/profile/birthday", title: "Birthday & Blessing", desc: "Janm-tithi set karein.", icon: Cake },
+          { to: "/dashboard/notifications", title: "Notifications", desc: "Order & reader updates.", icon: Bell },
         ].map((c) => (
           <Card key={c.to} className="surface-card group hover:shadow-elegant transition-all">
             <CardHeader className="pb-2">

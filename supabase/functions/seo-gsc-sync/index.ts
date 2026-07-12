@@ -9,6 +9,8 @@ const GSC_SITE_URL = "https://gyandootnova.in/";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const unauthorized = await assertSeoAuthorized(req);
+  if (unauthorized) return unauthorized;
 
   const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   const lovableKey = Deno.env.get("LOVABLE_API_KEY");

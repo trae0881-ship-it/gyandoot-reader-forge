@@ -135,21 +135,55 @@ const AppContent = () => {
                 <Route path="/" element={<Index />} />
                 <Route path="/books" element={<Books />} />
                 <Route path="/books/:slug" element={<BookDetail />} />
-                <Route path="/library" element={<Library />} />
+                <Route path="/library" element={<Navigate to="/dashboard/library/continue" replace />} />
 
                 <Route path="/books/:slug/read-file" element={<FileBookReader />} />
                 <Route path="/offer/:slug" element={<OfferLanding />} />
                 <Route path="/claim/:token" element={<ClaimPurchase />} />
 
                 <Route path="/books/:slug/:chapterSlug" element={<BookReader />} />
+                <Route path="/read/:slug/flip" element={<FlipReader />} />
                 <Route path="/articles" element={<Articles />} />
                 <Route path="/articles/:slug" element={<ArticleDetail />} />
                 <Route path="/support-us" element={<Donate />} />
                 <Route path="/donate" element={<Donate />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/dashboard" element={<Profile />} />
+                <Route path="/profile" element={<Navigate to="/dashboard/profile" replace />} />
+
+                {/* User Dashboard */}
+                <Route path="/dashboard" element={<DashboardLayout />}>
+                  <Route index element={<DashboardHome />} />
+                  <Route path="profile" element={<Profile />} />
+                  <Route path="personalized" element={<PersonalizedPage />} />
+
+                  <Route path="library" element={<PurchasedBooks />} />
+                  <Route path="library/free" element={<FreeBooks />} />
+                  <Route path="library/continue" element={<ContinueReading />} />
+                  <Route path="library/favorites" element={<Favorites />} />
+                  <Route path="library/recent" element={<RecentlyViewed />} />
+                  <Route path="library/history" element={<ReadingHistory />} />
+
+                  <Route path="orders" element={<MyOrders />} />
+                  <Route path="orders/invoices" element={<InvoicesPage />} />
+                  <Route path="orders/refunds" element={<RefundStatus />} />
+
+                  <Route path="reading" element={<ReadingDashboard />} />
+                  <Route path="reading/badges" element={<BadgesPage />} />
+                  <Route path="reading/calendar" element={<ReadingCalendar />} />
+                  <Route path="reading/certificates" element={<CertificatesPage />} />
+
+                  <Route path="community/reviews" element={<MyReviews />} />
+                  <Route path="community/bookmarks" element={<MyBookmarks />} />
+
+                  <Route path="spiritual" element={<SpiritualHome />} />
+                  <Route path="spiritual/meditation" element={<MeditationTimer />} />
+                  <Route path="spiritual/festivals" element={<FestivalCalendar />} />
+
+                  <Route path="notifications" element={<NotificationsPage />} />
+                  <Route path="support" element={<SupportPage />} />
+                </Route>
+
                 <Route path="/my-library" element={<Navigate to="/dashboard" replace />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/our-story" element={<OurStory />} />

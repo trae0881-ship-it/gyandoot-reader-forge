@@ -76,6 +76,13 @@ const FlipReader = () => {
   useEffect(() => { localStorage.setItem("reader:theme", theme); }, [theme]);
   useEffect(() => { localStorage.setItem("reader:fontSize", String(fontSize)); }, [fontSize]);
 
+  const progressKey = slug && sp.get("chapter") ? `reader:flip:progress:${slug}:${sp.get("chapter")}` : "";
+  const savedPage = useMemo(() => {
+    if (!progressKey) return 0;
+    const v = parseInt(localStorage.getItem(progressKey) || "0", 10);
+    return isNaN(v) ? 0 : v;
+  }, [progressKey]);
+
   const { data: book } = useQuery({
     queryKey: ["flip-book", slug],
     queryFn: async () => {
@@ -194,6 +201,7 @@ const FlipReader = () => {
           <div className="shadow-2xl">
             {/* @ts-ignore */}
             <HTMLFlipBook
+              key={`${progressKey}:${fontSize}:${dims.w}x${dims.h}:${pages.length}`}
               width={dims.w}
               height={dims.h}
               size="fixed"
@@ -206,9 +214,12 @@ const FlipReader = () => {
               flippingTime={700}
               drawShadow
               usePortrait
-              startPage={0}
+              startPage={Math.min(savedPage, Math.max(0, pages.length - 1))}
               ref={flipRef}
-              onFlip={(e: any) => setPageIdx(e.data)}
+              onFlip={(e: any) => {
+                setPageIdx(e.data);
+                if (progressKey) localStorage.setItem(progressKey, String(e.data));
+              }}
               className="reader-flipbook"
               style={{}}
               startZIndex={0}

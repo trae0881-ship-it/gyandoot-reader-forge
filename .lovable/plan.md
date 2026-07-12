@@ -1,57 +1,78 @@
-# Sales Conversion Sprint — 4 features
+## Goal
 
-## 1. Book Reviews (submit + display verified count)
+Logged-in user ke liye ek rich, delightful User Dashboard banana — jisme "logo click = dashboard" ho, aur ek Kindle-jaisa page-flip Reader ho. Feature list bahut lambi hai, isliye main isse **3 phases** me dunga taaki har phase ship-ready ho aur aap review kar saken.
 
-**DB** — `book_reviews` table already exists (rating, review, is_verified_purchase auto-set by trigger, is_approved). No migration needed.
+---
 
-**Components** — new `src/components/BookReviewForm.tsx` (star picker + textarea, logged-in only, one review per user per book) and `src/components/BookReviewList.tsx` (approved reviews with verified badge, avg rating, count).
+## Phase 1 — Foundation (yeh main abhi build karunga)
 
-**Book card** — replace the hardcoded `Stars`/reviews line in `BookCard` (Books.tsx line 382-390) with real aggregate from `book_reviews` (count of approved). Show "✓ Verified" badge next to count if any verified purchases exist. Fetch aggregates once per page in a single query keyed by book_id.
+### 1. Logo & Auth routing
+- `Header` me logo ka `to="/"` conditionally `to="/dashboard"` (logged-in user ke liye)
+- `/auth` ke baad success redirect: agar user hai → `/dashboard`, warna current behavior
+- Public site (Home, Books, Articles, About, etc.) sab kuch waise ka waisa — sirf logged-in user ke logo-click ka behavior badlega
 
-**Book detail** — add reviews section at bottom of `BookDetail.tsx` with the form (if logged in) + list.
+### 2. New Dashboard Shell — `/dashboard`
+Left sidebar (shadcn `Sidebar`, collapsible) + main content area. Sidebar sections:
+- Account
+- My Library
+- Orders
+- Reading Dashboard
+- Community
+- Spiritual
+- Notifications
+- Support
 
-## 2. `/offer/[slug]` ads landing page
+Har section apne sub-route pe kholta hai (`/dashboard/library`, `/dashboard/orders`, etc.). Mobile pe drawer.
 
-New route `src/pages/OfferLanding.tsx` registered in `App.tsx`. Distraction-free:
-- No header/footer (use a bare layout, just a small logo top-left)
-- Big cover, title, one-line pitch, price + WELCOME10 auto-applied
-- Single sticky "Buy Now — ₹XXX" CTA that jumps straight into checkout
-- Trust bar (compact), 2 short reviews, money-back note, FAQ (3 items)
-- UTM capture on mount → `sales_events` (view_offer_landing)
-- SEO: noindex (ad landing, not organic)
+### 3. Kindle-style Flip Reader — `/read/:bookId/flip`
+- `react-pageflip` (HTMLFlipBook) use karke real page-turn animation
+- Chapter content ko fixed-height "pages" me paginate karega (client-side splitter)
+- Controls: next/prev, keyboard arrows, tap zones (mobile), progress bar, chapter jump, font-size, theme (sepia/dark/light), bookmark
+- Existing `BookReader.tsx` intact rahega — flip ek naya mode hoga, reader ke andar toggle: "Scroll | Flip"
 
-## 3. Admin Sales Funnel dashboard
+### 4. Core Dashboard pages (real data, working)
+- **My Profile** (existing Profile.tsx ko integrate)
+- **Purchased Books** + **Free Books** + **Continue Reading** (from `reading_progress`) + **Recently Viewed** (localStorage) + **Favorites/Wishlist** (from `bookmarks`)
+- **My Orders** + **Invoice Download** (existing purchases → PDF via jsPDF)
+- **Reading Dashboard**: streak, total time, books completed, chapters read, daily goal, achievement badges, calendar heatmap (from `reading_progress`)
+- **My Reviews** + **My Comments** (from `book_reviews`)
+- **Notifications** (from `seo_notifications` filtered by user, or new lightweight table)
 
-New tab in `AdminDashboard.tsx` (or new `src/pages/admin/AdminSalesFunnel.tsx` linked from admin nav). One-screen funnel:
+---
 
-```text
-view_books_list  ████████████ 1,240
-  → view_book      ██████ 480 (39%)
-    → click_buy_now  ███ 210 (44%)
-      → begin_checkout ██ 92 (44%)
-        → payment_success █ 38 (41%)
-```
+## Phase 2 — Engagement & Spiritual (next turn)
 
-Data source: existing `sales_events` table. Show:
-- Funnel bars (last 7d / 30d toggle)
-- Drop-off % between each step
-- Top UTM sources by conversion
-- Recent 20 events table
+- Today's Quote / Daily Mantra / Panchang / Festival Calendar (static curated data + a `daily_spiritual` table)
+- Meditation Timer (client-only, chime + duration presets)
+- Reading Certificate (PDF on book completion)
+- Spiritual Journey Timeline
+- Reading Challenge / Goals
+- Birthday Blessing (from profile DOB)
+- Festival Theme (auto CSS switcher on festival dates)
+- Achievement Badges engine
 
-## 4. Guest checkout (email-only)
+---
 
-**Frontend** — on `BookDetail.tsx` Buy Now: if not logged in, show a compact inline dialog asking only for email (+ optional name). No password, no OTP required for the checkout itself.
+## Phase 3 — Advanced (final turn)
 
-**Backend** — extend `create-order` edge function to accept `guest_email` when there is no auth. Store as `guest_email` column on `purchases` (add if missing). `verify-payment` grants access + emails download link to guest email.
+- Family Library (invite emails, shared purchases table)
+- Audio Book Player (needs audio uploads on books)
+- Offline Reading (Service Worker + IndexedDB cache of chapter HTML)
+- QR Code for Purchased Books
+- AI Personalized Home (Lovable AI recommendations based on reading history)
+- Exclusive Member Content gate
+- Discussion Groups / Following authors / Followers (social graph tables)
+- Live Chat & Ticket system (contact_enquiries expansion)
 
-**DB migration** — add `guest_email TEXT` and `guest_name TEXT` on `purchases`, allow null user_id when guest_email present (validation trigger — one of the two must be set), plus RLS grant so anon can insert via edge function only (service role).
+---
 
-**Post-purchase** — send an existing transactional email with the file download link + a "claim account" link (magic-link signup) so they can access their library later.
+## Technical notes
 
-## Delivery order
+- New tables (Phase 1): `wishlist`, `favorites`, `reading_sessions` (for streak/time tracking), `user_notifications`, `achievements`, `user_achievements`. All with RLS + GRANTs.
+- New route: `/dashboard/*` with nested routes; existing `/library`, `/profile` will redirect into dashboard.
+- Design: warm spiritual palette (saffron/deep-maroon accents on cream), Playfair Display headings + Inter body (already in project). No emojis — Lucide icons only.
+- Dependencies: `react-pageflip`, `jspdf`, `react-calendar-heatmap`, `qrcode.react`.
 
-1. DB migration (guest checkout columns) — one approval gate.
-2. Features 1, 2, 3 in parallel edits (no cross-dependencies).
-3. Feature 4 wiring (frontend dialog + edge function updates) after migration lands.
+---
 
-All four use existing tables/functions where possible — only one migration is required.
+**Confirm karein: Kya main Phase 1 build karna shuru kar dun?** Agar aap chahe to pehle scope trim/expand bhi kar sakte hain (e.g. "flip reader pehle chahiye, dashboard baad me").

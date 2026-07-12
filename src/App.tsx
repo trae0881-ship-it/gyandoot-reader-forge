@@ -14,6 +14,16 @@ import { lazy, Suspense } from "react";
 // Only eagerly load the homepage
 import Index from "./pages/Index";
 
+// Dashboard sub-pages (small, imported eagerly to avoid lazy-default issue)
+import {
+  PurchasedBooks, FreeBooks, ContinueReading, Favorites, RecentlyViewed, ReadingHistory,
+} from "./pages/dashboard/LibraryPages";
+import { MyOrders, InvoicesPage, RefundStatus } from "./pages/dashboard/OrderPages";
+import { ReadingDashboard, BadgesPage, ReadingCalendar, CertificatesPage } from "./pages/dashboard/ReadingPages";
+import { MyReviews, MyBookmarks } from "./pages/dashboard/CommunityPages";
+import { SpiritualHome, MeditationTimer, FestivalCalendar } from "./pages/dashboard/SpiritualPages";
+import { NotificationsPage, SupportPage, PersonalizedPage } from "./pages/dashboard/MiscPages";
+
 // Lazy load all other pages for faster initial load
 const Books = lazy(() => import("./pages/Books"));
 const BookDetail = lazy(() => import("./pages/BookDetail"));
@@ -44,6 +54,11 @@ const Keywords = lazy(() => import("./pages/Keywords"));
 const Library = lazy(() => import("./pages/Library"));
 const OfferLanding = lazy(() => import("./pages/OfferLanding"));
 const ClaimPurchase = lazy(() => import("./pages/ClaimPurchase"));
+const FlipReader = lazy(() => import("./pages/FlipReader"));
+
+// Dashboard
+const DashboardLayout = lazy(() => import("./pages/dashboard/DashboardLayout"));
+const DashboardHome = lazy(() => import("./pages/dashboard/DashboardHome"));
 
 
 const AdminLayout = lazy(() => import("./pages/admin/AdminLayout"));
@@ -120,21 +135,55 @@ const AppContent = () => {
                 <Route path="/" element={<Index />} />
                 <Route path="/books" element={<Books />} />
                 <Route path="/books/:slug" element={<BookDetail />} />
-                <Route path="/library" element={<Library />} />
+                <Route path="/library" element={<Navigate to="/dashboard/library/continue" replace />} />
 
                 <Route path="/books/:slug/read-file" element={<FileBookReader />} />
                 <Route path="/offer/:slug" element={<OfferLanding />} />
                 <Route path="/claim/:token" element={<ClaimPurchase />} />
 
                 <Route path="/books/:slug/:chapterSlug" element={<BookReader />} />
+                <Route path="/read/:slug/flip" element={<FlipReader />} />
                 <Route path="/articles" element={<Articles />} />
                 <Route path="/articles/:slug" element={<ArticleDetail />} />
                 <Route path="/support-us" element={<Donate />} />
                 <Route path="/donate" element={<Donate />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/dashboard" element={<Profile />} />
+                <Route path="/profile" element={<Navigate to="/dashboard/profile" replace />} />
+
+                {/* User Dashboard */}
+                <Route path="/dashboard" element={<DashboardLayout />}>
+                  <Route index element={<DashboardHome />} />
+                  <Route path="profile" element={<Profile />} />
+                  <Route path="personalized" element={<PersonalizedPage />} />
+
+                  <Route path="library" element={<PurchasedBooks />} />
+                  <Route path="library/free" element={<FreeBooks />} />
+                  <Route path="library/continue" element={<ContinueReading />} />
+                  <Route path="library/favorites" element={<Favorites />} />
+                  <Route path="library/recent" element={<RecentlyViewed />} />
+                  <Route path="library/history" element={<ReadingHistory />} />
+
+                  <Route path="orders" element={<MyOrders />} />
+                  <Route path="orders/invoices" element={<InvoicesPage />} />
+                  <Route path="orders/refunds" element={<RefundStatus />} />
+
+                  <Route path="reading" element={<ReadingDashboard />} />
+                  <Route path="reading/badges" element={<BadgesPage />} />
+                  <Route path="reading/calendar" element={<ReadingCalendar />} />
+                  <Route path="reading/certificates" element={<CertificatesPage />} />
+
+                  <Route path="community/reviews" element={<MyReviews />} />
+                  <Route path="community/bookmarks" element={<MyBookmarks />} />
+
+                  <Route path="spiritual" element={<SpiritualHome />} />
+                  <Route path="spiritual/meditation" element={<MeditationTimer />} />
+                  <Route path="spiritual/festivals" element={<FestivalCalendar />} />
+
+                  <Route path="notifications" element={<NotificationsPage />} />
+                  <Route path="support" element={<SupportPage />} />
+                </Route>
+
                 <Route path="/my-library" element={<Navigate to="/dashboard" replace />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/our-story" element={<OurStory />} />

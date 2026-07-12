@@ -64,9 +64,9 @@ const Header = () => {
       <div className="w-full max-w-screen-2xl mx-auto flex h-[68px] md:h-[76px] items-center justify-between px-3 md:px-6">
         {/* Logo */}
         <Link
-          to="/"
+          to={user ? "/dashboard" : "/"}
           className="group flex items-center gap-2 sm:gap-3 shrink-0 py-1"
-          aria-label="GyandootNova — Go to homepage"
+          aria-label={user ? "GyandootNova — Go to your dashboard" : "GyandootNova — Go to homepage"}
         >
           <div className="relative flex items-center justify-center h-11 w-11 sm:h-12 sm:w-12 md:h-14 md:w-14 max-h-14 max-w-14 shrink-0">
             <div className="absolute -inset-1 rounded-full bg-gradient-gold opacity-30 blur-sm transition-opacity group-hover:opacity-50" aria-hidden="true" />
@@ -157,8 +157,9 @@ const Header = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => navigate("/library")}>My Library</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/profile")}>My Profile</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/dashboard")}>My Dashboard</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/dashboard/library")}>My Library</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/dashboard/profile")}>My Profile</DropdownMenuItem>
                 <DropdownMenuItem onClick={signOut}>
                   <LogOut className="mr-2 h-4 w-4" /> Sign Out
                 </DropdownMenuItem>

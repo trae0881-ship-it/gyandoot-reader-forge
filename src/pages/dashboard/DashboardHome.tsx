@@ -131,11 +131,14 @@ const DashboardHome = () => {
       <div className="grid md:grid-cols-3 gap-4">
         {[
           { to: "/dashboard/library", title: "My Library", desc: "Purchased & free books.", icon: BookOpen },
-          { to: "/dashboard/orders", title: "My Orders", desc: "Invoices, refunds & history.", icon: ShoppingBag },
-          { to: "/dashboard/reading", title: "Reading Insights", desc: "Streaks, badges, calendar.", icon: Trophy },
+          { to: "/dashboard/reading/challenge", title: "Reading Challenge", desc: "12 books in a year sankalp.", icon: Trophy },
+          { to: "/dashboard/reading/goals", title: "Goals & Sankalp", desc: "Daily lakshya set karein.", icon: Target },
           { to: "/dashboard/spiritual/meditation", title: "Meditation Timer", desc: "Silent bell after your session.", icon: Compass },
-          { to: "/dashboard/notifications", title: "Notifications", desc: "Order & reader updates.", icon: Bell },
+          { to: "/dashboard/spiritual/journey", title: "Spiritual Journey", desc: "Aapki path-yatra ka timeline.", icon: Sparkles },
           { to: "/dashboard/personalized", title: "AI Recommendations", desc: "Books picked for you.", icon: Sparkles },
+          { to: "/dashboard/orders", title: "My Orders", desc: "Invoices, refunds & history.", icon: ShoppingBag },
+          { to: "/dashboard/profile/birthday", title: "Birthday & Blessing", desc: "Janm-tithi set karein.", icon: Cake },
+          { to: "/dashboard/notifications", title: "Notifications", desc: "Order & reader updates.", icon: Bell },
         ].map((c) => (
           <Card key={c.to} className="surface-card group hover:shadow-elegant transition-all">
             <CardHeader className="pb-2">

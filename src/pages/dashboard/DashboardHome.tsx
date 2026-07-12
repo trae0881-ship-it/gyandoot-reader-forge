@@ -63,14 +63,33 @@ const StatCard = ({ icon: Icon, label, value, hint }: any) => (
 );
 
 const DashboardHome = () => {
+  useFestivalTheme();
   const { user } = useAuth();
   const { data: stats } = useDashboardStats();
-  const name = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Reader";
+  const { data: prefs } = useProfilePrefs();
+  const name = prefs?.display_name || user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Reader";
   const hour = new Date().getHours();
   const greeting = hour < 5 ? "Shubh raatri" : hour < 12 ? "Suprabhat" : hour < 17 ? "Namaste" : hour < 20 ? "Shubh sandhya" : "Shubh raatri";
 
+  const today = new Date();
+  const bday = prefs?.birthday ? new Date(prefs.birthday) : null;
+  const isBirthday = !!bday && bday.getMonth() === today.getMonth() && bday.getDate() === today.getDate();
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      {isBirthday && (
+        <Card className="surface-card border-primary/40 bg-gradient-cream">
+          <CardContent className="p-5 flex items-center gap-4">
+            <Cake className="h-8 w-8 text-primary shrink-0"/>
+            <div>
+              <div className="font-serif text-xl">Janmadin ki hardik shubhkamnayein, {name}!</div>
+              <div className="text-xs text-muted-foreground mt-0.5">॥ आयुष्मान् भव, यशस्वी भव, विद्यावान् भव ॥</div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      <FestivalBanner />
+
       {/* Hero */}
       <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-cream p-6 md:p-8">
         <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/10 blur-3xl" />

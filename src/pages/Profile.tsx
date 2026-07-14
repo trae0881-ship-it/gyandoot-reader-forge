@@ -266,7 +266,7 @@ const Profile = () => {
     },
   });
 
-  if (loading) return <Layout><div className="container py-20 text-center text-muted-foreground">Loading...</div></Layout>;
+  if (loading) return <div className="container py-20 text-center text-muted-foreground">Loading...</div>;
   if (!user) return null;
 
   const totalDonated = donations?.reduce((sum: number, d: any) => sum + Number(d.amount), 0) ?? 0;
@@ -276,7 +276,7 @@ const Profile = () => {
     allProgress?.find((pr) => pr.book_id === bookId);
 
   return (
-    <Layout>
+    <>
       <main className="container py-12 max-w-4xl">
         {/* Profile Header */}
         <section className="flex items-center gap-5 mb-10">
@@ -704,7 +704,7 @@ const Profile = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </Layout>
+    </>
   );
 };
 

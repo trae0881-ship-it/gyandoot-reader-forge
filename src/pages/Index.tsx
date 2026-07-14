@@ -226,6 +226,10 @@ const Index = () => {
 
 
 
+  if (shouldRedirect) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return (
     <Layout>
       <LiveReaderStrip />

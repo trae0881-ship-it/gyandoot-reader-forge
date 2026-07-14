@@ -37,7 +37,7 @@ export const MyReviews = () => {
                   </div>
                   <Badge variant={r.is_approved ? "default" : "secondary"} className="text-[10px]">{r.is_approved ? "Approved" : "Pending"}</Badge>
                 </div>
-                {r.review_text && <p className="mt-2 text-sm text-foreground/80">{r.review_text}</p>}
+                {r.review && <p className="mt-2 text-sm text-foreground/80">{r.review}</p>}
                 <div className="mt-2 text-[11px] text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</div>
               </CardContent>
             </Card>

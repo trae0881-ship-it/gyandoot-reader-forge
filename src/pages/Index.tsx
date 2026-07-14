@@ -109,9 +109,7 @@ const AnimatedCounter = ({ target, suffix = "" }: { target: number; suffix?: str
 /* ─── Main Page ─── */
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
-  if (!authLoading && user) {
-    return <Navigate to="/dashboard" replace />;
-  }
+  const shouldRedirect = !authLoading && !!user;
   const { data: featuredBooks } = useQuery({
     queryKey: ["featured-books"],
     queryFn: async () => {

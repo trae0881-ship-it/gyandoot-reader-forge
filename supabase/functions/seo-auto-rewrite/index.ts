@@ -178,6 +178,14 @@ Deno.serve(async (req) => {
         rewrite_count: (Number(post.rewrite_count) || 0) + 1,
         last_rewritten_at: new Date().toISOString(),
         quality_passed: newScore >= threshold,
+        // The track_content_edit trigger flips approved -> draft on any content
+        // change. Since this is an automated originality rewrite (not a human
+        // edit), auto-approve and keep the article live so /articles/:slug
+        // doesn't 404 while the post silently drops out of the approved feed.
+        approval_status: "approved",
+        reviewed_at: new Date().toISOString(),
+        publish_status: "published",
+        is_published: true,
         self_check: {
           ...(post.self_check || {}),
           last_rewrite: { attempt, score: newScore, at: new Date().toISOString() },

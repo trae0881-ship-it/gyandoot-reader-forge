@@ -99,6 +99,8 @@ async function scoreOriginality(sb: any, post: any): Promise<number> {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const unauthorized = await assertSeoAuthorized(req);
+  if (unauthorized) return unauthorized;
 
   const url = Deno.env.get("SUPABASE_URL")!;
   const svc = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;

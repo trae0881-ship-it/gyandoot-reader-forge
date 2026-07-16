@@ -18,6 +18,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { sendAlert } from "../_shared/seo-alerts.ts";
+import { assertSeoAuthorized } from "../_shared/seo-auth.ts";
 
 const DEFAULT_THRESHOLD = 92;
 const DEFAULT_MAX_ATTEMPTS = 3;

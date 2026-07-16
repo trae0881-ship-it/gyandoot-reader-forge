@@ -30,4 +30,28 @@ export default defineConfig(({ mode }) => ({
     __BUILD_ID__: JSON.stringify(BUILD_ID),
     __BUILT_AT__: JSON.stringify(new Date().toISOString()),
   },
+  build: {
+    target: "es2020",
+    cssCodeSplit: true,
+    sourcemap: false,
+    minify: "esbuild",
+    rollupOptions: {
+      output: {
+        // Split large vendor libs into their own chunks so first-page load
+        // doesn't pull in the entire admin/editor surface.
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return;
+          if (id.includes("react-dom") || id.includes("react/") || id.includes("scheduler")) return "react-vendor";
+          if (id.includes("react-router")) return "router";
+          if (id.includes("@radix-ui") || id.includes("cmdk") || id.includes("vaul") || id.includes("sonner")) return "ui-vendor";
+          if (id.includes("@supabase") || id.includes("@tanstack/react-query")) return "data-vendor";
+          if (id.includes("recharts") || id.includes("d3-")) return "charts";
+          if (id.includes("dompurify") || id.includes("marked") || id.includes("dayjs") || id.includes("date-fns")) return "utils";
+          if (id.includes("lucide-react")) return "icons";
+          return "vendor";
+        },
+      },
+    },
+    chunkSizeWarningLimit: 900,
+  },
 }));

@@ -231,6 +231,36 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_readiness_scores: {
+        Row: {
+          agent_readiness: number
+          ai_maturity: number
+          ai_visibility: number
+          created_at: string
+          id: string
+          notes: Json
+          scored_at: string
+        }
+        Insert: {
+          agent_readiness: number
+          ai_maturity: number
+          ai_visibility: number
+          created_at?: string
+          id?: string
+          notes?: Json
+          scored_at?: string
+        }
+        Update: {
+          agent_readiness?: number
+          ai_maturity?: number
+          ai_visibility?: number
+          created_at?: string
+          id?: string
+          notes?: Json
+          scored_at?: string
+        }
+        Relationships: []
+      }
       ai_settings: {
         Row: {
           api_key_encrypted: string

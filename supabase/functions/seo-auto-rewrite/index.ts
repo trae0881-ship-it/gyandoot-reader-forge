@@ -19,8 +19,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { sendAlert } from "../_shared/seo-alerts.ts";
 
-const DEFAULT_THRESHOLD = 85;
-const DEFAULT_MAX_ATTEMPTS = 2;
+const DEFAULT_THRESHOLD = 92;
+const DEFAULT_MAX_ATTEMPTS = 3;
 const AI_MODEL = "google/gemini-2.5-flash";
 
 // Same jaccard the daily publisher uses so scores stay comparable.

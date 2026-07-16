@@ -1081,6 +1081,7 @@ export type Database = {
           keyword_difficulty: number | null
           last_edited_at: string | null
           last_edited_by: string | null
+          last_rewritten_at: string | null
           manually_edited: boolean
           meta_description: string | null
           meta_title: string | null
@@ -1097,6 +1098,7 @@ export type Database = {
           report_sent_at: string | null
           reviewed_at: string | null
           reviewed_by: string | null
+          rewrite_count: number
           scheduled_at: string | null
           schema_type: string
           search_intent: string | null
@@ -1141,6 +1143,7 @@ export type Database = {
           keyword_difficulty?: number | null
           last_edited_at?: string | null
           last_edited_by?: string | null
+          last_rewritten_at?: string | null
           manually_edited?: boolean
           meta_description?: string | null
           meta_title?: string | null
@@ -1157,6 +1160,7 @@ export type Database = {
           report_sent_at?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          rewrite_count?: number
           scheduled_at?: string | null
           schema_type?: string
           search_intent?: string | null
@@ -1201,6 +1205,7 @@ export type Database = {
           keyword_difficulty?: number | null
           last_edited_at?: string | null
           last_edited_by?: string | null
+          last_rewritten_at?: string | null
           manually_edited?: boolean
           meta_description?: string | null
           meta_title?: string | null
@@ -1217,6 +1222,7 @@ export type Database = {
           report_sent_at?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          rewrite_count?: number
           scheduled_at?: string | null
           schema_type?: string
           search_intent?: string | null

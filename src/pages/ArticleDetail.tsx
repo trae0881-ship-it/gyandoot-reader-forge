@@ -38,8 +38,22 @@ const ArticleDetail = () => {
   const { data: post, isLoading } = useQuery({
     queryKey: ["post", slug],
     queryFn: async () => {
-      const { data } = await supabase.from("posts").select("*").eq("slug", slug!).eq("is_published", true).eq("approval_status", "approved").single();
-      return data;
+      // 1) Exact slug match
+      const exact = await supabase.from("posts").select("*").eq("slug", slug!).eq("is_published", true).eq("approval_status", "approved").maybeSingle();
+      if (exact.data) return exact.data;
+
+      // 2) Fallback: normalize (strip punctuation & whitespace, lowercase) — handles legacy URLs
+      //    that contained spaces, '?', or trailing fragments before the slug cleanup.
+      const normalize = (s: string) => s.toLowerCase().replace(/[\s?#&!()."'`,:;\-]+/g, "");
+      const target = normalize(decodeURIComponent(slug!));
+      const { data: candidates } = await supabase
+        .from("posts").select("*")
+        .eq("is_published", true).eq("approval_status", "approved");
+      const match = (candidates ?? []).find((p) => {
+        const n = normalize(p.slug);
+        return n === target || n.startsWith(target) || target.startsWith(n);
+      });
+      return match ?? null;
     },
     enabled: !!slug,
     staleTime: 5 * 60 * 1000, // 5m

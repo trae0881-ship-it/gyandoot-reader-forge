@@ -167,6 +167,14 @@ Deno.serve(async (req) => {
     }).eq("id", postId);
     log("self_check", { seoScore, rd, originality, passed });
 
+    // 6.1) If originality is below threshold, kick auto-rewrite (async, non-blocking).
+    // The rewrite function emails the admin on success or exhausted attempts.
+    if (originality < 85) {
+      log("auto_rewrite_triggered", { originality });
+      invokeFn(url, svc, "seo-auto-rewrite", { post_id: postId, threshold: 85, max_attempts: 2 })
+        .catch((e) => log("auto_rewrite_error", { error: String(e?.message || e) }));
+    }
+
     if (chosen) await sb.from("seo_keyword_queue").update({ status: "used", used_at: new Date().toISOString() }).eq("id", chosen.id);
 
     // 6.5) Hero image — external CDN link only (no upload, no hosting cost, zero load impact)

@@ -18,6 +18,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { sendAlert } from "../_shared/seo-alerts.ts";
+import { assertSeoAuthorized } from "../_shared/seo-auth.ts";
 
 const DEFAULT_THRESHOLD = 92;
 const DEFAULT_MAX_ATTEMPTS = 3;
@@ -98,6 +99,8 @@ async function scoreOriginality(sb: any, post: any): Promise<number> {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const unauthorized = await assertSeoAuthorized(req);
+  if (unauthorized) return unauthorized;
 
   const url = Deno.env.get("SUPABASE_URL")!;
   const svc = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;

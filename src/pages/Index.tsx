@@ -772,7 +772,7 @@ const Index = () => {
       </section>
 
       {/* ─── 3.5. COMPARE — printed vs PDF vs us ─── */}
-      <CompareSection />
+      <Suspense fallback={<SectionSkeleton h="20rem" />}><CompareSection /></Suspense>
 
       {/* ─── 3.7 HAMARI SEVAYEN · Our Offerings ─── */}
       <section aria-labelledby="hamari-sevayen" className="bg-background py-20">
@@ -1098,13 +1098,15 @@ const Index = () => {
 
       {/* ─── 7.5. GUARANTEE / TRUST ─── */}
 
-      <GuaranteeSection />
+      <Suspense fallback={<SectionSkeleton h="14rem" />}>
+        <GuaranteeSection />
+      </Suspense>
 
       {/* ─── 7.7. FAQ STRIP ─── */}
-      <FaqStrip />
+      <Suspense fallback={<SectionSkeleton h="18rem" />}><FaqStrip /></Suspense>
 
       {/* ─── 7.9. NEWSLETTER ─── */}
-      <NewsletterCta />
+      <Suspense fallback={<SectionSkeleton h="12rem" />}><NewsletterCta /></Suspense>
 
       {/* ─── 8. SEO CONTENT — KEYWORD-RICH ─── */}
       <section className="py-20">

@@ -44,16 +44,48 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
 import useSEO from "@/hooks/useSEO";
-import LiveReaderStrip from "@/components/LiveReaderStrip";
-import RecentPurchasesToast from "@/components/RecentPurchasesToast";
-import CompareSection from "@/components/CompareSection";
-import GuaranteeSection from "@/components/GuaranteeSection";
-import FaqStrip from "@/components/FaqStrip";
-import NewsletterCta from "@/components/NewsletterCta";
-import { useEffect, useRef, useState } from "react";
-import { WhyWeExist, ReaderJourney, TrustPillars } from "@/components/BrandExperience";
-import { BrandPurpose, EmotionalConnection, CalmFeeling } from "@/components/BrandSoul";
-import ContinueReadingSection from "@/components/ContinueReadingSection";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
+
+// Eager (above-the-fold) — BrandPurpose renders the very first section after the hero.
+import { BrandPurpose } from "@/components/BrandSoul";
+
+// Below-the-fold: lazy-loaded so they don't inflate the initial mobile bundle.
+// Each is code-split into its own chunk and mounted only when React reaches
+// that point in the tree (browser has already painted the hero by then).
+const LiveReaderStrip = lazy(() => import("@/components/LiveReaderStrip"));
+const RecentPurchasesToast = lazy(() => import("@/components/RecentPurchasesToast"));
+const ContinueReadingSection = lazy(() => import("@/components/ContinueReadingSection"));
+const CompareSection = lazy(() => import("@/components/CompareSection"));
+const GuaranteeSection = lazy(() => import("@/components/GuaranteeSection"));
+const FaqStrip = lazy(() => import("@/components/FaqStrip"));
+const NewsletterCta = lazy(() => import("@/components/NewsletterCta"));
+const WhyWeExist = lazy(() => import("@/components/BrandExperience").then(m => ({ default: m.WhyWeExist })));
+const ReaderJourney = lazy(() => import("@/components/BrandExperience").then(m => ({ default: m.ReaderJourney })));
+const TrustPillars = lazy(() => import("@/components/BrandExperience").then(m => ({ default: m.TrustPillars })));
+const EmotionalConnection = lazy(() => import("@/components/BrandSoul").then(m => ({ default: m.EmotionalConnection })));
+const CalmFeeling = lazy(() => import("@/components/BrandSoul").then(m => ({ default: m.CalmFeeling })));
+
+// Idle-mounted wrapper: only renders children after the browser is idle
+// (or 2s later as a fallback). Keeps the initial paint clean on mobile.
+const IdleMount = ({ children }: { children: React.ReactNode }) => {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const w = window as any;
+    if ("requestIdleCallback" in w) {
+      const id = w.requestIdleCallback(() => setReady(true), { timeout: 2000 });
+      return () => w.cancelIdleCallback?.(id);
+    }
+    const t = setTimeout(() => setReady(true), 1500);
+    return () => clearTimeout(t);
+  }, []);
+  if (!ready) return null;
+  return <Suspense fallback={null}>{children}</Suspense>;
+};
+
+// Section fallback: a fixed-height placeholder so lazy sections don't cause CLS.
+const SectionSkeleton = ({ h = "10rem" }: { h?: string }) => (
+  <div aria-hidden style={{ minHeight: h }} className="w-full" />
+);
 
 
 /* ─── Animated Counter ─── */
@@ -232,15 +264,20 @@ const Index = () => {
 
   return (
     <Layout>
-      <LiveReaderStrip />
-      <RecentPurchasesToast />
-      <ContinueReadingSection />
+      {/* Idle-only widgets — don't block the hero on mobile. */}
+      <IdleMount><LiveReaderStrip /></IdleMount>
+      <IdleMount><RecentPurchasesToast /></IdleMount>
+      <Suspense fallback={<SectionSkeleton h="4rem" />}>
+        <ContinueReadingSection />
+      </Suspense>
       <BrandPurpose />
-      <WhyWeExist />
-      <EmotionalConnection />
-      <ReaderJourney />
-      <TrustPillars />
-      <CalmFeeling />
+      <Suspense fallback={<SectionSkeleton h="18rem" />}>
+        <WhyWeExist />
+        <EmotionalConnection />
+        <ReaderJourney />
+        <TrustPillars />
+        <CalmFeeling />
+      </Suspense>
       {/* ─── 1. HERO — calm publishing-house entrance ─── */}
 
       <section className="relative overflow-hidden bg-primary py-20 md:py-28 lg:py-32">
@@ -735,7 +772,7 @@ const Index = () => {
       </section>
 
       {/* ─── 3.5. COMPARE — printed vs PDF vs us ─── */}
-      <CompareSection />
+      <Suspense fallback={<SectionSkeleton h="20rem" />}><CompareSection /></Suspense>
 
       {/* ─── 3.7 HAMARI SEVAYEN · Our Offerings ─── */}
       <section aria-labelledby="hamari-sevayen" className="bg-background py-20">
@@ -1061,13 +1098,15 @@ const Index = () => {
 
       {/* ─── 7.5. GUARANTEE / TRUST ─── */}
 
-      <GuaranteeSection />
+      <Suspense fallback={<SectionSkeleton h="14rem" />}>
+        <GuaranteeSection />
+      </Suspense>
 
       {/* ─── 7.7. FAQ STRIP ─── */}
-      <FaqStrip />
+      <Suspense fallback={<SectionSkeleton h="18rem" />}><FaqStrip /></Suspense>
 
       {/* ─── 7.9. NEWSLETTER ─── */}
-      <NewsletterCta />
+      <Suspense fallback={<SectionSkeleton h="12rem" />}><NewsletterCta /></Suspense>
 
       {/* ─── 8. SEO CONTENT — KEYWORD-RICH ─── */}
       <section className="py-20">

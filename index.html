@@ -47,52 +47,58 @@
     <meta name="twitter:description" content="Bhagavad Gita, Vedas, Upanishads, Ramayana and Hindu scriptures — read online in clear, modern English." />
     <meta name="twitter:image" content="https://gyandootnova.in/og-default.jpg" />
 
-    <!-- Third-party scripts deferred to after page load for faster FCP -->
+    <!-- Third-party scripts deferred until first user interaction or 5s idle,
+         whichever comes first — keeps them off the critical path for LCP/TBT. -->
     <script>
-    window.addEventListener('load', function() {
-      setTimeout(function() {
+    (function() {
+      var loaded = false;
+      function loadThirdParty() {
+        if (loaded) return; loaded = true;
         // Microsoft Clarity
         (function(c,l,a,r,i,t,y){
           c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
           t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
           y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
         })(window, document, "clarity", "script", "vz8iokq3m2");
-
         // Meta Pixel
-        !function(f,b,e,v,n,t,s)
-        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-        n.queue=[];t=b.createElement(e);t.async=!0;
-        t.src=v;s=b.getElementsByTagName(e)[0];
-        s.parentNode.insertBefore(t,s)}(window, document,'script',
-        'https://connect.facebook.net/en_US/fbevents.js');
-        fbq('init', '941870495003655');
-        fbq('track', 'PageView');
-
+        !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window, document,'script','https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '941870495003655'); fbq('track', 'PageView');
         // Google AdSense
         var ads = document.createElement('script');
         ads.async = true;
         ads.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8042391808464909';
         ads.crossOrigin = 'anonymous';
         document.head.appendChild(ads);
-      }, 2000);
-    });
+      }
+      var events = ['scroll','mousemove','touchstart','keydown','click'];
+      events.forEach(function(ev){ window.addEventListener(ev, loadThirdParty, { once: true, passive: true }); });
+      // Fallback: idle load after 5s
+      window.addEventListener('load', function() {
+        if ('requestIdleCallback' in window) {
+          requestIdleCallback(loadThirdParty, { timeout: 5000 });
+        } else {
+          setTimeout(loadThirdParty, 5000);
+        }
+      });
+    })();
     </script>
 
     <link rel="preconnect" href="https://vrzngahawxtbpwrgxtmb.supabase.co" />
     <link rel="dns-prefetch" href="https://vrzngahawxtbpwrgxtmb.supabase.co" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Trimmed font set: only the weights actually used across UI.
+         Was 5 families × many weights (~500 KiB); now 3 families × 3 weights. -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Manrope:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Noto+Serif+Devanagari:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&family=Inter:wght@400;500;600;700&family=Noto+Serif+Devanagari:wght@400;600;700&display=swap"
       rel="stylesheet"
       media="print"
       onload="this.media='all'"
     />
     <noscript>
-      <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Noto+Serif+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet" />
+      <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;600;700&family=Inter:wght@400;500;600;700&family=Noto+Serif+Devanagari:wght@400;600;700&display=swap" rel="stylesheet" />
     </noscript>
+
 
 
     <!-- Organization Schema -->

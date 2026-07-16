@@ -264,15 +264,20 @@ const Index = () => {
 
   return (
     <Layout>
-      <LiveReaderStrip />
-      <RecentPurchasesToast />
-      <ContinueReadingSection />
+      {/* Idle-only widgets — don't block the hero on mobile. */}
+      <IdleMount><LiveReaderStrip /></IdleMount>
+      <IdleMount><RecentPurchasesToast /></IdleMount>
+      <Suspense fallback={<SectionSkeleton h="4rem" />}>
+        <ContinueReadingSection />
+      </Suspense>
       <BrandPurpose />
-      <WhyWeExist />
-      <EmotionalConnection />
-      <ReaderJourney />
-      <TrustPillars />
-      <CalmFeeling />
+      <Suspense fallback={<SectionSkeleton h="18rem" />}>
+        <WhyWeExist />
+        <EmotionalConnection />
+        <ReaderJourney />
+        <TrustPillars />
+        <CalmFeeling />
+      </Suspense>
       {/* ─── 1. HERO — calm publishing-house entrance ─── */}
 
       <section className="relative overflow-hidden bg-primary py-20 md:py-28 lg:py-32">

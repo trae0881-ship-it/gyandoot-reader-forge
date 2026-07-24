@@ -42,18 +42,33 @@ const ArticleDetail = () => {
       const exact = await supabase.from("posts").select("*").eq("slug", slug!).eq("is_published", true).eq("approval_status", "approved").maybeSingle();
       if (exact.data) return exact.data;
 
-      // 2) Fallback: normalize (strip punctuation & whitespace, lowercase) — handles legacy URLs
-      //    that contained spaces, '?', or trailing fragments before the slug cleanup.
+      // 2) Fallback for legacy URLs (spaces, '?', trailing fragments):
+      //    only try a fallback when the requested slug is long enough to be
+      //    unambiguous, and only pull slugs (not full content) to keep the
+      //    payload tiny. Match on prefix in one direction only, and require a
+      //    unique candidate — otherwise return null so we render 404 instead
+      //    of silently redirecting the reader to an unrelated article.
       const normalize = (s: string) => s.toLowerCase().replace(/[\s?#&!()."'`,:;\-]+/g, "");
       const target = normalize(decodeURIComponent(slug!));
+      if (target.length < 8) return null;
+
       const { data: candidates } = await supabase
-        .from("posts").select("*")
-        .eq("is_published", true).eq("approval_status", "approved");
-      const match = (candidates ?? []).find((p) => {
+        .from("posts")
+        .select("id, slug")
+        .eq("is_published", true)
+        .eq("approval_status", "approved")
+        .ilike("slug", `${target.slice(0, 6)}%`)
+        .limit(50);
+
+      const matches = (candidates ?? []).filter((p) => {
         const n = normalize(p.slug);
-        return n === target || n.startsWith(target) || target.startsWith(n);
+        return n === target || n.startsWith(target);
       });
-      return match ?? null;
+      if (matches.length !== 1) return null;
+
+      const { data: full } = await supabase
+        .from("posts").select("*").eq("id", matches[0].id).maybeSingle();
+      return full ?? null;
     },
     enabled: !!slug,
     staleTime: 5 * 60 * 1000, // 5m

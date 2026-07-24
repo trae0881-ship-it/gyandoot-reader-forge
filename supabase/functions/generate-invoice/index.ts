@@ -70,18 +70,21 @@ Deno.serve(async (req) => {
     });
 
     // Fetch logo (best-effort) so we can embed it in the PDF.
+    // Fallback to the same logo the website header uses so the invoice always
+    // carries the brand mark even if admin hasn't uploaded a custom one.
+    const SITE_LOGO_URL =
+      "https://gyandootnova.in/__l5e/assets-v1/ea5dc66e-3ee7-4103-9ee8-c0c6f7f147a5/logo.jpeg";
+    const logoSource = settings.invoice_logo_url || SITE_LOGO_URL;
     let logoDataUrl: string | null = null;
-    if (settings.invoice_logo_url) {
-      try {
-        const resp = await fetch(settings.invoice_logo_url);
-        if (resp.ok) {
-          const ct = resp.headers.get("content-type") ?? "image/png";
-          const buf = new Uint8Array(await resp.arrayBuffer());
-          logoDataUrl = `data:${ct};base64,${base64Encode(buf)}`;
-        }
-      } catch {
-        logoDataUrl = null;
+    try {
+      const resp = await fetch(logoSource);
+      if (resp.ok) {
+        const ct = resp.headers.get("content-type") ?? "image/png";
+        const buf = new Uint8Array(await resp.arrayBuffer());
+        logoDataUrl = `data:${ct};base64,${base64Encode(buf)}`;
       }
+    } catch {
+      logoDataUrl = null;
     }
 
     const pdf = buildInvoicePdf({

@@ -70,18 +70,21 @@ Deno.serve(async (req) => {
     });
 
     // Fetch logo (best-effort) so we can embed it in the PDF.
+    // Fallback to the same logo the website header uses so the invoice always
+    // carries the brand mark even if admin hasn't uploaded a custom one.
+    const SITE_LOGO_URL =
+      "https://gyandootnova.in/__l5e/assets-v1/ea5dc66e-3ee7-4103-9ee8-c0c6f7f147a5/logo.jpeg";
+    const logoSource = settings.invoice_logo_url || SITE_LOGO_URL;
     let logoDataUrl: string | null = null;
-    if (settings.invoice_logo_url) {
-      try {
-        const resp = await fetch(settings.invoice_logo_url);
-        if (resp.ok) {
-          const ct = resp.headers.get("content-type") ?? "image/png";
-          const buf = new Uint8Array(await resp.arrayBuffer());
-          logoDataUrl = `data:${ct};base64,${base64Encode(buf)}`;
-        }
-      } catch {
-        logoDataUrl = null;
+    try {
+      const resp = await fetch(logoSource);
+      if (resp.ok) {
+        const ct = resp.headers.get("content-type") ?? "image/png";
+        const buf = new Uint8Array(await resp.arrayBuffer());
+        logoDataUrl = `data:${ct};base64,${base64Encode(buf)}`;
       }
+    } catch {
+      logoDataUrl = null;
     }
 
     const pdf = buildInvoicePdf({
@@ -159,6 +162,7 @@ function buildInvoicePdf({
 }) {
   const doc = new jsPDF({ unit: "pt", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
   const margin = 48;
   const currency = purchase.currency || "INR";
   const sym = currencySymbol(currency);
@@ -174,128 +178,184 @@ function buildInvoicePdf({
   const pan = settings.invoice_pan || "";
   const footerNote = settings.invoice_footer_note || "Thank you for supporting original scriptures. — GyandootNova";
 
-  // Optional logo (top-right)
+  // Brand colours (match the site's deep spiritual red)
+  const BRAND: [number, number, number] = [183, 28, 28];
+  const BRAND_SOFT: [number, number, number] = [252, 245, 240];
+  const INK: [number, number, number] = [30, 30, 30];
+  const MUTED: [number, number, number] = [110, 110, 110];
+
+  // ---------- Top brand band ----------
+  const bandH = 96;
+  doc.setFillColor(...BRAND);
+  doc.rect(0, 0, pageW, bandH, "F");
+
+  // Logo (square, aspect-preserved)
+  const logoSize = 60;
+  const logoX = margin;
+  const logoY = (bandH - logoSize) / 2;
   if (logoDataUrl) {
     try {
+      // white rounded plate behind logo for contrast against brand band
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(logoX - 6, logoY - 6, logoSize + 12, logoSize + 12, 8, 8, "F");
       const fmt = logoDataUrl.startsWith("data:image/jpeg") || logoDataUrl.startsWith("data:image/jpg") ? "JPEG" : "PNG";
-      doc.addImage(logoDataUrl, fmt, pageW - margin - 90, 40, 90, 45, undefined, "FAST");
-    } catch {
-      // ignore invalid image
-    }
+      doc.addImage(logoDataUrl, fmt, logoX, logoY, logoSize, logoSize, undefined, "FAST");
+    } catch { /* ignore */ }
   }
 
-  // Header brand
+  const textLeft = logoX + logoSize + 20;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
-  doc.setTextColor(183, 28, 28);
-  doc.text(businessName, margin, 70);
-
+  doc.setTextColor(255, 255, 255);
+  doc.text(businessName, textLeft, 46);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.setTextColor(90);
-  let headerY = 86;
-  if (businessAddress) {
-    const wrapped = doc.splitTextToSize(businessAddress, pageW / 2 - margin);
-    doc.text(wrapped, margin, headerY);
-    headerY += wrapped.length * 11;
-  }
-  doc.text("gyandootnova.in  |  amrendra8765@gmail.com", margin, headerY);
-  headerY += 11;
-  if (gstin) { doc.text(`GSTIN: ${gstin}`, margin, headerY); headerY += 11; }
-  if (pan) { doc.text(`PAN: ${pan}`, margin, headerY); headerY += 11; }
+  doc.setTextColor(255, 240, 235);
+  doc.text("Original spiritual scriptures  •  gyandootnova.in", textLeft, 62);
 
-  // Invoice meta box (right) — nudged down if a logo is present.
-  const metaTop = logoDataUrl ? 100 : 70;
+  // Right side of band: TAX INVOICE label
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(16);
-  doc.setTextColor(20);
-  doc.text("TAX INVOICE", pageW - margin, metaTop, { align: "right" });
-
+  doc.setFontSize(18);
+  doc.setTextColor(255, 255, 255);
+  doc.text("TAX INVOICE", pageW - margin, 46, { align: "right" });
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  doc.setTextColor(60);
-  doc.text(`Invoice #: ${invoiceNo}`, pageW - margin, metaTop + 18, { align: "right" });
-  doc.text(`Date: ${dateStr}`, pageW - margin, metaTop + 32, { align: "right" });
-  if (purchase.razorpay_payment_id) {
-    doc.text(`Payment ID: ${purchase.razorpay_payment_id}`, pageW - margin, metaTop + 46, { align: "right" });
-  }
+  doc.setFontSize(9);
+  doc.setTextColor(255, 240, 235);
+  doc.text(`Invoice #  ${invoiceNo}`, pageW - margin, 62, { align: "right" });
+  doc.text(`Date  ${dateStr}`, pageW - margin, 76, { align: "right" });
 
-  // Divider (below the taller of the two header columns)
-  const dividerY = Math.max(headerY + 8, metaTop + 60);
-  doc.setDrawColor(220);
-  doc.setLineWidth(0.6);
-  doc.line(margin, dividerY, pageW - margin, dividerY);
+  // ---------- Business + Bill To cards ----------
+  const cardsTop = bandH + 28;
+  const colW = (pageW - margin * 2 - 20) / 2;
 
-  // Bill To
-  const billTop = dividerY + 24;
+  // From card
+  doc.setFillColor(...BRAND_SOFT);
+  doc.roundedRect(margin, cardsTop, colW, 110, 6, 6, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(...BRAND);
+  doc.text("FROM", margin + 14, cardsTop + 18);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
-  doc.setTextColor(30);
-  doc.text("Bill To", margin, billTop);
-
+  doc.setTextColor(...INK);
+  doc.text(businessName, margin + 14, cardsTop + 34);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  doc.setTextColor(60);
-  doc.text(buyerName, margin, billTop + 18);
-  doc.text(buyerEmail, margin, billTop + 32);
+  doc.setFontSize(9);
+  doc.setTextColor(...MUTED);
+  let fy = cardsTop + 48;
+  if (businessAddress) {
+    const wrapped = doc.splitTextToSize(businessAddress, colW - 28);
+    doc.text(wrapped, margin + 14, fy);
+    fy += wrapped.length * 11;
+  }
+  doc.text("amrendra8765@gmail.com", margin + 14, fy); fy += 11;
+  if (gstin) { doc.text(`GSTIN: ${gstin}`, margin + 14, fy); fy += 11; }
+  if (pan) { doc.text(`PAN: ${pan}`, margin + 14, fy); fy += 11; }
 
-  // Line items table
-  const tableTop = billTop + 68;
-  doc.setFillColor(245, 240, 232);
-  doc.rect(margin, tableTop, pageW - margin * 2, 26, "F");
+  // Bill To card
+  const billX = margin + colW + 20;
+  doc.setFillColor(250, 250, 250);
+  doc.roundedRect(billX, cardsTop, colW, 110, 6, 6, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.setTextColor(...BRAND);
+  doc.text("BILL TO", billX + 14, cardsTop + 18);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(...INK);
+  doc.text(buyerName, billX + 14, cardsTop + 34);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(...MUTED);
+  doc.text(buyerEmail, billX + 14, cardsTop + 48);
+  if (purchase.razorpay_payment_id) {
+    doc.text(`Payment ID: ${purchase.razorpay_payment_id}`, billX + 14, cardsTop + 62);
+  }
+  if (purchase.razorpay_order_id) {
+    doc.text(`Order ID: ${purchase.razorpay_order_id}`, billX + 14, cardsTop + 76);
+  }
+
+  // ---------- Line items ----------
+  const tableTop = cardsTop + 140;
+  doc.setFillColor(...BRAND);
+  doc.rect(margin, tableTop, pageW - margin * 2, 28, "F");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
-  doc.setTextColor(30);
-  doc.text("Description", margin + 12, tableTop + 17);
-  doc.text("Qty", pageW - margin - 170, tableTop + 17, { align: "right" });
-  doc.text("Amount", pageW - margin - 12, tableTop + 17, { align: "right" });
+  doc.setTextColor(255, 255, 255);
+  doc.text("DESCRIPTION", margin + 14, tableTop + 18);
+  doc.text("QTY", pageW - margin - 180, tableTop + 18, { align: "right" });
+  doc.text("AMOUNT", pageW - margin - 14, tableTop + 18, { align: "right" });
 
-  const rowY = tableTop + 46;
+  const rowY = tableTop + 52;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  doc.setTextColor(40);
+  doc.setTextColor(...INK);
   const title = book?.title ?? "Digital Book";
   const author = book?.author ? ` by ${book.author}` : "";
-  const wrapped = doc.splitTextToSize(`${title}${author} — Digital eBook`, pageW - margin * 2 - 200);
-  doc.text(wrapped, margin + 12, rowY);
-  doc.text("1", pageW - margin - 170, rowY, { align: "right" });
-  doc.text(`${sym}${amount.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, pageW - margin - 12, rowY, { align: "right" });
+  const wrapped = doc.splitTextToSize(`${title}${author}`, pageW - margin * 2 - 220);
+  doc.text(wrapped, margin + 14, rowY);
+  doc.setFontSize(9);
+  doc.setTextColor(...MUTED);
+  doc.text("Digital eBook  •  lifetime access", margin + 14, rowY + 14);
 
-  // Totals block
-  const totalsTop = rowY + 40;
-  doc.setDrawColor(220);
-  doc.line(margin, totalsTop, pageW - margin, totalsTop);
-
-  let y = totalsTop + 22;
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(60);
-  doc.text("Subtotal", pageW - margin - 120, y, { align: "right" });
-  doc.text(`${sym}${amount.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, pageW - margin - 12, y, { align: "right" });
+  doc.setFontSize(10);
+  doc.setTextColor(...INK);
+  doc.text("1", pageW - margin - 180, rowY, { align: "right" });
+  doc.text(
+    `${sym}${amount.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+    pageW - margin - 14, rowY, { align: "right" },
+  );
+
+  // ---------- Totals ----------
+  const totalsBoxTop = rowY + 44;
+  doc.setDrawColor(230);
+  doc.setLineWidth(0.6);
+  doc.line(margin, totalsBoxTop, pageW - margin, totalsBoxTop);
+
+  let y = totalsBoxTop + 22;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(...MUTED);
+  doc.text("Subtotal", pageW - margin - 140, y, { align: "right" });
+  doc.setTextColor(...INK);
+  doc.text(
+    `${sym}${amount.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+    pageW - margin - 14, y, { align: "right" },
+  );
 
   if (coupon) {
     y += 16;
-    doc.text(`Coupon (${coupon.code})`, pageW - margin - 120, y, { align: "right" });
-    doc.text("applied", pageW - margin - 12, y, { align: "right" });
+    doc.setTextColor(...MUTED);
+    doc.text(`Coupon (${coupon.code})`, pageW - margin - 140, y, { align: "right" });
+    doc.setTextColor(...INK);
+    doc.text("applied", pageW - margin - 14, y, { align: "right" });
   }
 
-  y += 22;
-  doc.setDrawColor(200);
-  doc.line(pageW - margin - 220, y - 10, pageW - margin, y - 10);
+  // Total paid pill
+  y += 30;
+  doc.setFillColor(...BRAND);
+  doc.roundedRect(pageW - margin - 260, y - 20, 260, 34, 6, 6, "F");
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
-  doc.setTextColor(20);
-  doc.text("Total Paid", pageW - margin - 120, y, { align: "right" });
-  doc.text(`${sym}${amount.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, pageW - margin - 12, y, { align: "right" });
+  doc.setFontSize(11);
+  doc.setTextColor(255, 240, 235);
+  doc.text("TOTAL PAID", pageW - margin - 250, y + 2);
+  doc.setFontSize(14);
+  doc.setTextColor(255, 255, 255);
+  doc.text(
+    `${sym}${amount.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+    pageW - margin - 14, y + 2, { align: "right" },
+  );
 
-  // Notes / terms
+  // ---------- Notes ----------
   const notesY = y + 60;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
-  doc.setTextColor(30);
+  doc.setTextColor(...INK);
   doc.text("Notes", margin, notesY);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.setTextColor(80);
+  doc.setTextColor(...MUTED);
   const notes = [
     "This is a computer-generated invoice for a digital publication and does not require a signature.",
     "Digital goods are non-refundable once access to the content has been granted.",
@@ -304,15 +364,14 @@ function buildInvoicePdf({
   const wrappedNotes = doc.splitTextToSize(notes.join("\n"), pageW - margin * 2);
   doc.text(wrappedNotes, margin, notesY + 16);
 
-  // Footer
-  const pageH = doc.internal.pageSize.getHeight();
-  doc.setDrawColor(230);
-  doc.line(margin, pageH - 60, pageW - margin, pageH - 60);
+  // ---------- Footer ----------
+  doc.setFillColor(...BRAND_SOFT);
+  doc.rect(0, pageH - 46, pageW, 46, "F");
   doc.setFont("helvetica", "italic");
   doc.setFontSize(9);
-  doc.setTextColor(120);
+  doc.setTextColor(...BRAND);
   const footerWrapped = doc.splitTextToSize(footerNote, pageW - margin * 2);
-  doc.text(footerWrapped, pageW / 2, pageH - 40, { align: "center" });
+  doc.text(footerWrapped, pageW / 2, pageH - 26, { align: "center" });
 
   return doc;
 }

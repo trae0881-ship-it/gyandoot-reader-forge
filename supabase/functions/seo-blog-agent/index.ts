@@ -674,7 +674,11 @@ Return STRICT JSON (no markdown fences):
         scheduledTime = ist.toISOString().slice(11, 16);
       }
     }
-    if (confirmPublish && !requestedScheduledAt) {
+    if (!requestedScheduledAt && requestedPublishStatus === "scheduled") {
+      scheduledAtIso = suggested.iso;
+      publishStatus = "scheduled";
+    }
+    if (!requestedScheduledAt && (confirmPublish || requestedPublishStatus === "published")) {
       publishStatus = "published";
       scheduledAtIso = new Date().toISOString();
     }

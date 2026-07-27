@@ -239,6 +239,7 @@ const AppContent = () => {
                 <Route path="/qa/how-many-vedas" element={<QAHowManyVedas />} />
                 <Route path="/qa/how-many-upanishads" element={<QAHowManyUpanishads />} />
                 <Route path="/qa/how-many-slokas-in-bhagavad-gita" element={<QAHowManySlokas />} />
+                <Route path="/compare/yatharth-geeta-vs-bhagavad-gita" element={<YatharthGeetaVsBhagavadGita />} />
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<AdminDashboard />} />
                   <Route path="users" element={<AdminUsers />} />

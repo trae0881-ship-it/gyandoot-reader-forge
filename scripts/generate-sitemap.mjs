@@ -69,6 +69,9 @@ const STATIC = [
 
   // Comparison pages — capture brand-competitor queries content sites win
   { path: "/compare/yatharth-geeta-vs-bhagavad-gita", changefreq: "monthly", priority: "0.85" },
+  { path: "/compare/gita-press-vs-iskcon-gita", changefreq: "monthly", priority: "0.85" },
+  { path: "/compare/best-hindi-bhagavad-gita-translation", changefreq: "monthly", priority: "0.85" },
+  { path: "/compare/ramcharitmanas-vs-valmiki-ramayan", changefreq: "monthly", priority: "0.85" },
 ];
 
 async function fetchRows(table, select) {

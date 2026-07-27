@@ -111,6 +111,9 @@ const QAHowManyVedas = lazy(() => import("./pages/qa/HowManyVedas"));
 const QAHowManyUpanishads = lazy(() => import("./pages/qa/HowManyUpanishads"));
 const QAHowManySlokas = lazy(() => import("./pages/qa/HowManySlokasInBhagavadGita"));
 const YatharthGeetaVsBhagavadGita = lazy(() => import("./pages/compare/YatharthGeetaVsBhagavadGita"));
+const GitaPressVsIskconGita = lazy(() => import("./pages/compare/GitaPressVsIskconGita"));
+const BestHindiBhagavadGitaTranslation = lazy(() => import("./pages/compare/BestHindiBhagavadGitaTranslation"));
+const RamcharitmanasVsValmikiRamayan = lazy(() => import("./pages/compare/RamcharitmanasVsValmikiRamayan"));
 
 // Minimal loading spinner
 const PageLoader = () => (
@@ -240,6 +243,9 @@ const AppContent = () => {
                 <Route path="/qa/how-many-upanishads" element={<QAHowManyUpanishads />} />
                 <Route path="/qa/how-many-slokas-in-bhagavad-gita" element={<QAHowManySlokas />} />
                 <Route path="/compare/yatharth-geeta-vs-bhagavad-gita" element={<YatharthGeetaVsBhagavadGita />} />
+                <Route path="/compare/gita-press-vs-iskcon-gita" element={<GitaPressVsIskconGita />} />
+                <Route path="/compare/best-hindi-bhagavad-gita-translation" element={<BestHindiBhagavadGitaTranslation />} />
+                <Route path="/compare/ramcharitmanas-vs-valmiki-ramayan" element={<RamcharitmanasVsValmikiRamayan />} />
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<AdminDashboard />} />
                   <Route path="users" element={<AdminUsers />} />

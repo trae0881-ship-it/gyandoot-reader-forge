@@ -83,16 +83,16 @@ Deno.serve(async (req) => {
 
     // 3) Ensure queue has candidates
     const { count: queueCount } = await sb.from("seo_keyword_queue")
-      .select("*", { count: "exact", head: true }).eq("status", "queued");
+      .select("*", { count: "exact", head: true }).eq("status", "pending");
     if ((queueCount || 0) < 5) {
       log("queue_topup", { was: queueCount });
       // Kick the agent's research pass by asking it to pull one; it stores candidates.
-      await invokeFn(url, svc, "seo-blog-agent", { auto: true, research_only: true });
+      await invokeFn(url, svc, "seo-queue-topup", {});
     }
 
     // 4) Pop best keyword filtered by book relevance
     const { data: candidates } = await sb.from("seo_keyword_queue")
-      .select("*").eq("status", "queued").order("opportunity_score", { ascending: false }).limit(50);
+      .select("*").eq("status", "pending").order("opportunity_score", { ascending: false }).limit(50);
 
     const { data: existingPosts } = await sb.from("posts")
       .select("title,slug,primary_keyword,meta_title").limit(500);
@@ -113,7 +113,7 @@ Deno.serve(async (req) => {
         return s > 0.15;
       });
       if (!dup) { chosen = cand; break; }
-      await sb.from("seo_keyword_queue").update({ status: "rejected", notes: "duplicate>15%" }).eq("id", cand.id);
+      await sb.from("seo_keyword_queue").update({ status: "rejected", reject_reason: "duplicate>15%" }).eq("id", cand.id);
     }
 
     if (!chosen) {
@@ -121,7 +121,7 @@ Deno.serve(async (req) => {
       log("no_keyword_in_queue", { candidates: candidates?.length || 0 });
     } else {
       log("keyword_selected", { keyword: chosen.keyword, score: chosen.opportunity_score });
-      await sb.from("seo_keyword_queue").update({ status: "in_progress" }).eq("id", chosen.id);
+      await sb.from("seo_keyword_queue").update({ status: "processing" }).eq("id", chosen.id);
     }
 
     // 5) Invoke writer — publish immediately

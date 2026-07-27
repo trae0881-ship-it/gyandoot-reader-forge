@@ -23,7 +23,7 @@ import AuthorCredibility from "@/components/AuthorCredibility";
 import RecentPurchasesToast from "@/components/RecentPurchasesToast";
 import { getReferrerId } from "@/hooks/useReferral";
 import { WhyBookMatters } from "@/components/BrandExperience";
-import BookReviewList from "@/components/BookReviewList";
+import BookReviewList, { useBookReviewStats } from "@/components/BookReviewList";
 import BookReviewForm from "@/components/BookReviewForm";
 import GuestCheckoutDialog from "@/components/GuestCheckoutDialog";
 import { trackSalesEvent, useTrackOnMount } from "@/hooks/useAnalytics";
@@ -242,16 +242,19 @@ const BookDetail = () => {
   useTrackOnMount("view_book", { slug });
 
 
+  const reviewStatsQuery = useBookReviewStats(book ? [book.id] : []);
+  const bookStats = book ? reviewStatsQuery.data?.[book.id] : undefined;
+
   const cleanedDesc = book?.description?.replace(/<[^>]*>/g, "").trim();
   const priceLabel = book ? (book.is_free ? "मुफ़्त" : `₹${book.price}`) : "";
-  const shortDesc = cleanedDesc && cleanedDesc.length >= 20 ? cleanedDesc.slice(0, 110) : "";
+  const shortDesc = cleanedDesc && cleanedDesc.length >= 20 ? cleanedDesc.slice(0, 100) : "";
   const bookDescription = book
     ? (shortDesc
-        ? `${shortDesc}… ${book.author} द्वारा। ${priceLabel} — Instant digital delivery, UPI/Card checkout।`
-        : `${book.title} — ${book.author} द्वारा। ${priceLabel} में पढ़ें, तुरंत access, सभी devices पर। GyandootNova पर सुरक्षित checkout।`)
+        ? `${shortDesc}… ${book.author} द्वारा। ${priceLabel} में मुफ़्त preview के साथ online पढ़ें — instant access, सभी devices पर।`
+        : `${book.title} — ${book.author} द्वारा। ${priceLabel} में online पढ़ें, मुफ़्त पहला अध्याय, lifetime access, सुरक्षित checkout।`)
     : "Loading book...";
   const bookMetaTitle = book
-    ? `${book.title} — ${book.author} | ${priceLabel} | GyandootNova`
+    ? `${book.title} — ${book.author} | ऑनलाइन पढ़ें ${priceLabel} | GyandootNova`
     : "Loading... | GyandootNova";
 
 
@@ -279,6 +282,28 @@ const BookDetail = () => {
       "availability": "https://schema.org/InStock",
       "url": `https://gyandootnova.in/books/${book.slug}`,
       "deliveryLeadTime": { "@type": "QuantitativeValue", "minValue": 0, "maxValue": 1, "unitCode": "MIN" },
+    },
+    // Real ratings from approved reviews — enables star snippets in SERP.
+    ...(bookStats && bookStats.count > 0 ? {
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": bookStats.avg.toFixed(1),
+        "reviewCount": bookStats.count,
+        "bestRating": "5",
+        "worstRating": "1",
+      },
+    } : {}),
+    // Tells Google this book can be read online — "Read Free Online" hook
+    // that commerce sites (Amazon/Flipkart) can't offer.
+    "potentialAction": {
+      "@type": "ReadAction",
+      "target": [`https://gyandootnova.in/read/${book.slug}/flip`],
+      "expectsAcceptanceOf": {
+        "@type": "Offer",
+        "category": book.is_free ? "free" : "paid",
+        "price": book.is_free ? "0" : String(book.price),
+        "priceCurrency": "INR",
+      },
     },
   } : undefined;
 

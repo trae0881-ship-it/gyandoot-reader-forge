@@ -110,6 +110,7 @@ const QAWhoWroteVedas = lazy(() => import("./pages/qa/WhoWroteVedas"));
 const QAHowManyVedas = lazy(() => import("./pages/qa/HowManyVedas"));
 const QAHowManyUpanishads = lazy(() => import("./pages/qa/HowManyUpanishads"));
 const QAHowManySlokas = lazy(() => import("./pages/qa/HowManySlokasInBhagavadGita"));
+const YatharthGeetaVsBhagavadGita = lazy(() => import("./pages/compare/YatharthGeetaVsBhagavadGita"));
 
 // Minimal loading spinner
 const PageLoader = () => (
@@ -238,6 +239,7 @@ const AppContent = () => {
                 <Route path="/qa/how-many-vedas" element={<QAHowManyVedas />} />
                 <Route path="/qa/how-many-upanishads" element={<QAHowManyUpanishads />} />
                 <Route path="/qa/how-many-slokas-in-bhagavad-gita" element={<QAHowManySlokas />} />
+                <Route path="/compare/yatharth-geeta-vs-bhagavad-gita" element={<YatharthGeetaVsBhagavadGita />} />
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<AdminDashboard />} />
                   <Route path="users" element={<AdminUsers />} />

@@ -110,6 +110,7 @@ const QAWhoWroteVedas = lazy(() => import("./pages/qa/WhoWroteVedas"));
 const QAHowManyVedas = lazy(() => import("./pages/qa/HowManyVedas"));
 const QAHowManyUpanishads = lazy(() => import("./pages/qa/HowManyUpanishads"));
 const QAHowManySlokas = lazy(() => import("./pages/qa/HowManySlokasInBhagavadGita"));
+const YatharthGeetaVsBhagavadGita = lazy(() => import("./pages/compare/YatharthGeetaVsBhagavadGita"));
 
 // Minimal loading spinner
 const PageLoader = () => (

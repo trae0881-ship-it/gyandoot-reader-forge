@@ -559,6 +559,7 @@ export type Database = {
       }
       books: {
         Row: {
+          access_validity_days: number | null
           author: string
           category: string | null
           cover_url: string | null
@@ -577,6 +578,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          access_validity_days?: number | null
           author?: string
           category?: string | null
           cover_url?: string | null
@@ -595,6 +597,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          access_validity_days?: number | null
           author?: string
           category?: string | null
           cover_url?: string | null
@@ -2178,11 +2181,14 @@ export type Database = {
       get_user_purchases: {
         Args: { _user_id: string }
         Returns: {
+          access_validity_days: number
           amount: number
           book_id: string
           created_at: string
           currency: string
+          expires_at: string
           id: string
+          is_expired: boolean
           status: string
         }[]
       }

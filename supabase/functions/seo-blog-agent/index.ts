@@ -476,7 +476,7 @@ Deno.serve(async (req) => {
     const internalPool = (existing || []).slice(0, 60).map(p => `/articles/${p.slug} — ${p.title}`).join("\n");
 
     // 5) Generate article
-    const genPrompt = `Write a fully original, human-sounding, plagiarism-free English blog article for a ${NICHE} publisher.
+    const genPrompt = `Write a fully original, human-sounding, plagiarism-free Hindi-first article for a ${NICHE} publisher. Use simple Hinglish/Hindi phrasing where useful, but keep important search keywords in English too.
 
 TOPIC: ${topic}
 
@@ -488,6 +488,8 @@ ${internalPool || "(none)"}
 
 REQUIREMENTS
 - 1800–2500 words body (excluding TOC/FAQ/conclusion).
+- Target worldwide traffic: include naturally searched variants for India, US, UK, Canada and Australia readers.
+- Preserve spiritual accuracy; do not invent scripture claims. Explain practical meaning, path vidhi, benefits, FAQs, and common mistakes when relevant.
 - Google Helpful Content + EEAT, natural human tone, no AI clichés or repetition.
 - Prefer authoritative citations (gov, .edu, scientific, books, reputable news).
 - One H1, several H2/H3; short paragraphs; sentence variety; include Conclusion and a CTA paragraph.

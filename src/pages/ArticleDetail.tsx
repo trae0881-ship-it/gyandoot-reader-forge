@@ -1,6 +1,6 @@
 import DOMPurify from "dompurify";
-import { useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useEffect, useMemo } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import useSEO from "@/hooks/useSEO";
@@ -34,6 +34,7 @@ function extractKeywords(post: { title?: string; meta_title?: string; excerpt?: 
 
 const ArticleDetail = () => {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
 
   const { data: post, isLoading } = useQuery({
     queryKey: ["post", slug],
@@ -116,6 +117,19 @@ const ArticleDetail = () => {
         (data ?? []).forEach((candidate) => candidateMap.set(candidate.id, candidate));
       });
 
+      // If a legacy path cannot be narrowed by a slug prefix (for example old
+      // indexed titles with punctuation removed differently), fall back to the
+      // previous safe behavior: compare every approved post's normalized slug.
+      if (candidateMap.size === 0) {
+        const { data } = await supabase
+          .from("posts")
+          .select("id, slug")
+          .eq("is_published", true)
+          .eq("approval_status", "approved")
+          .limit(1000);
+        (data ?? []).forEach((candidate) => candidateMap.set(candidate.id, candidate));
+      }
+
       const matches = [...candidateMap.values()].filter((p) => {
         const n = normalize(p.slug);
         return n === target || n.startsWith(target) || target.startsWith(n);
@@ -132,6 +146,13 @@ const ArticleDetail = () => {
   });
 
   const keywords = useMemo(() => extractKeywords(post), [post]);
+
+  useEffect(() => {
+    if (!slug || !post?.slug) return;
+    if (slug !== post.slug) {
+      navigate(`/articles/${post.slug}`, { replace: true });
+    }
+  }, [navigate, post?.slug, slug]);
 
   // Prev / Next Navigation
   const { data: navPosts } = useQuery({

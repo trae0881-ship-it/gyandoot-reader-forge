@@ -38,43 +38,85 @@ const ArticleDetail = () => {
   const { data: post, isLoading } = useQuery({
     queryKey: ["post", slug],
     queryFn: async () => {
+      const requestedSlug = slug;
+      if (!requestedSlug) return null;
+
+      const safeDecode = (value: string) => {
+        try {
+          return decodeURIComponent(value);
+        } catch {
+          return value;
+        }
+      };
+
+      const normalize = (value: string) =>
+        value
+          .toLowerCase()
+          .normalize("NFKD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[\s?#&!()."'`,:;\-_/]+/g, "")
+          .trim();
+
+      const toStoredSlugShape = (value: string) =>
+        value
+          .toLowerCase()
+          .normalize("NFKD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^\p{L}\p{N}]+/gu, "-")
+          .replace(/-+/g, "-")
+          .replace(/^-|-$/g, "");
+
+      const decoded = safeDecode(requestedSlug);
+
       // 1) Exact slug match
-      const exact = await supabase.from("posts").select("*").eq("slug", slug!).eq("is_published", true).eq("approval_status", "approved").maybeSingle();
+      const exact = await supabase.from("posts").select("*").eq("slug", requestedSlug).eq("is_published", true).eq("approval_status", "approved").maybeSingle();
       if (exact.data) return exact.data;
 
-      // 2) Fallback for legacy URLs (spaces, '?', trailing fragments):
-      //    only try a fallback when the requested slug is long enough to be
-      //    unambiguous, and only pull slugs (not full content) to keep the
-      //    payload tiny. Match on prefix in one direction only, and require a
-      //    unique candidate — otherwise return null so we render 404 instead
-      //    of silently redirecting the reader to an unrelated article.
-      const normalize = (s: string) => s.toLowerCase().replace(/[\s?#&!()."'`,:;\-]+/g, "");
-      const decoded = decodeURIComponent(slug!);
+      // 2) Canonicalized exact match for legacy URLs where spaces/punctuation
+      //    were shared instead of the stored hyphenated slug.
+      const storedShape = toStoredSlugShape(decoded);
+      if (storedShape && storedShape !== requestedSlug) {
+        const canonical = await supabase
+          .from("posts")
+          .select("*")
+          .eq("slug", storedShape)
+          .eq("is_published", true)
+          .eq("approval_status", "approved")
+          .maybeSingle();
+        if (canonical.data) return canonical.data;
+      }
+
+      // 3) Fallback for legacy URLs (spaces, punctuation, old indexed text):
+      //    compare normalized forms on both sides so hyphenated DB slugs like
+      //    "the-bhagavad-gita-summary" still match old links like
+      //    "the bhagavad gita summary". Prefix filters are only used to keep
+      //    payloads small; final selection still requires one unique match.
       const target = normalize(decoded);
       if (target.length < 8) return null;
 
-      // Slugs are stored hyphenated, so derive the DB prefix from the decoded
-      // URL with whitespace converted to hyphens — never strip hyphens here,
-      // otherwise a legacy URL like "the bhagavad gita summary" would filter
-      // on "thebha%" and miss the stored "the-bhagavad-gita-summary".
-      const prefixSource = decoded
-        .toLowerCase()
-        .replace(/[?#&!()."'`,:;]+/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-")
-        .replace(/^-|-$/g, "");
-      const prefix = prefixSource.slice(0, 8);
-      if (prefix.length < 3) return null;
+      const prefixes = Array.from(new Set([
+        storedShape.slice(0, 8),
+        storedShape.split("-").filter(Boolean)[0],
+      ].filter((prefix) => prefix.length >= 3)));
 
-      const { data: candidates } = await supabase
-        .from("posts")
-        .select("id, slug")
-        .eq("is_published", true)
-        .eq("approval_status", "approved")
-        .ilike("slug", `${prefix}%`)
-        .limit(50);
+      const candidateResults = await Promise.all(
+        prefixes.map((prefix) =>
+          supabase
+            .from("posts")
+            .select("id, slug")
+            .eq("is_published", true)
+            .eq("approval_status", "approved")
+            .ilike("slug", `${prefix}%`)
+            .limit(100)
+        )
+      );
 
-      const matches = (candidates ?? []).filter((p) => {
+      const candidateMap = new Map<string, { id: string; slug: string }>();
+      candidateResults.forEach(({ data }) => {
+        (data ?? []).forEach((candidate) => candidateMap.set(candidate.id, candidate));
+      });
+
+      const matches = [...candidateMap.values()].filter((p) => {
         const n = normalize(p.slug);
         return n === target || n.startsWith(target) || target.startsWith(n);
       });

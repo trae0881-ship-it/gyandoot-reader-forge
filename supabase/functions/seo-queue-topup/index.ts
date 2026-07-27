@@ -53,6 +53,7 @@ Deno.serve(async (req) => {
       const r = await invokeFn(url, svc, "seo-blog-agent", {
         auto: true,
         publish_status: "scheduled",
+        batch_index: scheduled + i,
         book_context: bookTopics,
       });
       results.push({ i, status: r.status, post_id: r.data?.post_id });

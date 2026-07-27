@@ -411,7 +411,10 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json().catch(() => ({}));
-    const forcedTopic: string | undefined = body?.topic;
+    const forcedTopic: string | undefined = body?.topic || body?.keyword;
+    const requestedPublishStatus = ["draft", "scheduled", "published"].includes(body?.publish_status)
+      ? body.publish_status
+      : undefined;
     const requestedTz: string = typeof body?.timezone === "string" && body.timezone ? body.timezone : DEFAULT_TZ;
     const requestedAuthor: string = typeof body?.author === "string" && body.author ? body.author : AUTHOR;
     const requestedScheduledAt: string | null = typeof body?.scheduled_at === "string" ? body.scheduled_at : null;
@@ -430,7 +433,7 @@ Deno.serve(async (req) => {
     let topic = forcedTopic;
     if (!topic) {
       const raw = await callLLM([
-        { role: "system", content: `You are an SEO strategist for a publisher in the niche: ${NICHE}. Propose ONE high-search-intent English blog topic NOT already covered. Return JSON: {"topic":"...","rationale":"..."}` },
+        { role: "system", content: `You are an SEO strategist for a publisher in the niche: ${NICHE}. Propose ONE high-search-intent English/Hindi blog topic NOT already covered. Prioritize high-search-volume worldwide Hindu/spiritual keywords with clear reader intent. Return JSON: {"topic":"...","rationale":"..."}` },
         { role: "user", content: `Existing posts:\n${existingList || "(none)"}\n\nRules:\n- Evergreen or trending in books/spirituality/meditation/self-growth/mindfulness/consciousness.\n- Different angle from anything above.\n- Serve real reader search intent.` },
       ], true, log, supabase, "topic-discovery", resolveKey);
       topic = JSON.parse(raw).topic;
@@ -473,7 +476,7 @@ Deno.serve(async (req) => {
     const internalPool = (existing || []).slice(0, 60).map(p => `/articles/${p.slug} — ${p.title}`).join("\n");
 
     // 5) Generate article
-    const genPrompt = `Write a fully original, human-sounding, plagiarism-free English blog article for a ${NICHE} publisher.
+    const genPrompt = `Write a fully original, human-sounding, plagiarism-free Hindi-first article for a ${NICHE} publisher. Use simple Hinglish/Hindi phrasing where useful, but keep important search keywords in English too.
 
 TOPIC: ${topic}
 
@@ -485,6 +488,8 @@ ${internalPool || "(none)"}
 
 REQUIREMENTS
 - 1800–2500 words body (excluding TOC/FAQ/conclusion).
+- Target worldwide traffic: include naturally searched variants for India, US, UK, Canada and Australia readers.
+- Preserve spiritual accuracy; do not invent scripture claims. Explain practical meaning, path vidhi, benefits, FAQs, and common mistakes when relevant.
 - Google Helpful Content + EEAT, natural human tone, no AI clichés or repetition.
 - Prefer authoritative citations (gov, .edu, scientific, books, reputable news).
 - One H1, several H2/H3; short paragraphs; sentence variety; include Conclusion and a CTA paragraph.
@@ -669,7 +674,11 @@ Return STRICT JSON (no markdown fences):
         scheduledTime = ist.toISOString().slice(11, 16);
       }
     }
-    if (confirmPublish && !requestedScheduledAt) {
+    if (!requestedScheduledAt && requestedPublishStatus === "scheduled") {
+      scheduledAtIso = suggested.iso;
+      publishStatus = "scheduled";
+    }
+    if (!requestedScheduledAt && (confirmPublish || requestedPublishStatus === "published")) {
       publishStatus = "published";
       scheduledAtIso = new Date().toISOString();
     }

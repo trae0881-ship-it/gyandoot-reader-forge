@@ -23,7 +23,7 @@ import AuthorCredibility from "@/components/AuthorCredibility";
 import RecentPurchasesToast from "@/components/RecentPurchasesToast";
 import { getReferrerId } from "@/hooks/useReferral";
 import { WhyBookMatters } from "@/components/BrandExperience";
-import BookReviewList from "@/components/BookReviewList";
+import BookReviewList, { useBookReviewStats } from "@/components/BookReviewList";
 import BookReviewForm from "@/components/BookReviewForm";
 import GuestCheckoutDialog from "@/components/GuestCheckoutDialog";
 import { trackSalesEvent, useTrackOnMount } from "@/hooks/useAnalytics";

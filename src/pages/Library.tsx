@@ -1,7 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
-import { BookOpen, ArrowRight, Trash2, LogIn, Lock, Loader2 } from "lucide-react";
+import { BookOpen, ArrowRight, Trash2, LogIn, Lock, Loader2, Clock, RefreshCw } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import useSEO from "@/hooks/useSEO";
 import { useAuth } from "@/hooks/useAuth";
 import { useContinueReading } from "@/components/ContinueReadingSection";
@@ -10,19 +11,40 @@ import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { SITE } from "@/lib/jsonLd";
 
+type PurchaseInfo = {
+  status: string;
+  is_expired: boolean;
+  expires_at: string | null;
+  access_validity_days: number | null;
+};
+
 const Library = () => {
   const { user, loading } = useAuth();
   const location = useLocation();
   const queryClient = useQueryClient();
   const { data, isLoading } = useContinueReading(50);
 
-  const { data: purchasedIds } = useQuery({
-    queryKey: ["library-purchased-ids", user?.id],
+  const { data: purchaseMap } = useQuery({
+    queryKey: ["library-purchase-map", user?.id],
     enabled: !!user,
     queryFn: async () => {
       const { data, error } = await supabase.rpc("get_user_purchases", { _user_id: user!.id });
       if (error) throw error;
-      return new Set((data ?? []).filter((p: any) => p.status === "completed").map((p: any) => p.book_id));
+      const map = new Map<string, PurchaseInfo>();
+      for (const p of (data ?? []) as any[]) {
+        if (p.status !== "completed") continue;
+        const existing = map.get(p.book_id);
+        // Prefer the most recent non-expired purchase for the same book
+        if (!existing || (!p.is_expired && existing.is_expired)) {
+          map.set(p.book_id, {
+            status: p.status,
+            is_expired: !!p.is_expired,
+            expires_at: p.expires_at ?? null,
+            access_validity_days: p.access_validity_days ?? null,
+          });
+        }
+      }
+      return map;
     },
   });
 
@@ -192,7 +214,7 @@ const Library = () => {
                             </p>
                           )}
                         </div>
-                        {!purchasedIds?.has(row.book_id) && (
+                        {!purchaseMap?.has(row.book_id) && (
                           <button
                             onClick={() => removeEntry(row.book_id)}
                             aria-label="Remove from library"
@@ -202,6 +224,38 @@ const Library = () => {
                           </button>
                         )}
                       </div>
+
+                      {(() => {
+                        const info = purchaseMap?.get(row.book_id);
+                        if (!info || info.access_validity_days === null) return null;
+                        const expires = info.expires_at ? new Date(info.expires_at) : null;
+                        const now = Date.now();
+                        const daysLeft = expires
+                          ? Math.ceil((expires.getTime() - now) / (1000 * 60 * 60 * 24))
+                          : null;
+                        if (info.is_expired) {
+                          return (
+                            <Badge variant="destructive" className="mt-2 gap-1">
+                              <Lock className="h-3 w-3" /> Access expired
+                            </Badge>
+                          );
+                        }
+                        if (daysLeft !== null && daysLeft <= 30) {
+                          return (
+                            <Badge variant="outline" className="mt-2 gap-1 border-amber-500/40 text-amber-700 dark:text-amber-400">
+                              <Clock className="h-3 w-3" /> {daysLeft} din baaki
+                            </Badge>
+                          );
+                        }
+                        if (expires) {
+                          return (
+                            <p className="mt-2 text-[11px] text-muted-foreground flex items-center gap-1">
+                              <Clock className="h-3 w-3" /> Access till {expires.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}
+                            </p>
+                          );
+                        }
+                        return null;
+                      })()}
 
                       <p className="mt-2 text-xs text-primary">
                         Chapter {row.book_chapters?.chapter_number ?? row.chapter_number}
@@ -220,12 +274,27 @@ const Library = () => {
                       </div>
 
                       <div className="mt-3 flex gap-2">
-                        <Button asChild size="sm">
-                          <Link to={href}>Resume reading</Link>
-                        </Button>
-                        <Button asChild size="sm" variant="outline">
-                          <Link to={`/books/${row.books.slug}`}>Book details</Link>
-                        </Button>
+                        {purchaseMap?.get(row.book_id)?.is_expired ? (
+                          <>
+                            <Button asChild size="sm" variant="destructive">
+                              <Link to={`/books/${row.books.slug}`}>
+                                <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Renew / Repurchase
+                              </Link>
+                            </Button>
+                            <Button asChild size="sm" variant="outline">
+                              <Link to={`/books/${row.books.slug}`}>Book details</Link>
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <Button asChild size="sm">
+                              <Link to={href}>Resume reading</Link>
+                            </Button>
+                            <Button asChild size="sm" variant="outline">
+                              <Link to={`/books/${row.books.slug}`}>Book details</Link>
+                            </Button>
+                          </>
+                        )}
                       </div>
                     </div>
                   </li>

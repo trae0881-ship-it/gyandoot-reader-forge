@@ -303,6 +303,7 @@ const AdminBooks = () => {
     title: "", slug: "", author: "GyandootNova", description: "", price: 0,
     is_free: true, is_featured: false, cover_url: "", file_url: "", file_type: "",
     preview_chapters: 0, category: "", referral_commission_percent: 0,
+    access_validity_days: null as number | null,
   });
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [bookFile, setBookFile] = useState<File | null>(null);
@@ -375,6 +376,7 @@ const AdminBooks = () => {
         price: form.is_free ? 0 : form.price, is_free: form.is_free, is_featured: form.is_featured,
         cover_url, file_type, preview_chapters: form.preview_chapters, category: form.category,
         referral_commission_percent: form.referral_commission_percent,
+        access_validity_days: form.is_free ? null : form.access_validity_days,
       };
       let bookId = editing?.id as string | undefined;
       if (editing) {
@@ -419,6 +421,7 @@ const AdminBooks = () => {
       title: "", slug: "", author: "GyandootNova", description: "", price: 0,
       is_free: true, is_featured: false, cover_url: "", file_url: "", file_type: "",
       preview_chapters: 0, category: "", referral_commission_percent: 0,
+      access_validity_days: null,
     });
     setEditing(null); setCoverFile(null); setBookFile(null);
   };
@@ -439,6 +442,7 @@ const AdminBooks = () => {
       file_url: fileUrl, file_type: book.file_type ?? "",
       preview_chapters: book.preview_chapters ?? 0, category: book.category ?? "",
       referral_commission_percent: (book as any).referral_commission_percent ?? 0,
+      access_validity_days: (book as any).access_validity_days ?? null,
     });
     setOpen(true);
   };
@@ -571,6 +575,21 @@ const AdminBooks = () => {
                     <Label>Referral Commission (%)</Label>
                     <Input type="number" min={0} max={100} value={form.referral_commission_percent} onChange={(e) => setForm({ ...form, referral_commission_percent: Number(e.target.value) })} className="mt-1" placeholder="e.g. 10" />
                     <p className="text-xs text-muted-foreground mt-1">Referrer को हर sale पर कितने % commission मिलेगा (0 = disabled)</p>
+                  </div>
+                  <div>
+                    <Label>Access Validity (Purchase ke baad kitne din tak access)</Label>
+                    <select
+                      value={form.access_validity_days === null ? "lifetime" : String(form.access_validity_days)}
+                      onChange={(e) => setForm({ ...form, access_validity_days: e.target.value === "lifetime" ? null : Number(e.target.value) })}
+                      className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    >
+                      <option value="lifetime">Lifetime (हमेशा के लिए)</option>
+                      <option value="30">30 दिन</option>
+                      <option value="90">90 दिन</option>
+                      <option value="180">180 दिन</option>
+                      <option value="365">365 दिन (1 साल)</option>
+                    </select>
+                    <p className="text-xs text-muted-foreground mt-1">Buyer ko book kitne din tak read karne di jaye. Validity khatm hone par book lock ho jayegi aur repurchase ka option milega.</p>
                   </div>
                 </>
               )}

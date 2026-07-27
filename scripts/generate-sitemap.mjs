@@ -66,6 +66,9 @@ const STATIC = [
   { path: "/qa/how-many-vedas", changefreq: "monthly", priority: "0.8" },
   { path: "/qa/how-many-upanishads", changefreq: "monthly", priority: "0.8" },
   { path: "/qa/how-many-slokas-in-bhagavad-gita", changefreq: "monthly", priority: "0.8" },
+
+  // Comparison pages — capture brand-competitor queries content sites win
+  { path: "/compare/yatharth-geeta-vs-bhagavad-gita", changefreq: "monthly", priority: "0.85" },
 ];
 
 async function fetchRows(table, select) {

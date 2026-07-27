@@ -100,7 +100,7 @@ Deno.serve(async (req) => {
     let chosen: any = null;
     for (const cand of candidates || []) {
       const kw = String(cand.keyword || "").toLowerCase();
-      const bookMatch = bookTopics.some((t: string) =>
+      const bookMatch = Number(cand.relevance_score || 0) >= 70 || cand.source === "high_volume_worldwide" || bookTopics.some((t: string) =>
         kw.includes(String(t).toLowerCase()) || String(t).toLowerCase().includes(kw));
       if (!bookMatch) continue;
       // uniqueness gate 15%

@@ -283,6 +283,28 @@ const BookDetail = () => {
       "url": `https://gyandootnova.in/books/${book.slug}`,
       "deliveryLeadTime": { "@type": "QuantitativeValue", "minValue": 0, "maxValue": 1, "unitCode": "MIN" },
     },
+    // Real ratings from approved reviews — enables star snippets in SERP.
+    ...(bookStats && bookStats.count > 0 ? {
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": bookStats.avg.toFixed(1),
+        "reviewCount": bookStats.count,
+        "bestRating": "5",
+        "worstRating": "1",
+      },
+    } : {}),
+    // Tells Google this book can be read online — "Read Free Online" hook
+    // that commerce sites (Amazon/Flipkart) can't offer.
+    "potentialAction": {
+      "@type": "ReadAction",
+      "target": [`https://gyandootnova.in/read/${book.slug}/flip`],
+      "expectsAcceptanceOf": {
+        "@type": "Offer",
+        "category": book.is_free ? "free" : "paid",
+        "price": book.is_free ? "0" : String(book.price),
+        "priceCurrency": "INR",
+      },
+    },
   } : undefined;
 
   const faqJsonLd = book ? {

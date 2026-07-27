@@ -49,20 +49,34 @@ const ArticleDetail = () => {
       //    unique candidate — otherwise return null so we render 404 instead
       //    of silently redirecting the reader to an unrelated article.
       const normalize = (s: string) => s.toLowerCase().replace(/[\s?#&!()."'`,:;\-]+/g, "");
-      const target = normalize(decodeURIComponent(slug!));
+      const decoded = decodeURIComponent(slug!);
+      const target = normalize(decoded);
       if (target.length < 8) return null;
+
+      // Slugs are stored hyphenated, so derive the DB prefix from the decoded
+      // URL with whitespace converted to hyphens — never strip hyphens here,
+      // otherwise a legacy URL like "the bhagavad gita summary" would filter
+      // on "thebha%" and miss the stored "the-bhagavad-gita-summary".
+      const prefixSource = decoded
+        .toLowerCase()
+        .replace(/[?#&!()."'`,:;]+/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+      const prefix = prefixSource.slice(0, 8);
+      if (prefix.length < 3) return null;
 
       const { data: candidates } = await supabase
         .from("posts")
         .select("id, slug")
         .eq("is_published", true)
         .eq("approval_status", "approved")
-        .ilike("slug", `${target.slice(0, 6)}%`)
+        .ilike("slug", `${prefix}%`)
         .limit(50);
 
       const matches = (candidates ?? []).filter((p) => {
         const n = normalize(p.slug);
-        return n === target || n.startsWith(target);
+        return n === target || n.startsWith(target) || target.startsWith(n);
       });
       if (matches.length !== 1) return null;
 

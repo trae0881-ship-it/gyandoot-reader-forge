@@ -411,7 +411,10 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json().catch(() => ({}));
-    const forcedTopic: string | undefined = body?.topic;
+    const forcedTopic: string | undefined = body?.topic || body?.keyword;
+    const requestedPublishStatus = ["draft", "scheduled", "published"].includes(body?.publish_status)
+      ? body.publish_status
+      : undefined;
     const requestedTz: string = typeof body?.timezone === "string" && body.timezone ? body.timezone : DEFAULT_TZ;
     const requestedAuthor: string = typeof body?.author === "string" && body.author ? body.author : AUTHOR;
     const requestedScheduledAt: string | null = typeof body?.scheduled_at === "string" ? body.scheduled_at : null;
@@ -430,7 +433,7 @@ Deno.serve(async (req) => {
     let topic = forcedTopic;
     if (!topic) {
       const raw = await callLLM([
-        { role: "system", content: `You are an SEO strategist for a publisher in the niche: ${NICHE}. Propose ONE high-search-intent English blog topic NOT already covered. Return JSON: {"topic":"...","rationale":"..."}` },
+        { role: "system", content: `You are an SEO strategist for a publisher in the niche: ${NICHE}. Propose ONE high-search-intent English/Hindi blog topic NOT already covered. Prioritize high-search-volume worldwide Hindu/spiritual keywords with clear reader intent. Return JSON: {"topic":"...","rationale":"..."}` },
         { role: "user", content: `Existing posts:\n${existingList || "(none)"}\n\nRules:\n- Evergreen or trending in books/spirituality/meditation/self-growth/mindfulness/consciousness.\n- Different angle from anything above.\n- Serve real reader search intent.` },
       ], true, log, supabase, "topic-discovery", resolveKey);
       topic = JSON.parse(raw).topic;

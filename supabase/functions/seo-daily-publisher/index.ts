@@ -91,8 +91,12 @@ Deno.serve(async (req) => {
     }
 
     // 4) Pop best keyword filtered by book relevance
+    // Prefer high search-volume keywords first (worldwide traffic), then opportunity score.
     const { data: candidates } = await sb.from("seo_keyword_queue")
-      .select("*").eq("status", "pending").order("opportunity_score", { ascending: false }).limit(50);
+      .select("*").eq("status", "pending")
+      .order("estimated_volume", { ascending: false, nullsFirst: false })
+      .order("opportunity_score", { ascending: false, nullsFirst: false })
+      .limit(50);
 
     const { data: existingPosts } = await sb.from("posts")
       .select("title,slug,primary_keyword,meta_title").limit(500);

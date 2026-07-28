@@ -55,7 +55,7 @@ const ArticleDetail = () => {
           .toLowerCase()
           .normalize("NFKD")
           .replace(/[\u0300-\u036f]/g, "")
-          .replace(/[\s?#&!()."'`,:;\-_/]+/g, "")
+          .replace(/[^\p{L}\p{N}]+/gu, "")
           .trim();
 
       const toStoredSlugShape = (value: string) =>
@@ -69,37 +69,61 @@ const ArticleDetail = () => {
 
       const decoded = safeDecode(requestedSlug);
 
-      // 1) Exact slug match
-      const exact = await supabase.from("posts").select("*").eq("slug", requestedSlug).eq("is_published", true).eq("approval_status", "approved").maybeSingle();
-      if (exact.data) return exact.data;
-
-      // 2) Canonicalized exact match for legacy URLs where spaces/punctuation
-      //    were shared instead of the stored hyphenated slug.
+      // 1) Exact + canonical slug match. React Router normally decodes params,
+      //    but keep both shapes to support encoded legacy URLs and copied links.
       const storedShape = toStoredSlugShape(decoded);
-      if (storedShape && storedShape !== requestedSlug) {
-        const canonical = await supabase
+      const exactSlugs = Array.from(new Set([requestedSlug, decoded, storedShape].filter(Boolean)));
+      for (const candidateSlug of exactSlugs) {
+        const exact = await supabase
           .from("posts")
           .select("*")
-          .eq("slug", storedShape)
+          .eq("slug", candidateSlug)
           .eq("is_published", true)
           .eq("approval_status", "approved")
           .maybeSingle();
-        if (canonical.data) return canonical.data;
+        if (exact.data) return exact.data;
       }
 
-      // 3) Fallback for legacy URLs (spaces, punctuation, old indexed text):
-      //    compare normalized forms on both sides so hyphenated DB slugs like
-      //    "the-bhagavad-gita-summary" still match old links like
-      //    "the bhagavad gita summary". Prefix filters are only used to keep
-      //    payloads small; final selection still requires one unique match.
+      // 2) Legacy fallback for old indexed/shared URLs with spaces or punctuation.
+      //    Compare normalized forms on both sides so stored hyphenated slugs like
+      //    "the-bhagavad-gita-summary" match legacy paths like
+      //    "the bhagavad gita summary". Prefix filters are only a fast path; if
+      //    they do not produce one unique normalized match, fetch all approved
+      //    post slugs and run the same comparison safely.
       const target = normalize(decoded);
-      if (target.length < 8) return null;
+      if (target.length < 3) return null;
+
+      type CandidatePost = { id: string; slug: string };
+
+      const addCandidates = (candidateMap: Map<string, CandidatePost>, candidates: CandidatePost[] | null) => {
+        (candidates ?? []).forEach((candidate) => candidateMap.set(candidate.id, candidate));
+      };
+
+      const findMatches = (candidates: CandidatePost[]) => {
+        const exactMatches = candidates.filter((candidate) => normalize(candidate.slug) === target);
+        if (exactMatches.length > 0) return exactMatches;
+        return candidates.filter((candidate) => {
+          const candidateSlug = normalize(candidate.slug);
+          return candidateSlug.startsWith(target) || target.startsWith(candidateSlug);
+        });
+      };
+
+      const loadAllApprovedCandidates = async () => {
+        const { data } = await supabase
+          .from("posts")
+          .select("id, slug")
+          .eq("is_published", true)
+          .eq("approval_status", "approved")
+          .limit(5000);
+        return data ?? [];
+      };
 
       const prefixes = Array.from(new Set([
         storedShape.slice(0, 8),
         storedShape.split("-").filter(Boolean)[0],
       ].filter((prefix) => prefix.length >= 3)));
 
+      const candidateMap = new Map<string, CandidatePost>();
       const candidateResults = await Promise.all(
         prefixes.map((prefix) =>
           supabase
@@ -111,33 +135,26 @@ const ArticleDetail = () => {
             .limit(100)
         )
       );
+      candidateResults.forEach(({ data }) => addCandidates(candidateMap, data));
 
-      const candidateMap = new Map<string, { id: string; slug: string }>();
-      candidateResults.forEach(({ data }) => {
-        (data ?? []).forEach((candidate) => candidateMap.set(candidate.id, candidate));
-      });
+      let matches = findMatches([...candidateMap.values()]);
 
-      // If a legacy path cannot be narrowed by a slug prefix (for example old
-      // indexed titles with punctuation removed differently), fall back to the
-      // previous safe behavior: compare every approved post's normalized slug.
-      if (candidateMap.size === 0) {
-        const { data } = await supabase
-          .from("posts")
-          .select("id, slug")
-          .eq("is_published", true)
-          .eq("approval_status", "approved")
-          .limit(1000);
-        (data ?? []).forEach((candidate) => candidateMap.set(candidate.id, candidate));
+      // If the prefix fast path was empty, too broad, or missed the specific
+      // article because of query limits, restore the previous safe behavior:
+      // compare every approved post's normalized slug on the client.
+      if (matches.length !== 1) {
+        matches = findMatches(await loadAllApprovedCandidates());
       }
 
-      const matches = [...candidateMap.values()].filter((p) => {
-        const n = normalize(p.slug);
-        return n === target || n.startsWith(target) || target.startsWith(n);
-      });
       if (matches.length !== 1) return null;
 
       const { data: full } = await supabase
-        .from("posts").select("*").eq("id", matches[0].id).maybeSingle();
+        .from("posts")
+        .select("*")
+        .eq("id", matches[0].id)
+        .eq("is_published", true)
+        .eq("approval_status", "approved")
+        .maybeSingle();
       return full ?? null;
     },
     enabled: !!slug,
@@ -158,7 +175,8 @@ const ArticleDetail = () => {
   const { data: navPosts } = useQuery({
     queryKey: ["post-nav", post?.id],
     queryFn: async () => {
-      const createdAt = post!.created_at;
+      if (!post) return { older: null, newer: null };
+      const createdAt = post.created_at;
       const [olderRes, newerRes] = await Promise.all([
         supabase.from("posts").select("title, slug").eq("is_published", true).eq("approval_status", "approved").lt("created_at", createdAt).order("created_at", { ascending: false }).limit(1),
         supabase.from("posts").select("title, slug").eq("is_published", true).eq("approval_status", "approved").gt("created_at", createdAt).order("created_at", { ascending: true }).limit(1),
@@ -174,6 +192,7 @@ const ArticleDetail = () => {
   const { data: relatedPosts } = useQuery({
     queryKey: ["post-related-v2", post?.id, keywords.join("|")],
     queryFn: async () => {
+      if (!post) return [];
       const results = new Map<string, { title: string; slug: string; cover_url: string | null; excerpt: string | null; score: number }>();
 
       // 1) Keyword ilike OR match across title + excerpt (limited to 12 candidates)
@@ -185,13 +204,13 @@ const ArticleDetail = () => {
           .from("posts")
           .select("id, title, slug, cover_url, excerpt, post_type")
           .eq("is_published", true).eq("approval_status", "approved")
-          .neq("id", post!.id)
+          .neq("id", post.id)
           .or(orExpr)
           .limit(12);
         (data ?? []).forEach((r) => {
           const hay = `${r.title} ${r.excerpt ?? ""}`.toLowerCase();
           const score = keywords.reduce((s, k) => (hay.includes(k) ? s + 1 : s), 0)
-            + (r.post_type === post!.post_type ? 0.5 : 0);
+            + (r.post_type === post.post_type ? 0.5 : 0);
           results.set(r.id, { title: r.title, slug: r.slug, cover_url: r.cover_url, excerpt: r.excerpt, score });
         });
       }
@@ -202,8 +221,8 @@ const ArticleDetail = () => {
           .from("posts")
           .select("id, title, slug, cover_url, excerpt")
           .eq("is_published", true).eq("approval_status", "approved")
-          .eq("post_type", post!.post_type)
-          .neq("id", post!.id)
+          .eq("post_type", post.post_type)
+          .neq("id", post.id)
           .order("created_at", { ascending: false })
           .limit(8);
         (data ?? []).forEach((r) => {

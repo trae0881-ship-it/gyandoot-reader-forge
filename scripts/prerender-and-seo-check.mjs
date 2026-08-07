@@ -79,15 +79,21 @@ async function fetchSlugs(table, filter = "") {
 
   const url = `${SUPABASE_URL}/rest/v1/${table}?select=slug${filter}`;
 
-  const res = await fetch(url, {
-    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
-  });
-  if (!res.ok) {
-    console.warn(`[warn] ${table} fetch failed (${res.status})`);
+  // Network/DB outages must never fail the build.
+  try {
+    const res = await fetch(url, {
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
+    });
+    if (!res.ok) {
+      console.warn(`[warn] ${table} fetch failed (${res.status})`);
+      return [];
+    }
+    const rows = await res.json();
+    return rows.map((r) => r.slug).filter(Boolean);
+  } catch (e) {
+    console.warn(`[warn] ${table} fetch failed (${e.message})`);
     return [];
   }
-  const rows = await res.json();
-  return rows.map((r) => r.slug).filter(Boolean);
 }
 
 async function fetchSeoPrerenderPayload() {
@@ -577,7 +583,15 @@ async function main() {
       ];
       for (const c of candidates) if (existsSync(c)) { execPath = c; break; }
     }
-    const browser = await chromium.launch({ headless: true, executablePath: execPath || undefined });
+    let browser;
+    try {
+      browser = await chromium.launch({ headless: true, executablePath: execPath || undefined });
+    } catch (e) {
+      // No chromium available (CI/sandbox). Skip prerender instead of failing the build.
+      console.warn(`[warn] prerender skipped — chromium unavailable: ${e.message}`);
+      if (NO_FAIL) return;
+      throw e;
+    }
 
 
     const context = await browser.newContext({
@@ -670,5 +684,5 @@ async function main() {
 
 main().catch((e) => {
   console.error(e);
-  process.exit(1);
+  if (!NO_FAIL) process.exit(1);
 });

@@ -96,7 +96,7 @@ const Auth = () => {
         password,
         options: {
           data: { display_name: displayName },
-          emailRedirectTo: window.location.origin,
+          emailRedirectTo: `${window.location.origin}${nextPath ?? ""}`,
         },
       });
       if (error) {
@@ -119,7 +119,7 @@ const Auth = () => {
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/auth`,
+      redirect_uri: `${window.location.origin}${nextPath ?? "/auth"}`,
     });
 
     if (result.error) {
@@ -131,7 +131,7 @@ const Auth = () => {
     if (result.redirected) return;
 
     setGoogleLoading(false);
-    navigate("/dashboard", { replace: true });
+    navigate(nextPath ?? "/dashboard", { replace: true });
   };
 
   return (

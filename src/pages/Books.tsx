@@ -388,7 +388,7 @@ const BookCard = ({
         )}
 
 
-        <div className="mt-5 flex items-center gap-2 flex-wrap">
+        <div className="mt-3 flex items-center gap-2 flex-wrap">
           <Stars value={rating} />
           <span className="text-[13px] font-semibold" style={{ color: T.text }}>
             {rating.toFixed(1)}
@@ -408,7 +408,7 @@ const BookCard = ({
 
 
 
-        <div className="mt-6 flex items-end justify-between gap-2">
+        <div className="mt-4 flex items-end justify-between gap-2">
           <div className="flex items-baseline gap-2">
             {book.is_free ? (
               <span className="text-[20px] font-bold" style={{ color: T.success }}>
@@ -442,7 +442,7 @@ const BookCard = ({
           In stock — instant lifetime access
         </p>
 
-        <div className="mt-auto pt-6">
+        <div className="mt-auto pt-4">
           <Link
             to={`/books/${book.slug}`}
             onClick={() => {
@@ -468,19 +468,20 @@ const BookCard = ({
 // Skeleton
 // ==============================
 const CardSkeleton = () => (
-  <div
-    className="overflow-hidden rounded-2xl"
-    style={{ background: T.card, border: `1px solid ${T.border}` }}
-  >
-    <div className="aspect-[3/4] animate-pulse" style={{ background: T.borderSoft }} />
-    <div className="space-y-2.5 p-5">
-      <div className="h-3 w-1/3 animate-pulse rounded" style={{ background: T.borderSoft }} />
+  <div>
+    <div
+      className="aspect-[3/4] animate-pulse rounded-[14px]"
+      style={{ background: T.borderSoft, border: `1px solid ${T.border}` }}
+    />
+    <div className="space-y-2.5 px-1 pt-4">
       <div className="h-4 w-4/5 animate-pulse rounded" style={{ background: T.borderSoft }} />
       <div className="h-3 w-1/2 animate-pulse rounded" style={{ background: T.borderSoft }} />
+      <div className="h-3 w-2/3 animate-pulse rounded" style={{ background: T.borderSoft }} />
       <div className="h-9 w-full animate-pulse rounded-xl" style={{ background: T.borderSoft }} />
     </div>
   </div>
 );
+
 
 // ==============================
 // Horizontal book row

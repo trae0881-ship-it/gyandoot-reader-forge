@@ -252,26 +252,18 @@ const BookCard = ({
 
   return (
     <article
-      className="group relative flex h-full flex-col overflow-hidden rounded-2xl transition-all duration-500 ease-out hover:-translate-y-1.5"
-      style={{
-        background: T.card,
-        border: `1px solid ${T.border}`,
-        boxShadow: "0 1px 2px rgba(17,24,39,0.03)",
-      }}
-      onMouseEnter={(e) =>
-        ((e.currentTarget as HTMLElement).style.boxShadow =
-          "0 24px 44px -24px rgba(17,24,39,0.18), 0 6px 14px -8px rgba(17,24,39,0.06)")
-      }
-      onMouseLeave={(e) =>
-        ((e.currentTarget as HTMLElement).style.boxShadow =
-          "0 1px 2px rgba(17,24,39,0.03)")
-      }
+      className="group relative flex h-full flex-col transition-all duration-500 ease-out hover:-translate-y-1"
+      style={{ background: "transparent" }}
     >
       <Link
         to={`/books/${book.slug}`}
         onClick={() => onRecent(book)}
-        className="relative block overflow-hidden"
-        style={{ background: "#F6F5F1" }}
+        className="relative block overflow-hidden rounded-[14px]"
+        style={{
+          background: "#F6F5F1",
+          border: `1px solid ${T.border}`,
+          boxShadow: "0 10px 26px -18px rgba(17,24,39,0.35)",
+        }}
       >
         <div className="aspect-[3/4]">
           {book.cover_url ? (
@@ -288,6 +280,7 @@ const BookCard = ({
             </div>
           )}
         </div>
+
 
         <div className="pointer-events-none absolute left-3 top-3 flex flex-col gap-1.5">
           {book.is_featured && (

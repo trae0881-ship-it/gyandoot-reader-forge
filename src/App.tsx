@@ -54,6 +54,7 @@ const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
 const ShippingPolicy = lazy(() => import("./pages/ShippingPolicy"));
 const SitemapPage = lazy(() => import("./pages/Sitemap"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Keywords = lazy(() => import("./pages/Keywords"));
 const Library = lazy(() => import("./pages/Library"));
@@ -158,6 +159,7 @@ const AppContent = () => {
                 <Route path="/donate" element={<Donate />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
                 <Route path="/profile" element={<Navigate to="/dashboard/profile" replace />} />
 
                 {/* User Dashboard */}

@@ -252,26 +252,18 @@ const BookCard = ({
 
   return (
     <article
-      className="group relative flex h-full flex-col overflow-hidden rounded-2xl transition-all duration-500 ease-out hover:-translate-y-1.5"
-      style={{
-        background: T.card,
-        border: `1px solid ${T.border}`,
-        boxShadow: "0 1px 2px rgba(17,24,39,0.03)",
-      }}
-      onMouseEnter={(e) =>
-        ((e.currentTarget as HTMLElement).style.boxShadow =
-          "0 24px 44px -24px rgba(17,24,39,0.18), 0 6px 14px -8px rgba(17,24,39,0.06)")
-      }
-      onMouseLeave={(e) =>
-        ((e.currentTarget as HTMLElement).style.boxShadow =
-          "0 1px 2px rgba(17,24,39,0.03)")
-      }
+      className="group relative flex h-full flex-col transition-all duration-500 ease-out hover:-translate-y-1"
+      style={{ background: "transparent" }}
     >
       <Link
         to={`/books/${book.slug}`}
         onClick={() => onRecent(book)}
-        className="relative block overflow-hidden"
-        style={{ background: "#F6F5F1" }}
+        className="relative block overflow-hidden rounded-[14px]"
+        style={{
+          background: "#F6F5F1",
+          border: `1px solid ${T.border}`,
+          boxShadow: "0 10px 26px -18px rgba(17,24,39,0.35)",
+        }}
       >
         <div className="aspect-[3/4]">
           {book.cover_url ? (
@@ -288,6 +280,7 @@ const BookCard = ({
             </div>
           )}
         </div>
+
 
         <div className="pointer-events-none absolute left-3 top-3 flex flex-col gap-1.5">
           {book.is_featured && (
@@ -366,16 +359,10 @@ const BookCard = ({
         </div>
       </Link>
 
-      <div className="flex flex-1 flex-col p-6 md:p-7">
-        <p
-          className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em]"
-          style={{ color: T.textMuted }}
-        >
-          {CATEGORIES.find((c) => c.value === book.category)?.label ?? "Spiritual"}
-        </p>
+      <div className="flex flex-1 flex-col px-1 pt-4">
         <h3
-          className="line-clamp-2 min-h-[3.15rem] text-[18px] font-semibold"
-          style={{ color: T.text, letterSpacing: "-0.01em", lineHeight: 1.4 }}
+          className="line-clamp-2 font-serif text-[19px] font-bold md:text-[20px]"
+          style={{ color: T.text, letterSpacing: "-0.01em", lineHeight: 1.35 }}
         >
           <Link
             to={`/books/${book.slug}`}
@@ -385,11 +372,23 @@ const BookCard = ({
             {book.title}
           </Link>
         </h3>
-        <p className="mt-3 truncate text-[14px]" style={{ color: "#6B7280", lineHeight: 1.5 }}>
-          by <span className="font-medium" style={{ color: "#374151" }}>{book.author}</span>
+        <p
+          className="mt-1.5 line-clamp-2 font-serif text-[15px] italic"
+          style={{ color: "#8A8577", lineHeight: 1.45 }}
+        >
+          {book.author}
         </p>
+        {book.description && (
+          <p
+            className="mt-1.5 line-clamp-2 text-[13.5px]"
+            style={{ color: "#4B5563", lineHeight: 1.55 }}
+          >
+            {book.description}
+          </p>
+        )}
 
-        <div className="mt-5 flex items-center gap-2 flex-wrap">
+
+        <div className="mt-3 flex items-center gap-2 flex-wrap">
           <Stars value={rating} />
           <span className="text-[13px] font-semibold" style={{ color: T.text }}>
             {rating.toFixed(1)}
@@ -409,7 +408,7 @@ const BookCard = ({
 
 
 
-        <div className="mt-6 flex items-end justify-between gap-2">
+        <div className="mt-4 flex items-end justify-between gap-2">
           <div className="flex items-baseline gap-2">
             {book.is_free ? (
               <span className="text-[20px] font-bold" style={{ color: T.success }}>
@@ -443,7 +442,7 @@ const BookCard = ({
           In stock — instant lifetime access
         </p>
 
-        <div className="mt-auto pt-6">
+        <div className="mt-auto pt-4">
           <Link
             to={`/books/${book.slug}`}
             onClick={() => {
@@ -469,19 +468,20 @@ const BookCard = ({
 // Skeleton
 // ==============================
 const CardSkeleton = () => (
-  <div
-    className="overflow-hidden rounded-2xl"
-    style={{ background: T.card, border: `1px solid ${T.border}` }}
-  >
-    <div className="aspect-[3/4] animate-pulse" style={{ background: T.borderSoft }} />
-    <div className="space-y-2.5 p-5">
-      <div className="h-3 w-1/3 animate-pulse rounded" style={{ background: T.borderSoft }} />
+  <div>
+    <div
+      className="aspect-[3/4] animate-pulse rounded-[14px]"
+      style={{ background: T.borderSoft, border: `1px solid ${T.border}` }}
+    />
+    <div className="space-y-2.5 px-1 pt-4">
       <div className="h-4 w-4/5 animate-pulse rounded" style={{ background: T.borderSoft }} />
       <div className="h-3 w-1/2 animate-pulse rounded" style={{ background: T.borderSoft }} />
+      <div className="h-3 w-2/3 animate-pulse rounded" style={{ background: T.borderSoft }} />
       <div className="h-9 w-full animate-pulse rounded-xl" style={{ background: T.borderSoft }} />
     </div>
   </div>
 );
+
 
 // ==============================
 // Horizontal book row

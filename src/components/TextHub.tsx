@@ -25,7 +25,11 @@ interface Props {
   english: string;
   hindi: string;
   sanskrit?: string;
-  slug: string; // /texts/<slug>
+  slug: string; // page slug, combined with basePath
+  /** Route prefix this page is actually mounted at. Defaults to "/texts". */
+  basePath?: string;
+  /** Breadcrumb section label + link. Defaults to Sacred Texts / /texts. */
+  breadcrumb?: { name: string; path: string };
   tagline: string;
   seoTitle: string;
   seoDescription: string;

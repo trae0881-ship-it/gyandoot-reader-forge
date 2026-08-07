@@ -178,7 +178,23 @@ Managed by **Lovable Cloud** (Supabase under the hood). All server-side logic li
 
 ---
 
+## 🗂️ Three-Section Map (frontend / backend / database)
+
+| Section | Physical location | Layer README |
+|---|---|---|
+| **FRONTEND** | `src/`, `public/`, `index.html`, `vite.config.ts`, `tailwind.config.ts` | `src/README.md` |
+| **BACKEND (API)** | `supabase/functions/` (+ `supabase/functions/_shared/`) | `supabase/functions/README.md` |
+| **DATABASE** | `supabase/migrations/`, `supabase/config.toml`, storage buckets | `supabase/DATABASE.md` |
+| **Tooling / root** | `scripts/`, `e2e/`, `package.json`, `.env.example` | this file |
+
+Environment variables: public frontend values live in `.env` (template:
+`.env.example`, git-ignored real file). All secrets live in the backend
+secret manager and are only readable inside edge functions.
+
+---
+
 ## 📝 Why Code Lives in One Repo
+
 
 Lovable platform requires `package.json`, `vite.config.ts`, `index.html` at the **root**, and Supabase CLI requires `supabase/` at the root. Physically separating into `frontend/` and `backend/` folders would break the auto-deploy pipeline.
 

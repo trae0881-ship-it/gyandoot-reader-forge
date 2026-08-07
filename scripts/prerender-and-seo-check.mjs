@@ -79,15 +79,21 @@ async function fetchSlugs(table, filter = "") {
 
   const url = `${SUPABASE_URL}/rest/v1/${table}?select=slug${filter}`;
 
-  const res = await fetch(url, {
-    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
-  });
-  if (!res.ok) {
-    console.warn(`[warn] ${table} fetch failed (${res.status})`);
+  // Network/DB outages must never fail the build.
+  try {
+    const res = await fetch(url, {
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
+    });
+    if (!res.ok) {
+      console.warn(`[warn] ${table} fetch failed (${res.status})`);
+      return [];
+    }
+    const rows = await res.json();
+    return rows.map((r) => r.slug).filter(Boolean);
+  } catch (e) {
+    console.warn(`[warn] ${table} fetch failed (${e.message})`);
     return [];
   }
-  const rows = await res.json();
-  return rows.map((r) => r.slug).filter(Boolean);
 }
 
 async function fetchSeoPrerenderPayload() {

@@ -583,7 +583,15 @@ async function main() {
       ];
       for (const c of candidates) if (existsSync(c)) { execPath = c; break; }
     }
-    const browser = await chromium.launch({ headless: true, executablePath: execPath || undefined });
+    let browser;
+    try {
+      browser = await chromium.launch({ headless: true, executablePath: execPath || undefined });
+    } catch (e) {
+      // No chromium available (CI/sandbox). Skip prerender instead of failing the build.
+      console.warn(`[warn] prerender skipped — chromium unavailable: ${e.message}`);
+      if (NO_FAIL) return;
+      throw e;
+    }
 
 
     const context = await browser.newContext({
@@ -676,5 +684,5 @@ async function main() {
 
 main().catch((e) => {
   console.error(e);
-  process.exit(1);
+  if (!NO_FAIL) process.exit(1);
 });

@@ -88,7 +88,7 @@ const TextHub = ({
     buildFAQSchema(faqs),
     buildBreadcrumbSchema([
       { name: "Home", path: "/" },
-      { name: "Sacred Texts", path: "/texts" },
+      { name: breadcrumb.name, path: breadcrumb.path },
       { name: english, path },
     ]),
   ];
@@ -108,7 +108,7 @@ const TextHub = ({
         <nav aria-label="breadcrumb" className="text-xs text-muted-foreground mb-4">
           <Link to="/" className="hover:text-primary">Home</Link>
           <span className="mx-2">/</span>
-          <span>Sacred Texts</span>
+          <span>{breadcrumb.name}</span>
           <span className="mx-2">/</span>
           <span className="text-foreground">{english}</span>
         </nav>

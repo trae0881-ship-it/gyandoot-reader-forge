@@ -359,16 +359,10 @@ const BookCard = ({
         </div>
       </Link>
 
-      <div className="flex flex-1 flex-col p-6 md:p-7">
-        <p
-          className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em]"
-          style={{ color: T.textMuted }}
-        >
-          {CATEGORIES.find((c) => c.value === book.category)?.label ?? "Spiritual"}
-        </p>
+      <div className="flex flex-1 flex-col px-1 pt-4">
         <h3
-          className="line-clamp-2 min-h-[3.15rem] text-[18px] font-semibold"
-          style={{ color: T.text, letterSpacing: "-0.01em", lineHeight: 1.4 }}
+          className="line-clamp-2 font-serif text-[19px] font-bold md:text-[20px]"
+          style={{ color: T.text, letterSpacing: "-0.01em", lineHeight: 1.35 }}
         >
           <Link
             to={`/books/${book.slug}`}
@@ -378,9 +372,21 @@ const BookCard = ({
             {book.title}
           </Link>
         </h3>
-        <p className="mt-3 truncate text-[14px]" style={{ color: "#6B7280", lineHeight: 1.5 }}>
-          by <span className="font-medium" style={{ color: "#374151" }}>{book.author}</span>
+        <p
+          className="mt-1.5 line-clamp-2 font-serif text-[15px] italic"
+          style={{ color: "#8A8577", lineHeight: 1.45 }}
+        >
+          {book.author}
         </p>
+        {book.description && (
+          <p
+            className="mt-1.5 line-clamp-2 text-[13.5px]"
+            style={{ color: "#4B5563", lineHeight: 1.55 }}
+          >
+            {book.description}
+          </p>
+        )}
+
 
         <div className="mt-5 flex items-center gap-2 flex-wrap">
           <Stars value={rating} />

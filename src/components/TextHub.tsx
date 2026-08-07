@@ -55,6 +55,8 @@ const TextHub = ({
   hindi,
   sanskrit,
   slug,
+  basePath = "/texts",
+  breadcrumb = { name: "Sacred Texts", path: "/texts" },
   tagline,
   seoTitle,
   seoDescription,
@@ -65,7 +67,7 @@ const TextHub = ({
   related,
   readerCta,
 }: Props) => {
-  const path = `/texts/${slug}`;
+  const path = `${basePath.replace(/\/$/, "")}/${slug}`;
 
   const jsonLd = [
     buildArticleSchema({

@@ -42,13 +42,7 @@ import {
   Check,
 } from "lucide-react";
 
-/** Only render real image files as covers (some legacy rows stored docs/empty strings). */
-const isDisplayableCover = (url?: string | null): boolean => {
-  if (!url) return false;
-  const clean = url.trim().split("?")[0].toLowerCase();
-  if (!clean.startsWith("http") && !clean.startsWith("/")) return false;
-  return /\.(png|jpe?g|webp|avif|gif|svg)$/.test(clean) || !/\.[a-z0-9]{2,5}$/.test(clean);
-};
+import BookCover from "@/components/BookCover";
 
 // ==============================
 // Design tokens (page-scoped)
@@ -276,20 +270,12 @@ const BookCard = ({
         }}
       >
         <div className="aspect-[3/4]">
-          {isDisplayableCover(book.cover_url) ? (
-            <img
-              src={book.cover_url!}
-              alt={`${book.title} book cover`}
-              loading="lazy"
-              decoding="async"
-              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
-              className="h-full w-full object-cover transition-transform duration-[700ms] ease-out group-hover:scale-[1.03]"
-            />
-          ) : (
-            <div className="grid h-full w-full place-items-center">
-              <BookOpen className="h-10 w-10" style={{ color: "#D1D5DB" }} />
-            </div>
-          )}
+          <BookCover
+            src={book.cover_url}
+            title={book.title}
+            author={book.author}
+            className="transition-transform duration-[700ms] ease-out group-hover:scale-[1.03]"
+          />
         </div>
 
 
@@ -607,19 +593,7 @@ const QuickView = ({
         </button>
 
         <div className="hidden w-2/5 shrink-0 sm:block" style={{ background: "#F6F5F1" }}>
-          {isDisplayableCover(book.cover_url) ? (
-            <img
-              src={book.cover_url!}
-              alt={`${book.title} book cover`}
-              loading="lazy"
-              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="grid h-full w-full place-items-center">
-              <BookOpen className="h-16 w-16" style={{ color: "#D1D5DB" }} />
-            </div>
-          )}
+          <BookCover src={book.cover_url} title={book.title} author={book.author} />
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 sm:p-8">

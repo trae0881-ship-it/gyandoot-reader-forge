@@ -1,6 +1,7 @@
 import DOMPurify from "dompurify";
 import { useParams, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import BookCover from "@/components/BookCover";
 import useSEO from "@/hooks/useSEO";
 import { supabase } from "@/integrations/supabase/client";
 import Layout from "@/components/layout/Layout";
@@ -403,19 +404,7 @@ const BookDetail = () => {
 
             <div className="md:col-span-1">
               <div className="aspect-[3/4] overflow-hidden rounded-lg bg-muted flex items-center justify-center">
-                {book.cover_url ? (
-                  <img
-                    src={book.cover_url}
-                    alt={`${book.title} — ${book.author}`}
-                    width={600}
-                    height={800}
-                    decoding="async"
-                    {...({ fetchpriority: "high" } as any)}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <BookOpen className="h-16 w-16 text-muted-foreground/40" />
-                )}
+                <BookCover src={book.cover_url} title={book.title} author={book.author} eager />
               </div>
             </div>
 
@@ -917,11 +906,7 @@ const SimilarBooks = ({ currentBookId, category }: { currentBookId: string; cate
             <Link key={b.id} to={`/books/${b.slug}`}>
               <Card className="group overflow-hidden border-border transition-all hover:shadow-lg hover:-translate-y-1">
                 <div className="aspect-[3/4] bg-muted flex items-center justify-center overflow-hidden">
-                  {b.cover_url ? (
-                    <img src={b.cover_url} alt={b.title} className="h-full w-full object-cover transition-transform group-hover:scale-105" loading="lazy" />
-                  ) : (
-                    <BookOpen className="h-12 w-12 text-muted-foreground/30" />
-                  )}
+                  <BookCover src={b.cover_url} title={b.title} author={b.author} className="transition-transform group-hover:scale-105" />
                 </div>
                 <CardContent className="p-4">
                   <h3 className="font-serif font-semibold text-card-foreground group-hover:text-primary transition-colors line-clamp-1">{b.title}</h3>

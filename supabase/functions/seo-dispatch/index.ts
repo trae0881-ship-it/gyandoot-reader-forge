@@ -157,6 +157,7 @@ Deno.serve(async (req) => {
           headers: {
             Authorization: `Bearer ${svc}`,
             apikey: svc,
+            "x-cron-secret": Deno.env.get("SEO_CRON_TOKEN") ?? "",
             "Content-Type": "application/json",
           },
           body: JSON.stringify(payload.body ?? {}),

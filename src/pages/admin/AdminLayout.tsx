@@ -47,8 +47,14 @@ const AdminLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [otpVerified, setOtpVerified] = useState<boolean>(() => isAdminOtpValid());
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const canEnter = perms.hasAdminAccess || isAdmin;
+
+  // Auto-close the mobile drawer on route change
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     if (!loading && (!user || !canEnter)) {
@@ -90,12 +96,8 @@ const AdminLayout = () => {
     return perms[item.area];
   });
 
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
-  // Auto-close the mobile drawer on route change
-  useEffect(() => {
-    setMobileNavOpen(false);
-  }, [location.pathname]);
+
 
   const NavList = ({ onNavigate }: { onNavigate?: () => void }) => (
     <nav className="space-y-1">

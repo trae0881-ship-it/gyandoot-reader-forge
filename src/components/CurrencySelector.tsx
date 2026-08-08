@@ -1,5 +1,5 @@
 import { useLocale } from "@/hooks/useLocale";
-import { CURRENCIES, CURRENCY_CODES, type CurrencyCode } from "@/lib/currency";
+import { CURRENCIES, SELECTABLE_CURRENCY_CODES, type CurrencyCode } from "@/lib/currency";
 import {
   Select,
   SelectContent,
@@ -26,7 +26,7 @@ const CurrencySelector = ({ className, compact }: Props) => {
         <SelectValue />
       </SelectTrigger>
       <SelectContent className="z-50 bg-popover">
-        {CURRENCY_CODES.map((code) => {
+        {SELECTABLE_CURRENCY_CODES.map((code) => {
           const c = CURRENCIES[code];
           return (
             <SelectItem key={code} value={code}>

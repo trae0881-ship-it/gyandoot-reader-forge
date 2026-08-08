@@ -132,7 +132,17 @@ const ToolBtn = ({ onClick, active, title, children, disabled }: {
 
 const Divider = () => <div className="w-px h-5 bg-border mx-0.5 shrink-0" />;
 
+/* ─── Font families the admin can pick before typing ──────────────────── */
+const FONT_FAMILIES = [
+  { label: "Default", value: "" },
+  { label: "Noto Serif Devanagari", value: "'Noto Serif Devanagari', serif" },
+  { label: "Georgia", value: "Georgia, serif" },
+  { label: "Noto Serif", value: "'Noto Serif', serif" },
+  { label: "Inter", value: "Inter, system-ui, sans-serif" },
+];
+
 /* ─── Text color swatches ─────────────────────────────────────────────── */
+
 const COLORS = [
   "#000000", "#374151", "#6b7280", "#ffffff",
   "#dc2626", "#ea580c", "#d97706", "#65a30d",

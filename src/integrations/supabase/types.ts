@@ -1018,6 +1018,48 @@ export type Database = {
         }
         Relationships: []
       }
+      editorial_agent_runs: {
+        Row: {
+          created_at: string
+          details: Json | null
+          error: string | null
+          id: string
+          keyword: string | null
+          originality_score: number | null
+          post_id: string | null
+          quality_score: number | null
+          revisions: number | null
+          status: string
+          topic: string | null
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          error?: string | null
+          id?: string
+          keyword?: string | null
+          originality_score?: number | null
+          post_id?: string | null
+          quality_score?: number | null
+          revisions?: number | null
+          status?: string
+          topic?: string | null
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          error?: string | null
+          id?: string
+          keyword?: string | null
+          originality_score?: number | null
+          post_id?: string | null
+          quality_score?: number | null
+          revisions?: number | null
+          status?: string
+          topic?: string | null
+        }
+        Relationships: []
+      }
       lsi_keywords: {
         Row: {
           category: string | null
@@ -2074,27 +2116,6 @@ export type Database = {
           },
         ]
       }
-      tmp_blog_parts: {
-        Row: {
-          content: string | null
-          id: number
-          part: number | null
-          slug: string | null
-        }
-        Insert: {
-          content?: string | null
-          id?: number
-          part?: number | null
-          slug?: string | null
-        }
-        Update: {
-          content?: string | null
-          id?: number
-          part?: number | null
-          slug?: string | null
-        }
-        Relationships: []
-      }
       user_roles: {
         Row: {
           id: string
@@ -2305,24 +2326,6 @@ export type Database = {
       increment_purchase_count: {
         Args: { _book_id: string }
         Returns: undefined
-      }
-      insert_post: {
-        Args: {
-          category: string
-          content: string
-          excerpt: string
-          meta_description: string
-          meta_title: string
-          primary_keyword: string
-          reading_time_min: number
-          secondary_keywords: Json
-          slug: string
-          social_captions: Json
-          tags: Json
-          title: string
-          word_count: number
-        }
-        Returns: string
       }
       is_admin_otp_verified: { Args: { _user_id: string }; Returns: boolean }
       publish_scheduled_posts: { Args: never; Returns: undefined }

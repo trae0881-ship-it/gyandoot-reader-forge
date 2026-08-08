@@ -909,6 +909,7 @@ const SimilarBooks = ({ currentBookId, category }: { currentBookId: string; cate
     },
   });
 
+  const { formatPrice } = useLocale();
   if (!similarBooks || similarBooks.length === 0) return null;
 
   return (

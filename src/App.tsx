@@ -9,7 +9,9 @@ import { useVisitorTracker } from "@/hooks/useVisitorTracker";
 
 
 
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import { installSelfHealing } from "@/lib/selfHeal";
 
 // Only eagerly load the homepage
 import Index from "./pages/Index";

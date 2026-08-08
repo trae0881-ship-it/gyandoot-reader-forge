@@ -290,6 +290,28 @@ const RichTextEditor = ({ value, onChange, placeholder = "Start writing…", min
         </ToolBtn>
         <Divider />
 
+        {/* Font family */}
+        <select
+          title="Font"
+          className="h-7 rounded border border-border bg-background px-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+          value={editor.getAttributes("textStyle").fontFamily || ""}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (!value) editor.chain().focus().unsetFontFamily().run();
+            else editor.chain().focus().setFontFamily(value).run();
+          }}
+          style={{ fontFamily: editor.getAttributes("textStyle").fontFamily || undefined }}
+        >
+          {FONT_FAMILIES.map((f) => (
+            <option key={f.label} value={f.value} style={{ fontFamily: f.value || undefined }}>
+              {f.label}
+            </option>
+          ))}
+        </select>
+        <Divider />
+
+
+
         {/* Headings */}
         <ToolBtn title="Heading 1" active={editor.isActive("heading", { level: 1 })} onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}>
           <Heading1 className="h-3.5 w-3.5" />

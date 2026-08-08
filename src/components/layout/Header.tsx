@@ -113,8 +113,8 @@ const Header = () => {
           )}
         </nav>
 
-        {/* Desktop right actions */}
-        <div className="hidden lg:flex items-center gap-1 shrink-0">
+        {/* Right actions — currency + search stay visible on every screen size */}
+        <div className="flex items-center gap-1 shrink-0">
           <CurrencySelector compact />
           {/* Search */}
           {searchOpen ? (
@@ -124,7 +124,7 @@ const Header = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search..."
                 aria-label="Search books"
-                className="h-8 w-28 xl:w-40"
+                className="h-8 w-24 sm:w-32 xl:w-40"
                 autoFocus
               />
               <Button type="submit" size="icon" variant="ghost" className="h-8 w-8" aria-label="Submit search">
@@ -145,7 +145,7 @@ const Header = () => {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="WhatsApp"
-              className="inline-flex items-center justify-center h-8 w-8 rounded-md text-primary hover:bg-accent transition-colors"
+              className="hidden sm:inline-flex items-center justify-center h-8 w-8 rounded-md text-primary hover:bg-accent transition-colors"
             >
               <MessageCircle className="h-4 w-4" />
             </a>
@@ -153,7 +153,7 @@ const Header = () => {
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs" aria-label="Open user menu">
+                <Button variant="ghost" size="sm" className="hidden lg:inline-flex h-8 gap-1 text-xs" aria-label="Open user menu">
                   <User className="h-4 w-4" />
                   <span className="hidden xl:inline max-w-[80px] truncate">{user.email?.split("@")[0]}</span>
                 </Button>
@@ -168,22 +168,23 @@ const Header = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => navigate("/auth")}>
+            <Button variant="outline" size="sm" className="hidden lg:inline-flex h-8 text-xs" onClick={() => navigate("/auth")}>
               <User className="mr-1 h-3.5 w-3.5" /> Sign In
             </Button>
           )}
+
+          {/* Mobile toggle */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          >
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
         </div>
 
-        {/* Mobile toggle */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="lg:hidden"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label={mobileOpen ? "Close menu" : "Open menu"}
-        >
-          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </Button>
       </div>
 
       {/* Mobile nav */}

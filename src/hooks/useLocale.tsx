@@ -116,35 +116,48 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
     document.documentElement.classList.add("notranslate");
   }, []);
 
-  // Country detection (only used when no manual/stored preference exists).
+  // Country detection (only used when no manual preference exists).
   useEffect(() => {
     let cancelled = false;
 
-    const apply = (cc: string | null) => {
+    const apply = (cc: string | null, cache = false) => {
       if (cancelled || !cc) return;
-      setCountry(cc);
-      const s = readStored();
-      if (s.manual || s.code) return; // priority 1 & 2 win
-      setCurrencyState(currencyForCountry(cc));
+      const code = cc.toUpperCase();
+      setCountry(code);
+      if (cache) {
+        try { localStorage.setItem(COUNTRY_KEY, code); } catch { /* ignore */ }
+      }
+      if (readStored().manual) return; // manual selection always wins
+      setCurrencyState(currencyForCountry(code));
     };
 
-    apply(guessCountry());
+    // 1. Cached IP-detected country (instant, accurate on repeat visits)
+    let cached: string | null = null;
+    try { cached = localStorage.getItem(COUNTRY_KEY); } catch { /* ignore */ }
+    apply(cached ?? guessCountry());
 
+    // 2. Live IP lookup (with fallback provider)
     (async () => {
-      try {
-        const res = await fetch("https://ipapi.co/json/", {
-          signal: AbortSignal.timeout(4000),
-        });
-        if (!res.ok) return;
-        const j = await res.json();
-        if (j?.country_code) apply(String(j.country_code));
-      } catch {
-        /* keep offline guess */
+      const providers: { url: string; pick: (j: any) => string | undefined }[] = [
+        { url: "https://ipapi.co/json/", pick: (j) => j?.country_code },
+        { url: "https://ipwho.is/", pick: (j) => j?.country_code },
+      ];
+      for (const p of providers) {
+        try {
+          const res = await fetch(p.url, { signal: AbortSignal.timeout(4000) });
+          if (!res.ok) continue;
+          const j = await res.json();
+          const cc = p.pick(j);
+          if (cc) { apply(String(cc), true); return; }
+        } catch {
+          /* try next provider */
+        }
       }
     })();
 
     return () => { cancelled = true; };
   }, []);
+
 
   const setCurrency = useCallback((c: Currency) => {
     if (!isCurrencyCode(c)) return;

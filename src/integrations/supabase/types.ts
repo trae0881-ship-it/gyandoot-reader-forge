@@ -917,9 +917,11 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
+          currency: string
           donor_email: string | null
           donor_name: string | null
           id: string
+          payment_gateway: string
           razorpay_order_id: string | null
           razorpay_payment_id: string | null
           razorpay_signature: string | null
@@ -929,9 +931,11 @@ export type Database = {
         Insert: {
           amount: number
           created_at?: string
+          currency?: string
           donor_email?: string | null
           donor_name?: string | null
           id?: string
+          payment_gateway?: string
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
           razorpay_signature?: string | null
@@ -941,9 +945,11 @@ export type Database = {
         Update: {
           amount?: number
           created_at?: string
+          currency?: string
           donor_email?: string | null
           donor_name?: string | null
           id?: string
+          payment_gateway?: string
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
           razorpay_signature?: string | null
@@ -1327,6 +1333,7 @@ export type Database = {
           guest_email: string | null
           guest_name: string | null
           id: string
+          payment_gateway: string
           razorpay_order_id: string | null
           razorpay_payment_id: string | null
           razorpay_signature: string | null
@@ -1345,6 +1352,7 @@ export type Database = {
           guest_email?: string | null
           guest_name?: string | null
           id?: string
+          payment_gateway?: string
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
           razorpay_signature?: string | null
@@ -1363,6 +1371,7 @@ export type Database = {
           guest_email?: string | null
           guest_name?: string | null
           id?: string
+          payment_gateway?: string
           razorpay_order_id?: string | null
           razorpay_payment_id?: string | null
           razorpay_signature?: string | null

@@ -6,8 +6,11 @@
   "scripts": {
     "dev": "vite",
     "predev": "node scripts/generate-sitemap.mjs && node scripts/write-build-info.mjs",
-    "prebuild": "node scripts/generate-sitemap.mjs && node scripts/write-build-info.mjs",
+    "prebuild": "node scripts/verify-edge-functions.mjs && node scripts/generate-sitemap.mjs && node scripts/write-build-info.mjs",
     "build": "rm -rf dist && vite build && node scripts/prerender-and-seo-check.mjs --no-fail && node scripts/verify-prerender-clean.mjs && node scripts/crawl-summary.mjs",
+    "functions:verify": "node scripts/verify-edge-functions.mjs",
+    "predeploy": "node scripts/verify-edge-functions.mjs",
+    "deploy": "npx supabase functions deploy",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",

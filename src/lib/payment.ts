@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { CURRENCIES, gatewayForCurrency, type CurrencyCode } from "@/lib/currency";
 
 declare global {
   interface Window {
@@ -9,17 +10,21 @@ declare global {
 export type PaymentGateway = "razorpay" | "paypal";
 
 interface CreateOrderParams {
-  amount: number; // Always in INR (source-of-truth)
+  /**
+   * Numeric amount exactly as stored in the database.
+   * NEVER converted — only the currency code changes.
+   */
+  amount: number;
   type: "donation" | "purchase";
+  /** Optional override; normally derived from `buyer_currency`. */
   gateway?: PaymentGateway;
   book_id?: string;
   name?: string;
   email?: string;
   coupon_id?: string;
   referrer_id?: string;
-  // Buyer's display currency + live INR→currency rate (for PayPal international pricing)
-  buyer_currency?: string;
-  buyer_fx_rate?: number;
+  /** Buyer's selected currency. INR -> Razorpay, others -> PayPal. */
+  buyer_currency?: CurrencyCode;
   // Guest checkout — when the user is not logged in.
   guest_email?: string;
   guest_name?: string;
@@ -45,7 +50,17 @@ export async function initiatePayment(
   onSuccess: (info?: PaymentSuccessInfo) => void,
   onFailure: (error: string) => void
 ) {
-  const gateway = params.gateway || "razorpay";
+  const currency: CurrencyCode = params.buyer_currency ?? "INR";
+  const routed = gatewayForCurrency(currency);
+
+  if (routed === "unsupported") {
+    onFailure(
+      `${CURRENCIES[currency]?.label ?? currency} (${currency}) payments are not supported yet. Please switch to INR, USD, GBP, EUR, CAD, AUD, JPY or SGD.`
+    );
+    return;
+  }
+
+  const gateway: PaymentGateway = params.gateway ?? routed;
 
   try {
     const { data: { session } } = await supabase.auth.getSession();
@@ -57,7 +72,7 @@ export async function initiatePayment(
     }
 
     const res = await supabase.functions.invoke("create-order", {
-      body: { ...params, gateway },
+      body: { ...params, gateway, buyer_currency: currency },
       headers: session ? {} : { Authorization: "" },
     });
 

@@ -12,7 +12,8 @@ import { BookOpen, Eye, Lock, Loader2, PlayCircle, Tag, X, CheckCircle, User, Ca
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useMemo, useEffect } from "react";
 
-import { initiatePayment, type PaymentGateway } from "@/lib/payment";
+import { initiatePayment } from "@/lib/payment";
+import CurrencySelector from "@/components/CurrencySelector";
 import SocialShareBar from "@/components/SocialShareBar";
 import { useLocale } from "@/hooks/useLocale";
 import { useToast } from "@/hooks/use-toast";
@@ -43,15 +44,7 @@ const BookDetail = () => {
 
   const [purchasing, setPurchasing] = useState(false);
   const [claimingFree, setClaimingFree] = useState(false);
-  const { country, currency, rates, formatPrice } = useLocale();
-  const isIndia = (country ?? "").toUpperCase() === "IN";
-  const [gateway, setGateway] = useState<PaymentGateway>("razorpay");
-  const [gatewayTouched, setGatewayTouched] = useState(false);
-  // Auto-select PayPal for non-India visitors, Razorpay for India — unless user manually chose.
-  useEffect(() => {
-    if (gatewayTouched || !country) return;
-    setGateway(isIndia ? "razorpay" : "paypal");
-  }, [country, isIndia, gatewayTouched]);
+  const { country, currency, formatPrice, gateway } = useLocale();
   const [couponCode, setCouponCode] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<{
@@ -136,7 +129,7 @@ const BookDetail = () => {
       return;
     }
     setAppliedCoupon(data);
-    toast({ title: "Coupon Applied!", description: `You save ₹${data.discount_amount}` });
+    toast({ title: "Coupon Applied!", description: `You save ${formatPrice(data.discount_amount)}` });
   };
 
   const removeCoupon = () => {
@@ -200,12 +193,10 @@ const BookDetail = () => {
       {
         amount: finalAmount,
         type: "purchase",
-        gateway,
         book_id: book.id,
         coupon_id: appliedCoupon?.coupon_id,
         referrer_id: referrerId || undefined,
         buyer_currency: currency,
-        buyer_fx_rate: 1,
         guest_email: guest?.email,
         guest_name: guest?.name,
         name: guest?.name,
@@ -246,7 +237,7 @@ const BookDetail = () => {
   const bookStats = book ? reviewStatsQuery.data?.[book.id] : undefined;
 
   const cleanedDesc = book?.description?.replace(/<[^>]*>/g, "").trim();
-  const priceLabel = book ? (book.is_free ? "मुफ़्त" : `₹${book.price}`) : "";
+  const priceLabel = book ? (book.is_free ? "मुफ़्त" : `${formatPrice(book.price)}`) : "";
   const shortDesc = cleanedDesc && cleanedDesc.length >= 20 ? cleanedDesc.slice(0, 100) : "";
   const bookDescription = book
     ? (shortDesc
@@ -433,11 +424,11 @@ const BookDetail = () => {
               <h1 className="font-serif text-3xl font-bold md:text-4xl">{book.title}</h1>
               <p className="mt-1 text-lg text-muted-foreground">by {book.author}</p>
               <span className={`mt-3 inline-block rounded-full px-3 py-1 text-sm font-medium ${book.is_free ? "bg-muted text-primary" : "bg-secondary/20 text-secondary-foreground"}`}>
-                {book.is_free ? "Free to Read" : `₹${book.price}`}
+                {book.is_free ? "Free to Read" : `${formatPrice(book.price)}`}
               </span>
 
               <div className="mt-4 grid grid-cols-2 gap-2 rounded-lg border border-border bg-muted/30 p-3 text-xs sm:grid-cols-4">
-                <div className="flex items-center gap-1.5"><Tag className="h-3.5 w-3.5 text-primary" /><span><strong>{book.is_free ? "मुफ़्त" : `₹${book.price}`}</strong> कीमत</span></div>
+                <div className="flex items-center gap-1.5"><Tag className="h-3.5 w-3.5 text-primary" /><span><strong>{book.is_free ? "मुफ़्त" : `${formatPrice(book.price)}`}</strong> कीमत</span></div>
                 <div className="flex items-center gap-1.5"><PlayCircle className="h-3.5 w-3.5 text-primary" /><span><strong>तुरंत</strong> delivery (0 min)</span></div>
                 <div className="flex items-center gap-1.5"><CreditCard className="h-3.5 w-3.5 text-primary" /><span><strong>UPI</strong> · Card · NetBanking</span></div>
                 <div className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-primary" /><span><strong>7-day</strong> refund</span></div>
@@ -454,14 +445,14 @@ const BookDetail = () => {
                         100% coupon auto-applied
                       </span>
                     </div>
-                    <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">₹0 checkout</span>
+                    <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">{formatPrice(0)} checkout</span>
                   </div>
 
                   <Button size="lg" onClick={handleClaimFreeBook} disabled={claimingFree}>
                     {claimingFree ? (
                       <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</>
                     ) : (
-                      <><ShoppingCart className="mr-2 h-4 w-4" /> Buy Now — ₹0</>
+                      <><ShoppingCart className="mr-2 h-4 w-4" /> Buy Now — {formatPrice(0)}</>
                     )}
                   </Button>
 
@@ -484,35 +475,34 @@ const BookDetail = () => {
                   <div className="rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
                     <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">आप क्या पा रहे हैं</p>
                     <ul className="space-y-1.5 text-sm">
-                      <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5 text-primary" /> पुस्तक का lifetime access</span><span className="text-muted-foreground">₹{book.price}</span></li>
-                      <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><Smartphone className="h-3.5 w-3.5 text-primary" /> सभी devices पर पढ़ें</span><span className="text-muted-foreground line-through">₹500</span></li>
-                      <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><Bookmark className="h-3.5 w-3.5 text-primary" /> Bookmarks + Notes</span><span className="text-muted-foreground line-through">₹300</span></li>
-                      <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><PlayCircle className="h-3.5 w-3.5 text-primary" /> Continue reading + Progress</span><span className="text-muted-foreground line-through">₹200</span></li>
-                      <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><Gift className="h-3.5 w-3.5 text-primary" /> जीवनभर Free updates</span><span className="text-muted-foreground line-through">₹500</span></li>
-                      <li className="flex justify-between font-bold border-t border-primary/20 pt-2 mt-2"><span>आज आपका मूल्य</span><span className="text-primary text-lg">₹{book.price}</span></li>
+                      <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5 text-primary" /> पुस्तक का lifetime access</span><span className="text-muted-foreground">{formatPrice(book.price)}</span></li>
+                      <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><Smartphone className="h-3.5 w-3.5 text-primary" /> सभी devices पर पढ़ें</span><span className="text-muted-foreground line-through">{formatPrice(500)}</span></li>
+                      <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><Bookmark className="h-3.5 w-3.5 text-primary" /> Bookmarks + Notes</span><span className="text-muted-foreground line-through">{formatPrice(300)}</span></li>
+                      <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><PlayCircle className="h-3.5 w-3.5 text-primary" /> Continue reading + Progress</span><span className="text-muted-foreground line-through">{formatPrice(200)}</span></li>
+                      <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><Gift className="h-3.5 w-3.5 text-primary" /> जीवनभर Free updates</span><span className="text-muted-foreground line-through">{formatPrice(500)}</span></li>
+                      <li className="flex justify-between font-bold border-t border-primary/20 pt-2 mt-2"><span>आज आपका मूल्य</span><span className="text-primary text-lg">{formatPrice(book.price)}</span></li>
                     </ul>
                   </div>
 
-                  {/* Localized price breakdown */}
+                  {/* Currency + price breakdown (same number, different currency) */}
                   <div className="rounded-xl border border-border bg-muted/30 p-4 text-sm">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Price breakdown</p>
+                    <div className="flex items-center justify-between gap-3 mb-3">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Currency</span>
+                      <CurrencySelector compact />
+                    </div>
                     <div className="space-y-1.5">
-                      <div className="flex justify-between"><span className="text-muted-foreground">Base price</span><span className="font-medium">₹{(appliedCoupon ? appliedCoupon.final_amount : book.price).toLocaleString("en-IN")} INR</span></div>
-                      {country && <div className="flex justify-between"><span className="text-muted-foreground">Your region</span><span className="font-medium">{country} · {currency}</span></div>}
-                      <div className="flex justify-between"><span className="text-muted-foreground">Pricing model</span><span className="font-medium">1:1 parity (no FX)</span></div>
-                      <div className="flex justify-between border-t border-border pt-1.5 mt-1.5"><span className="font-semibold">You'll be charged</span><span className="font-bold text-primary">{gateway === "paypal" ? `${formatPrice(appliedCoupon ? appliedCoupon.final_amount : book.price)} ${currency}` : `₹${(appliedCoupon ? appliedCoupon.final_amount : book.price).toLocaleString("en-IN")} INR`}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Product</span><span className="font-medium">{book.title}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Price</span><span className="font-medium">{formatPrice(appliedCoupon ? appliedCoupon.final_amount : book.price)} {currency}</span></div>
+                      {country && <div className="flex justify-between"><span className="text-muted-foreground">Your region</span><span className="font-medium">{country}</span></div>}
+                      <div className="flex justify-between"><span className="text-muted-foreground">Payment method</span><span className="font-medium">{gateway === "razorpay" ? "Razorpay" : gateway === "paypal" ? "PayPal" : "Not available"}</span></div>
+                      <div className="flex justify-between border-t border-border pt-1.5 mt-1.5"><span className="font-semibold">You'll be charged</span><span className="font-bold text-primary">{formatPrice(appliedCoupon ? appliedCoupon.final_amount : book.price)} {currency}</span></div>
                     </div>
-                  </div>
-
-                  <div>
-                    <div className="flex gap-2">
-                      <Button type="button" variant={gateway === "razorpay" ? "default" : "outline"} size="sm" onClick={() => { setGateway("razorpay"); setGatewayTouched(true); }}>Razorpay (India)</Button>
-                      <Button type="button" variant={gateway === "paypal" ? "default" : "outline"} size="sm" onClick={() => { setGateway("paypal"); setGatewayTouched(true); }}>PayPal (International)</Button>
-                    </div>
-                    <p className="mt-1.5 text-[11px] text-muted-foreground">
-                      {gateway === "paypal"
-                        ? <>Charged in your local currency at the same number as the INR price.</>
-                        : <>Cards, UPI, netbanking · charged in INR.</>}
+                    <p className="mt-2 text-[11px] text-muted-foreground">
+                      {gateway === "razorpay"
+                        ? "Cards, UPI, netbanking · charged in INR."
+                        : gateway === "paypal"
+                          ? "Charged by PayPal in your selected currency — same number, no exchange-rate conversion."
+                          : `${currency} is not supported by our payment providers yet. Please select another currency.`}
                     </p>
                   </div>
 
@@ -541,7 +531,7 @@ const BookDetail = () => {
                           {" — "}
                           {appliedCoupon.discount_type === "percent"
                             ? `${appliedCoupon.discount_value}% off`
-                            : `₹${appliedCoupon.discount_amount} off`}
+                            : `${formatPrice(appliedCoupon.discount_amount)} off`}
                         </span>
                       </div>
                       <button onClick={removeCoupon} className="text-muted-foreground hover:text-destructive ml-2">
@@ -552,14 +542,14 @@ const BookDetail = () => {
 
                   <div className="flex items-center gap-3">
                     {appliedCoupon && (
-                      <span className="text-muted-foreground line-through text-sm">₹{book.price}</span>
+                      <span className="text-muted-foreground line-through text-sm">{formatPrice(book.price)}</span>
                     )}
                     <span className="text-2xl font-bold text-primary">
-                      ₹{appliedCoupon ? appliedCoupon.final_amount : book.price}
+                      {formatPrice(appliedCoupon ? appliedCoupon.final_amount : book.price)}
                     </span>
                     {appliedCoupon && (
                       <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                        Save ₹{appliedCoupon.discount_amount}
+                        Save {formatPrice(appliedCoupon.discount_amount)}
                       </span>
                     )}
                     <span className="text-xs text-muted-foreground ml-auto">जीवनभर</span>
@@ -569,7 +559,7 @@ const BookDetail = () => {
                     {purchasing ? (
                       <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</>
                     ) : (
-                      <><Unlock className="mr-2 h-4 w-4" /> Buy Now — ₹{appliedCoupon ? appliedCoupon.final_amount : book.price} (जीवनभर)</>
+                      <><Unlock className="mr-2 h-4 w-4" /> Buy Now — {formatPrice(appliedCoupon ? appliedCoupon.final_amount : book.price)} (जीवनभर)</>
                     )}
                   </Button>
 
@@ -673,7 +663,7 @@ const BookDetail = () => {
                 <ShoppingCart className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground uppercase tracking-wider">Price</p>
-                  <p className="font-medium text-foreground">{book.is_free ? "Free" : `₹${book.price}`}</p>
+                  <p className="font-medium text-foreground">{book.is_free ? "Free" : `${formatPrice(book.price)}`}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -705,7 +695,7 @@ const BookDetail = () => {
                 <p>
                   {book.is_free
                     ? "This book is completely free to read. Simply open any chapter and start your spiritual journey."
-                    : `Get full access to all ${totalChapters} chapters for just ₹${book.price}. Once purchased, the book is available in your account forever — no subscription needed.`}
+                    : `Get full access to all ${totalChapters} chapters for just ${formatPrice(book.price)}. Once purchased, the book is available in your account forever — no subscription needed.`}
                 </p>
                 {previewChapters > 0 && (
                   <p>
@@ -855,7 +845,7 @@ const BookDetail = () => {
         open={guestDialogOpen}
         onOpenChange={setGuestDialogOpen}
         onContinue={(data) => runPayment(data)}
-        priceLabel={`₹${appliedCoupon ? appliedCoupon.final_amount : book.price}`}
+        priceLabel={`${formatPrice(appliedCoupon ? appliedCoupon.final_amount : book.price)}`}
       />
 
 
@@ -865,7 +855,7 @@ const BookDetail = () => {
           <div className="flex-1 min-w-0">
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground">जीवनभर access</p>
             <div className="flex items-baseline gap-1">
-              <span className="text-lg font-bold text-primary">₹{appliedCoupon ? appliedCoupon.final_amount : book.price}</span>
+              <span className="text-lg font-bold text-primary">{formatPrice(appliedCoupon ? appliedCoupon.final_amount : book.price)}</span>
               <span className="text-[10px] text-primary inline-flex items-center gap-0.5"><CheckCircle className="h-2.5 w-2.5" /> 7-दिन refund</span>
             </div>
           </div>
@@ -878,7 +868,7 @@ const BookDetail = () => {
         <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border shadow-2xl p-3 flex items-center gap-3">
           <div className="flex-1 min-w-0">
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground">100% Free</p>
-            <span className="text-lg font-bold text-primary">₹0 — जीवनभर</span>
+            <span className="text-lg font-bold text-primary">{formatPrice(0)} — जीवनभर</span>
           </div>
           <Button onClick={handleClaimFreeBook} disabled={claimingFree} size="lg" className="font-bold shadow-md shrink-0">
             {claimingFree ? <Loader2 className="h-4 w-4 animate-spin" /> : <>अभी पढ़ें →</>}
@@ -919,6 +909,7 @@ const SimilarBooks = ({ currentBookId, category }: { currentBookId: string; cate
     },
   });
 
+  const { formatPrice } = useLocale();
   if (!similarBooks || similarBooks.length === 0) return null;
 
   return (
@@ -942,7 +933,7 @@ const SimilarBooks = ({ currentBookId, category }: { currentBookId: string; cate
                   <p className="text-sm text-muted-foreground">{b.author}</p>
                   <div className="mt-2 flex items-center justify-between">
                     <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${b.is_free ? "bg-muted text-primary" : "bg-secondary/20 text-secondary-foreground"}`}>
-                      {b.is_free ? "Free" : `₹${b.price}`}
+                      {b.is_free ? "Free" : `${formatPrice(b.price)}`}
                     </span>
                     <span className="text-xs text-muted-foreground">{Math.max(b.purchase_count, 100)}+ readers</span>
                   </div>

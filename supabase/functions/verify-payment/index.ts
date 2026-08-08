@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { convertInr } from "../_shared/fx.ts";
+import { normalizeCurrency, paypalAmount } from "../_shared/currency.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -58,6 +58,14 @@ Deno.serve(async (req) => {
   }
 });
 
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  INR: "₹", USD: "$", GBP: "£", EUR: "€", CAD: "C$", AUD: "A$", JPY: "¥", SGD: "S$",
+  AED: "AED ", SAR: "SAR ",
+};
+// Same number, different currency — never converted.
+const money = (amount: number, code: string) =>
+  `${CURRENCY_SYMBOLS[normalizeCurrency(code)] ?? ""}${amount} ${normalizeCurrency(code)}`;
+
 async function sendReceipt(
   supabase: any,
   user: any,
@@ -74,6 +82,7 @@ async function sendReceipt(
 
   try {
     let amount = 0;
+    let currencyCode = "INR";
     let bookTitle = "";
     let recipientEmail = user?.email || "";
     let recipientName = "";
@@ -81,7 +90,7 @@ async function sendReceipt(
     if (type === "purchase") {
       const { data: purchase } = await supabase
         .from("purchases")
-        .select("book_id, created_at, guest_email, guest_name, claim_token")
+        .select("book_id, created_at, guest_email, guest_name, claim_token, amount, currency")
         .eq("razorpay_order_id", orderId)
         .single();
       if (purchase?.book_id) {
@@ -92,8 +101,9 @@ async function sendReceipt(
           .single();
         if (book) {
           bookTitle = book.title;
-          amount = book.price;
+          amount = Number(purchase.amount ?? book.price);
         }
+        currencyCode = normalizeCurrency(purchase.currency ?? "INR");
         if (purchase.guest_email) {
           recipientEmail = purchase.guest_email;
           recipientName = purchase.guest_name ?? "";
@@ -108,11 +118,12 @@ async function sendReceipt(
     } else {
       const { data: donation } = await supabase
         .from("donations")
-        .select("amount, donor_name, donor_email")
+        .select("amount, donor_name, donor_email, currency")
         .eq("razorpay_order_id", orderId)
         .single();
       if (donation) {
         amount = donation.amount;
+        currencyCode = normalizeCurrency(donation.currency ?? "INR");
         recipientName = donation.donor_name || "";
         if (donation.donor_email) recipientEmail = donation.donor_email;
       }
@@ -142,7 +153,7 @@ async function sendReceipt(
           <p>Thank you for your purchase! Your book is now ready to read.</p>
           <div style="background: #FFF8E1; border-left: 4px solid #FBC02D; padding: 15px 20px; margin: 20px 0; border-radius: 4px;">
             <p style="margin: 0 0 8px; font-weight: bold; color: #333;">📖 ${bookTitle}</p>
-            <p style="margin: 0; color: #555;">Amount: <strong>₹${amount}</strong></p>
+            <p style="margin: 0; color: #555;">Amount: <strong>${money(amount, currencyCode)}</strong></p>
             <p style="margin: 8px 0 0; color: #888; font-size: 13px;">Payment ID: ${paymentId}</p>
             <p style="margin: 4px 0 0; color: #888; font-size: 13px;">Date: ${date}</p>
             <p style="margin: 4px 0 0; color: #888; font-size: 13px;">Gateway: ${gateway.charAt(0).toUpperCase() + gateway.slice(1)}</p>
@@ -164,7 +175,7 @@ async function sendReceipt(
           <p>Namaste${recipientName ? ` ${recipientName}` : ""},</p>
           <p>Thank you for your generous donation! Your kindness helps spread spiritual knowledge to seekers everywhere.</p>
           <div style="background: #E8F5E9; border-left: 4px solid #4CAF50; padding: 15px 20px; margin: 20px 0; border-radius: 4px;">
-            <p style="margin: 0 0 8px; font-weight: bold; color: #333;">❤️ Donation Amount: <strong>₹${amount}</strong></p>
+            <p style="margin: 0 0 8px; font-weight: bold; color: #333;">❤️ Donation Amount: <strong>${money(amount, currencyCode)}</strong></p>
             <p style="margin: 8px 0 0; color: #888; font-size: 13px;">Payment ID: ${paymentId}</p>
             <p style="margin: 4px 0 0; color: #888; font-size: 13px;">Date: ${date}</p>
             <p style="margin: 4px 0 0; color: #888; font-size: 13px;">Gateway: ${gateway.charAt(0).toUpperCase() + gateway.slice(1)}</p>
@@ -231,6 +242,47 @@ async function verifyRazorpay(
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+  }
+
+  // Verify the actual captured amount + currency with Razorpay (never trust the client).
+  const keyId = Deno.env.get("RAZORPAY_KEY_ID");
+  if (keyId) {
+    try {
+      const payRes = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}`, {
+        headers: { Authorization: "Basic " + btoa(`${keyId}:${keySecret}`) },
+      });
+      if (payRes.ok) {
+        const pay = await payRes.json();
+        const expectedTable = type === "purchase" ? "purchases" : "donations";
+        const { data: row } = await supabase
+          .from(expectedTable)
+          .select("amount, currency")
+          .eq("razorpay_order_id", orderId)
+          .maybeSingle();
+        const expectedAmount = Number(row?.amount ?? 0);
+        const expectedCurrency = normalizeCurrency(row?.currency ?? "INR");
+
+        const orderMatches = pay?.order_id === orderId;
+        const currencyMatches = String(pay?.currency ?? "").toUpperCase() === expectedCurrency;
+        const amountMatches = expectedAmount > 0
+          ? Number(pay?.amount) === Math.round(expectedAmount * 100)
+          : true;
+        const captured = pay?.status === "captured" || pay?.status === "authorized";
+
+        if (!orderMatches || !currencyMatches || !amountMatches || !captured) {
+          console.error("Razorpay payment mismatch", {
+            orderId, paymentId, expectedAmount, expectedCurrency,
+            got: { order_id: pay?.order_id, amount: pay?.amount, currency: pay?.currency, status: pay?.status },
+          });
+          return new Response(JSON.stringify({ error: "Payment verification failed" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
+    } catch (e) {
+      console.warn("Razorpay payment fetch failed, relying on signature only:", e);
+    }
   }
 
   const table = type === "purchase" ? "purchases" : "donations";
@@ -371,10 +423,9 @@ async function verifyPaypal(supabase: any, user: any, orderId: string, type: str
     });
   }
 
-  // SECURITY: cross-check the captured amount against the expected converted
-  // book/donation price so a tampered client-side FX rate cannot unlock paid
-  // content for pennies. Reject if the captured amount is materially below
-  // what the server would have quoted.
+  // SECURITY: cross-check the captured amount/currency against the order that
+  // the server created. There is NO exchange-rate conversion — the captured
+  // amount must equal the stored numeric amount in the stored currency.
   const capture = captureData.purchase_units?.[0]?.payments?.captures?.[0];
   const capturedAmountStr = capture?.amount?.value;
   const capturedCurrency = capture?.amount?.currency_code;
@@ -387,57 +438,40 @@ async function verifyPaypal(supabase: any, user: any, orderId: string, type: str
     });
   }
 
-  // Resolve the expected INR base amount for this order.
-  let expectedInr = 0;
+  // Resolve the expected amount + currency from the pending order row.
+  let expectedAmount = 0;
+  let expectedCurrency = "";
   if (type === "purchase") {
     const { data: pRow } = await supabase
       .from("purchases")
-      .select("book_id, coupon_id")
+      .select("book_id, coupon_id, amount, currency")
       .eq("razorpay_order_id", orderId)
       .maybeSingle();
-    if (pRow?.book_id) {
+    expectedCurrency = normalizeCurrency(pRow?.currency);
+    expectedAmount = Number(pRow?.amount ?? 0);
+    if (!expectedAmount && pRow?.book_id) {
       const { data: book } = await supabase
-        .from("books")
-        .select("price")
-        .eq("id", pRow.book_id)
-        .maybeSingle();
-      expectedInr = Number(book?.price ?? 0);
-      // If a coupon was applied at order creation, honour it as an upper bound.
-      if (pRow.coupon_id) {
-        const { data: coupon } = await supabase
-          .from("coupons")
-          .select("discount_type, discount_value")
-          .eq("id", pRow.coupon_id)
-          .maybeSingle();
-        if (coupon) {
-          const disc = coupon.discount_type === "percent"
-            ? Math.round((expectedInr * Number(coupon.discount_value)) / 100)
-            : Number(coupon.discount_value);
-          expectedInr = Math.max(1, expectedInr - disc);
-        }
-      }
+        .from("books").select("price").eq("id", pRow.book_id).maybeSingle();
+      expectedAmount = Number(book?.price ?? 0);
     }
   } else {
     const { data: dRow } = await supabase
       .from("donations")
-      .select("amount")
+      .select("amount, currency")
       .eq("razorpay_order_id", orderId)
       .maybeSingle();
-    expectedInr = Number(dRow?.amount ?? 0);
+    expectedAmount = Number(dRow?.amount ?? 0);
+    expectedCurrency = normalizeCurrency(dRow?.currency);
   }
 
-  if (expectedInr > 0) {
-    const { converted: expectedForeign } = await convertInr(expectedInr, capturedCurrency);
-    // Allow a 15% tolerance for FX drift between order creation and capture,
-    // plus any minor rounding differences.
-    const minAcceptable = expectedForeign * 0.85;
-    if (capturedAmount < minAcceptable) {
-      console.error("PayPal amount mismatch", {
-        orderId,
-        expectedInr,
-        expectedForeign,
-        capturedAmount,
-        capturedCurrency,
+  if (expectedAmount > 0) {
+    const expectedStr = paypalAmount(expectedAmount, expectedCurrency);
+    const currencyOk = capturedCurrency.toUpperCase() === expectedCurrency;
+    // Allow only sub-cent rounding differences — no conversion tolerance.
+    const amountOk = Math.abs(capturedAmount - Number(expectedStr)) < 0.01;
+    if (!currencyOk || !amountOk) {
+      console.error("PayPal amount/currency mismatch", {
+        orderId, expectedStr, expectedCurrency, capturedAmount, capturedCurrency,
       });
       return new Response(
         JSON.stringify({ error: "Payment amount does not match order total" }),

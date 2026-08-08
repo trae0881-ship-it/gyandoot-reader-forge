@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import CurrencySelector from "@/components/CurrencySelector";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { Menu, X, User, LogOut, Shield, MessageCircle, Search } from "lucide-react";
@@ -114,6 +115,7 @@ const Header = () => {
 
         {/* Desktop right actions */}
         <div className="hidden md:flex items-center gap-1">
+          <CurrencySelector compact />
           {/* Search */}
           {searchOpen ? (
             <form onSubmit={handleSearch} className="flex items-center gap-1" role="search" aria-label="Site search">

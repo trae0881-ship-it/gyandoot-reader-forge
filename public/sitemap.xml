@@ -266,18 +266,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gyandootnova.in/articles/geeta-18-adhyay-saransh</loc>
-    <lastmod>2026-08-08</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://gyandootnova.in/articles/ramayan-kahani-hindi</loc>
-    <lastmod>2026-08-08</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://gyandootnova.in/articles/%E0%A4%B8%E0%A4%B0%E0%A4%B2-%E0%A4%A6%E0%A5%88%E0%A4%A8%E0%A4%BF%E0%A4%95-%E0%A4%85%E0%A4%AD%E0%A5%8D%E0%A4%AF%E0%A4%BE%E0%A4%B8-%E0%A4%95%E0%A5%87-%E0%A4%AE%E0%A4%BE%E0%A4%A7%E0%A5%8D%E0%A4%AF%E0%A4%AE-%E0%A4%B8%E0%A5%87-%E0%A4%9C%E0%A5%8D%E0%A4%AF%E0%A4%BE%E0%A4%A6%E0%A4%BE-%E0%A4%B8%E0%A5%8B%E0%A4%9A%E0%A4%A8%E0%A5%87-%E0%A4%B8%E0%A5%87-%E0%A4%95%E0%A5%88%E0%A4%B8%E0%A5%87-%E0%A4%B0%E0%A5%8B%E0%A4%95%E0%A5%87%E0%A4%82</loc>
     <lastmod>2026-07-16</lastmod>
     <changefreq>weekly</changefreq>
@@ -296,18 +284,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gyandootnova.in/articles/hanuman-chalisa-path-fayde</loc>
-    <lastmod>2026-08-08</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://gyandootnova.in/articles/vishnu-sahasranama-arth</loc>
-    <lastmod>2026-08-08</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://gyandootnova.in/articles/rigved-devta-list</loc>
     <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
@@ -321,6 +297,12 @@
   </url>
   <url>
     <loc>https://gyandootnova.in/articles/atharvaved-kya-hai</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/hanuman-chalisa-path-fayde</loc>
     <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -380,6 +362,18 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://gyandootnova.in/articles/rigved-yajurved-bhed</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/geeta-18-adhyay-saransh</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://gyandootnova.in/articles/purush-sukta-hindi</loc>
     <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
@@ -423,12 +417,6 @@
   </url>
   <url>
     <loc>https://gyandootnova.in/articles/finding-lifes-purpose-spiritual-journey</loc>
-    <lastmod>2026-07-16</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://gyandootnova.in/articles/practical-mindfulness-techniques-anxiety-relief</loc>
     <lastmod>2026-07-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -524,12 +512,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gyandootnova.in/articles/rigved-yajurved-bhed</loc>
-    <lastmod>2026-08-08</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://gyandootnova.in/articles/science-of-manifestation-thoughts-reality</loc>
     <lastmod>2026-07-22</lastmod>
     <changefreq>weekly</changefreq>
@@ -537,6 +519,24 @@
   </url>
   <url>
     <loc>https://gyandootnova.in/articles/vedas-ancient-indian-wisdom-spirituality</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/practical-mindfulness-techniques-anxiety-relief</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/vishnu-sahasranama-arth</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/ramayan-kahani-hindi</loc>
     <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>

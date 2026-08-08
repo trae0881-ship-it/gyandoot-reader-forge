@@ -44,6 +44,7 @@ interface LocaleContextValue {
 
 const STORAGE_KEY = "gn_currency";
 const MANUAL_KEY = "gn_currency_manual";
+const COUNTRY_KEY = "gn_country";
 
 const LocaleContext = createContext<LocaleContextValue | null>(null);
 

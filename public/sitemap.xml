@@ -207,19 +207,13 @@
   </url>
   <url>
     <loc>https://gyandootnova.in/books/bhagavad-gita-simplified</loc>
-    <lastmod>2026-07-11</lastmod>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://gyandootnova.in/books/krishna-sahastraname</loc>
-    <lastmod>2026-06-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://gyandootnova.in/books/%E0%A4%95%E0%A4%A6%E0%A4%B0%E0%A4%A8%E0%A4%A5</loc>
-    <lastmod>2026-06-03</lastmod>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -242,22 +236,46 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://gyandootnova.in/books/%E0%A4%95%E0%A4%A6%E0%A4%B0%E0%A4%A8%E0%A4%A5</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://gyandootnova.in/books/kakradi-sahastraname</loc>
-    <lastmod>2026-06-28</lastmod>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://gyandootnova.in/books/rigved</loc>
-    <lastmod>2026-07-08</lastmod>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://gyandootnova.in/books/%E0%A4%8B%E0%A4%97%E0%A5%8D%E0%A4%B5%E0%A5%87%E0%A4%A6%E0%A4%83-%E0%A4%AE%E0%A4%A3%E0%A5%8D%E0%A4%A1%E0%A4%B2%E0%A4%82-4</loc>
-    <lastmod>2026-07-10</lastmod>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/rigved-prasiddh-mantra</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/geeta-18-adhyay-saransh</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/ramayan-kahani-hindi</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://gyandootnova.in/articles/%E0%A4%B8%E0%A4%B0%E0%A4%B2-%E0%A4%A6%E0%A5%88%E0%A4%A8%E0%A4%BF%E0%A4%95-%E0%A4%85%E0%A4%AD%E0%A5%8D%E0%A4%AF%E0%A4%BE%E0%A4%B8-%E0%A4%95%E0%A5%87-%E0%A4%AE%E0%A4%BE%E0%A4%A7%E0%A5%8D%E0%A4%AF%E0%A4%AE-%E0%A4%B8%E0%A5%87-%E0%A4%9C%E0%A5%8D%E0%A4%AF%E0%A4%BE%E0%A4%A6%E0%A4%BE-%E0%A4%B8%E0%A5%8B%E0%A4%9A%E0%A4%A8%E0%A5%87-%E0%A4%B8%E0%A5%87-%E0%A4%95%E0%A5%88%E0%A4%B8%E0%A5%87-%E0%A4%B0%E0%A5%8B%E0%A4%95%E0%A5%87%E0%A4%82</loc>
@@ -278,6 +296,54 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://gyandootnova.in/articles/hanuman-chalisa-path-fayde</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/vishnu-sahasranama-arth</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/rigved-devta-list</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/samved-kya-hai</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/atharvaved-kya-hai</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/char-veda-tulna-hindi</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/rigved-rishi-list</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/nasadiya-sukta-hindi-arth</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://gyandootnova.in/articles/Vashikaranmantra</loc>
     <lastmod>2026-07-11</lastmod>
     <changefreq>weekly</changefreq>
@@ -290,14 +356,68 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://gyandootnova.in/articles/rigved-aur-vigyan</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/yajurved-kya-hai</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/bhagavad-gita-online-padhe</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/gayatri-mantra-rigved</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/purush-sukta-hindi</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://gyandootnova.in/articles/rigved-kya-hai</loc>
     <lastmod>2026-07-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://gyandootnova.in/articles/ramayan-patra-hindi</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/geeta-karm-yog</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://gyandootnova.in/articles/%E0%A4%AD%E0%A4%97%E0%A4%B5%E0%A4%A6-%E0%A4%97%E0%A5%80%E0%A4%A4%E0%A4%BE-%E0%A4%95%E0%A5%8D%E0%A4%AF%E0%A4%BE-%E0%A4%B9%E0%A5%88</loc>
     <lastmod>2026-07-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/rigved-rochak-tathya</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/hanuman-chalisa-path-vidhi</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -314,6 +434,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://gyandootnova.in/articles/vedic-shiksha-paddhati</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://gyandootnova.in/articles/beginners-guide-daily-meditation-inner-peace</loc>
     <lastmod>2026-07-16</lastmod>
     <changefreq>weekly</changefreq>
@@ -326,8 +452,32 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://gyandootnova.in/articles/rigved-yoga-sambandh</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/geeta-updesh-hindi</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/rigved-padhne-ke-fayde</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://gyandootnova.in/articles/consciousness-quantum-physics-ancient-modern</loc>
     <lastmod>2026-07-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/dharmik-granth-free-online-padhe</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -370,6 +520,12 @@
   <url>
     <loc>https://gyandootnova.in/articles/sound-healing-modern-meditation-guide</loc>
     <lastmod>2026-07-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/rigved-yajurved-bhed</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

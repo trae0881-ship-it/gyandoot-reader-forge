@@ -136,11 +136,12 @@ function makeInvoiceNumber(purchaseId: string, createdAt: string) {
 }
 
 function currencySymbol(code: string) {
-  if (code === "INR") return "Rs. ";
-  if (code === "USD") return "$";
-  if (code === "EUR") return "EUR ";
-  if (code === "GBP") return "GBP ";
-  return `${code} `;
+  const map: Record<string, string> = {
+    INR: "Rs. ", USD: "$", EUR: "EUR ", GBP: "GBP ",
+    CAD: "C$", AUD: "A$", SGD: "S$", JPY: "JPY ",
+    AED: "AED ", SAR: "SAR ",
+  };
+  return map[code] ?? `${code} `;
 }
 
 function buildInvoicePdf({

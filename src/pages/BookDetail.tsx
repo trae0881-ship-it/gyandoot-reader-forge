@@ -237,7 +237,7 @@ const BookDetail = () => {
   const bookStats = book ? reviewStatsQuery.data?.[book.id] : undefined;
 
   const cleanedDesc = book?.description?.replace(/<[^>]*>/g, "").trim();
-  const priceLabel = book ? (book.is_free ? "मुफ़्त" : `₹${book.price}`) : "";
+  const priceLabel = book ? (book.is_free ? "मुफ़्त" : `${formatPrice(book.price)}`) : "";
   const shortDesc = cleanedDesc && cleanedDesc.length >= 20 ? cleanedDesc.slice(0, 100) : "";
   const bookDescription = book
     ? (shortDesc
@@ -424,11 +424,11 @@ const BookDetail = () => {
               <h1 className="font-serif text-3xl font-bold md:text-4xl">{book.title}</h1>
               <p className="mt-1 text-lg text-muted-foreground">by {book.author}</p>
               <span className={`mt-3 inline-block rounded-full px-3 py-1 text-sm font-medium ${book.is_free ? "bg-muted text-primary" : "bg-secondary/20 text-secondary-foreground"}`}>
-                {book.is_free ? "Free to Read" : `₹${book.price}`}
+                {book.is_free ? "Free to Read" : `${formatPrice(book.price)}`}
               </span>
 
               <div className="mt-4 grid grid-cols-2 gap-2 rounded-lg border border-border bg-muted/30 p-3 text-xs sm:grid-cols-4">
-                <div className="flex items-center gap-1.5"><Tag className="h-3.5 w-3.5 text-primary" /><span><strong>{book.is_free ? "मुफ़्त" : `₹${book.price}`}</strong> कीमत</span></div>
+                <div className="flex items-center gap-1.5"><Tag className="h-3.5 w-3.5 text-primary" /><span><strong>{book.is_free ? "मुफ़्त" : `${formatPrice(book.price)}`}</strong> कीमत</span></div>
                 <div className="flex items-center gap-1.5"><PlayCircle className="h-3.5 w-3.5 text-primary" /><span><strong>तुरंत</strong> delivery (0 min)</span></div>
                 <div className="flex items-center gap-1.5"><CreditCard className="h-3.5 w-3.5 text-primary" /><span><strong>UPI</strong> · Card · NetBanking</span></div>
                 <div className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-primary" /><span><strong>7-day</strong> refund</span></div>
@@ -475,12 +475,12 @@ const BookDetail = () => {
                   <div className="rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-secondary/5 p-4">
                     <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">आप क्या पा रहे हैं</p>
                     <ul className="space-y-1.5 text-sm">
-                      <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5 text-primary" /> पुस्तक का lifetime access</span><span className="text-muted-foreground">₹{book.price}</span></li>
+                      <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5 text-primary" /> पुस्तक का lifetime access</span><span className="text-muted-foreground">{formatPrice(book.price)}</span></li>
                       <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><Smartphone className="h-3.5 w-3.5 text-primary" /> सभी devices पर पढ़ें</span><span className="text-muted-foreground line-through">₹500</span></li>
                       <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><Bookmark className="h-3.5 w-3.5 text-primary" /> Bookmarks + Notes</span><span className="text-muted-foreground line-through">₹300</span></li>
                       <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><PlayCircle className="h-3.5 w-3.5 text-primary" /> Continue reading + Progress</span><span className="text-muted-foreground line-through">₹200</span></li>
                       <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><Gift className="h-3.5 w-3.5 text-primary" /> जीवनभर Free updates</span><span className="text-muted-foreground line-through">₹500</span></li>
-                      <li className="flex justify-between font-bold border-t border-primary/20 pt-2 mt-2"><span>आज आपका मूल्य</span><span className="text-primary text-lg">₹{book.price}</span></li>
+                      <li className="flex justify-between font-bold border-t border-primary/20 pt-2 mt-2"><span>आज आपका मूल्य</span><span className="text-primary text-lg">{formatPrice(book.price)}</span></li>
                     </ul>
                   </div>
 
@@ -531,7 +531,7 @@ const BookDetail = () => {
                           {" — "}
                           {appliedCoupon.discount_type === "percent"
                             ? `${appliedCoupon.discount_value}% off`
-                            : `₹${appliedCoupon.discount_amount} off`}
+                            : `${formatPrice(appliedCoupon.discount_amount)} off`}
                         </span>
                       </div>
                       <button onClick={removeCoupon} className="text-muted-foreground hover:text-destructive ml-2">
@@ -542,14 +542,14 @@ const BookDetail = () => {
 
                   <div className="flex items-center gap-3">
                     {appliedCoupon && (
-                      <span className="text-muted-foreground line-through text-sm">₹{book.price}</span>
+                      <span className="text-muted-foreground line-through text-sm">{formatPrice(book.price)}</span>
                     )}
                     <span className="text-2xl font-bold text-primary">
-                      ₹{appliedCoupon ? appliedCoupon.final_amount : book.price}
+                      {formatPrice(appliedCoupon ? appliedCoupon.final_amount : book.price)}
                     </span>
                     {appliedCoupon && (
                       <span className="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                        Save ₹{appliedCoupon.discount_amount}
+                        Save {formatPrice(appliedCoupon.discount_amount)}
                       </span>
                     )}
                     <span className="text-xs text-muted-foreground ml-auto">जीवनभर</span>
@@ -559,7 +559,7 @@ const BookDetail = () => {
                     {purchasing ? (
                       <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</>
                     ) : (
-                      <><Unlock className="mr-2 h-4 w-4" /> Buy Now — ₹{appliedCoupon ? appliedCoupon.final_amount : book.price} (जीवनभर)</>
+                      <><Unlock className="mr-2 h-4 w-4" /> Buy Now — {formatPrice(appliedCoupon ? appliedCoupon.final_amount : book.price)} (जीवनभर)</>
                     )}
                   </Button>
 
@@ -663,7 +663,7 @@ const BookDetail = () => {
                 <ShoppingCart className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                 <div>
                   <p className="text-xs text-muted-foreground uppercase tracking-wider">Price</p>
-                  <p className="font-medium text-foreground">{book.is_free ? "Free" : `₹${book.price}`}</p>
+                  <p className="font-medium text-foreground">{book.is_free ? "Free" : `${formatPrice(book.price)}`}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -845,7 +845,7 @@ const BookDetail = () => {
         open={guestDialogOpen}
         onOpenChange={setGuestDialogOpen}
         onContinue={(data) => runPayment(data)}
-        priceLabel={`₹${appliedCoupon ? appliedCoupon.final_amount : book.price}`}
+        priceLabel={`${formatPrice(appliedCoupon ? appliedCoupon.final_amount : book.price)}`}
       />
 
 
@@ -855,7 +855,7 @@ const BookDetail = () => {
           <div className="flex-1 min-w-0">
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground">जीवनभर access</p>
             <div className="flex items-baseline gap-1">
-              <span className="text-lg font-bold text-primary">₹{appliedCoupon ? appliedCoupon.final_amount : book.price}</span>
+              <span className="text-lg font-bold text-primary">{formatPrice(appliedCoupon ? appliedCoupon.final_amount : book.price)}</span>
               <span className="text-[10px] text-primary inline-flex items-center gap-0.5"><CheckCircle className="h-2.5 w-2.5" /> 7-दिन refund</span>
             </div>
           </div>
@@ -932,7 +932,7 @@ const SimilarBooks = ({ currentBookId, category }: { currentBookId: string; cate
                   <p className="text-sm text-muted-foreground">{b.author}</p>
                   <div className="mt-2 flex items-center justify-between">
                     <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${b.is_free ? "bg-muted text-primary" : "bg-secondary/20 text-secondary-foreground"}`}>
-                      {b.is_free ? "Free" : `₹${b.price}`}
+                      {b.is_free ? "Free" : `${formatPrice(b.price)}`}
                     </span>
                     <span className="text-xs text-muted-foreground">{Math.max(b.purchase_count, 100)}+ readers</span>
                   </div>

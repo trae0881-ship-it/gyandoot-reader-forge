@@ -72,7 +72,7 @@ async function emailAdmin(row: Record<string, unknown>, diagnosis: string | null
     method: "POST",
     headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      from: "GyandootNova Alerts <onboarding@resend.dev>",
+      from: "GyandootNova Alerts <info@gyandootnova.in>",
       to: [ADMIN_EMAIL],
       subject: `[Bug] ${String(row.message).slice(0, 90)}`,
       html,

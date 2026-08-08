@@ -46,18 +46,19 @@ const EUROZONE = [
   "MT","NL","PT","SK","SI","ES",
 ];
 
+/**
+ * Simplified worldwide rule:
+ *   India            -> INR (Razorpay)
+ *   Eurozone         -> EUR (PayPal)
+ *   Everyone else    -> USD (PayPal)
+ */
 export const COUNTRY_CURRENCY: Record<string, CurrencyCode> = {
   IN: "INR",
-  US: "USD",
-  GB: "GBP",
-  AE: "AED",
-  SA: "SAR",
-  CA: "CAD",
-  AU: "AUD",
-  JP: "JPY",
-  SG: "SGD",
   ...Object.fromEntries(EUROZONE.map((c) => [c, "EUR" as CurrencyCode])),
 };
+
+/** Currencies a shopper can actually pick in the UI. */
+export const SELECTABLE_CURRENCY_CODES: CurrencyCode[] = ["INR", "USD", "EUR"];
 
 export const DEFAULT_CURRENCY: CurrencyCode = "INR";
 
@@ -66,7 +67,9 @@ export const isCurrencyCode = (v: unknown): v is CurrencyCode =>
 
 export const currencyForCountry = (country?: string | null): CurrencyCode => {
   if (!country) return DEFAULT_CURRENCY;
-  return COUNTRY_CURRENCY[country.toUpperCase()] ?? DEFAULT_CURRENCY;
+  const cc = country.toUpperCase();
+  // India -> INR, Eurozone -> EUR, rest of the world -> USD.
+  return COUNTRY_CURRENCY[cc] ?? "USD";
 };
 
 /**

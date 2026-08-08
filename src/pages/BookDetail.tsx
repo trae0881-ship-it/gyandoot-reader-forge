@@ -565,13 +565,8 @@ const BookDetail = () => {
 
 
 
-                  {/* Risk Reversal */}
-                  <div className="flex items-start gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3">
-                    <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                    <div className="text-xs text-foreground/80">
-                      <strong className="text-foreground">7-दिन 100% पैसा वापसी की गारंटी</strong> — पसंद ना आए तो एक click में refund। कोई सवाल नहीं।
-                    </div>
-                  </div>
+
+
 
                   {/* Trust badges */}
                   <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground pt-1">

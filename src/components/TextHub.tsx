@@ -26,7 +26,7 @@ interface Props {
   hindi: string;
   sanskrit?: string;
   slug: string; // page slug, combined with basePath
-  /** Route prefix this page is actually mounted at. Defaults to "/texts". */
+  /** Route prefix this page is actually mounted at. Used by every SEO URL. */
   basePath?: string;
   /** Breadcrumb section label + link. Defaults to Sacred Texts / /texts. */
   breadcrumb?: { name: string; path: string };
@@ -67,7 +67,10 @@ const TextHub = ({
   related,
   readerCta,
 }: Props) => {
-  const path = `${basePath.replace(/\/$/, "")}/${slug}`;
+  // Keep canonical, Open Graph, hreflang and every JSON-LD URL on the
+  // component's real route. Comparison pages explicitly pass "/compare".
+  const routePrefix = `/${basePath.replace(/^\/+|\/+$/g, "")}`;
+  const path = `${routePrefix}/${slug}`;
 
   const jsonLd = [
     buildArticleSchema({

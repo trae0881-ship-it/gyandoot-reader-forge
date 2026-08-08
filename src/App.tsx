@@ -128,8 +128,9 @@ const queryClient = new QueryClient();
 const AppContent = () => {
   useVisitorTracker();
 
-
-
+  useEffect(() => {
+    installSelfHealing();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -140,6 +141,7 @@ const AppContent = () => {
             <Toaster />
             <Sonner />
             <BrowserRouter>
+            <ErrorBoundary>
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Index />} />

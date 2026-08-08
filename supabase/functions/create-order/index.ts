@@ -1,5 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { convertInr, PAYPAL_SUPPORTED as _PP_SUPPORTED } from "../_shared/fx.ts";
+import {
+  gatewayForCurrency, normalizeCurrency, paypalAmount, razorpayAmount, PAYPAL_SUPPORTED,
+} from "../_shared/currency.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -18,10 +20,23 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const {
-      amount, type, book_id, name, email, gateway = "razorpay",
-      coupon_id, referrer_id, buyer_currency, buyer_fx_rate,
+      amount, type, book_id, name, email,
+      coupon_id, referrer_id, buyer_currency,
       guest_email, guest_name,
     } = await req.json();
+
+    // ---- Currency + gateway routing (NO exchange-rate conversion) ----
+    const currency = normalizeCurrency(buyer_currency);
+    const gateway = gatewayForCurrency(currency);
+    if (gateway === "unsupported") {
+      return new Response(
+        JSON.stringify({
+          error: `${currency} is not supported by our payment providers. Please choose INR, USD, GBP, EUR, CAD, AUD, JPY or SGD.`,
+          unsupported_currency: currency,
+        }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     // Auth is optional. Purchases allow logged-in OR guest (guest_email required).
     let user: any = null;
@@ -136,14 +151,8 @@ Deno.serve(async (req) => {
 
     if (gateway === "razorpay") {
       return await handleRazorpay(supabase, user, verifiedAmount, type, book_id, name, email, coupon_id, referrer_id, guest_email, guest_name);
-    } else if (gateway === "paypal") {
-      return await handlePaypal(supabase, user, verifiedAmount, type, book_id, name, email, coupon_id, referrer_id, buyer_currency, guest_email, guest_name);
-    } else {
-      return new Response(JSON.stringify({ error: "Unsupported gateway" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
     }
+    return await handlePaypal(supabase, user, verifiedAmount, type, book_id, name, email, coupon_id, referrer_id, currency, guest_email, guest_name);
   } catch (err) {
     console.error("create-order error:", err);
     return new Response(JSON.stringify({ error: "Internal server error" }), {
@@ -180,7 +189,7 @@ async function handleRazorpay(
       Authorization: "Basic " + btoa(`${keyId}:${keySecret}`),
     },
     body: JSON.stringify({
-      amount: Math.round(amount * 100),
+      amount: razorpayAmount(amount, "INR"),
       currency: "INR",
       receipt: `${type}_${Date.now()}`,
     }),
@@ -210,6 +219,7 @@ async function handleRazorpay(
       status: "pending",
       amount,
       currency: "INR",
+      payment_gateway: "razorpay",
     };
     if (referrer_id && referrer_id !== user?.id) {
       purchaseData.referrer_id = referrer_id;
@@ -224,6 +234,8 @@ async function handleRazorpay(
       donor_email: email || user?.email || null,
       razorpay_order_id: order.id,
       status: "pending",
+      currency: "INR",
+      payment_gateway: "razorpay",
     });
   }
 
@@ -232,8 +244,6 @@ async function handleRazorpay(
     { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
 }
-
-const PAYPAL_SUPPORTED = _PP_SUPPORTED;
 
 async function handlePaypal(
   supabase: any, user: any, amount: number, type: string,
@@ -269,10 +279,15 @@ async function handlePaypal(
 
   const { access_token } = await tokenRes.json();
 
-  // SECURITY: server-side FX only. Ignore any client-supplied rate — a hostile
-  // buyer would otherwise send `buyer_fx_rate: 0.00001` and pay pennies.
-  const { rate: _rate, formatted: paypalValue, currency } =
-    await convertInr(amount, buyer_currency || "USD");
+  // NO CONVERSION: the same numeric amount is charged in the buyer's currency.
+  const currency = normalizeCurrency(buyer_currency);
+  if (!PAYPAL_SUPPORTED.has(currency)) {
+    return new Response(
+      JSON.stringify({ error: `PayPal does not support ${currency}`, unsupported_currency: currency }),
+      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+  const paypalValue = paypalAmount(amount, currency);
 
 
   const orderRes = await fetch("https://api-m.paypal.com/v2/checkout/orders", {
@@ -315,6 +330,7 @@ async function handlePaypal(
       status: "pending",
       amount: Number(paypalValue),
       currency,
+      payment_gateway: "paypal",
     };
     if (referrer_id && referrer_id !== user?.id) {
       purchaseData.referrer_id = referrer_id;
@@ -329,6 +345,8 @@ async function handlePaypal(
       donor_email: email || user?.email || null,
       razorpay_order_id: ppOrder.id,
       status: "pending",
+      currency,
+      payment_gateway: "paypal",
     });
   }
 

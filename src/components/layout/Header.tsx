@@ -114,6 +114,7 @@ const Header = () => {
 
         {/* Desktop right actions */}
         <div className="hidden md:flex items-center gap-1">
+          <CurrencySelector compact />
           {/* Search */}
           {searchOpen ? (
             <form onSubmit={handleSearch} className="flex items-center gap-1" role="search" aria-label="Site search">

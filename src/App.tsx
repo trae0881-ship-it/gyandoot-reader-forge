@@ -279,6 +279,7 @@ const AppContent = () => {
                 <Route path="*" element={<NotFound />} />
               </Routes>
               </Suspense>
+              </ErrorBoundary>
             </BrowserRouter>
           </LocaleProvider>
         </AuthProvider>

@@ -132,7 +132,17 @@ const ToolBtn = ({ onClick, active, title, children, disabled }: {
 
 const Divider = () => <div className="w-px h-5 bg-border mx-0.5 shrink-0" />;
 
+/* ─── Font families the admin can pick before typing ──────────────────── */
+const FONT_FAMILIES = [
+  { label: "Default", value: "" },
+  { label: "Noto Serif Devanagari", value: "'Noto Serif Devanagari', serif" },
+  { label: "Georgia", value: "Georgia, serif" },
+  { label: "Noto Serif", value: "'Noto Serif', serif" },
+  { label: "Inter", value: "Inter, system-ui, sans-serif" },
+];
+
 /* ─── Text color swatches ─────────────────────────────────────────────── */
+
 const COLORS = [
   "#000000", "#374151", "#6b7280", "#ffffff",
   "#dc2626", "#ea580c", "#d97706", "#65a30d",
@@ -289,6 +299,28 @@ const RichTextEditor = ({ value, onChange, placeholder = "Start writing…", min
           <Redo className="h-3.5 w-3.5" />
         </ToolBtn>
         <Divider />
+
+        {/* Font family */}
+        <select
+          title="Font"
+          className="h-7 rounded border border-border bg-background px-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+          value={editor.getAttributes("textStyle").fontFamily || ""}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (!value) editor.chain().focus().unsetFontFamily().run();
+            else editor.chain().focus().setFontFamily(value).run();
+          }}
+          style={{ fontFamily: editor.getAttributes("textStyle").fontFamily || undefined }}
+        >
+          {FONT_FAMILIES.map((f) => (
+            <option key={f.label} value={f.value} style={{ fontFamily: f.value || undefined }}>
+              {f.label}
+            </option>
+          ))}
+        </select>
+        <Divider />
+
+
 
         {/* Headings */}
         <ToolBtn title="Heading 1" active={editor.isActive("heading", { level: 1 })} onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}>

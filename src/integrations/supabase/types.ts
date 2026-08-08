@@ -294,6 +294,66 @@ export type Database = {
         }
         Relationships: []
       }
+      app_errors: {
+        Row: {
+          ai_diagnosis: string | null
+          auto_fix: string | null
+          created_at: string
+          emailed_at: string | null
+          fingerprint: string
+          id: string
+          last_seen_at: string
+          message: string
+          needs_ai: boolean
+          occurrences: number
+          route: string | null
+          severity: string
+          source: string
+          stack: string | null
+          status: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          ai_diagnosis?: string | null
+          auto_fix?: string | null
+          created_at?: string
+          emailed_at?: string | null
+          fingerprint: string
+          id?: string
+          last_seen_at?: string
+          message: string
+          needs_ai?: boolean
+          occurrences?: number
+          route?: string | null
+          severity?: string
+          source?: string
+          stack?: string | null
+          status?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          ai_diagnosis?: string | null
+          auto_fix?: string | null
+          created_at?: string
+          emailed_at?: string | null
+          fingerprint?: string
+          id?: string
+          last_seen_at?: string
+          message?: string
+          needs_ai?: boolean
+          occurrences?: number
+          route?: string | null
+          severity?: string
+          source?: string
+          stack?: string | null
+          status?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       book_chapters: {
         Row: {
           approval_notes: string | null

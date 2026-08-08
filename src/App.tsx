@@ -9,7 +9,9 @@ import { useVisitorTracker } from "@/hooks/useVisitorTracker";
 
 
 
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
+import ErrorBoundary from "@/components/ErrorBoundary";
+import { installSelfHealing } from "@/lib/selfHeal";
 
 // Only eagerly load the homepage
 import Index from "./pages/Index";
@@ -128,8 +130,9 @@ const queryClient = new QueryClient();
 const AppContent = () => {
   useVisitorTracker();
 
-
-
+  useEffect(() => {
+    installSelfHealing();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -140,6 +143,7 @@ const AppContent = () => {
             <Toaster />
             <Sonner />
             <BrowserRouter>
+            <ErrorBoundary>
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Index />} />
@@ -277,6 +281,7 @@ const AppContent = () => {
                 <Route path="*" element={<NotFound />} />
               </Routes>
               </Suspense>
+              </ErrorBoundary>
             </BrowserRouter>
           </LocaleProvider>
         </AuthProvider>

@@ -96,12 +96,12 @@ const Header = () => {
 
 
         {/* Desktop nav */}
-        <nav aria-label="Main navigation" className="hidden md:flex items-center gap-0.5 lg:gap-1">
+        <nav aria-label="Main navigation" className="hidden lg:flex items-center gap-0.5 xl:gap-1">
           {navLinks.map((link) => (
             <Link
               key={link.to}
               to={link.to}
-              className="link-underline text-[13px] lg:text-sm font-medium text-foreground/75 transition-colors hover:text-primary px-2 py-1.5 whitespace-nowrap"
+              className="link-underline text-[13px] xl:text-sm font-medium text-foreground/75 transition-colors hover:text-primary px-1.5 xl:px-2 py-1.5 whitespace-nowrap"
             >
               {link.label}
             </Link>
@@ -114,7 +114,7 @@ const Header = () => {
         </nav>
 
         {/* Desktop right actions */}
-        <div className="hidden md:flex items-center gap-1">
+        <div className="hidden lg:flex items-center gap-1 shrink-0">
           <CurrencySelector compact />
           {/* Search */}
           {searchOpen ? (
@@ -124,7 +124,7 @@ const Header = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search..."
                 aria-label="Search books"
-                className="h-8 w-32 lg:w-40"
+                className="h-8 w-28 xl:w-40"
                 autoFocus
               />
               <Button type="submit" size="icon" variant="ghost" className="h-8 w-8" aria-label="Submit search">
@@ -155,7 +155,7 @@ const Header = () => {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-8 gap-1 text-xs" aria-label="Open user menu">
                   <User className="h-4 w-4" />
-                  <span className="hidden lg:inline max-w-[80px] truncate">{user.email?.split("@")[0]}</span>
+                  <span className="hidden xl:inline max-w-[80px] truncate">{user.email?.split("@")[0]}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -178,7 +178,7 @@ const Header = () => {
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden"
+          className="lg:hidden"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
         >
@@ -188,13 +188,17 @@ const Header = () => {
 
       {/* Mobile nav */}
       {mobileOpen && (
-        <div className="border-t border-border bg-background p-4 md:hidden">
+        <div className="border-t border-border bg-background p-4 lg:hidden max-h-[calc(100vh-68px)] overflow-y-auto">
           <nav aria-label="Mobile navigation" className="flex flex-col gap-3">
             {navLinks.map((link) => (
               <Link key={link.to} to={link.to} className="text-sm font-medium" onClick={() => setMobileOpen(false)}>
                 {link.label}
               </Link>
             ))}
+            <div className="flex items-center justify-between gap-2 rounded-md border border-border/60 px-3 py-2">
+              <span className="text-sm font-medium text-muted-foreground">Currency</span>
+              <CurrencySelector compact />
+            </div>
             <form onSubmit={handleSearch} className="flex items-center gap-2" role="search" aria-label="Site search (mobile)">
               <Input
                 value={searchQuery}

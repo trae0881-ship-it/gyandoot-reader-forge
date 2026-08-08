@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useLocale } from "@/hooks/useLocale";
 import { supabase } from "@/integrations/supabase/client";
 import useSEO from "@/hooks/useSEO";
 import Layout from "@/components/layout/Layout";
@@ -417,11 +418,11 @@ const BookCard = ({
             ) : (
               <>
                 <span className="text-[20px] font-bold" style={{ color: T.text }}>
-                  ₹{book.price}
+                  {formatPrice(book.price ?? 0)}
                 </span>
                 {original > (book.price ?? 0) && (
                   <span className="text-xs line-through" style={{ color: T.textMuted }}>
-                    ₹{original}
+                    {formatPrice(original)}
                   </span>
                 )}
               </>
@@ -432,7 +433,7 @@ const BookCard = ({
               className="rounded-md px-2 py-0.5 text-[11px] font-semibold"
               style={{ background: T.primarySoft, color: "#92400E" }}
             >
-              Save ₹{saved}
+              Save {formatPrice(saved)}
             </span>
           )}
         </div>
@@ -629,9 +630,9 @@ const QuickView = ({
               <span className="text-3xl font-bold" style={{ color: T.success }}>Free</span>
             ) : (
               <>
-                <span className="text-3xl font-bold" style={{ color: T.text }}>₹{book.price}</span>
+                <span className="text-3xl font-bold" style={{ color: T.text }}>{formatPrice(book.price ?? 0)}</span>
                 {original > (book.price ?? 0) && (
-                  <span className="text-base line-through" style={{ color: T.textMuted }}>₹{original}</span>
+                  <span className="text-base line-through" style={{ color: T.textMuted }}>{formatPrice(original)}</span>
                 )}
               </>
             )}

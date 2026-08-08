@@ -20,7 +20,14 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: false,
     },
+    // Layer folders (frontend/, backend/, database/) are navigation views that
+    // symlink to the real source dirs — don't watch them twice.
+    watch: {
+      ignored: ["**/frontend/**", "**/backend/**", "**/database/**"],
+    },
+    fs: { allow: [path.resolve(__dirname)] },
   },
+
   plugins: [react(), mcpPlugin(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
     alias: {

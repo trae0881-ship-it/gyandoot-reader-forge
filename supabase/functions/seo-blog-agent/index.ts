@@ -667,8 +667,12 @@ Return STRICT JSON (no markdown fences):
     let postId: string | null = null;
     let finalSlug = slugFinal;
 
+    // Agent-generated content is auto-approved: the DB trigger blocks any
+    // publish/schedule while approval_status is still 'draft'.
     const savePayloadCommon = {
       publish_status: publishStatus,
+      approval_status: publishStatus === "draft" ? "draft" : "approved",
+      is_published: publishStatus === "published",
       scheduled_at: scheduledAtIso,
       timezone: requestedTz,
       reading_time_min: rt.minutes,

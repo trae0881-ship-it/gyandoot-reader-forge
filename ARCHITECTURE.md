@@ -229,10 +229,16 @@ secret manager and are only readable inside edge functions.
 
 ---
 
-## 📝 Why Code Lives in One Repo
+## 📝 Why the Canonical Files Stay at the Root
 
+The hosting pipeline builds and previews from the repository root, so
+`package.json`, `vite.config.ts` and `index.html` must physically exist there,
+and the migration/edge-function tooling reads and writes `supabase/` at the
+root. The `frontend/`, `backend/` and `database/` folders therefore hold
+filesystem links to those canonical paths: real, navigable folders with the
+three layers physically separated, one copy of every file, and a build that
+still deploys.
 
-Lovable platform requires `package.json`, `vite.config.ts`, `index.html` at the **root**, and Supabase CLI requires `supabase/` at the root. Physically separating into `frontend/` and `backend/` folders would break the auto-deploy pipeline.
 
 **Logical separation is what matters** — and it's strictly enforced:
 - Frontend never imports from `supabase/functions/`

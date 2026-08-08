@@ -43,6 +43,8 @@ import {
 } from "lucide-react";
 
 import BookCover from "@/components/BookCover";
+import CurrencySelector from "@/components/CurrencySelector";
+
 
 // ==============================
 // Design tokens (page-scoped)
@@ -1152,7 +1154,9 @@ const Books = () => {
                 </div>
 
                 <div className="ml-auto flex items-center gap-2">
+                  <CurrencySelector compact />
                   <FilterSelect value={sort} onChange={setSort} options={SORTS} accent />
+
                   <Button
                     variant="outline"
                     className="h-11 rounded-xl lg:hidden"

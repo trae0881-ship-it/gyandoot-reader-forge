@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import CurrencySelector from "@/components/CurrencySelector";
+
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { Menu, X, User, LogOut, Shield, MessageCircle, Search } from "lucide-react";
@@ -115,7 +115,6 @@ const Header = () => {
 
         {/* Right actions — currency + search stay visible on every screen size */}
         <div className="flex items-center gap-1 shrink-0">
-          <CurrencySelector compact />
           {/* Search */}
           {searchOpen ? (
             <form onSubmit={handleSearch} className="flex items-center gap-1" role="search" aria-label="Site search">
@@ -196,10 +195,6 @@ const Header = () => {
                 {link.label}
               </Link>
             ))}
-            <div className="flex items-center justify-between gap-2 rounded-md border border-border/60 px-3 py-2">
-              <span className="text-sm font-medium text-muted-foreground">Currency</span>
-              <CurrencySelector compact />
-            </div>
             <form onSubmit={handleSearch} className="flex items-center gap-2" role="search" aria-label="Site search (mobile)">
               <Input
                 value={searchQuery}

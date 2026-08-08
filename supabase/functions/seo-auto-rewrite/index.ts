@@ -126,7 +126,7 @@ Deno.serve(async (req) => {
     for (const r of rows || []) {
       const r2 = await fetch(`${url}/functions/v1/seo-auto-rewrite`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${svc}`, apikey: svc, "Content-Type": "application/json" },
+        headers: { Authorization: `Bearer ${svc}`, apikey: svc, "x-cron-secret": Deno.env.get("SEO_CRON_TOKEN") ?? "", "Content-Type": "application/json" },
         body: JSON.stringify({ post_id: r.id, threshold, max_attempts: maxAttempts }),
       });
       results.push({ post_id: r.id, status: r2.status });

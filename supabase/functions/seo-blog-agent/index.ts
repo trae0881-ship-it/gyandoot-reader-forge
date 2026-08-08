@@ -15,6 +15,7 @@ import {
   recordProviderSuccess, classifyError,
 } from "../_shared/seo-alerts.ts";
 import { buildKeyResolver, KeyResolver } from "../_shared/ai-key-resolver.ts";
+import { assertSeoAuthorized } from "../_shared/seo-auth.ts";
 
 const NICHE = "Books, Spirituality, Meditation, Self Growth, Mindfulness, Consciousness";
 const SITE = "https://gyandootnova.in";
@@ -371,38 +372,10 @@ Deno.serve(async (req) => {
   const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
   // Authorization: this endpoint publishes content and burns paid AI/search
-  // quotas. It MUST NOT be callable by anonymous users. Accept either:
-  //   - x-cron-secret matching SEO_AGENT_CRON_SECRET (scheduled cron), or
-  //   - an admin JWT in the Authorization header (admin UI).
-  const cronSecret = Deno.env.get("SEO_AGENT_CRON_SECRET") || "";
-  const providedSecret = req.headers.get("x-cron-secret") || "";
-  let authorized = cronSecret.length > 0 && providedSecret === cronSecret;
-  if (!authorized) {
-    const authHeader = req.headers.get("Authorization") || "";
-    if (authHeader.startsWith("Bearer ")) {
-      try {
-        const token = authHeader.slice(7);
-        const anon = createClient(
-          Deno.env.get("SUPABASE_URL")!,
-          Deno.env.get("SUPABASE_ANON_KEY")!,
-        );
-        const { data, error } = await anon.auth.getUser(token);
-        if (!error && data?.user) {
-          const { data: isAdmin } = await supabase.rpc("has_role", {
-            _user_id: data.user.id,
-            _role: "admin",
-          });
-          if (isAdmin === true) authorized = true;
-        }
-      } catch { /* fall through to 401 */ }
-    }
-  }
-  if (!authorized) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
+  // quotas. It MUST NOT be callable by anonymous users. Handled centrally by
+  // the shared guard (cron secret, service-role bearer, or admin JWT).
+  const unauthorized = await assertSeoAuthorized(req);
+  if (unauthorized) return unauthorized;
 
   const resolveKey = await buildKeyResolver(supabase);
 
@@ -694,8 +667,12 @@ Return STRICT JSON (no markdown fences):
     let postId: string | null = null;
     let finalSlug = slugFinal;
 
+    // Agent-generated content is auto-approved: the DB trigger blocks any
+    // publish/schedule while approval_status is still 'draft'.
     const savePayloadCommon = {
       publish_status: publishStatus,
+      approval_status: publishStatus === "draft" ? "draft" : "approved",
+      is_published: publishStatus === "published",
       scheduled_at: scheduledAtIso,
       timezone: requestedTz,
       reading_time_min: rt.minutes,

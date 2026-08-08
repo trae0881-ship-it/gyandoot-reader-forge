@@ -180,23 +180,65 @@ Managed by **Lovable Cloud** (Supabase under the hood). All server-side logic li
 
 ## 🗂️ Three-Section Map (frontend / backend / database)
 
-| Section | Physical location | Layer README |
+The repo has three top-level layer folders. Each entry inside them is a
+filesystem link to the canonical file, so there is exactly one copy of every
+file — no duplication, and the build/deploy pipeline keeps working.
+
+```text
+project/
+├── frontend/                 # USER → presentation layer
+│   ├── src/
+│   ├── public/
+│   ├── index.html
+│   ├── vite.config.ts
+│   ├── tailwind.config.ts
+│   ├── package.json
+│   └── README.md
+├── backend/                  # API layer
+│   ├── supabase/
+│   │   └── functions/
+│   │       ├── _shared/
+│   │       └── <edge functions>
+│   └── README.md
+├── database/                 # persistence layer
+│   ├── supabase/
+│   │   ├── migrations/
+│   │   ├── config.toml
+│   │   └── DATABASE.md
+│   └── README.md
+├── scripts/
+├── e2e/
+├── .env.example
+├── .gitignore
+└── README.md
+```
+
+| Section | Layer folder | Canonical build path |
 |---|---|---|
-| **FRONTEND** | `src/`, `public/`, `index.html`, `vite.config.ts`, `tailwind.config.ts` | `src/README.md` |
-| **BACKEND (API)** | `supabase/functions/` (+ `supabase/functions/_shared/`) | `supabase/functions/README.md` |
-| **DATABASE** | `supabase/migrations/`, `supabase/config.toml`, storage buckets | `supabase/DATABASE.md` |
-| **Tooling / root** | `scripts/`, `e2e/`, `package.json`, `.env.example` | this file |
+| **FRONTEND** | `frontend/` | `src/`, `public/`, `index.html`, `vite.config.ts`, `tailwind.config.ts` |
+| **BACKEND (API)** | `backend/supabase/functions/` | `supabase/functions/` |
+| **DATABASE** | `database/supabase/` | `supabase/migrations/`, `supabase/config.toml` |
+| **Tooling / root** | — | `scripts/`, `e2e/`, `package.json`, `.env.example` |
+
+Flow: `USER → frontend → API → backend → database → Supabase database`.
 
 Environment variables: public frontend values live in `.env` (template:
 `.env.example`, git-ignored real file). All secrets live in the backend
 secret manager and are only readable inside edge functions.
 
+
 ---
 
-## 📝 Why Code Lives in One Repo
+## 📝 Why the Canonical Files Stay at the Root
 
+The hosting pipeline builds and previews from the repository root, so
+`package.json`, `vite.config.ts` and `index.html` must physically exist there,
+and the migration/edge-function tooling reads and writes `supabase/` at the
+root. The `frontend/`, `backend/` and `database/` folders therefore hold
+filesystem links to those canonical paths: real, navigable folders with the
+three layers physically separated, one copy of every file, and a build that
+still deploys.
 
-Lovable platform requires `package.json`, `vite.config.ts`, `index.html` at the **root**, and Supabase CLI requires `supabase/` at the root. Physically separating into `frontend/` and `backend/` folders would break the auto-deploy pipeline.
 
 **Logical separation is what matters** — and it's strictly enforced:
 - Frontend never imports from `supabase/functions/`

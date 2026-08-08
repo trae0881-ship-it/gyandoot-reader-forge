@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { convertInr } from "../_shared/fx.ts";
+import { normalizeCurrency, paypalAmount } from "../_shared/currency.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -371,10 +371,9 @@ async function verifyPaypal(supabase: any, user: any, orderId: string, type: str
     });
   }
 
-  // SECURITY: cross-check the captured amount against the expected converted
-  // book/donation price so a tampered client-side FX rate cannot unlock paid
-  // content for pennies. Reject if the captured amount is materially below
-  // what the server would have quoted.
+  // SECURITY: cross-check the captured amount/currency against the order that
+  // the server created. There is NO exchange-rate conversion — the captured
+  // amount must equal the stored numeric amount in the stored currency.
   const capture = captureData.purchase_units?.[0]?.payments?.captures?.[0];
   const capturedAmountStr = capture?.amount?.value;
   const capturedCurrency = capture?.amount?.currency_code;
@@ -387,57 +386,40 @@ async function verifyPaypal(supabase: any, user: any, orderId: string, type: str
     });
   }
 
-  // Resolve the expected INR base amount for this order.
-  let expectedInr = 0;
+  // Resolve the expected amount + currency from the pending order row.
+  let expectedAmount = 0;
+  let expectedCurrency = "";
   if (type === "purchase") {
     const { data: pRow } = await supabase
       .from("purchases")
-      .select("book_id, coupon_id")
+      .select("book_id, coupon_id, amount, currency")
       .eq("razorpay_order_id", orderId)
       .maybeSingle();
-    if (pRow?.book_id) {
+    expectedCurrency = normalizeCurrency(pRow?.currency);
+    expectedAmount = Number(pRow?.amount ?? 0);
+    if (!expectedAmount && pRow?.book_id) {
       const { data: book } = await supabase
-        .from("books")
-        .select("price")
-        .eq("id", pRow.book_id)
-        .maybeSingle();
-      expectedInr = Number(book?.price ?? 0);
-      // If a coupon was applied at order creation, honour it as an upper bound.
-      if (pRow.coupon_id) {
-        const { data: coupon } = await supabase
-          .from("coupons")
-          .select("discount_type, discount_value")
-          .eq("id", pRow.coupon_id)
-          .maybeSingle();
-        if (coupon) {
-          const disc = coupon.discount_type === "percent"
-            ? Math.round((expectedInr * Number(coupon.discount_value)) / 100)
-            : Number(coupon.discount_value);
-          expectedInr = Math.max(1, expectedInr - disc);
-        }
-      }
+        .from("books").select("price").eq("id", pRow.book_id).maybeSingle();
+      expectedAmount = Number(book?.price ?? 0);
     }
   } else {
     const { data: dRow } = await supabase
       .from("donations")
-      .select("amount")
+      .select("amount, currency")
       .eq("razorpay_order_id", orderId)
       .maybeSingle();
-    expectedInr = Number(dRow?.amount ?? 0);
+    expectedAmount = Number(dRow?.amount ?? 0);
+    expectedCurrency = normalizeCurrency(dRow?.currency);
   }
 
-  if (expectedInr > 0) {
-    const { converted: expectedForeign } = await convertInr(expectedInr, capturedCurrency);
-    // Allow a 15% tolerance for FX drift between order creation and capture,
-    // plus any minor rounding differences.
-    const minAcceptable = expectedForeign * 0.85;
-    if (capturedAmount < minAcceptable) {
-      console.error("PayPal amount mismatch", {
-        orderId,
-        expectedInr,
-        expectedForeign,
-        capturedAmount,
-        capturedCurrency,
+  if (expectedAmount > 0) {
+    const expectedStr = paypalAmount(expectedAmount, expectedCurrency);
+    const currencyOk = capturedCurrency.toUpperCase() === expectedCurrency;
+    // Allow only sub-cent rounding differences — no conversion tolerance.
+    const amountOk = Math.abs(capturedAmount - Number(expectedStr)) < 0.01;
+    if (!currencyOk || !amountOk) {
+      console.error("PayPal amount/currency mismatch", {
+        orderId, expectedStr, expectedCurrency, capturedAmount, capturedCurrency,
       });
       return new Response(
         JSON.stringify({ error: "Payment amount does not match order total" }),

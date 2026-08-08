@@ -129,7 +129,7 @@ const BookDetail = () => {
       return;
     }
     setAppliedCoupon(data);
-    toast({ title: "Coupon Applied!", description: `You save ₹${data.discount_amount}` });
+    toast({ title: "Coupon Applied!", description: `You save ${formatPrice(data.discount_amount)}` });
   };
 
   const removeCoupon = () => {
@@ -445,14 +445,14 @@ const BookDetail = () => {
                         100% coupon auto-applied
                       </span>
                     </div>
-                    <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">₹0 checkout</span>
+                    <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">{formatPrice(0)} checkout</span>
                   </div>
 
                   <Button size="lg" onClick={handleClaimFreeBook} disabled={claimingFree}>
                     {claimingFree ? (
                       <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</>
                     ) : (
-                      <><ShoppingCart className="mr-2 h-4 w-4" /> Buy Now — ₹0</>
+                      <><ShoppingCart className="mr-2 h-4 w-4" /> Buy Now — {formatPrice(0)}</>
                     )}
                   </Button>
 
@@ -476,10 +476,10 @@ const BookDetail = () => {
                     <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">आप क्या पा रहे हैं</p>
                     <ul className="space-y-1.5 text-sm">
                       <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5 text-primary" /> पुस्तक का lifetime access</span><span className="text-muted-foreground">{formatPrice(book.price)}</span></li>
-                      <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><Smartphone className="h-3.5 w-3.5 text-primary" /> सभी devices पर पढ़ें</span><span className="text-muted-foreground line-through">₹500</span></li>
-                      <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><Bookmark className="h-3.5 w-3.5 text-primary" /> Bookmarks + Notes</span><span className="text-muted-foreground line-through">₹300</span></li>
-                      <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><PlayCircle className="h-3.5 w-3.5 text-primary" /> Continue reading + Progress</span><span className="text-muted-foreground line-through">₹200</span></li>
-                      <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><Gift className="h-3.5 w-3.5 text-primary" /> जीवनभर Free updates</span><span className="text-muted-foreground line-through">₹500</span></li>
+                      <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><Smartphone className="h-3.5 w-3.5 text-primary" /> सभी devices पर पढ़ें</span><span className="text-muted-foreground line-through">{formatPrice(500)}</span></li>
+                      <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><Bookmark className="h-3.5 w-3.5 text-primary" /> Bookmarks + Notes</span><span className="text-muted-foreground line-through">{formatPrice(300)}</span></li>
+                      <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><PlayCircle className="h-3.5 w-3.5 text-primary" /> Continue reading + Progress</span><span className="text-muted-foreground line-through">{formatPrice(200)}</span></li>
+                      <li className="flex justify-between"><span className="inline-flex items-center gap-1.5"><Gift className="h-3.5 w-3.5 text-primary" /> जीवनभर Free updates</span><span className="text-muted-foreground line-through">{formatPrice(500)}</span></li>
                       <li className="flex justify-between font-bold border-t border-primary/20 pt-2 mt-2"><span>आज आपका मूल्य</span><span className="text-primary text-lg">{formatPrice(book.price)}</span></li>
                     </ul>
                   </div>
@@ -695,7 +695,7 @@ const BookDetail = () => {
                 <p>
                   {book.is_free
                     ? "This book is completely free to read. Simply open any chapter and start your spiritual journey."
-                    : `Get full access to all ${totalChapters} chapters for just ₹${book.price}. Once purchased, the book is available in your account forever — no subscription needed.`}
+                    : `Get full access to all ${totalChapters} chapters for just ${formatPrice(book.price)}. Once purchased, the book is available in your account forever — no subscription needed.`}
                 </p>
                 {previewChapters > 0 && (
                   <p>
@@ -868,7 +868,7 @@ const BookDetail = () => {
         <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border shadow-2xl p-3 flex items-center gap-3">
           <div className="flex-1 min-w-0">
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground">100% Free</p>
-            <span className="text-lg font-bold text-primary">₹0 — जीवनभर</span>
+            <span className="text-lg font-bold text-primary">{formatPrice(0)} — जीवनभर</span>
           </div>
           <Button onClick={handleClaimFreeBook} disabled={claimingFree} size="lg" className="font-bold shadow-md shrink-0">
             {claimingFree ? <Loader2 className="h-4 w-4 animate-spin" /> : <>अभी पढ़ें →</>}

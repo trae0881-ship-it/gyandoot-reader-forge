@@ -13,7 +13,7 @@ const emojiMessage =
   "Emojis are not allowed in public-facing UI. Use a Lucide icon (e.g. <Star />) instead.";
 
 export default tseslint.config(
-  { ignores: ["dist", "supabase/functions/**"] },
+  { ignores: ["dist", "supabase/functions/**", "frontend/**", "backend/**", "database/**"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],

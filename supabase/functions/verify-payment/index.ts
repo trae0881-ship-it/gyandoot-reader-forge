@@ -58,6 +58,14 @@ Deno.serve(async (req) => {
   }
 });
 
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  INR: "₹", USD: "$", GBP: "£", EUR: "€", CAD: "C$", AUD: "A$", JPY: "¥", SGD: "S$",
+  AED: "AED ", SAR: "SAR ",
+};
+// Same number, different currency — never converted.
+const money = (amount: number, code: string) =>
+  `${CURRENCY_SYMBOLS[normalizeCurrency(code)] ?? ""}${amount} ${normalizeCurrency(code)}`;
+
 async function sendReceipt(
   supabase: any,
   user: any,
@@ -74,6 +82,7 @@ async function sendReceipt(
 
   try {
     let amount = 0;
+    let currencyCode = "INR";
     let bookTitle = "";
     let recipientEmail = user?.email || "";
     let recipientName = "";
@@ -81,7 +90,7 @@ async function sendReceipt(
     if (type === "purchase") {
       const { data: purchase } = await supabase
         .from("purchases")
-        .select("book_id, created_at, guest_email, guest_name, claim_token")
+        .select("book_id, created_at, guest_email, guest_name, claim_token, amount, currency")
         .eq("razorpay_order_id", orderId)
         .single();
       if (purchase?.book_id) {
@@ -92,8 +101,9 @@ async function sendReceipt(
           .single();
         if (book) {
           bookTitle = book.title;
-          amount = book.price;
+          amount = Number(purchase.amount ?? book.price);
         }
+        currencyCode = normalizeCurrency(purchase.currency ?? "INR");
         if (purchase.guest_email) {
           recipientEmail = purchase.guest_email;
           recipientName = purchase.guest_name ?? "";
@@ -108,11 +118,12 @@ async function sendReceipt(
     } else {
       const { data: donation } = await supabase
         .from("donations")
-        .select("amount, donor_name, donor_email")
+        .select("amount, donor_name, donor_email, currency")
         .eq("razorpay_order_id", orderId)
         .single();
       if (donation) {
         amount = donation.amount;
+        currencyCode = normalizeCurrency(donation.currency ?? "INR");
         recipientName = donation.donor_name || "";
         if (donation.donor_email) recipientEmail = donation.donor_email;
       }
@@ -142,7 +153,7 @@ async function sendReceipt(
           <p>Thank you for your purchase! Your book is now ready to read.</p>
           <div style="background: #FFF8E1; border-left: 4px solid #FBC02D; padding: 15px 20px; margin: 20px 0; border-radius: 4px;">
             <p style="margin: 0 0 8px; font-weight: bold; color: #333;">📖 ${bookTitle}</p>
-            <p style="margin: 0; color: #555;">Amount: <strong>₹${amount}</strong></p>
+            <p style="margin: 0; color: #555;">Amount: <strong>${money(amount, currencyCode)}</strong></p>
             <p style="margin: 8px 0 0; color: #888; font-size: 13px;">Payment ID: ${paymentId}</p>
             <p style="margin: 4px 0 0; color: #888; font-size: 13px;">Date: ${date}</p>
             <p style="margin: 4px 0 0; color: #888; font-size: 13px;">Gateway: ${gateway.charAt(0).toUpperCase() + gateway.slice(1)}</p>
@@ -164,7 +175,7 @@ async function sendReceipt(
           <p>Namaste${recipientName ? ` ${recipientName}` : ""},</p>
           <p>Thank you for your generous donation! Your kindness helps spread spiritual knowledge to seekers everywhere.</p>
           <div style="background: #E8F5E9; border-left: 4px solid #4CAF50; padding: 15px 20px; margin: 20px 0; border-radius: 4px;">
-            <p style="margin: 0 0 8px; font-weight: bold; color: #333;">❤️ Donation Amount: <strong>₹${amount}</strong></p>
+            <p style="margin: 0 0 8px; font-weight: bold; color: #333;">❤️ Donation Amount: <strong>${money(amount, currencyCode)}</strong></p>
             <p style="margin: 8px 0 0; color: #888; font-size: 13px;">Payment ID: ${paymentId}</p>
             <p style="margin: 4px 0 0; color: #888; font-size: 13px;">Date: ${date}</p>
             <p style="margin: 4px 0 0; color: #888; font-size: 13px;">Gateway: ${gateway.charAt(0).toUpperCase() + gateway.slice(1)}</p>
@@ -231,6 +242,47 @@ async function verifyRazorpay(
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+  }
+
+  // Verify the actual captured amount + currency with Razorpay (never trust the client).
+  const keyId = Deno.env.get("RAZORPAY_KEY_ID");
+  if (keyId) {
+    try {
+      const payRes = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}`, {
+        headers: { Authorization: "Basic " + btoa(`${keyId}:${keySecret}`) },
+      });
+      if (payRes.ok) {
+        const pay = await payRes.json();
+        const expectedTable = type === "purchase" ? "purchases" : "donations";
+        const { data: row } = await supabase
+          .from(expectedTable)
+          .select("amount, currency")
+          .eq("razorpay_order_id", orderId)
+          .maybeSingle();
+        const expectedAmount = Number(row?.amount ?? 0);
+        const expectedCurrency = normalizeCurrency(row?.currency ?? "INR");
+
+        const orderMatches = pay?.order_id === orderId;
+        const currencyMatches = String(pay?.currency ?? "").toUpperCase() === expectedCurrency;
+        const amountMatches = expectedAmount > 0
+          ? Number(pay?.amount) === Math.round(expectedAmount * 100)
+          : true;
+        const captured = pay?.status === "captured" || pay?.status === "authorized";
+
+        if (!orderMatches || !currencyMatches || !amountMatches || !captured) {
+          console.error("Razorpay payment mismatch", {
+            orderId, paymentId, expectedAmount, expectedCurrency,
+            got: { order_id: pay?.order_id, amount: pay?.amount, currency: pay?.currency, status: pay?.status },
+          });
+          return new Response(JSON.stringify({ error: "Payment verification failed" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
+    } catch (e) {
+      console.warn("Razorpay payment fetch failed, relying on signature only:", e);
+    }
   }
 
   const table = type === "purchase" ? "purchases" : "donations";

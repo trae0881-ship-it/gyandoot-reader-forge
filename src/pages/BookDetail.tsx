@@ -12,7 +12,8 @@ import { BookOpen, Eye, Lock, Loader2, PlayCircle, Tag, X, CheckCircle, User, Ca
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useMemo, useEffect } from "react";
 
-import { initiatePayment, type PaymentGateway } from "@/lib/payment";
+import { initiatePayment } from "@/lib/payment";
+import CurrencySelector from "@/components/CurrencySelector";
 import SocialShareBar from "@/components/SocialShareBar";
 import { useLocale } from "@/hooks/useLocale";
 import { useToast } from "@/hooks/use-toast";
@@ -43,15 +44,7 @@ const BookDetail = () => {
 
   const [purchasing, setPurchasing] = useState(false);
   const [claimingFree, setClaimingFree] = useState(false);
-  const { country, currency, rates, formatPrice } = useLocale();
-  const isIndia = (country ?? "").toUpperCase() === "IN";
-  const [gateway, setGateway] = useState<PaymentGateway>("razorpay");
-  const [gatewayTouched, setGatewayTouched] = useState(false);
-  // Auto-select PayPal for non-India visitors, Razorpay for India — unless user manually chose.
-  useEffect(() => {
-    if (gatewayTouched || !country) return;
-    setGateway(isIndia ? "razorpay" : "paypal");
-  }, [country, isIndia, gatewayTouched]);
+  const { country, currency, formatPrice, gateway } = useLocale();
   const [couponCode, setCouponCode] = useState("");
   const [couponLoading, setCouponLoading] = useState(false);
   const [appliedCoupon, setAppliedCoupon] = useState<{
@@ -200,12 +193,10 @@ const BookDetail = () => {
       {
         amount: finalAmount,
         type: "purchase",
-        gateway,
         book_id: book.id,
         coupon_id: appliedCoupon?.coupon_id,
         referrer_id: referrerId || undefined,
         buyer_currency: currency,
-        buyer_fx_rate: 1,
         guest_email: guest?.email,
         guest_name: guest?.name,
         name: guest?.name,
@@ -493,26 +484,25 @@ const BookDetail = () => {
                     </ul>
                   </div>
 
-                  {/* Localized price breakdown */}
+                  {/* Currency + price breakdown (same number, different currency) */}
                   <div className="rounded-xl border border-border bg-muted/30 p-4 text-sm">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Price breakdown</p>
+                    <div className="flex items-center justify-between gap-3 mb-3">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Currency</span>
+                      <CurrencySelector compact />
+                    </div>
                     <div className="space-y-1.5">
-                      <div className="flex justify-between"><span className="text-muted-foreground">Base price</span><span className="font-medium">₹{(appliedCoupon ? appliedCoupon.final_amount : book.price).toLocaleString("en-IN")} INR</span></div>
-                      {country && <div className="flex justify-between"><span className="text-muted-foreground">Your region</span><span className="font-medium">{country} · {currency}</span></div>}
-                      <div className="flex justify-between"><span className="text-muted-foreground">Pricing model</span><span className="font-medium">1:1 parity (no FX)</span></div>
-                      <div className="flex justify-between border-t border-border pt-1.5 mt-1.5"><span className="font-semibold">You'll be charged</span><span className="font-bold text-primary">{gateway === "paypal" ? `${formatPrice(appliedCoupon ? appliedCoupon.final_amount : book.price)} ${currency}` : `₹${(appliedCoupon ? appliedCoupon.final_amount : book.price).toLocaleString("en-IN")} INR`}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Product</span><span className="font-medium">{book.title}</span></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Price</span><span className="font-medium">{formatPrice(appliedCoupon ? appliedCoupon.final_amount : book.price)} {currency}</span></div>
+                      {country && <div className="flex justify-between"><span className="text-muted-foreground">Your region</span><span className="font-medium">{country}</span></div>}
+                      <div className="flex justify-between"><span className="text-muted-foreground">Payment method</span><span className="font-medium">{gateway === "razorpay" ? "Razorpay" : gateway === "paypal" ? "PayPal" : "Not available"}</span></div>
+                      <div className="flex justify-between border-t border-border pt-1.5 mt-1.5"><span className="font-semibold">You'll be charged</span><span className="font-bold text-primary">{formatPrice(appliedCoupon ? appliedCoupon.final_amount : book.price)} {currency}</span></div>
                     </div>
-                  </div>
-
-                  <div>
-                    <div className="flex gap-2">
-                      <Button type="button" variant={gateway === "razorpay" ? "default" : "outline"} size="sm" onClick={() => { setGateway("razorpay"); setGatewayTouched(true); }}>Razorpay (India)</Button>
-                      <Button type="button" variant={gateway === "paypal" ? "default" : "outline"} size="sm" onClick={() => { setGateway("paypal"); setGatewayTouched(true); }}>PayPal (International)</Button>
-                    </div>
-                    <p className="mt-1.5 text-[11px] text-muted-foreground">
-                      {gateway === "paypal"
-                        ? <>Charged in your local currency at the same number as the INR price.</>
-                        : <>Cards, UPI, netbanking · charged in INR.</>}
+                    <p className="mt-2 text-[11px] text-muted-foreground">
+                      {gateway === "razorpay"
+                        ? "Cards, UPI, netbanking · charged in INR."
+                        : gateway === "paypal"
+                          ? "Charged by PayPal in your selected currency — same number, no exchange-rate conversion."
+                          : `${currency} is not supported by our payment providers yet. Please select another currency.`}
                     </p>
                   </div>
 

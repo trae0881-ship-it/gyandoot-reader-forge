@@ -243,6 +243,7 @@ const BookCard = ({
   wished: boolean;
   size?: "default" | "featured";
 }) => {
+  const { formatPrice } = useLocale();
   const rating = ratingFor(book.id);
   const reviews = reviewsFor(book.id, book.purchase_count ?? 0);
   const isNew =
@@ -570,6 +571,7 @@ const QuickView = ({
     };
   }, [book, onClose]);
 
+  const { formatPrice } = useLocale();
   if (!book) return null;
   const rating = ratingFor(book.id);
   const reviews = reviewsFor(book.id, book.purchase_count ?? 0);

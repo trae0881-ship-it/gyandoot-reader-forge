@@ -15,6 +15,8 @@ import { useToast } from "@/hooks/use-toast";
 import SecureRichReader from "@/components/SecureRichReader";
 import { useAntiCopy } from "@/hooks/useAntiCopy";
 import useSEO from "@/hooks/useSEO";
+import { applyHighlights, captureSelection, type StoredHighlight } from "@/lib/readerHighlights";
+
 
 /* ─── Types ─────────────────────────────────────────────────────────── */
 interface Highlight {

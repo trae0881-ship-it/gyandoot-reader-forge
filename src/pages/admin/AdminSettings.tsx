@@ -123,7 +123,7 @@ const AdminSettings = () => {
       toast({ title: "Invalid invoice settings", description: err, variant: "destructive" });
       return;
     }
-    const updates = [...SOCIAL_KEYS, ...URGENCY_KEYS, ...BOOK_KEYS, ...INVOICE_KEYS].map(({ key }) => ({ key, value: values[key] ?? "" }));
+    const updates = [...SOCIAL_KEYS, ...WHATSAPP_KEYS, ...URGENCY_KEYS, ...BOOK_KEYS, ...INVOICE_KEYS].map(({ key }) => ({ key, value: values[key] ?? "" }));
     mutation.mutate(updates);
   };
 

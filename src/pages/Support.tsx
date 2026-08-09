@@ -3,6 +3,10 @@ import { HelpCircle, Mail, MessageSquare, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import useSEO from "@/hooks/useSEO";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import WhatsAppSupportButton from "@/components/WhatsAppSupportButton";
 
 const supportTopics = [
   {

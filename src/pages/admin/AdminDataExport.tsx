@@ -2,12 +2,48 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Database, Download, Loader2 } from "lucide-react";
+import { Database, Download, Loader2, Plug, UploadCloud } from "lucide-react";
 
 const AdminDataExport = () => {
   const { toast } = useToast();
   const [busy, setBusy] = useState<null | "postgres" | "mysql">(null);
+  const [host, setHost] = useState(() => localStorage.getItem("mysql_host") ?? "");
+  const [port, setPort] = useState(() => localStorage.getItem("mysql_port") ?? "3306");
+  const [mysqlBusy, setMysqlBusy] = useState<null | "test" | "sync">(null);
+  const [result, setResult] = useState<string>("");
+
+  const runMysql = async (action: "test" | "sync") => {
+    if (!host.trim()) {
+      toast({ title: "Host चाहिए", description: "MySQL server का host/IP डालिए।", variant: "destructive" });
+      return;
+    }
+    localStorage.setItem("mysql_host", host.trim());
+    localStorage.setItem("mysql_port", port.trim() || "3306");
+    setMysqlBusy(action);
+    setResult("");
+    try {
+      const { data, error } = await supabase.functions.invoke("mysql-sync", {
+        body: { action, host: host.trim(), port: Number(port) || 3306 },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      setResult(JSON.stringify(data, null, 2));
+      toast({
+        title: action === "test" ? "Connection successful" : "Sync complete",
+        description: action === "test" ? "MySQL से connection बन गया।" : "पूरा data MySQL में भेज दिया गया।",
+      });
+    } catch (e: any) {
+      const msg = e?.context ? await e.context.text().catch(() => e.message) : e.message;
+      setResult(String(msg));
+      toast({ title: "MySQL failed", description: String(msg).slice(0, 200), variant: "destructive" });
+    } finally {
+      setMysqlBusy(null);
+    }
+  };
+
 
   const handleExport = async (dialect: "postgres" | "mysql") => {
     setBusy(dialect);

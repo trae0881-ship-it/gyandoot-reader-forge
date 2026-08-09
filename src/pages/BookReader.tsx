@@ -918,7 +918,10 @@ const BookReader = () => {
         <div
           ref={contentRef}
           className="max-w-none"
+          onMouseUp={handleSelection}
+          onTouchEnd={handleSelection}
         >
+
           <SecureRichReader
             content={rawContent}
             fontSize={fontSize}

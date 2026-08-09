@@ -51,6 +51,37 @@ const Support = () => {
           ))}
         </section>
 
+        <section className="mb-8 rounded-xl border border-border bg-card p-8">
+          <h2 className="font-serif text-xl font-bold text-foreground mb-2">WhatsApp पर तुरंत सहायता</h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            अपनी book चुनिए — WhatsApp message में book का नाम अपने आप जुड़ जाएगा, ताकि हम तुरंत सही मदद कर सकें।
+          </p>
+          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+            <div className="space-y-1.5">
+              <label htmlFor="wa-book" className="text-xs font-medium text-muted-foreground">
+                Book (optional)
+              </label>
+              <select
+                id="wa-book"
+                value={selectedBook}
+                onChange={(e) => setSelectedBook(e.target.value)}
+                className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+              >
+                <option value="">General support (कोई book नहीं)</option>
+                {(books ?? []).map((b) => (
+                  <option key={b.slug} value={b.title}>{b.title}</option>
+                ))}
+              </select>
+            </div>
+            <WhatsAppSupportButton
+              book={selectedBook || null}
+              url={selectedBookSlug ? `${window.location.origin}/books/${selectedBookSlug}` : null}
+              variant="default"
+              className="w-full sm:w-auto"
+            />
+          </div>
+        </section>
+
         <section className="grid md:grid-cols-2 gap-8">
           <div className="p-8 bg-muted/50 rounded-xl">
             <h2 className="font-serif text-xl font-bold text-foreground mb-3">Browse FAQ</h2>

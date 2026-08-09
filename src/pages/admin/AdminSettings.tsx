@@ -17,6 +17,21 @@ const SOCIAL_KEYS = [
   { key: "linkedin_url", label: "LinkedIn URL", icon: Linkedin, placeholder: "https://linkedin.com/company/gyandootnova", hint: "Full LinkedIn profile or company URL" },
 ];
 
+const WHATSAPP_KEYS = [
+  {
+    key: "whatsapp_message_general",
+    label: "General support message",
+    placeholder: "Namaste GyandootNova team! 🙏\n\nMujhe support chahiye.\n\nPage: {page}\nEmail: {email}\n\nMeri problem: ",
+    hint: "Placeholders: {page} {email} {site} — खाली छोड़ें तो default message जाएगा।",
+  },
+  {
+    key: "whatsapp_message_book",
+    label: "Book support message",
+    placeholder: "Namaste GyandootNova team! 🙏\n\nBook: {book}\nLink: {url}\nEmail: {email}\n\nIs book me meri problem: ",
+    hint: "Book page / reader से WhatsApp खुलने पर यह जाता है। Placeholders: {book} {url} {email} {site}",
+  },
+];
+
 const URGENCY_KEYS = [
   { key: "urgency_enabled", label: "Banner Enabled", placeholder: "true", hint: "true या false — banner on/off" },
   { key: "urgency_coupon", label: "Coupon Code", placeholder: "BHAKTI20", hint: "Banner में दिखेगा (coupon table में भी active होना चाहिए)" },

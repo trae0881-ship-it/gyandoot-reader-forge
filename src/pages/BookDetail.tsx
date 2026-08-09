@@ -17,6 +17,7 @@ import { initiatePayment } from "@/lib/payment";
 import CurrencySelector from "@/components/CurrencySelector";
 import SocialShareBar from "@/components/SocialShareBar";
 import { useLocale } from "@/hooks/useLocale";
+import WhatsAppSupportButton from "@/components/WhatsAppSupportButton";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import AskScripture from "@/components/AskScripture";

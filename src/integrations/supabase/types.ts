@@ -2218,6 +2218,7 @@ export type Database = {
     }
     Functions: {
       admin_db_storage_stats: { Args: never; Returns: Json }
+      admin_export_schema: { Args: never; Returns: Json }
       admin_get_book_file_url: { Args: { _book_id: string }; Returns: string }
       admin_get_chapter_full: {
         Args: { _chapter_id: string }

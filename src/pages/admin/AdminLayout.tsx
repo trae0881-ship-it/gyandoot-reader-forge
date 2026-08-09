@@ -2,7 +2,7 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
-import { BookOpen, FileText, Heart, ShoppingCart, LayoutDashboard, LogOut, ArrowLeft, Settings, Users, Tag, Share2, Sparkles, Code, KeyRound, Mail, Hash, FlaskConical, Globe2, UserCheck, Rocket, UsersRound, ShieldCheck, TrendingUp, Menu } from "lucide-react";
+import { BookOpen, FileText, Heart, ShoppingCart, LayoutDashboard, LogOut, ArrowLeft, Settings, Users, Tag, Share2, Sparkles, Code, KeyRound, Mail, Hash, FlaskConical, Globe2, UserCheck, Rocket, UsersRound, ShieldCheck, TrendingUp, Menu, Database } from "lucide-react";
 import { useEffect, useState } from "react";
 import AdminOtpGate, { isAdminOtpValid } from "@/components/admin/AdminOtpGate";
 
@@ -39,6 +39,7 @@ const navItems: NavItem[] = [
   { to: "/admin/api-tester", label: "API Tester", icon: FlaskConical, area: "isSuperAdmin" },
   { to: "/admin/visitors", label: "Visitors", icon: Globe2, area: "isSuperAdmin" },
   { to: "/admin/identified-visitors", label: "Identified Visitors", icon: UserCheck, area: "isSuperAdmin" },
+  { to: "/admin/data-export", label: "Data Export", icon: Database, area: "isSuperAdmin" },
   { to: "/admin/settings", label: "Settings", icon: Settings, area: "isSuperAdmin" },
 ];
 

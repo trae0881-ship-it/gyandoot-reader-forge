@@ -2,12 +2,48 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Database, Download, Loader2 } from "lucide-react";
+import { Database, Download, Loader2, Plug, UploadCloud } from "lucide-react";
 
 const AdminDataExport = () => {
   const { toast } = useToast();
   const [busy, setBusy] = useState<null | "postgres" | "mysql">(null);
+  const [host, setHost] = useState(() => localStorage.getItem("mysql_host") ?? "");
+  const [port, setPort] = useState(() => localStorage.getItem("mysql_port") ?? "3306");
+  const [mysqlBusy, setMysqlBusy] = useState<null | "test" | "sync">(null);
+  const [result, setResult] = useState<string>("");
+
+  const runMysql = async (action: "test" | "sync") => {
+    if (!host.trim()) {
+      toast({ title: "Host चाहिए", description: "MySQL server का host/IP डालिए।", variant: "destructive" });
+      return;
+    }
+    localStorage.setItem("mysql_host", host.trim());
+    localStorage.setItem("mysql_port", port.trim() || "3306");
+    setMysqlBusy(action);
+    setResult("");
+    try {
+      const { data, error } = await supabase.functions.invoke("mysql-sync", {
+        body: { action, host: host.trim(), port: Number(port) || 3306 },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      setResult(JSON.stringify(data, null, 2));
+      toast({
+        title: action === "test" ? "Connection successful" : "Sync complete",
+        description: action === "test" ? "MySQL से connection बन गया।" : "पूरा data MySQL में भेज दिया गया।",
+      });
+    } catch (e: any) {
+      const msg = e?.context ? await e.context.text().catch(() => e.message) : e.message;
+      setResult(String(msg));
+      toast({ title: "MySQL failed", description: String(msg).slice(0, 200), variant: "destructive" });
+    } finally {
+      setMysqlBusy(null);
+    }
+  };
+
 
   const handleExport = async (dialect: "postgres" | "mysql") => {
     setBusy(dialect);
@@ -92,8 +128,59 @@ const AdminDataExport = () => {
           </p>
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>MySQL live connection</CardTitle>
+          <CardDescription>
+            अपने MySQL server से सीधे connect कीजिए और एक click में पूरा data वहाँ भेजिए।
+            Database <code>gyandootnova</code> और user <code>amrendra_gyandoot</code> पहले से securely saved हैं —
+            सिर्फ host/port दीजिए।
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="sm:col-span-2 space-y-1">
+              <Label htmlFor="mysql-host">MySQL host</Label>
+              <Input
+                id="mysql-host"
+                placeholder="db.example.com या 123.45.67.89"
+                value={host}
+                onChange={(e) => setHost(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="mysql-port">Port</Label>
+              <Input
+                id="mysql-port"
+                placeholder="3306"
+                value={port}
+                onChange={(e) => setPort(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Button variant="outline" onClick={() => runMysql("test")} disabled={!!mysqlBusy}>
+              {mysqlBusy === "test" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plug className="mr-2 h-4 w-4" />}
+              Connection test
+            </Button>
+            <Button onClick={() => runMysql("sync")} disabled={!!mysqlBusy}>
+              {mysqlBusy === "sync" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
+              पूरा data MySQL में भेजिए
+            </Button>
+          </div>
+          {result && (
+            <pre className="max-h-64 overflow-auto rounded-md bg-muted p-3 text-xs">{result}</pre>
+          )}
+          <p className="text-xs text-muted-foreground">
+            Sync सभी tables बनाता है और rows को <code>REPLACE INTO</code> से update करता है — बार-बार चला सकते हैं।
+            Remote access और user grants MySQL server पर enabled होने चाहिए।
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 };
+
 
 export default AdminDataExport;

@@ -275,6 +275,7 @@ const AppContent = () => {
                   <Route path="team" element={<AdminTeam />} />
                   <Route path="content-audit" element={<AdminContentAudit />} />
                   <Route path="settings" element={<AdminSettings />} />
+                  <Route path="data-export" element={<AdminDataExport />} />
                   <Route path="sales-funnel" element={<AdminSalesFunnel />} />
 
 

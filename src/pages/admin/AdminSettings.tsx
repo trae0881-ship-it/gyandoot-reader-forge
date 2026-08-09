@@ -17,6 +17,21 @@ const SOCIAL_KEYS = [
   { key: "linkedin_url", label: "LinkedIn URL", icon: Linkedin, placeholder: "https://linkedin.com/company/gyandootnova", hint: "Full LinkedIn profile or company URL" },
 ];
 
+const WHATSAPP_KEYS = [
+  {
+    key: "whatsapp_message_general",
+    label: "General support message",
+    placeholder: "Namaste GyandootNova team! 🙏\n\nMujhe support chahiye.\n\nPage: {page}\nEmail: {email}\n\nMeri problem: ",
+    hint: "Placeholders: {page} {email} {site} — खाली छोड़ें तो default message जाएगा।",
+  },
+  {
+    key: "whatsapp_message_book",
+    label: "Book support message",
+    placeholder: "Namaste GyandootNova team! 🙏\n\nBook: {book}\nLink: {url}\nEmail: {email}\n\nIs book me meri problem: ",
+    hint: "Book page / reader से WhatsApp खुलने पर यह जाता है। Placeholders: {book} {url} {email} {site}",
+  },
+];
+
 const URGENCY_KEYS = [
   { key: "urgency_enabled", label: "Banner Enabled", placeholder: "true", hint: "true या false — banner on/off" },
   { key: "urgency_coupon", label: "Coupon Code", placeholder: "BHAKTI20", hint: "Banner में दिखेगा (coupon table में भी active होना चाहिए)" },
@@ -108,7 +123,7 @@ const AdminSettings = () => {
       toast({ title: "Invalid invoice settings", description: err, variant: "destructive" });
       return;
     }
-    const updates = [...SOCIAL_KEYS, ...URGENCY_KEYS, ...BOOK_KEYS, ...INVOICE_KEYS].map(({ key }) => ({ key, value: values[key] ?? "" }));
+    const updates = [...SOCIAL_KEYS, ...WHATSAPP_KEYS, ...URGENCY_KEYS, ...BOOK_KEYS, ...INVOICE_KEYS].map(({ key }) => ({ key, value: values[key] ?? "" }));
     mutation.mutate(updates);
   };
 
@@ -209,6 +224,37 @@ const AdminSettings = () => {
             )}
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MessageCircle className="h-5 w-5 text-primary" /> WhatsApp Support Messages
+            </CardTitle>
+            <CardDescription>
+              User जब WhatsApp support button दबाएगा तो यही pre-filled message जाएगा। Book page पर book वाला template use होता है।
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            {isLoading ? (
+              <p className="text-sm text-muted-foreground">Loading...</p>
+            ) : (
+              WHATSAPP_KEYS.map(({ key, label, placeholder, hint }) => (
+                <div key={key} className="space-y-1.5">
+                  <Label>{label}</Label>
+                  <Textarea
+                    value={values[key] ?? ""}
+                    onChange={(e) => setValues((prev) => ({ ...prev, [key]: e.target.value }))}
+                    placeholder={placeholder}
+                    rows={5}
+                  />
+                  <p className="text-xs text-muted-foreground whitespace-pre-line">{hint}</p>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
+
 
         <Card>
           <CardHeader>

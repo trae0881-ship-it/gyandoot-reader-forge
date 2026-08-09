@@ -17,6 +17,7 @@ import { initiatePayment } from "@/lib/payment";
 import CurrencySelector from "@/components/CurrencySelector";
 import SocialShareBar from "@/components/SocialShareBar";
 import { useLocale } from "@/hooks/useLocale";
+import WhatsAppSupportButton from "@/components/WhatsAppSupportButton";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import AskScripture from "@/components/AskScripture";
@@ -552,9 +553,13 @@ const BookDetail = () => {
                     )}
                   </Button>
 
-
-
-
+                  <WhatsAppSupportButton
+                    book={book.title}
+                    url={`${window.location.origin}/books/${book.slug}`}
+                    label="इस book के लिए WhatsApp सहायता"
+                    size="sm"
+                    className="w-full"
+                  />
 
 
                   {/* Trust badges */}

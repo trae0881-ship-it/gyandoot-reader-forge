@@ -7,16 +7,16 @@ import { Database, Download, Loader2 } from "lucide-react";
 
 const AdminDataExport = () => {
   const { toast } = useToast();
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<null | "postgres" | "mysql">(null);
 
-  const handleExport = async () => {
-    setBusy(true);
+  const handleExport = async (dialect: "postgres" | "mysql") => {
+    setBusy(dialect);
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData.session?.access_token;
       if (!token) throw new Error("Session expired — दोबारा login कीजिए।");
 
-      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-data-export`;
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-data-export?dialect=${dialect}`;
       const res = await fetch(url, {
         method: "POST",
         headers: {
@@ -34,7 +34,7 @@ const AdminDataExport = () => {
       const href = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = href;
-      a.download = `gyandoot-full-export-${new Date().toISOString().slice(0, 10)}.sql`;
+      a.download = `gyandoot-full-export-${dialect}-${new Date().toISOString().slice(0, 10)}.sql`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -44,7 +44,7 @@ const AdminDataExport = () => {
     } catch (e: any) {
       toast({ title: "Export failed", description: e.message, variant: "destructive" });
     } finally {
-      setBusy(false);
+      setBusy(null);
     }
   };
 
@@ -75,10 +75,21 @@ const AdminDataExport = () => {
             <li>Restore: <code>psql -d your_db -f gyandoot-full-export.sql</code></li>
             <li>File में personal data है — इसे सुरक्षित रखें।</li>
           </ul>
-          <Button onClick={handleExport} disabled={busy}>
-            {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-            {busy ? "Export तैयार हो रहा है…" : "Download full export"}
-          </Button>
+          <div className="flex flex-wrap gap-3">
+            <Button onClick={() => handleExport("postgres")} disabled={!!busy}>
+              {busy === "postgres" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+              PostgreSQL export
+            </Button>
+            <Button variant="secondary" onClick={() => handleExport("mysql")} disabled={!!busy}>
+              {busy === "mysql" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+              MySQL export
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            MySQL file me database <code>gyandootnova</code>, user <code>AMRENDRA&amp;</code> aur uske grants
+            already likhe hote hain — import ke baad password zaroor badal lijiye.
+            Restore: <code>mysql -u root -p &lt; gyandoot-full-export-mysql.sql</code>
+          </p>
         </CardContent>
       </Card>
     </div>

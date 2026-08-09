@@ -627,6 +627,27 @@ const AdminPosts = () => {
         </div>
       </div>
 
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        {(() => {
+          const all = posts ?? [];
+          const statusOf = (p: any) => p.publish_status ?? (p.is_published ? "published" : "draft");
+          const stats = [
+            { label: "Total", value: all.length, cls: "text-foreground" },
+            { label: "Published", value: all.filter((p: any) => statusOf(p) === "published").length, cls: "text-emerald-600" },
+            { label: "Draft", value: all.filter((p: any) => statusOf(p) === "draft").length, cls: "text-muted-foreground" },
+            { label: "Scheduled", value: all.filter((p: any) => statusOf(p) === "scheduled").length, cls: "text-amber-600" },
+          ];
+          return stats.map((s) => (
+            <Card key={s.label}>
+              <CardContent className="p-4">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">{s.label}</p>
+                <p className={`text-2xl font-bold ${s.cls}`}>{s.value}</p>
+              </CardContent>
+            </Card>
+          ));
+        })()}
+      </div>
+
       <Card>
         <CardContent className="p-0">
           <Table>

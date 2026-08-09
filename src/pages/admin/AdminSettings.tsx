@@ -228,6 +228,37 @@ const AdminSettings = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
+              <MessageCircle className="h-5 w-5 text-primary" /> WhatsApp Support Messages
+            </CardTitle>
+            <CardDescription>
+              User जब WhatsApp support button दबाएगा तो यही pre-filled message जाएगा। Book page पर book वाला template use होता है।
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            {isLoading ? (
+              <p className="text-sm text-muted-foreground">Loading...</p>
+            ) : (
+              WHATSAPP_KEYS.map(({ key, label, placeholder, hint }) => (
+                <div key={key} className="space-y-1.5">
+                  <Label>{label}</Label>
+                  <Textarea
+                    value={values[key] ?? ""}
+                    onChange={(e) => setValues((prev) => ({ ...prev, [key]: e.target.value }))}
+                    placeholder={placeholder}
+                    rows={5}
+                  />
+                  <p className="text-xs text-muted-foreground whitespace-pre-line">{hint}</p>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
+
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-primary" /> Book Detail — Free Chapter Note
             </CardTitle>
             <CardDescription>

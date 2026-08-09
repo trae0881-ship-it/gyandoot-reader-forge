@@ -76,6 +76,7 @@ const AdminPosts = lazy(() => import("./pages/admin/AdminPosts"));
 const AdminDonations = lazy(() => import("./pages/admin/AdminDonations"));
 const AdminPurchases = lazy(() => import("./pages/admin/AdminPurchases"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
+const AdminDataExport = lazy(() => import("./pages/admin/AdminDataExport"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 const AdminCoupons = lazy(() => import("./pages/admin/AdminCoupons"));
 const AdminReferrals = lazy(() => import("./pages/admin/AdminReferrals"));

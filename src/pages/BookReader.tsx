@@ -491,32 +491,19 @@ const BookReader = () => {
 
 
   /* ─── Text selection / highlight bar ──────────────────────────────── */
-  const handleMouseUp = useCallback(() => {
+  const handleSelection = useCallback(() => {
     if (!user) return;
-    const sel = window.getSelection();
-    if (!sel || sel.isCollapsed || !sel.toString().trim()) {
+    const cap = captureSelection(contentRef.current);
+    if (!cap) {
       setShowHighlightBar(false);
+      setSelectionInfo(null);
       return;
     }
-
-    const range = sel.getRangeAt(0);
-    const container = range.startContainer.parentElement;
-    const paragraphs = contentRef.current?.querySelectorAll("p[data-para-idx]");
-    let paraIdx = 0;
-    if (paragraphs) {
-      paragraphs.forEach((p) => {
-        if (p.contains(container)) paraIdx = parseInt(p.getAttribute("data-para-idx") ?? "0");
-      });
-    }
-
-    const rect = range.getBoundingClientRect();
-    setHighlightBarPos({ x: rect.left + rect.width / 2, y: rect.top + window.scrollY - 60 });
-    setSelectionInfo({
-      text: sel.toString(),
-      paraIdx,
-      start: range.startOffset,
-      end: range.endOffset,
+    setHighlightBarPos({
+      x: cap.rect.left + cap.rect.width / 2,
+      y: cap.rect.top + window.scrollY - 56,
     });
+    setSelectionInfo({ text: cap.text, paraIdx: cap.paraIdx, start: cap.start, end: cap.end });
     setShowHighlightBar(true);
   }, [user]);
 
@@ -535,45 +522,31 @@ const BookReader = () => {
     setSelectionInfo(null);
   };
 
-  /* ─── Render paragraph with highlights ────────────────────────────── */
-  const renderParagraph = (text: string, idx: number) => {
-    const paraHighlights = highlights.filter((h) => h.paragraph_index === idx);
-    if (!paraHighlights.length) {
-      return <p key={idx} data-para-idx={idx} className="mb-4">{text}</p>;
-    }
-
-    const segments: { text: string; highlighted: boolean; highlightId?: string; color?: string }[] = [];
-    let lastEnd = 0;
-    const sorted = [...paraHighlights].sort((a, b) => a.start_offset - b.start_offset);
-
-    sorted.forEach((h) => {
-      const start = Math.max(0, h.start_offset);
-      const end = Math.min(text.length, h.end_offset);
-      if (start > lastEnd) segments.push({ text: text.slice(lastEnd, start), highlighted: false });
-      if (end > start) segments.push({ text: text.slice(start, end), highlighted: true, highlightId: h.id, color: h.color });
-      lastEnd = end;
+  /* ─── Re-apply saved highlights on the rendered chapter ────────────── */
+  useEffect(() => {
+    if (!contentRef.current) return;
+    const root = contentRef.current;
+    const raf = requestAnimationFrame(() => {
+      applyHighlights(root, highlights as StoredHighlight[], (c) => getColorConfig(c).markClass);
     });
-    if (lastEnd < text.length) segments.push({ text: text.slice(lastEnd), highlighted: false });
+    return () => cancelAnimationFrame(raf);
+  }, [highlights, chapterContent, fontSize, theme]);
 
-    return (
-      <p key={idx} data-para-idx={idx} className="mb-4">
-        {segments.map((seg, si) =>
-          seg.highlighted ? (
-            <mark
-              key={si}
-              className={`${getColorConfig(seg.color ?? "yellow").markClass} rounded px-0.5 cursor-pointer`}
-              title="Click to remove highlight"
-              onClick={() => seg.highlightId && deleteHighlightMutation.mutate(seg.highlightId)}
-            >
-              {seg.text}
-            </mark>
-          ) : (
-            <span key={si}>{seg.text}</span>
-          )
-        )}
-      </p>
-    );
-  };
+  /* Click a highlight mark to remove it */
+  useEffect(() => {
+    const root = contentRef.current;
+    if (!root) return;
+    const onClick = (e: MouseEvent) => {
+      const mark = (e.target as HTMLElement | null)?.closest?.("mark[data-hl-id]");
+      const id = mark?.getAttribute("data-hl-id");
+      if (id) deleteHighlightMutation.mutate(id);
+    };
+    root.addEventListener("click", onClick);
+    return () => root.removeEventListener("click", onClick);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chapterContent]);
+
+
 
   /* ─── Access check ─────────────────────────────────────────────────── */
   const canRead = !!book?.is_free || isPreviewChapter || !!hasPurchased;

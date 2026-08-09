@@ -92,8 +92,59 @@ const AdminDataExport = () => {
           </p>
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>MySQL live connection</CardTitle>
+          <CardDescription>
+            अपने MySQL server से सीधे connect कीजिए और एक click में पूरा data वहाँ भेजिए।
+            Database <code>gyandootnova</code> और user <code>amrendra_gyandoot</code> पहले से securely saved हैं —
+            सिर्फ host/port दीजिए।
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="sm:col-span-2 space-y-1">
+              <Label htmlFor="mysql-host">MySQL host</Label>
+              <Input
+                id="mysql-host"
+                placeholder="db.example.com या 123.45.67.89"
+                value={host}
+                onChange={(e) => setHost(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="mysql-port">Port</Label>
+              <Input
+                id="mysql-port"
+                placeholder="3306"
+                value={port}
+                onChange={(e) => setPort(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Button variant="outline" onClick={() => runMysql("test")} disabled={!!mysqlBusy}>
+              {mysqlBusy === "test" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plug className="mr-2 h-4 w-4" />}
+              Connection test
+            </Button>
+            <Button onClick={() => runMysql("sync")} disabled={!!mysqlBusy}>
+              {mysqlBusy === "sync" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
+              पूरा data MySQL में भेजिए
+            </Button>
+          </div>
+          {result && (
+            <pre className="max-h-64 overflow-auto rounded-md bg-muted p-3 text-xs">{result}</pre>
+          )}
+          <p className="text-xs text-muted-foreground">
+            Sync सभी tables बनाता है और rows को <code>REPLACE INTO</code> से update करता है — बार-बार चला सकते हैं।
+            Remote access और user grants MySQL server पर enabled होने चाहिए।
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 };
+
 
 export default AdminDataExport;

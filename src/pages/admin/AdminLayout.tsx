@@ -39,6 +39,7 @@ const navItems: NavItem[] = [
   { to: "/admin/api-tester", label: "API Tester", icon: FlaskConical, area: "isSuperAdmin" },
   { to: "/admin/visitors", label: "Visitors", icon: Globe2, area: "isSuperAdmin" },
   { to: "/admin/identified-visitors", label: "Identified Visitors", icon: UserCheck, area: "isSuperAdmin" },
+  { to: "/admin/data-export", label: "Data Export", icon: Database, area: "isSuperAdmin" },
   { to: "/admin/settings", label: "Settings", icon: Settings, area: "isSuperAdmin" },
 ];
 

@@ -5,7 +5,8 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-const MYSQL_USER = "AMRENDRA&";
+const MYSQL_USER = "AMRENDRA_gyandootnova";
+const MYSQL_PASSWORD = "Amrendra_98746";
 const MYSQL_DB = "gyandootnova";
 
 /** Postgres literal */
@@ -148,7 +149,7 @@ Deno.serve(async (req) => {
               `-- Restore: mysql -u '${MYSQL_USER}' -p < gyandoot-full-export-mysql.sql\n\n` +
               `SET NAMES utf8mb4;\nSET FOREIGN_KEY_CHECKS = 0;\nSET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';\n\n` +
               `CREATE DATABASE IF NOT EXISTS \`${MYSQL_DB}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\n` +
-              `CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY 'CHANGE_ME_STRONG_PASSWORD';\n` +
+              `CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';\n` +
               `GRANT ALL PRIVILEGES ON \`${MYSQL_DB}\`.* TO '${MYSQL_USER}'@'%';\nFLUSH PRIVILEGES;\n` +
               `USE \`${MYSQL_DB}\`;\n\n-- =====================\n-- 1) TABLE STRUCTURE\n-- =====================\n\n`,
           );

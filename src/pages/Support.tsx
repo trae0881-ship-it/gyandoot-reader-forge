@@ -33,6 +33,19 @@ const Support = () => {
     canonical: "/support",
   });
 
+  const [selectedBook, setSelectedBook] = useState("");
+  const { data: books } = useQuery({
+    queryKey: ["support-book-list"],
+    staleTime: 10 * 60 * 1000,
+    queryFn: async () => {
+      const { data } = await supabase.from("books").select("title, slug").order("title");
+      return data ?? [];
+    },
+  });
+  const selectedBookSlug = books?.find((b) => b.title === selectedBook)?.slug ?? null;
+
+
+
   return (
     <Layout>
       <main className="container py-16 max-w-4xl mx-auto">

@@ -960,7 +960,38 @@ const BookReader = () => {
           )}
         </div>
       </div>
+      {/* Floating highlight toolbar (appears on text selection) */}
+      {showHighlightBar && user && selectionInfo && (
+        <div
+          className="fixed z-[60] -translate-x-1/2 rounded-full border bg-background shadow-lg px-2 py-1.5 flex items-center gap-1.5"
+          style={{ left: highlightBarPos.x, top: Math.max(8, highlightBarPos.y - window.scrollY) }}
+        >
+          <Highlighter className="h-3.5 w-3.5 text-muted-foreground" />
+          {HIGHLIGHT_COLORS.map((c) => (
+            <button
+              key={c.id}
+              title={`Highlight ${c.label}`}
+              onClick={() => saveHighlight(c.id)}
+              className={`h-5 w-5 rounded-full border border-border ${c.swatch} ${selectedColor === c.id ? "ring-2 ring-primary ring-offset-1" : ""}`}
+            />
+          ))}
+          <button
+            title="Add note"
+            onClick={() => {
+              setNoteText((t) => `${t ? `${t}\n\n` : ""}“${selectionInfo.text.trim()}” — `);
+              setShowNotes(true);
+              setShowHighlightBar(false);
+              window.getSelection()?.removeAllRanges();
+            }}
+            className="ml-1 rounded-full p-1 hover:bg-muted"
+          >
+            <StickyNote className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
+
       {book && <AskScripture bookId={book.id} bookTitle={book.title} />}
+
     </div>
   );
 };

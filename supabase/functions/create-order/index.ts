@@ -271,9 +271,16 @@ async function handlePaypal(
   });
 
   if (!tokenRes.ok) {
-    console.error("PayPal token error:", await tokenRes.text());
-    return new Response(JSON.stringify({ error: "PayPal auth failed" }), {
-      status: 500,
+    const tokenErr = await tokenRes.text();
+    console.error("PayPal token error:", tokenErr, "base:", PAYPAL_API_BASE);
+    const invalidClient = tokenErr.includes("invalid_client");
+    return new Response(JSON.stringify({
+      error: invalidClient
+        ? "International payments are temporarily unavailable. Please pay in INR or contact support."
+        : "PayPal auth failed",
+      code: invalidClient ? "paypal_invalid_credentials" : "paypal_auth_failed",
+    }), {
+      status: 503,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

@@ -376,9 +376,8 @@ Deno.serve(async (req) => {
       emailError = "RESEND_API_KEY not configured";
     }
 
-    } else {
-      emailError = "RESEND_API_KEY not configured";
-    }
+
+
 
     // Failed send should not block tomorrow, but must allow a retry today.
     if (!emailed && !force) {

@@ -268,13 +268,86 @@ Deno.serve(async (req) => {
     </table>
 
     <h2 style="font-size:15px;margin:0 0 8px">Content</h2>
-    <table style="width:100%;border-collapse:collapse;font-size:14px">
+    <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:22px">
       <tr><td style="padding:6px 0;color:#666;width:240px">Published articles (total)</td><td style="padding:6px 0;font-weight:600">${numFmt(publishedCount || 0)}</td></tr>
       <tr><td style="padding:6px 0;color:#666">Published in last 24h</td><td style="padding:6px 0;font-weight:600">${numFmt(publishedToday || 0)}</td></tr>
       <tr><td style="padding:6px 0;color:#666">Scheduled</td><td style="padding:6px 0;font-weight:600">${numFmt(scheduledCount || 0)}</td></tr>
     </table>
+
+    <h2 style="font-size:15px;margin:0 0 8px">SEO Agent Events (last 24h)</h2>
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      ${alerts.length
+        ? alerts.map((a: any) => `<tr><td style="padding:5px 0;color:#444">${esc(a.error_type)}${a.recovered ? " (recovered)" : ""}<div style="color:#888;font-size:12px">${esc(String(a.message || "").slice(0, 220))}</div></td><td style="padding:5px 0;text-align:right;color:#888;white-space:nowrap">${esc(new Date(a.created_at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", hour12: false }))}</td></tr>`).join("")
+        : `<tr><td style="padding:5px 0;color:#888">No agent issues in the last 24h</td></tr>`}
+    </table>
   </div>
 </div>`;
+
+    // ---- PDF version of the same report -----------------------------------
+    const L: PdfLine[] = [];
+    L.push({ text: `${SITE_NAME} — Daily SEO & Traffic Report`, bold: true, size: 16 });
+    L.push({ text: `${istNow()} IST`, size: 10 });
+    L.push({ text: `Live site: ${SITE_URL}`, size: 10 });
+
+    const head = (t: string) => L.push({ text: t, bold: true, size: 13, gap: 12 });
+    const kv = (k: string, v: string) => L.push({ text: `${k}: ${v}`, size: 10 });
+
+    head("Google Search Traffic");
+    const tRow = (label: string, t: Totals | null) =>
+      kv(label, t
+        ? `${numFmt(t.clicks)} clicks | ${numFmt(t.impressions)} impressions | CTR ${pct(t.ctr)} | avg pos ${(t.position || 0).toFixed(1)}`
+        : "Search Console data unavailable");
+    tRow("Last 1 day", d1);
+    tRow("Last 7 days", d7);
+    tRow("Last 28 days", d28);
+
+    head("AI Search Visibility (last 24h)");
+    kv("AI assistant referrals", numFmt(aiReferralTotal));
+    kv("AI crawler hits", numFmt(aiBotTotal));
+    for (const [k, v] of aiReferrals) kv(`  ${k}`, numFmt(v));
+    for (const [k, v] of aiBots) kv(`  ${k}`, numFmt(v));
+    if (!aiReferrals.length && !aiBots.length) L.push({ text: "No AI activity recorded in the last 24h", size: 10 });
+
+    head("Website Traffic");
+    kv("Visits (24h)", numFmt(rows24.length));
+    kv("Unique visitors (24h)", numFmt(uniqueVisitors));
+    kv("Visits (7 days)", numFmt(visits7Count || 0));
+    L.push({ text: "Top countries (24h)", bold: true, size: 10, gap: 6 });
+    if (topCountries.length) for (const [k, v] of topCountries) kv(`  ${k}`, numFmt(v));
+    else L.push({ text: "  No visits recorded", size: 10 });
+    L.push({ text: "Top landing pages (24h)", bold: true, size: 10, gap: 6 });
+    if (topLanding.length) for (const [k, v] of topLanding) kv(`  ${k}`, numFmt(v));
+    else L.push({ text: "  No visits recorded", size: 10 });
+
+    head("Top Search Queries (28 days)");
+    if (topQueries.length) {
+      for (const r of topQueries) {
+        L.push({ text: `${r.keys?.[0]} — ${numFmt(r.clicks)} clicks, ${numFmt(r.impressions)} impr, pos ${(r.position || 0).toFixed(1)}`, size: 10 });
+      }
+    } else L.push({ text: "No query data available", size: 10 });
+
+    head("Top Pages (28 days)");
+    if (topPages.length) {
+      for (const r of topPages) {
+        L.push({ text: `${r.keys?.[0]} — ${numFmt(r.clicks)} clicks, ${numFmt(r.impressions)} impr`, size: 10 });
+      }
+    } else L.push({ text: "No page data available", size: 10 });
+
+    head("Content");
+    kv("Published articles (total)", numFmt(publishedCount || 0));
+    kv("Published in last 24h", numFmt(publishedToday || 0));
+    kv("Scheduled", numFmt(scheduledCount || 0));
+
+    head("SEO Agent Events (last 24h)");
+    if (alerts.length) {
+      for (const a of alerts) {
+        const when = new Date(a.created_at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", hour12: false });
+        L.push({ text: `[${when}] ${a.error_type}${a.recovered ? " (recovered)" : ""}`, bold: true, size: 10, gap: 4 });
+        if (a.message) L.push({ text: String(a.message).slice(0, 400), size: 9 });
+      }
+    } else L.push({ text: "No agent issues in the last 24h", size: 10 });
+
+    const pdfBase64 = toBase64(buildPdf(L));
 
     let emailed = false;
     let emailError: string | null = null;
@@ -287,6 +360,9 @@ Deno.serve(async (req) => {
           to: [ADMIN_EMAIL],
           subject: `[SEO REPORT] ${SITE_NAME} — ${day}`,
           html,
+          attachments: [
+            { filename: `gyandootnova-seo-report-${day}.pdf`, content: pdfBase64 },
+          ],
         }),
       });
       emailed = res.ok;
@@ -294,6 +370,10 @@ Deno.serve(async (req) => {
         emailError = (await res.text()).slice(0, 300);
         console.error("daily report email failed", res.status, emailError);
       }
+    } else {
+      emailError = "RESEND_API_KEY not configured";
+    }
+
     } else {
       emailError = "RESEND_API_KEY not configured";
     }

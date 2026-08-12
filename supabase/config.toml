@@ -48,3 +48,6 @@ verify_jwt = false
 
 
 
+
+[functions.seo-daily-report]
+verify_jwt = false

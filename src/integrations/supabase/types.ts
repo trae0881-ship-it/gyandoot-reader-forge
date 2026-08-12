@@ -1946,6 +1946,27 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_report_runs: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          report_date: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind?: string
+          report_date: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          report_date?: string
+        }
+        Relationships: []
+      }
       settings: {
         Row: {
           id: string

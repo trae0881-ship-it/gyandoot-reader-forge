@@ -252,8 +252,8 @@ async function handlePaypal(
   buyer_currency?: string,
   guest_email?: string, guest_name?: string,
 ) {
-  const clientId = Deno.env.get("PAYPAL_CLIENT_ID");
-  const clientSecret = Deno.env.get("PAYPAL_CLIENT_SECRET");
+  const clientId = Deno.env.get("PAYPAL_CLIENT_ID")?.trim();
+  const clientSecret = Deno.env.get("PAYPAL_CLIENT_SECRET")?.trim();
   if (!clientId || !clientSecret) {
     return new Response(JSON.stringify({ error: "PayPal not configured" }), {
       status: 500,

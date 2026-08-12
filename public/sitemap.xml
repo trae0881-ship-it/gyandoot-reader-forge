@@ -308,13 +308,13 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gyandootnova.in/articles/shiv-chalisa</loc>
+    <loc>https://gyandootnova.in/articles/durga-chalisa</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gyandootnova.in/articles/durga-chalisa</loc>
+    <loc>https://gyandootnova.in/articles/shiv-chalisa</loc>
     <lastmod>2026-08-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -464,12 +464,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gyandootnova.in/articles/gayatri-mantra-rigved</loc>
-    <lastmod>2026-08-12</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://gyandootnova.in/articles/stoicism-mindfulness-modern-stress</loc>
     <lastmod>2026-07-18</lastmod>
     <changefreq>weekly</changefreq>
@@ -478,6 +472,12 @@
   <url>
     <loc>https://gyandootnova.in/articles/sound-healing-modern-meditation-guide</loc>
     <lastmod>2026-07-24</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/gayatri-mantra-rigved</loc>
+    <lastmod>2026-08-12</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

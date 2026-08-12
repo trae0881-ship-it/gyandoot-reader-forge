@@ -11,11 +11,17 @@ const LINE_H = 15;
 // PDF strings must be Latin-1; strip anything else so we never emit garbage.
 function pdfEscape(s: string): string {
   return (s || "")
+    .replace(/[\u2013\u2014]/g, "-")
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/\u2026/g, "...")
+    .replace(/\u00B7/g, "-")
     .replace(/[^\x20-\x7E\u00A0-\u00FF]/g, "")
     .replace(/\\/g, "\\\\")
     .replace(/\(/g, "\\(")
     .replace(/\)/g, "\\)");
 }
+
 
 function wrap(text: string, size: number, maxWidth: number): string[] {
   // Helvetica average glyph width ~0.5em; conservative estimate avoids overflow.

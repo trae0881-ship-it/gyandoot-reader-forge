@@ -7,6 +7,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { SITE_NAME, ADMIN_EMAIL, istNow } from "../_shared/seo-alerts.ts";
 import { assertSeoAuthorized } from "../_shared/seo-auth.ts";
+import { buildPdf, toBase64, type PdfLine } from "../_shared/simple-pdf.ts";
+
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
 const FROM = "SEO Agent <info@gyandootnova.in>";

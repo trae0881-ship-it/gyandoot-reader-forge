@@ -2,6 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
   gatewayForCurrency, normalizeCurrency, paypalAmount, razorpayAmount, PAYPAL_SUPPORTED,
 } from "../_shared/currency.ts";
+import { PAYPAL_API_BASE } from "../_shared/paypal.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

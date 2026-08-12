@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { normalizeCurrency, paypalAmount } from "../_shared/currency.ts";
+import { PAYPAL_API_BASE } from "../_shared/paypal.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -388,7 +389,7 @@ async function verifyPaypal(supabase: any, user: any, orderId: string, type: str
     });
   }
 
-  const tokenRes = await fetch("https://api-m.paypal.com/v1/oauth2/token", {
+  const tokenRes = await fetch(`${PAYPAL_API_BASE}/v1/oauth2/token`, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -398,7 +399,7 @@ async function verifyPaypal(supabase: any, user: any, orderId: string, type: str
   });
   const { access_token } = await tokenRes.json();
 
-  const captureRes = await fetch(`https://api-m.paypal.com/v2/checkout/orders/${orderId}/capture`, {
+  const captureRes = await fetch(`${PAYPAL_API_BASE}/v2/checkout/orders/${orderId}/capture`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

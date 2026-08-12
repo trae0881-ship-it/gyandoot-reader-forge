@@ -192,10 +192,20 @@ Deno.serve(async (req) => {
     const { count: scheduledCount } = await sb
       .from("posts").select("id", { count: "exact", head: true }).eq("status", "scheduled");
 
+    // ---- Agent alerts (rolled up here instead of instant emails) -----------
+    const { data: alertRows } = await sb
+      .from("seo_agent_alerts")
+      .select("created_at, severity, error_type, provider, message, recovered")
+      .gte("created_at", since24)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    const alerts = alertRows || [];
+
     const listRows = (items: [string, number][], emptyText: string) =>
       items.length
         ? items.map(([k, v]) => `<tr><td style="padding:5px 0;color:#444">${esc(k)}</td><td style="padding:5px 0;text-align:right;font-weight:600">${numFmt(v)}</td></tr>`).join("")
         : `<tr><td colspan="2" style="padding:5px 0;color:#888">${esc(emptyText)}</td></tr>`;
+
 
     const html = `<div style="font-family:Georgia,serif;max-width:700px;margin:0 auto;background:#fafaf8;border-radius:12px;overflow:hidden">
   <div style="background:#1B7A3E;color:#fff;padding:22px 28px">

@@ -97,20 +97,24 @@ export async function logAlert(sb: SupabaseClient, p: AlertPayload, subject: str
   } catch (e) { console.error("logAlert insert failed", e); }
 }
 
+// Ad-hoc alert emails are OFF by default: everything is recorded in
+// `seo_agent_alerts` and rolled up into the single 17:00 IST daily PDF report.
+// Set SEO_ALERT_EMAILS=on to restore instant emails.
+const INSTANT_ALERT_EMAILS = (Deno.env.get("SEO_ALERT_EMAILS") || "").toLowerCase() === "on";
+
 export async function sendAlert(sb: SupabaseClient, p: AlertPayload): Promise<void> {
   const tag = p.severity === "high" ? "[SEO AGENT ALERT - HIGH PRIORITY]" : "[SEO AGENT ALERT]";
   const subject = `${tag} ${p.errorType}`;
-  const html = buildHtml(p, subject);
-  const ok = await sendEmail(subject, html);
+  const ok = INSTANT_ALERT_EMAILS ? await sendEmail(subject, buildHtml(p, subject)) : false;
   await logAlert(sb, p, subject, ok);
 }
 
 export async function sendRecovery(sb: SupabaseClient, p: AlertPayload): Promise<void> {
   const subject = `[SEO AGENT RECOVERED] ${p.errorType}`;
-  const html = buildHtml({ ...p, recovered: true }, subject);
-  const ok = await sendEmail(subject, html);
+  const ok = INSTANT_ALERT_EMAILS ? await sendEmail(subject, buildHtml({ ...p, recovered: true }, subject)) : false;
   await logAlert(sb, { ...p, recovered: true }, subject, ok);
 }
+
 
 // ── Provider health tracking ─────────────────────────────────────────
 export async function isProviderPaused(sb: SupabaseClient, provider: string): Promise<boolean> {

@@ -151,8 +151,7 @@ Deno.serve(async (req) => {
       });
       results.push({ post_id: r.id, status: r2.status });
     }
-    (results as any).scored = scored;
-    return new Response(JSON.stringify({ success: true, sweep: true, results }), {
+    return new Response(JSON.stringify({ success: true, sweep: true, scored, results }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

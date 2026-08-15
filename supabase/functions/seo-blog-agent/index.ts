@@ -529,7 +529,7 @@ Return STRICT JSON (no markdown fences):
 
 
     const raw = await callLLM([
-      { role: "system", content: "You are a senior SEO editor and domain writer. Follow Google Helpful Content. Output ONLY valid JSON, no code fences." },
+      { role: "system", content: "You are a senior SEO editor and domain writer for a Hindi-first spiritual publisher aiming to be the #1 authority in its niche. Follow Google Helpful Content and EEAT. Every article must be 100% original — never reuse phrasing from sources or from the site's existing posts. Build the article around the assigned primary keyword and its LSI variants. Output ONLY valid JSON, no code fences." },
       { role: "user", content: genPrompt },
     ], true, log, supabase, "draft-generation", resolveKey);
     let article: any;

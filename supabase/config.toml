@@ -51,3 +51,6 @@ verify_jwt = false
 
 [functions.seo-daily-report]
 verify_jwt = false
+
+[functions.verse-analyze]
+verify_jwt = true

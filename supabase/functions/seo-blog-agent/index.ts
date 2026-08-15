@@ -401,17 +401,45 @@ Deno.serve(async (req) => {
 
 
     const existingList = (existing || []).map(p => `- ${p.title} (/${p.slug})`).join("\n");
+    const usedKeywords = new Set(
+      (existing || []).map((p: any) => String(p.title || "").toLowerCase()),
+    );
 
-    // 2) Topic discovery
+    // 1b) Keyword hub: pull the active LSI keyword bank so every article is
+    // anchored to a real, prioritised target keyword instead of a random topic.
+    const { data: kwRows } = await supabase
+      .from("lsi_keywords")
+      .select("term, category, related_terms, description, priority")
+      .eq("is_active", true)
+      .order("priority", { ascending: false })
+      .limit(120);
+    const { data: usedKwRows } = await supabase
+      .from("posts").select("primary_keyword").not("primary_keyword", "is", null).limit(1000);
+    const usedKw = new Set((usedKwRows || []).map((r: any) => String(r.primary_keyword || "").toLowerCase().trim()));
+    const freshKeywords = (kwRows || []).filter((k: any) => !usedKw.has(String(k.term).toLowerCase().trim()));
+    const keywordPool = (freshKeywords.length ? freshKeywords : (kwRows || [])).slice(0, 40);
+    const keywordBlock = keywordPool
+      .map((k: any) => `- ${k.term}${k.category ? ` [${k.category}]` : ""}${k.related_terms?.length ? ` — related: ${k.related_terms.slice(0, 6).join(", ")}` : ""}`)
+      .join("\n");
+    // Rotate through the pool so batch runs don't all pick the same term.
+    const targetKeyword: string | undefined = keywordPool.length
+      ? keywordPool[batchIndex % keywordPool.length].term
+      : undefined;
+    log.keyword_pool_size = keywordPool.length;
+    log.target_keyword = targetKeyword ?? null;
+
+    // 2) Topic discovery — always keyword-first
     let topic = forcedTopic;
     if (!topic) {
       const raw = await callLLM([
-        { role: "system", content: `You are an SEO strategist for a publisher in the niche: ${NICHE}. Propose ONE high-search-intent English/Hindi blog topic NOT already covered. Prioritize high-search-volume worldwide Hindu/spiritual keywords with clear reader intent. Return JSON: {"topic":"...","rationale":"..."}` },
-        { role: "user", content: `Existing posts:\n${existingList || "(none)"}\n\nRules:\n- Evergreen or trending in books/spirituality/meditation/self-growth/mindfulness/consciousness.\n- Different angle from anything above.\n- Serve real reader search intent.` },
+        { role: "system", content: `You are an SEO strategist for a publisher in the niche: ${NICHE}. Build ONE high-search-intent blog topic around the ASSIGNED TARGET KEYWORD. The topic must be unique — no overlap in angle, framing or promise with any existing post. Prioritize high-search-volume worldwide Hindu/spiritual keywords with clear reader intent. Return JSON: {"topic":"...","rationale":"..."}` },
+        { role: "user", content: `ASSIGNED TARGET KEYWORD: ${targetKeyword || "(choose the strongest untapped keyword below)"}\n\nKEYWORD BANK (site's own LSI hub — use these terms and their related variants):\n${keywordBlock || "(empty)"}\n\nExisting posts (do NOT repeat these):\n${existingList || "(none)"}\n\nRules:\n- Topic must clearly target the assigned keyword and rank for it.\n- Evergreen or trending in books/spirituality/meditation/self-growth/mindfulness/consciousness.\n- Completely different angle from anything above.\n- Serve real reader search intent.` },
       ], true, log, supabase, "topic-discovery", resolveKey);
       topic = JSON.parse(raw).topic;
     }
     log.topic = topic;
+    void usedKeywords;
+
 
     // 3) Similarity (semantic-ish via jaccard)
     const topicTokens = tokenize(topic!);

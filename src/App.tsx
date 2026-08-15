@@ -93,6 +93,7 @@ const AdminSeoCommand = lazy(() => import("./pages/admin/AdminSeoCommand"));
 const AdminTeam = lazy(() => import("./pages/admin/AdminTeam"));
 const AdminContentAudit = lazy(() => import("./pages/admin/AdminContentAudit"));
 const AdminCopyright = lazy(() => import("./pages/admin/AdminCopyright"));
+const AdminVerseStudio = lazy(() => import("./pages/admin/AdminVerseStudio"));
 const AdminSalesFunnel = lazy(() => import("./pages/admin/AdminSalesFunnel"));
 
 
@@ -276,6 +277,7 @@ const AppContent = () => {
                   <Route path="team" element={<AdminTeam />} />
                   <Route path="content-audit" element={<AdminContentAudit />} />
                   <Route path="copyright" element={<AdminCopyright />} />
+                  <Route path="verse-studio" element={<AdminVerseStudio />} />
                   <Route path="settings" element={<AdminSettings />} />
                   <Route path="data-export" element={<AdminDataExport />} />
                   <Route path="sales-funnel" element={<AdminSalesFunnel />} />

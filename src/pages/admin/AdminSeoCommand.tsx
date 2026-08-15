@@ -251,9 +251,13 @@ const AdminSeoCommand = () => {
           <Button onClick={() => refreshKb(false)} disabled={!!busy} size="sm" variant="outline">
             {busy === "Book KB refresh" ? <Loader2 className="h-4 w-4 animate-spin" /> : <BookOpen className="h-4 w-4" />} Refresh Book KB
           </Button>
+          <Button onClick={() => rankOptimize(false)} disabled={!!busy} size="sm" variant="secondary">
+            {busy === "Rank optimizer" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Target className="h-4 w-4" />} Rank Optimizer
+          </Button>
           <Button onClick={syncGsc} disabled={!!busy} variant="outline" size="sm">
             {busy === "GSC sync" ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCcw className="h-4 w-4" />} Sync GSC
           </Button>
+
         </div>
       </div>
 

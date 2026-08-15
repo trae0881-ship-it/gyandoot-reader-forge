@@ -2,7 +2,7 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
-import { BookOpen, FileText, Heart, ShoppingCart, LayoutDashboard, LogOut, ArrowLeft, Settings, Users, Tag, Share2, Sparkles, Code, KeyRound, Mail, Hash, FlaskConical, Globe2, UserCheck, Rocket, UsersRound, ShieldCheck, TrendingUp, Menu, Database } from "lucide-react";
+import { BookOpen, FileText, Heart, ShoppingCart, LayoutDashboard, LogOut, ArrowLeft, Settings, Users, Tag, Share2, Sparkles, Code, KeyRound, Mail, Hash, FlaskConical, Globe2, UserCheck, Rocket, UsersRound, ShieldCheck, TrendingUp, Menu, Database, Copyright } from "lucide-react";
 import { useEffect, useState } from "react";
 import AdminOtpGate, { isAdminOtpValid } from "@/components/admin/AdminOtpGate";
 
@@ -22,6 +22,7 @@ const navItems: NavItem[] = [
   { to: "/admin/books", label: "Books", icon: BookOpen, area: "books" },
   { to: "/admin/posts", label: "Posts", icon: FileText, area: "seo" },
   { to: "/admin/content-audit", label: "Content Audit", icon: ShieldCheck, area: "hasAdminAccess" },
+  { to: "/admin/copyright", label: "Copyright", icon: Copyright, area: "hasAdminAccess" },
   { to: "/admin/coupons", label: "Coupons", icon: Tag, area: "payments" },
   { to: "/admin/donations", label: "Donations", icon: Heart, area: "payments" },
   { to: "/admin/purchases", label: "Purchases", icon: ShoppingCart, area: "payments" },

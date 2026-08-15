@@ -498,7 +498,7 @@ ${existingList || "(none)"}
 
 REQUIREMENTS
 - 1800–2500 words body (excluding TOC/FAQ/conclusion).
-- 100% UNIQUE: every sentence written from scratch. Zero copied phrasing from research notes, Wikipedia, Gita Press editions, other blogs or generic AI templates. Use original examples, analogies and section ordering. Target originality ≥ 92/100.
+- 100% UNIQUE: every sentence written from scratch. Zero copied phrasing from research notes, Wikipedia, Gita Press editions, other blogs or generic AI templates. Use original examples, analogies and section ordering. Target originality ≥ 95/100 (100% copyright-free, publishable without any attribution risk).
 - Keyword coverage: primary keyword 6–10 times naturally (density ~1%), plus its Hindi/English/transliterated variants and question forms.
 - Target worldwide traffic: include naturally searched variants for India, US, UK, Canada and Australia readers.
 - Preserve spiritual accuracy; do not invent scripture claims. Explain practical meaning, path vidhi, benefits, FAQs, and common mistakes when relevant.

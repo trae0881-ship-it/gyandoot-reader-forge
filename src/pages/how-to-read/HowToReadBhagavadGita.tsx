@@ -41,10 +41,11 @@ const faqs = [
 
 const HowToReadBhagavadGita = () => {
   useSEO({
-    title: "How to Read the Bhagavad Gita — Beginner's Guide (2026)",
+    title: "How to Read the Bhagavad Gita — Step-by-Step Guide",
     description:
-      "Step-by-step guide to reading the Bhagavad Gita: which chapter to start with, best translations in Hindi and English, daily reading plan, and answers to common doubts.",
+      "How to read the Bhagavad Gita properly: which chapter to start with, the best Hindi and English translations, an 18-day reading plan, how long it takes, and answers to common doubts.",
     canonical: path,
+
     ogType: "article",
     hreflang: true,
     jsonLd: [

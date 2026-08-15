@@ -165,7 +165,7 @@ Deno.serve(async (req) => {
         checks: {
           seo_over_70: seoScore >= 70,
           readability_over_55: rd >= 55,
-          originality_over_92: originality >= 95,
+          originality_over_95: originality >= 95,
         },
       },
     }).eq("id", postId);

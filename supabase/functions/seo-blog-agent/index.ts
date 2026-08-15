@@ -481,22 +481,34 @@ Deno.serve(async (req) => {
 
 TOPIC: ${topic}
 
+PRIMARY TARGET KEYWORD (must be the focus_keyword, in H1, first 100 words, one H2, meta title & description, and the slug):
+${targetKeyword || topic}
+
+SUPPORTING / LSI KEYWORD BANK (weave 8–15 of these in naturally, never stuffed):
+${keywordBlock || "(none)"}
+
 RESEARCH NOTES (multi-provider, rewrite in your own words, DO NOT COPY sentences):
 ${researchBlock}
 
 INTERNAL LINK POOL (use 3–6 contextual links as <a href="/articles/slug">natural anchor</a> — only use slugs from this list, never invent):
 ${internalPool || "(none)"}
 
+ALREADY PUBLISHED (your article must not duplicate any of these in angle, structure, headings or examples):
+${existingList || "(none)"}
+
 REQUIREMENTS
 - 1800–2500 words body (excluding TOC/FAQ/conclusion).
+- 100% UNIQUE: every sentence written from scratch. Zero copied phrasing from research notes, Wikipedia, Gita Press editions, other blogs or generic AI templates. Use original examples, analogies and section ordering. Target originality ≥ 92/100.
+- Keyword coverage: primary keyword 6–10 times naturally (density ~1%), plus its Hindi/English/transliterated variants and question forms.
 - Target worldwide traffic: include naturally searched variants for India, US, UK, Canada and Australia readers.
 - Preserve spiritual accuracy; do not invent scripture claims. Explain practical meaning, path vidhi, benefits, FAQs, and common mistakes when relevant.
 - Google Helpful Content + EEAT, natural human tone, no AI clichés or repetition.
 - Prefer authoritative citations (gov, .edu, scientific, books, reputable news).
 - One H1, several H2/H3; short paragraphs; sentence variety; include Conclusion and a CTA paragraph.
-- TOC (linked H2s) + FAQ (6 Qs).
+- TOC (linked H2s) + FAQ (6 Qs, each answering a real long-tail query around the primary keyword).
 - 2–4 external links only to authoritative sources from research.
 - Output valid HTML body (h1,h2,h3,p,ul,ol,li,a,strong,em,blockquote).
+
 
 Return STRICT JSON (no markdown fences):
 {

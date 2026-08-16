@@ -20,8 +20,17 @@ const DEFAULT_OG_H = "640";
 
 const HREFLANGS = ["en", "en-US", "en-GB", "en-AU", "en-CA", "en-IN", "hi-IN", "x-default"] as const;
 
+/**
+ * Returns the single meta tag for this key, creating it if missing and removing
+ * any duplicates (prerendered head + client head can otherwise both emit one).
+ */
 const getOrCreateMeta = (attr: string, value: string): HTMLMetaElement => {
-  let el = document.querySelector(`meta[${attr}="${value}"]`) as HTMLMetaElement;
+  const found = Array.from(
+    document.querySelectorAll(`meta[${attr}="${value}"]`),
+  ) as HTMLMetaElement[];
+  // Keep the first, drop every duplicate.
+  found.slice(1).forEach((n) => n.remove());
+  let el = found[0];
   if (!el) {
     el = document.createElement("meta");
     const [key] = attr === "property" ? ["property"] : ["name"];
@@ -30,6 +39,7 @@ const getOrCreateMeta = (attr: string, value: string): HTMLMetaElement => {
   }
   return el;
 };
+
 
 const useSEO = ({ title, description, canonical, ogImage, ogType, jsonLd, hreflang, noindex }: SEOProps) => {
   useEffect(() => {

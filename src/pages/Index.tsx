@@ -86,8 +86,33 @@ const SectionSkeleton = ({ h = "10rem" }: { h?: string }) => (
   <div aria-hidden style={{ minHeight: h }} className="w-full" />
 );
 
+/* ─── Catalogue stats — every figure comes from the database ─── */
+const CatalogueStats = () => {
+  const { data } = useSiteStats();
+  const stats = [
+    { value: data?.books ?? 0, label: "Titles in the library" },
+    { value: data?.articles ?? 0, label: "Free articles published" },
+    { value: 4, label: "Sacred-text hubs (Vedas, Gita, Upanishads, Rig Veda)" },
+    { value: 2, label: "Languages: Hindi & English" },
+  ];
+  return (
+    <section className="bg-primary py-16">
+      <div className="container">
+        <div className="grid gap-8 text-center sm:grid-cols-2 lg:grid-cols-4">
+          {stats.map((s) => (
+            <div key={s.label}>
+              <AnimatedCounter target={s.value} />
+              <p className="mt-2 text-sm font-medium text-primary-foreground/90">{s.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
 
 /* ─── Animated Counter ─── */
+
 const AnimatedCounter = ({ target, suffix = "" }: { target: number; suffix?: string }) => {
   // Start at the real target so the number is ALWAYS visible, even if the
   // IntersectionObserver never fires (short viewports, prerender, JS delay).

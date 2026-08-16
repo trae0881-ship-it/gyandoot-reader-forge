@@ -342,6 +342,16 @@ const ArticleDetail = () => {
     jsonLd: post ? [articleJsonLd, breadcrumbJsonLd, faqJsonLd] : undefined,
   });
 
+  // Keep <html lang> aligned with the article's real language, restore on exit.
+  useEffect(() => {
+    if (!post) return;
+    const prev = document.documentElement.lang;
+    document.documentElement.lang = isHindi ? "hi" : "en";
+    return () => { document.documentElement.lang = prev; };
+  }, [post, isHindi]);
+
+
+
   if (isLoading) {
     return <Layout><div className="flex justify-center py-32"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div></Layout>;
   }

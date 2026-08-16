@@ -115,10 +115,10 @@ const Support = () => {
               Can't find what you're looking for? Reach out directly.
             </p>
             <a
-              href="mailto:amrendra8765@gmail.com"
+              href="mailto:gyandootnova57@gmail.com"
               className="inline-flex items-center gap-2 text-primary font-semibold hover:underline"
             >
-              <Mail className="h-4 w-4" /> amrendra8765@gmail.com
+              <Mail className="h-4 w-4" /> gyandootnova57@gmail.com
             </a>
           </div>
         </section>

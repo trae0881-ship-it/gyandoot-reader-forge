@@ -249,7 +249,7 @@ function buildInvoicePdf({
     doc.text(wrapped, margin + 14, fy);
     fy += wrapped.length * 11;
   }
-  doc.text("amrendra8765@gmail.com", margin + 14, fy); fy += 11;
+  doc.text("gyandootnova57@gmail.com", margin + 14, fy); fy += 11;
   if (gstin) { doc.text(`GSTIN: ${gstin}`, margin + 14, fy); fy += 11; }
   if (pan) { doc.text(`PAN: ${pan}`, margin + 14, fy); fy += 11; }
 
@@ -360,7 +360,7 @@ function buildInvoicePdf({
   const notes = [
     "This is a computer-generated invoice for a digital publication and does not require a signature.",
     "Digital goods are non-refundable once access to the content has been granted.",
-    "For any billing questions, contact amrendra8765@gmail.com with the Invoice # above.",
+    "For any billing questions, contact gyandootnova57@gmail.com with the Invoice # above.",
   ];
   const wrappedNotes = doc.splitTextToSize(notes.join("\n"), pageW - margin * 2);
   doc.text(wrappedNotes, margin, notesY + 16);

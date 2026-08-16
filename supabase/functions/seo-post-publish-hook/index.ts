@@ -6,7 +6,7 @@ import { assertSeoAuthorized } from "../_shared/seo-auth.ts";
 
 const SITE = "https://gyandootnova.in";
 const GSC_SITE_URL = "https://gyandootnova.in/";
-const REPORT_TO = "amrendra8765@gmail.com";
+const REPORT_TO = "gyandootnova57@gmail.com";
 const GATEWAY = "https://connector-gateway.lovable.dev";
 
 async function submitToGsc(articleUrl: string) {

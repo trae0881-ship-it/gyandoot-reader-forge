@@ -353,7 +353,7 @@ Deno.serve(async (req) => {
 
     // Recipients: override with SEO_REPORT_TO (comma separated). Default sends
     // to both admin inboxes so a single mailbox filtering it out never hides it.
-    const recipients = (Deno.env.get("SEO_REPORT_TO") || `${ADMIN_EMAIL},amrendra8765@gmail.com`)
+    const recipients = (Deno.env.get("SEO_REPORT_TO") || `${ADMIN_EMAIL},gyandootnova57@gmail.com`)
       .split(",").map((s) => s.trim()).filter(Boolean);
     const uniqueRecipients = [...new Set(recipients)];
 

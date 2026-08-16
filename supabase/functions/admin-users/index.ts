@@ -55,7 +55,7 @@ async function sendAccountStatusEmail(email: string, displayName: string | null,
                   </div>
                   `}
                   <p style="margin:24px 0 0;font-size:13px;color:#9ca3af;">
-                    If you have questions, reply to this email or contact us at amrendra8765@gmail.com
+                    If you have questions, reply to this email or contact us at gyandootnova57@gmail.com
                   </p>
                 </td>
               </tr>

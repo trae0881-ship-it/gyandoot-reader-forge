@@ -48,7 +48,7 @@ const About = () => {
         alternateName: ["Gyandoot", "Gyandoot Nova", "gyandootnova.in"],
         url: "https://gyandootnova.in",
         logo: "https://gyandootnova.in/gyandoot-nova-icon.ico",
-        email: "amrendra8765@gmail.com",
+        email: "gyandootnova57@gmail.com",
         telephone: "+91-91615-33353",
         foundingDate: "2024",
         description:
@@ -66,7 +66,7 @@ const About = () => {
           {
             "@type": "ContactPoint",
             contactType: "customer support",
-            email: "amrendra8765@gmail.com",
+            email: "gyandootnova57@gmail.com",
             telephone: "+91-91615-33353",
             availableLanguage: ["Hindi", "English"],
           },

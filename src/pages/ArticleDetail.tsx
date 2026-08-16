@@ -237,10 +237,23 @@ const ArticleDetail = () => {
     gcTime: 60 * 60 * 1000,
   });
 
+  // Language targeting must follow the actual article language — hardcoding
+  // hi-IN on English posts sends mixed signals to search engines.
+  const langSample = `${post?.title ?? ""} ${(post?.excerpt ?? "").replace(/<[^>]*>/g, "")} ${(post?.content ?? "").replace(/<[^>]*>/g, "").slice(0, 2000)}`;
+  const devanagari = (langSample.match(/[\u0900-\u097F]/g) || []).length;
+  const latin = (langSample.match(/[A-Za-z]/g) || []).length;
+  const isHindi = devanagari > latin;
+  const articleLang = isHindi ? "hi-IN" : "en-IN";
+
   const rawDesc = (post?.meta_description || post?.excerpt?.replace(/<[^>]*>/g, "").trim() || "").slice(0, 155);
   const articleDesc = (rawDesc && rawDesc.length >= 20)
     ? rawDesc
-    : (post ? `${post.title} — GyandootNova पर आध्यात्मिक लेख, विचार और ज्ञान पढ़ें।` : "Spiritual articles and insights at GyandootNova.");
+    : (post
+        ? (isHindi
+            ? `${post.title} — GyandootNova पर आध्यात्मिक लेख, विचार और ज्ञान पढ़ें।`
+            : `${post.title} — read this spiritual article, insight and commentary on GyandootNova.`)
+        : "Spiritual articles and insights at GyandootNova.");
+
 
   const breadcrumbJsonLd = post ? {
     "@context": "https://schema.org",
@@ -261,7 +274,7 @@ const ArticleDetail = () => {
     "mainEntityOfPage": { "@type": "WebPage", "@id": `https://gyandootnova.in/articles/${post.slug}` },
     "datePublished": post.created_at,
     "dateModified": post.updated_at,
-    "inLanguage": "hi-IN",
+    "inLanguage": articleLang,
     ...(post.cover_url && { "image": post.cover_url }),
     "author": { "@type": "Organization", "name": "GyandootNova", "url": "https://gyandootnova.in" },
     "publisher": {
@@ -273,7 +286,8 @@ const ArticleDetail = () => {
   const faqJsonLd = post ? {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    "mainEntity": [
+    "inLanguage": articleLang,
+    "mainEntity": isHindi ? [
       {
         "@type": "Question",
         "name": `${post.title} किस बारे में है?`,
@@ -287,15 +301,37 @@ const ArticleDetail = () => {
       {
         "@type": "Question",
         "name": "और आध्यात्मिक लेख कहाँ मिलेंगे?",
-        "acceptedAnswer": { "@type": "Answer", "text": "हमारे Articles सेक्शन में वेद, उपनिषद, गीता और आधुनिक आध्यात्मिक विषयों पर सैकड़ों लेख उपलब्ध हैं।" },
+        "acceptedAnswer": { "@type": "Answer", "text": "हमारे Articles सेक्शन में वेद, उपनिषद, गीता और ध्यान जैसे विषयों पर लेख उपलब्ध हैं।" },
       },
       {
         "@type": "Question",
         "name": "क्या मैं इस लेख को साझा कर सकता हूँ?",
         "acceptedAnswer": { "@type": "Answer", "text": "बिल्कुल — WhatsApp, Facebook, X या LinkedIn पर share बटन से आप इसे तुरंत साझा कर सकते हैं।" },
       },
+    ] : [
+      {
+        "@type": "Question",
+        "name": `What is "${post.title}" about?`,
+        "acceptedAnswer": { "@type": "Answer", "text": (post.excerpt || articleDesc).slice(0, 500) },
+      },
+      {
+        "@type": "Question",
+        "name": "Is this article free to read?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes — every article on GyandootNova is free to read in full." },
+      },
+      {
+        "@type": "Question",
+        "name": "Where can I find more articles like this?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Our Articles section covers the Vedas, Upanishads, Bhagavad Gita and meditation practice." },
+      },
+      {
+        "@type": "Question",
+        "name": "Can I share this article?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes — use the WhatsApp, Facebook, X or LinkedIn share buttons on this page." },
+      },
     ],
   } : undefined;
+
 
   useSEO({
     title: post ? (post.meta_title || post.title) : "Loading Article... | GyandootNova",
@@ -305,6 +341,16 @@ const ArticleDetail = () => {
     ogType: "article",
     jsonLd: post ? [articleJsonLd, breadcrumbJsonLd, faqJsonLd] : undefined,
   });
+
+  // Keep <html lang> aligned with the article's real language, restore on exit.
+  useEffect(() => {
+    if (!post) return;
+    const prev = document.documentElement.lang;
+    document.documentElement.lang = isHindi ? "hi" : "en";
+    return () => { document.documentElement.lang = prev; };
+  }, [post, isHindi]);
+
+
 
   if (isLoading) {
     return <Layout><div className="flex justify-center py-32"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div></Layout>;

@@ -53,7 +53,6 @@ import { BrandPurpose } from "@/components/BrandSoul";
 // Each is code-split into its own chunk and mounted only when React reaches
 // that point in the tree (browser has already painted the hero by then).
 const LiveReaderStrip = lazy(() => import("@/components/LiveReaderStrip"));
-const RecentPurchasesToast = lazy(() => import("@/components/RecentPurchasesToast"));
 const ContinueReadingSection = lazy(() => import("@/components/ContinueReadingSection"));
 const CompareSection = lazy(() => import("@/components/CompareSection"));
 const GuaranteeSection = lazy(() => import("@/components/GuaranteeSection"));
@@ -266,7 +265,6 @@ const Index = () => {
     <Layout>
       {/* Idle-only widgets — don't block the hero on mobile. */}
       <IdleMount><LiveReaderStrip /></IdleMount>
-      <IdleMount><RecentPurchasesToast /></IdleMount>
       <Suspense fallback={<SectionSkeleton h="4rem" />}>
         <ContinueReadingSection />
       </Suspense>

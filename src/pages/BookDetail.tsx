@@ -23,7 +23,6 @@ import { useNavigate } from "react-router-dom";
 import AskScripture from "@/components/AskScripture";
 import AuthorCredibility from "@/components/AuthorCredibility";
 
-import RecentPurchasesToast from "@/components/RecentPurchasesToast";
 import { getReferrerId } from "@/hooks/useReferral";
 import { WhyBookMatters } from "@/components/BrandExperience";
 import BookReviewList, { useBookReviewStats } from "@/components/BookReviewList";
@@ -388,7 +387,6 @@ const BookDetail = () => {
 
   return (
     <Layout>
-      <RecentPurchasesToast />
       <section className="py-12">
         <div className="container">
           {/* Breadcrumb — SEO + brand-entity link back to GyandootNova. */}

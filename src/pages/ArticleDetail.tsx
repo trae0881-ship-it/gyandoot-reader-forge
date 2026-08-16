@@ -286,7 +286,8 @@ const ArticleDetail = () => {
   const faqJsonLd = post ? {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    "mainEntity": [
+    "inLanguage": articleLang,
+    "mainEntity": isHindi ? [
       {
         "@type": "Question",
         "name": `${post.title} किस बारे में है?`,
@@ -300,15 +301,37 @@ const ArticleDetail = () => {
       {
         "@type": "Question",
         "name": "और आध्यात्मिक लेख कहाँ मिलेंगे?",
-        "acceptedAnswer": { "@type": "Answer", "text": "हमारे Articles सेक्शन में वेद, उपनिषद, गीता और आधुनिक आध्यात्मिक विषयों पर सैकड़ों लेख उपलब्ध हैं।" },
+        "acceptedAnswer": { "@type": "Answer", "text": "हमारे Articles सेक्शन में वेद, उपनिषद, गीता और ध्यान जैसे विषयों पर लेख उपलब्ध हैं।" },
       },
       {
         "@type": "Question",
         "name": "क्या मैं इस लेख को साझा कर सकता हूँ?",
         "acceptedAnswer": { "@type": "Answer", "text": "बिल्कुल — WhatsApp, Facebook, X या LinkedIn पर share बटन से आप इसे तुरंत साझा कर सकते हैं।" },
       },
+    ] : [
+      {
+        "@type": "Question",
+        "name": `What is "${post.title}" about?`,
+        "acceptedAnswer": { "@type": "Answer", "text": (post.excerpt || articleDesc).slice(0, 500) },
+      },
+      {
+        "@type": "Question",
+        "name": "Is this article free to read?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes — every article on GyandootNova is free to read in full." },
+      },
+      {
+        "@type": "Question",
+        "name": "Where can I find more articles like this?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Our Articles section covers the Vedas, Upanishads, Bhagavad Gita and meditation practice." },
+      },
+      {
+        "@type": "Question",
+        "name": "Can I share this article?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes — use the WhatsApp, Facebook, X or LinkedIn share buttons on this page." },
+      },
     ],
   } : undefined;
+
 
   useSEO({
     title: post ? (post.meta_title || post.title) : "Loading Article... | GyandootNova",

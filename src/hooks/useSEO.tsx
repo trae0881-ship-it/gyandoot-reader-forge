@@ -86,9 +86,13 @@ const useSEO = ({ title, description, canonical, ogImage, ogType, jsonLd, hrefla
     setTwitter("twitter:image", absImage);
     setTwitter("twitter:image:alt", title);
 
-    // Canonical
+    // Canonical — exactly one per page; drop any duplicates from the static head.
     if (canonical) {
-      let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+      const links = Array.from(
+        document.querySelectorAll('link[rel="canonical"]'),
+      ) as HTMLLinkElement[];
+      links.slice(1).forEach((n) => n.remove());
+      let link = links[0];
       if (!link) {
         link = document.createElement("link");
         link.rel = "canonical";
@@ -101,7 +105,9 @@ const useSEO = ({ title, description, canonical, ogImage, ogType, jsonLd, hrefla
     // market we're targeting (US/UK/AU/CA/IN) plus Hindi (India) and x-default.
     const hreflangEls: HTMLLinkElement[] = [];
     if (hreflang && canonical) {
-      document.querySelectorAll('link[data-dyn-hreflang="1"]').forEach((n) => n.remove());
+      // Remove every existing alternate (dynamic or prerendered) so each
+      // hreflang value appears exactly once.
+      document.querySelectorAll('link[rel="alternate"][hreflang]').forEach((n) => n.remove());
       HREFLANGS.forEach((lang) => {
         const l = document.createElement("link");
         l.rel = "alternate";
@@ -112,6 +118,7 @@ const useSEO = ({ title, description, canonical, ogImage, ogType, jsonLd, hrefla
         hreflangEls.push(l);
       });
     }
+
 
     // JSON-LD — accepts a single object or an array; each renders as its own <script>.
     const scriptEls: HTMLScriptElement[] = [];

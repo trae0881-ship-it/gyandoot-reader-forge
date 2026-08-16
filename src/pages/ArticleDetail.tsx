@@ -274,7 +274,7 @@ const ArticleDetail = () => {
     "mainEntityOfPage": { "@type": "WebPage", "@id": `https://gyandootnova.in/articles/${post.slug}` },
     "datePublished": post.created_at,
     "dateModified": post.updated_at,
-    "inLanguage": "hi-IN",
+    "inLanguage": articleLang,
     ...(post.cover_url && { "image": post.cover_url }),
     "author": { "@type": "Organization", "name": "GyandootNova", "url": "https://gyandootnova.in" },
     "publisher": {

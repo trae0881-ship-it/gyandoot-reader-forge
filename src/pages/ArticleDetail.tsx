@@ -237,10 +237,23 @@ const ArticleDetail = () => {
     gcTime: 60 * 60 * 1000,
   });
 
+  // Language targeting must follow the actual article language — hardcoding
+  // hi-IN on English posts sends mixed signals to search engines.
+  const langSample = `${post?.title ?? ""} ${(post?.excerpt ?? "").replace(/<[^>]*>/g, "")} ${(post?.content ?? "").replace(/<[^>]*>/g, "").slice(0, 2000)}`;
+  const devanagari = (langSample.match(/[\u0900-\u097F]/g) || []).length;
+  const latin = (langSample.match(/[A-Za-z]/g) || []).length;
+  const isHindi = devanagari > latin;
+  const articleLang = isHindi ? "hi-IN" : "en-IN";
+
   const rawDesc = (post?.meta_description || post?.excerpt?.replace(/<[^>]*>/g, "").trim() || "").slice(0, 155);
   const articleDesc = (rawDesc && rawDesc.length >= 20)
     ? rawDesc
-    : (post ? `${post.title} — GyandootNova पर आध्यात्मिक लेख, विचार और ज्ञान पढ़ें।` : "Spiritual articles and insights at GyandootNova.");
+    : (post
+        ? (isHindi
+            ? `${post.title} — GyandootNova पर आध्यात्मिक लेख, विचार और ज्ञान पढ़ें।`
+            : `${post.title} — read this spiritual article, insight and commentary on GyandootNova.`)
+        : "Spiritual articles and insights at GyandootNova.");
+
 
   const breadcrumbJsonLd = post ? {
     "@context": "https://schema.org",

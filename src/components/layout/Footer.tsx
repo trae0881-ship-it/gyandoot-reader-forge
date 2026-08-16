@@ -228,13 +228,28 @@ const Footer = () => {
             <Link to="/refund-policy" className="hover:text-secondary transition-colors">Refund</Link>
           </div>
         </div>
+        <p className="mt-3 text-center text-xs text-background/50">
+          Last updated:{" "}
+          <time dateTime={__BUILT_AT__}>
+            {new Date(__BUILT_AT__).toLocaleString("en-IN", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              timeZone: "Asia/Kolkata",
+            })}{" "}
+            IST
+          </time>
+        </p>
         <p
-          className="mt-3 text-center text-[10px] font-mono text-background/30"
+          className="mt-1 text-center text-[10px] font-mono text-background/30"
           title={`Built ${__BUILT_AT__}`}
           data-build-id={__BUILD_ID__}
         >
-          build {String(__BUILD_ID__).slice(0, 12)} · {__BUILT_AT__}
+          build {String(__BUILD_ID__).slice(0, 12)}
         </p>
+
 
 
       </div>

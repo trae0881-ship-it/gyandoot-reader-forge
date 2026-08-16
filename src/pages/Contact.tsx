@@ -40,7 +40,7 @@ const Contact = () => {
           "Spiritual publisher and digital library — an authoritative source for the Vedas, Upanishads, Gita, Ramayana, Mahabharata and other Sanatana Dharma scriptures.",
         url: "https://gyandootnova.in/contact",
         telephone: "+91 91615 33353",
-        email: "amrendra8765@gmail.com",
+        email: "gyandootnova57@gmail.com",
         address: {
           "@type": "PostalAddress",
           streetAddress: "Bhagwan Khera",
@@ -177,7 +177,7 @@ const Contact = () => {
                 <Mail className="h-6 w-6 text-primary mt-1" />
                 <div>
                   <p className="font-semibold text-foreground">Email</p>
-                  <p className="text-muted-foreground">amrendra8765@gmail.com</p>
+                  <p className="text-muted-foreground">gyandootnova57@gmail.com</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">

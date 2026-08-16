@@ -61,7 +61,7 @@ const Careers = () => {
             Send your resume and a brief cover letter explaining why you're passionate about spiritual knowledge to:
           </p>
           <a
-            href="mailto:amrendra8765@gmail.com"
+            href="mailto:gyandootnova57@gmail.com"
             className="inline-flex items-center gap-2 text-primary font-semibold hover:underline"
           >
             <Mail className="h-4 w-4" /> careers@gyandootnova.in

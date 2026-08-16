@@ -35,7 +35,7 @@ const RefundPolicy = () => {
 
         <h2>4. How to Request a Refund</h2>
         <ol>
-          <li>Email us at <a href="mailto:amrendra8765@gmail.com" className="text-primary">amrendra8765@gmail.com</a> with your purchase details.</li>
+          <li>Email us at <a href="mailto:gyandootnova57@gmail.com" className="text-primary">gyandootnova57@gmail.com</a> with your purchase details.</li>
           <li>Include your registered email and order/payment ID.</li>
           <li>Our team will review and respond within 3-5 business days.</li>
         </ol>

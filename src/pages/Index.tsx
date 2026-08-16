@@ -1073,7 +1073,7 @@ const Index = () => {
                   </div>
                 </a>
                 <a
-                  href="mailto:amrendra8765@gmail.com"
+                  href="mailto:gyandootnova57@gmail.com"
                   className="flex items-start gap-4 rounded-xl border border-border p-4 hover:border-primary/40 transition-colors"
                 >
                   <div className="rounded-lg bg-primary/10 p-2.5 shrink-0">
@@ -1082,7 +1082,7 @@ const Index = () => {
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Email</p>
                     <p className="font-serif text-base font-semibold text-card-foreground mt-0.5 break-all">
-                      amrendra8765@gmail.com
+                      gyandootnova57@gmail.com
                     </p>
                   </div>
                 </a>

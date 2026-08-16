@@ -41,7 +41,7 @@ const ShippingPolicy = () => {
         <ol>
           <li>Refresh the page and check your account.</li>
           <li>Wait a few minutes — payment verification may take up to 5 minutes.</li>
-          <li>If the issue persists, contact us at <a href="mailto:amrendra8765@gmail.com" className="text-primary">amrendra8765@gmail.com</a> with your payment ID.</li>
+          <li>If the issue persists, contact us at <a href="mailto:gyandootnova57@gmail.com" className="text-primary">gyandootnova57@gmail.com</a> with your payment ID.</li>
         </ol>
 
         <h2>6. No Physical Shipping</h2>

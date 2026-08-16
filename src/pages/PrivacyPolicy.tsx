@@ -47,12 +47,12 @@ const PrivacyPolicy = () => {
 
         <h2>6. Your Rights</h2>
         <p>
-          You have the right to access, update, or delete your personal information at any time. Contact us at amrendra8765@gmail.com for any privacy-related requests.
+          You have the right to access, update, or delete your personal information at any time. Contact us at gyandootnova57@gmail.com for any privacy-related requests.
         </p>
 
         <h2>7. Contact Us</h2>
         <p>
-          For questions about this Privacy Policy, please contact us at <a href="mailto:amrendra8765@gmail.com" className="text-primary">amrendra8765@gmail.com</a>.
+          For questions about this Privacy Policy, please contact us at <a href="mailto:gyandootnova57@gmail.com" className="text-primary">gyandootnova57@gmail.com</a>.
         </p>
       </main>
     </Layout>

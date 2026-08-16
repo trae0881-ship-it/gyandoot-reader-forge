@@ -401,7 +401,10 @@ Deno.serve(async (req) => {
         success: true,
         emailed,
         emailError,
+        emailId,
+        recipients: uniqueRecipients,
         report_date: day,
+
         gsc: { last1d: d1, last7d: d7, last28d: d28 },
         onsite: { visits24h: rows24.length, unique24h: uniqueVisitors, visits7d: visits7Count || 0 },
         ai: { referrals: aiReferrals, bots: aiBots },

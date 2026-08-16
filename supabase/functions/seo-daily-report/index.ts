@@ -351,15 +351,23 @@ Deno.serve(async (req) => {
 
     const pdfBase64 = toBase64(buildPdf(L));
 
+    // Recipients: override with SEO_REPORT_TO (comma separated). Default sends
+    // to both admin inboxes so a single mailbox filtering it out never hides it.
+    const recipients = (Deno.env.get("SEO_REPORT_TO") || `${ADMIN_EMAIL},amrendra8765@gmail.com`)
+      .split(",").map((s) => s.trim()).filter(Boolean);
+    const uniqueRecipients = [...new Set(recipients)];
+
     let emailed = false;
     let emailError: string | null = null;
+    let emailId: string | null = null;
     if (RESEND_API_KEY) {
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${RESEND_API_KEY}` },
         body: JSON.stringify({
           from: FROM,
-          to: [ADMIN_EMAIL],
+          to: uniqueRecipients,
+          reply_to: ADMIN_EMAIL,
           subject: `[SEO REPORT] ${SITE_NAME} — ${day}`,
           html,
           attachments: [
@@ -368,13 +376,17 @@ Deno.serve(async (req) => {
         }),
       });
       emailed = res.ok;
-      if (!res.ok) {
+      if (res.ok) {
+        try { emailId = (await res.json())?.id ?? null; } catch { /* ignore */ }
+        console.log("daily report emailed", { to: uniqueRecipients, emailId });
+      } else {
         emailError = (await res.text()).slice(0, 300);
         console.error("daily report email failed", res.status, emailError);
       }
     } else {
       emailError = "RESEND_API_KEY not configured";
     }
+
 
 
 

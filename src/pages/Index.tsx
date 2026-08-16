@@ -1,3 +1,4 @@
+import { useSiteStats } from "@/hooks/useSiteStats";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -53,7 +54,6 @@ import { BrandPurpose } from "@/components/BrandSoul";
 // Each is code-split into its own chunk and mounted only when React reaches
 // that point in the tree (browser has already painted the hero by then).
 const LiveReaderStrip = lazy(() => import("@/components/LiveReaderStrip"));
-const RecentPurchasesToast = lazy(() => import("@/components/RecentPurchasesToast"));
 const ContinueReadingSection = lazy(() => import("@/components/ContinueReadingSection"));
 const CompareSection = lazy(() => import("@/components/CompareSection"));
 const GuaranteeSection = lazy(() => import("@/components/GuaranteeSection"));
@@ -87,8 +87,33 @@ const SectionSkeleton = ({ h = "10rem" }: { h?: string }) => (
   <div aria-hidden style={{ minHeight: h }} className="w-full" />
 );
 
+/* ─── Catalogue stats — every figure comes from the database ─── */
+const CatalogueStats = () => {
+  const { data } = useSiteStats();
+  const stats = [
+    { value: data?.books ?? 0, label: "Titles in the library" },
+    { value: data?.articles ?? 0, label: "Free articles published" },
+    { value: 4, label: "Sacred-text hubs (Vedas, Gita, Upanishads, Rig Veda)" },
+    { value: 2, label: "Languages: Hindi & English" },
+  ];
+  return (
+    <section className="bg-primary py-16">
+      <div className="container">
+        <div className="grid gap-8 text-center sm:grid-cols-2 lg:grid-cols-4">
+          {stats.map((s) => (
+            <div key={s.label}>
+              <AnimatedCounter target={s.value} />
+              <p className="mt-2 text-sm font-medium text-primary-foreground/90">{s.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
 
 /* ─── Animated Counter ─── */
+
 const AnimatedCounter = ({ target, suffix = "" }: { target: number; suffix?: string }) => {
   // Start at the real target so the number is ALWAYS visible, even if the
   // IntersectionObserver never fires (short viewports, prerender, JS delay).
@@ -266,7 +291,6 @@ const Index = () => {
     <Layout>
       {/* Idle-only widgets — don't block the hero on mobile. */}
       <IdleMount><LiveReaderStrip /></IdleMount>
-      <IdleMount><RecentPurchasesToast /></IdleMount>
       <Suspense fallback={<SectionSkeleton h="4rem" />}>
         <ContinueReadingSection />
       </Suspense>
@@ -940,25 +964,9 @@ const Index = () => {
         </div>
       </section>
 
-      {/* ─── 6. IMPACT / STATS ─── */}
-      <section className="bg-primary py-16">
-        <div className="container">
-          <div className="grid gap-8 text-center sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { target: 500, suffix: "+", label: "Published titles" },
-              { target: 10000, suffix: "+", label: "Readers joined" },
-              { target: 200, suffix: "+", label: "Articles & sutras" },
-              { target: 50, suffix: "+", label: "Discourse events" },
+      {/* ─── 6. IMPACT / STATS (real catalogue numbers only) ─── */}
+      <CatalogueStats />
 
-            ].map((stat) => (
-              <div key={stat.label}>
-                <AnimatedCounter target={stat.target} suffix={stat.suffix} />
-                <p className="mt-2 text-sm font-medium text-primary-foreground/90">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ─── 7. TESTIMONIALS ─── */}
       <section className="py-20">

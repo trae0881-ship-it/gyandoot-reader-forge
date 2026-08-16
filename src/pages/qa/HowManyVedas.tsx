@@ -91,7 +91,7 @@ const HowManyVedas = () => (
       { label: "Rig Veda — the oldest Veda", to: "/texts/rig-veda" },
       { label: "Who wrote the Vedas?", to: "/qa/who-wrote-vedas" },
       { label: "How many Upanishads are there?", to: "/qa/how-many-upanishads" },
-      { label: "वेद का अर्थ — Hindi guide", to: "/hindi/vedas-meaning-hindi" },
+      { label: "वेद का अर्थ — Hindi guide", to: "/hindi/vedas-meaning-in-hindi" },
     ]}
   />
 );

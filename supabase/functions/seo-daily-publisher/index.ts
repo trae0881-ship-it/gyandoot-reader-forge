@@ -13,6 +13,19 @@ import { assertSeoAuthorized } from "../_shared/seo-auth.ts";
 
 const MIN_QUEUE = 30;
 
+type TargetBook = {
+  id: string;
+  title: string;
+  slug: string;
+  author: string | null;
+  summary: string;
+  topics: string[];
+  concepts: string[];
+  keywords: string[];
+  entities: string[];
+  faqs: unknown[];
+};
+
 const STOP = new Set("the a an and or but if of to in on for with from by as is are was were be been being this that these those it its at we our you your they them he she his her hai hain ka ke ki ko me mein se par or aur ya bhi wo woh yeh ye kya kyun kaise".split(/\s+/));
 function tokens(s: string) {
   return new Set(
@@ -74,12 +87,52 @@ Deno.serve(async (req) => {
       await invokeFn(url, svc, "seo-book-kb-refresh", {});
     }
 
-    // 2) Load KB for grounding
+    // 2) Load the per-book KB and choose the least recently covered title.
+    // source_book_ids on posts is the durable cursor: no separate mutable
+    // rotation state is needed, and a failed run does not consume a book turn.
     const { data: kb } = await sb.from("book_knowledge").select("*");
+    const { data: bookRows } = await sb.from("books")
+      .select("id,title,slug,author")
+      .order("created_at", { ascending: true });
+    const { data: coveredPosts } = await sb.from("posts")
+      .select("source_book_ids,created_at")
+      .eq("post_type", "article")
+      .not("source_book_ids", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(1000);
+
+    const lastCovered = new Map<string, number>();
+    for (const post of coveredPosts || []) {
+      const coveredAt = new Date(post.created_at).getTime();
+      for (const id of post.source_book_ids || []) {
+        if (!lastCovered.has(id)) lastCovered.set(id, coveredAt);
+      }
+    }
+    const kbByBook = new Map((kb || []).filter((row: any) => row.book_id).map((row: any) => [row.book_id, row]));
+    const selectedBook = [...(bookRows || [])]
+      .filter((book: any) => book.slug && kbByBook.has(book.id))
+      .sort((a: any, b: any) => (lastCovered.get(a.id) || 0) - (lastCovered.get(b.id) || 0))[0];
+    if (!selectedBook) throw new Error("No book with knowledge data is available for blog grounding");
+    const selectedKb: any = kbByBook.get(selectedBook.id);
+    const targetBook: TargetBook = {
+      id: selectedBook.id,
+      title: selectedBook.title,
+      slug: selectedBook.slug,
+      author: selectedBook.author,
+      summary: selectedKb.summary || "",
+      topics: selectedKb.topics || [],
+      concepts: selectedKb.concepts || [],
+      keywords: selectedKb.keywords || [],
+      entities: selectedKb.entities || [],
+      faqs: selectedKb.faqs || [],
+    };
     const bookTopics = Array.from(new Set((kb || []).flatMap((k: any) => [
       ...(k.topics || []), ...(k.concepts || []), ...(k.keywords || []), ...(k.entities || []),
     ]))).slice(0, 200);
-    log("kb_loaded", { topics: bookTopics.length, books: kb?.length || 0 });
+    const selectedTerms = Array.from(new Set([
+      ...targetBook.keywords, ...targetBook.topics, ...targetBook.concepts, ...targetBook.entities,
+    ])).slice(0, 80);
+    log("kb_loaded", { topics: bookTopics.length, books: kb?.length || 0, target_book_id: targetBook.id, target_book: targetBook.title });
 
     // 3) Ensure queue has candidates
     const { count: queueCount } = await sb.from("seo_keyword_queue")
@@ -104,7 +157,8 @@ Deno.serve(async (req) => {
     let chosen: any = null;
     for (const cand of candidates || []) {
       const kw = String(cand.keyword || "").toLowerCase();
-      const bookMatch = Number(cand.relevance_score || 0) >= 70 || cand.source === "high_volume_worldwide" || bookTopics.some((t: string) =>
+      const matchedIds = Array.isArray(cand.matched_book_ids) ? cand.matched_book_ids : [];
+      const bookMatch = matchedIds.includes(targetBook.id) || selectedTerms.some((t: string) =>
         kw.includes(String(t).toLowerCase()) || String(t).toLowerCase().includes(kw));
       if (!bookMatch) continue;
       // uniqueness gate 15%
@@ -132,11 +186,12 @@ Deno.serve(async (req) => {
     const agentBody: any = {
       auto: !chosen,
       publish_status: "published",
-      book_context: bookTopics.slice(0, 60),
+      target_book: targetBook,
+      book_context: selectedTerms.slice(0, 60),
     };
     if (chosen) agentBody.keyword = chosen.keyword;
     const agentRes = await invokeFn(url, svc, "seo-blog-agent", agentBody);
-    log("agent_run", { status: agentRes.status });
+    log("agent_run", { status: agentRes.status, target_book_id: targetBook.id, target_book: targetBook.title });
 
     const postId = agentRes.data?.post_id || agentRes.data?.post?.id;
     if (!postId) throw new Error(`agent returned no post_id: ${JSON.stringify(agentRes.data).slice(0, 300)}`);

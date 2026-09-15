@@ -24,6 +24,40 @@ const DEFAULT_TZ = "Asia/Kolkata";
 const SIMILARITY_THRESHOLD = 0.7;
 const CONTENT_SCORE_THRESHOLD = Number(Deno.env.get("SEO_CONTENT_SCORE_MIN") || "55");
 
+type TargetBook = {
+  id: string;
+  title: string;
+  slug: string;
+  author?: string | null;
+  summary?: string;
+  topics?: string[];
+  concepts?: string[];
+  keywords?: string[];
+  entities?: string[];
+  faqs?: unknown[];
+};
+
+function parseTargetBook(value: unknown): TargetBook | null {
+  if (!value || typeof value !== "object") return null;
+  const raw = value as Record<string, unknown>;
+  if (typeof raw.id !== "string" || typeof raw.title !== "string" || typeof raw.slug !== "string") return null;
+  const strings = (item: unknown) => Array.isArray(item) ? item.filter((v): v is string => typeof v === "string").slice(0, 80) : [];
+  return {
+    id: raw.id.slice(0, 100), title: raw.title.slice(0, 300), slug: raw.slug.slice(0, 200),
+    author: typeof raw.author === "string" ? raw.author.slice(0, 300) : null,
+    summary: typeof raw.summary === "string" ? raw.summary.slice(0, 4000) : "",
+    topics: strings(raw.topics), concepts: strings(raw.concepts), keywords: strings(raw.keywords),
+    entities: strings(raw.entities), faqs: Array.isArray(raw.faqs) ? raw.faqs.slice(0, 12) : [],
+  };
+}
+
+function ensureTargetBookLink(html: string, book: TargetBook | null): string {
+  if (!book || html.includes(`/books/${book.slug}`)) return html;
+  const block = `<aside class="book-recommendation"><h2>इस विषय की मूल पुस्तक</h2><p>इस विषय को विस्तार से समझने के लिए <a href="/books/${book.slug}"><strong>${book.title}</strong></a>${book.author ? ` — ${book.author}` : ""} पढ़ें।</p></aside>`;
+  const conclusion = html.search(/<h2[^>]*>\s*(निष्कर्ष|उपसंहार|Conclusion)/i);
+  return conclusion >= 0 ? `${html.slice(0, conclusion)}${block}${html.slice(conclusion)}` : `${html}${block}`;
+}
+
 // Suggested IST publishing slots for a Hindi spiritual audience.
 // Alternates a morning devotion slot and an evening reading slot.
 const IST_SLOTS: [number, number][] = [[7, 0], [19, 30]]; // 07:00 and 19:30 IST
@@ -393,6 +427,23 @@ Deno.serve(async (req) => {
     const requestedScheduledAt: string | null = typeof body?.scheduled_at === "string" ? body.scheduled_at : null;
     const confirmPublish: boolean = body?.confirm_publish === true;
     const batchIndex: number = Number.isInteger(body?.batch_index) ? body.batch_index : 0;
+    const targetBook = parseTargetBook(body?.target_book);
+    const targetBookTerms = targetBook
+      ? Array.from(new Set([...(targetBook.keywords || []), ...(targetBook.topics || []), ...(targetBook.concepts || []), ...(targetBook.entities || [])])).slice(0, 80)
+      : [];
+    const targetBookBlock = targetBook ? [
+      `TITLE: ${targetBook.title}`,
+      `AUTHOR: ${targetBook.author || "GyandootNova"}`,
+      `BOOK URL: /books/${targetBook.slug}`,
+      `SUMMARY: ${targetBook.summary || ""}`,
+      `TOPICS: ${(targetBook.topics || []).join(", ")}`,
+      `CONCEPTS: ${(targetBook.concepts || []).join(", ")}`,
+      `KEYWORDS: ${(targetBook.keywords || []).join(", ")}`,
+      `ENTITIES: ${(targetBook.entities || []).join(", ")}`,
+      `FAQ SIGNALS: ${JSON.stringify(targetBook.faqs || []).slice(0, 2500)}`,
+    ].join("\n") : "";
+    log.target_book_id = targetBook?.id ?? null;
+    log.target_book = targetBook?.title ?? null;
 
     // 1) Scan Posts (build internal content map)
     const { data: existing } = await supabase.from("posts")
@@ -417,7 +468,11 @@ Deno.serve(async (req) => {
       .from("posts").select("primary_keyword").not("primary_keyword", "is", null).limit(1000);
     const usedKw = new Set((usedKwRows || []).map((r: any) => String(r.primary_keyword || "").toLowerCase().trim()));
     const freshKeywords = (kwRows || []).filter((k: any) => !usedKw.has(String(k.term).toLowerCase().trim()));
-    const keywordPool = (freshKeywords.length ? freshKeywords : (kwRows || [])).slice(0, 40);
+    const bookKeywordRows = targetBookTerms.map((term, index) => ({
+      term, category: targetBook?.title || "book", related_terms: [], priority: 1000 - index,
+    }));
+    const siteKeywordRows = (freshKeywords.length ? freshKeywords : (kwRows || [])).slice(0, 40);
+    const keywordPool = targetBook ? [...bookKeywordRows, ...siteKeywordRows].slice(0, 80) : siteKeywordRows;
     const keywordBlock = keywordPool
       .map((k: any) => `- ${k.term}${k.category ? ` [${k.category}]` : ""}${k.related_terms?.length ? ` — related: ${k.related_terms.slice(0, 6).join(", ")}` : ""}`)
       .join("\n");
@@ -432,8 +487,8 @@ Deno.serve(async (req) => {
     let topic = forcedTopic;
     if (!topic) {
       const raw = await callLLM([
-        { role: "system", content: `You are an SEO strategist for a publisher in the niche: ${NICHE}. Build ONE high-search-intent blog topic around the ASSIGNED TARGET KEYWORD. The topic must be unique — no overlap in angle, framing or promise with any existing post. Prioritize high-search-volume worldwide Hindu/spiritual keywords with clear reader intent. Return JSON: {"topic":"...","rationale":"..."}` },
-        { role: "user", content: `ASSIGNED TARGET KEYWORD: ${targetKeyword || "(choose the strongest untapped keyword below)"}\n\nKEYWORD BANK (site's own LSI hub — use these terms and their related variants):\n${keywordBlock || "(empty)"}\n\nExisting posts (do NOT repeat these):\n${existingList || "(none)"}\n\nRules:\n- Topic must clearly target the assigned keyword and rank for it.\n- Evergreen or trending in books/spirituality/meditation/self-growth/mindfulness/consciousness.\n- Completely different angle from anything above.\n- Serve real reader search intent.` },
+        { role: "system", content: `You are an SEO strategist for a publisher in the niche: ${NICHE}. Build ONE high-search-intent blog topic around the ASSIGNED TARGET BOOK and TARGET KEYWORD. The topic must be unique — no overlap in angle, framing or promise with any existing post. Prioritize high-search-volume worldwide Hindu/spiritual keywords with clear reader intent. Return JSON: {"topic":"...","rationale":"..."}` },
+        { role: "user", content: `${targetBook ? `ASSIGNED TARGET BOOK (the article must be specifically about this book, its teachings, questions or practical application):\n${targetBookBlock}\n\n` : ""}ASSIGNED TARGET KEYWORD: ${targetKeyword || "(choose the strongest untapped keyword below)"}\n\nKEYWORD BANK (site's own LSI hub — use these terms and their related variants):\n${keywordBlock || "(empty)"}\n\nExisting posts (do NOT repeat these):\n${existingList || "(none)"}\n\nRules:\n- Topic must clearly target the assigned book and keyword.\n- Evergreen or trending in books/spirituality/meditation/self-growth/mindfulness/consciousness.\n- Completely different angle from anything above.\n- Serve real reader search intent.` },
       ], true, log, supabase, "topic-discovery", resolveKey);
       topic = JSON.parse(raw).topic;
     }
@@ -480,6 +535,8 @@ Deno.serve(async (req) => {
     const genPrompt = `Write a fully original, human-sounding, plagiarism-free Hindi-first article for a ${NICHE} publisher. Use simple Hinglish/Hindi phrasing where useful, but keep important search keywords in English too.
 
 TOPIC: ${topic}
+
+${targetBook ? `PRIMARY BOOK GROUNDING (this is the article's source theme; do not drift to another book):\n${targetBookBlock}\n\nThe body must naturally name and link this book at least once using <a href="/books/${targetBook.slug}">${targetBook.title}</a>. Do not quote or reproduce book passages; explain ideas originally.\n` : ""}
 
 PRIMARY TARGET KEYWORD (must be the focus_keyword, in H1, first 100 words, one H2, meta title & description, and the slug):
 ${targetKeyword || topic}
@@ -599,6 +656,7 @@ Return STRICT JSON (no markdown fences):
     let bodyHtml = String(article.body_html).replace(/<a\s+href="\/articles\/([^"#?]+)"[^>]*>([^<]+)<\/a>/gi, (m, slug, anchor) => {
       return validSlugs.has(slug) ? m : anchor;
     });
+    bodyHtml = ensureTargetBookLink(bodyHtml, targetBook);
 
     const faqSchema = {
       "@context": "https://schema.org", "@type": "FAQPage",
@@ -731,6 +789,13 @@ Return STRICT JSON (no markdown fences):
       external_references: externalRefsArr,
       canonical_url: canonical,
       schema_type: "BlogPosting",
+      source_book_ids: targetBook ? [targetBook.id] : [],
+      self_check: targetBook ? {
+        target_book_id: targetBook.id,
+        target_book_title: targetBook.title,
+        target_book_slug: targetBook.slug,
+        book_grounded: bodyHtml.includes(`/books/${targetBook.slug}`),
+      } : {},
     };
 
     try {

@@ -11,6 +11,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { buildKeyResolver } from "../_shared/ai-key-resolver.ts";
 import { assertSeoAuthorized } from "../_shared/seo-auth.ts";
+import { selectBookBlogTarget } from "../_shared/book-blog-target.ts";
 import {
   callChain, parseJson, WRITER_CHAIN, REVIEWER_CHAIN, ChatMsg,
 } from "../_shared/llm-multi.ts";
@@ -18,12 +19,6 @@ import {
 const SITE = "https://gyandootnova.in";
 // The dedicated editorial "user" that owns every article this agent writes.
 const AGENT_AUTHOR = "Gyandoot Editorial Desk";
-const PILLARS = [
-  "sahasranama (सहस्रनाम)",
-  "aarti (आरती)",
-  "rigved / vedic mantras (ऋग्वेद)",
-  "devotional stories (भक्ति कथा)",
-];
 const MIN_WORDS = 1600;
 const MAX_REVISIONS = 3;
 const PASS_SCORE = 85;              // editor scorecard gate
@@ -240,15 +235,19 @@ async function runAgent(body: any): Promise<any> {
     const covered = posts.map(p => `${p.title} — ${p.primary_keyword || ""}`).join("\n");
 
     // 2) keyword research from live search + trends
-    const pillar = PILLARS[Math.floor(Math.random() * PILLARS.length)];
+    const targetBook = await selectBookBlogTarget(supabase);
+    if (!targetBook) throw new Error("No book with knowledge data is available for blog grounding");
+    log.target_book_id = targetBook.id;
+    log.target_book = targetBook.title;
+    const pillar = `${targetBook.title} ${(targetBook.keywords || []).slice(0, 3).join(" ")}`;
     const trend = await research(`${pillar} bhakti devotional trending 2026`, resolveKey, log, true);
     const serp = await research(`${pillar} lyrics meaning benefits hindi`, resolveKey, log);
     const researchPool = [...trend, ...serp];
 
     const kwRaw = await callChain(REVIEWER_CHAIN, [
       { role: "system", content: "You are an SEO keyword strategist for a Hindi devotional publisher. Output ONLY valid JSON." },
-      { role: "user", content: `हमारी website पर ये articles पहले से हैं:\n${covered.slice(0, 6000)}\n\nLive search signals:\n${researchPool.map(s => `- ${s.title}`).join("\n").slice(0, 4000)}\n\nPillar: ${pillar}\n${forcedTopic ? `Admin ने ये topic माँगा है: ${forcedTopic}\n` : ""}
-ऐसा एक keyword चुनो जिस पर (a) अच्छा search volume हो, (b) हमारी site पर पहले से article न हो, (c) devotional intent हो.
+      { role: "user", content: `हमारी website पर ये articles पहले से हैं:\n${covered.slice(0, 6000)}\n\nLive search signals:\n${researchPool.map(s => `- ${s.title}`).join("\n").slice(0, 4000)}\n\nचुनी हुई पुस्तक: ${targetBook.title} (${SITE}/books/${targetBook.slug})\nपुस्तक सार: ${targetBook.summary}\nविषय: ${(targetBook.topics || []).join(", ")}\nकीवर्ड: ${(targetBook.keywords || []).join(", ")}\n${forcedTopic ? `Admin ने ये topic माँगा है: ${forcedTopic}\n` : ""}
+ इसी पुस्तक से सीधे संबंधित एक अलग keyword चुनो जिस पर (a) अच्छा search volume हो, (b) हमारी site पर पहले से article न हो. दूसरी पुस्तक के विषय पर मत भटको.
 Return JSON: {"topic":"article title idea in Hindi","focus_keyword":"...","secondary_keywords":["6-8"],"search_intent":"informational|transactional|navigational","estimated_volume":number,"why_now":"trend reason","duplicate_of":null|"existing title"}` },
     ], true, resolveKey, log, "keyword-research");
     const kw = parseJson(kwRaw.text);
@@ -283,7 +282,7 @@ Return JSON: {"topic":"article title idea in Hindi","focus_keyword":"...","secon
     const { data: bookRows } = await supabase.from("books")
       .select("id, title, slug, author, description, category").limit(50);
     const books: Book[] = (bookRows || []).filter(b => b.slug);
-    const bookPool = books.map(b => `/books/${b.slug} — ${b.title}${b.category ? ` (${b.category})` : ""}`).join("\n");
+    const bookPool = [`/books/${targetBook.slug} — ${targetBook.title} (मुख्य पुस्तक; अनिवार्य लिंक)`, ...books.filter(b => b.id !== targetBook.id).map(b => `/books/${b.slug} — ${b.title}${b.category ? ` (${b.category})` : ""}`)].join("\n");
     const internalPool = posts.slice(0, 50).map(p => `/articles/${p.slug} — ${p.title}`).join("\n");
 
     // 5) write → review → rewrite loop
@@ -296,7 +295,7 @@ Return JSON: {"topic":"article title idea in Hindi","focus_keyword":"...","secon
     for (let attempt = 1; attempt <= MAX_REVISIONS + 1; attempt++) {
       const msgs: ChatMsg[] = [
         { role: "system", content: "You are a senior Hindi devotional writer + SEO editor for GyandootNova. 100% original, factually accurate, Google Helpful Content compliant. Output ONLY valid JSON, no fences." },
-        { role: "user", content: writerPrompt(topic, kw, sources, internalPool, bookPool, fixes) },
+        { role: "user", content: `${writerPrompt(topic, kw, sources, internalPool, bookPool, fixes)}\n\nमुख्य पुस्तक ${targetBook.title} के विषयों (${(targetBook.topics || []).join(", ")}) और सार (${targetBook.summary}) पर लेख केन्द्रित रखें। पुस्तक का पाठ कॉपी न करें।` },
       ];
       const res = await callChain(WRITER_CHAIN, msgs, true, resolveKey, log, `write-${attempt}`);
       writerProvider = res.provider;
@@ -304,6 +303,9 @@ Return JSON: {"topic":"article title idea in Hindi","focus_keyword":"...","secon
       if (!draft?.body_html) { fixes = ["पिछला output valid JSON नहीं था — सिर्फ़ JSON लौटाओ।"]; continue; }
 
       draft.body_html = injectBookLinks(String(draft.body_html), books, topic, log);
+      if (!draft.body_html.includes(`/books/${targetBook.slug}`)) {
+        draft.body_html += `<p>इस विषय पर आगे पढ़ें: <a href="/books/${targetBook.slug}">${targetBook.title}</a>।</p>`;
+      }
 
       // hard metrics
       const bodyText = strip(draft.body_html);
@@ -335,7 +337,7 @@ Return JSON: {"topic":"article title idea in Hindi","focus_keyword":"...","secon
       if (metrics.overlap > MAX_SOURCE_OVERLAP) hard.push(`sources से ${(metrics.overlap * 100).toFixed(1)}% text मेल खा रहा है — पूरी तरह अपने शब्दों में दोबारा लिखो।`);
       if (metrics.similarity > MAX_INTERNAL_SIMILARITY) hard.push("हमारी ही किसी पुरानी post से बहुत मिलता-जुलता है — नया angle लो।");
       if (metrics.internal < 3) hard.push("कम से कम 3 internal links चाहिए।");
-      if (metrics.books < 2) hard.push("कम से कम 2 book links चाहिए (जहाँ स्वाभाविक हों)।");
+       if (metrics.books < 1) hard.push("चुनी हुई पुस्तक का लिंक चाहिए।");
       if (!/<h2/i.test(draft.body_html)) hard.push("H2 headings नहीं हैं।");
       if ((review.critical || []).length) hard.push(...review.critical);
 
@@ -408,7 +410,8 @@ Return JSON: {"topic":"article title idea in Hindi","focus_keyword":"...","secon
       originality_score: Math.round((1 - metrics.overlap) * 100),
       readability_score: Number(review?.scores?.readability) || null,
       quality_passed: !!log.passed,
-      self_check: { review, metrics, revisions: log.revisions },
+       self_check: { review, metrics, revisions: log.revisions, target_book_id: targetBook.id, target_book_title: targetBook.title },
+       source_book_ids: [targetBook.id],
       featured_image_alt: article.featured_image_alt ?? null,
       featured_image_caption: article.featured_image_caption ?? null,
       social_caption: article.social_caption ?? null,

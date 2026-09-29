@@ -4,6 +4,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { assertSeoAuthorized } from "../_shared/seo-auth.ts";
+import { selectBookBlogTarget } from "../_shared/book-blog-target.ts";
 
 const MIN_SCHEDULED = 30;
 const MAX_PER_RUN = 5; // safety: don't burn tokens in one shot
@@ -42,21 +43,20 @@ Deno.serve(async (req) => {
     });
   }
 
-  const { data: kb } = await sb.from("book_knowledge").select("topics,concepts,keywords,entities");
-  const bookTopics = Array.from(new Set((kb || []).flatMap((k: any) => [
-    ...(k.topics || []), ...(k.concepts || []), ...(k.keywords || []), ...(k.entities || []),
-  ]))).slice(0, 60);
-
   const results: any[] = [];
+  const attemptedBooks = new Set<string>();
   for (let i = 0; i < toGenerate; i++) {
     try {
+      const targetBook = await selectBookBlogTarget(sb, attemptedBooks);
+      if (!targetBook) break;
+      attemptedBooks.add(targetBook.id);
       const r = await invokeFn(url, svc, "seo-blog-agent", {
         auto: true,
         publish_status: "scheduled",
         batch_index: scheduled + i,
-        book_context: bookTopics,
+        target_book: targetBook,
       });
-      results.push({ i, status: r.status, post_id: r.data?.post_id });
+      results.push({ i, status: r.status, post_id: r.data?.post_id, book_id: targetBook.id });
     } catch (e: any) {
       results.push({ i, error: String(e?.message || e) });
     }

@@ -47,7 +47,11 @@ Deno.serve(async (req) => {
   const attemptedBooks = new Set<string>();
   for (let i = 0; i < toGenerate; i++) {
     try {
-      const targetBook = await selectBookBlogTarget(sb, attemptedBooks);
+      let targetBook = await selectBookBlogTarget(sb, attemptedBooks);
+      if (!targetBook && attemptedBooks.size) {
+        attemptedBooks.clear();
+        targetBook = await selectBookBlogTarget(sb);
+      }
       if (!targetBook) break;
       attemptedBooks.add(targetBook.id);
       const r = await invokeFn(url, svc, "seo-blog-agent", {
@@ -62,7 +66,7 @@ Deno.serve(async (req) => {
     }
   }
 
-  return new Response(JSON.stringify({ success: true, scheduled, generated: results.length, results }), {
+  return new Response(JSON.stringify({ success: results.every(r => r.status === 200 && r.post_id), scheduled, generated: results.filter(r => r.post_id).length, results }), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 });

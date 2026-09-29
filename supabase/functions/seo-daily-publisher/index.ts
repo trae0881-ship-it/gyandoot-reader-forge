@@ -182,6 +182,8 @@ Deno.serve(async (req) => {
       originality_score: originality,
       quality_passed: passed,
       self_check: {
+        target_book_id: targetBook.id,
+        target_book_title: targetBook.title,
         seo_score: seoScore,
         readability: rd,
         originality,

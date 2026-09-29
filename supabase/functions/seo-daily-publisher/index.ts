@@ -10,6 +10,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { assertSeoAuthorized } from "../_shared/seo-auth.ts";
+import { selectBookBlogTarget } from "../_shared/book-blog-target.ts";
 
 const MIN_QUEUE = 30;
 
@@ -91,41 +92,8 @@ Deno.serve(async (req) => {
     // source_book_ids on posts is the durable cursor: no separate mutable
     // rotation state is needed, and a failed run does not consume a book turn.
     const { data: kb } = await sb.from("book_knowledge").select("*");
-    const { data: bookRows } = await sb.from("books")
-      .select("id,title,slug,author")
-      .order("created_at", { ascending: true });
-    const { data: coveredPosts } = await sb.from("posts")
-      .select("source_book_ids,created_at")
-      .eq("post_type", "article")
-      .not("source_book_ids", "is", null)
-      .order("created_at", { ascending: false })
-      .limit(1000);
-
-    const lastCovered = new Map<string, number>();
-    for (const post of coveredPosts || []) {
-      const coveredAt = new Date(post.created_at).getTime();
-      for (const id of post.source_book_ids || []) {
-        if (!lastCovered.has(id)) lastCovered.set(id, coveredAt);
-      }
-    }
-    const kbByBook = new Map((kb || []).filter((row: any) => row.book_id).map((row: any) => [row.book_id, row]));
-    const selectedBook = [...(bookRows || [])]
-      .filter((book: any) => book.slug && kbByBook.has(book.id))
-      .sort((a: any, b: any) => (lastCovered.get(a.id) || 0) - (lastCovered.get(b.id) || 0))[0];
-    if (!selectedBook) throw new Error("No book with knowledge data is available for blog grounding");
-    const selectedKb: any = kbByBook.get(selectedBook.id);
-    const targetBook: TargetBook = {
-      id: selectedBook.id,
-      title: selectedBook.title,
-      slug: selectedBook.slug,
-      author: selectedBook.author,
-      summary: selectedKb.summary || "",
-      topics: selectedKb.topics || [],
-      concepts: selectedKb.concepts || [],
-      keywords: selectedKb.keywords || [],
-      entities: selectedKb.entities || [],
-      faqs: selectedKb.faqs || [],
-    };
+    const targetBook: TargetBook | null = await selectBookBlogTarget(sb);
+    if (!targetBook) throw new Error("No book with knowledge data is available for blog grounding");
     const bookTopics = Array.from(new Set((kb || []).flatMap((k: any) => [
       ...(k.topics || []), ...(k.concepts || []), ...(k.keywords || []), ...(k.entities || []),
     ]))).slice(0, 200);
@@ -214,6 +182,8 @@ Deno.serve(async (req) => {
       originality_score: originality,
       quality_passed: passed,
       self_check: {
+        target_book_id: targetBook.id,
+        target_book_title: targetBook.title,
         seo_score: seoScore,
         readability: rd,
         originality,

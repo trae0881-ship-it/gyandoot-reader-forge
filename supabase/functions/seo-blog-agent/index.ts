@@ -16,6 +16,7 @@ import {
 } from "../_shared/seo-alerts.ts";
 import { buildKeyResolver, KeyResolver } from "../_shared/ai-key-resolver.ts";
 import { assertSeoAuthorized } from "../_shared/seo-auth.ts";
+import { selectBookBlogTarget } from "../_shared/book-blog-target.ts";
 
 const NICHE = "Books, Spirituality, Meditation, Self Growth, Mindfulness, Consciousness";
 const SITE = "https://gyandootnova.in";
@@ -427,7 +428,8 @@ Deno.serve(async (req) => {
     const requestedScheduledAt: string | null = typeof body?.scheduled_at === "string" ? body.scheduled_at : null;
     const confirmPublish: boolean = body?.confirm_publish === true;
     const batchIndex: number = Number.isInteger(body?.batch_index) ? body.batch_index : 0;
-    const targetBook = parseTargetBook(body?.target_book);
+    const targetBook = parseTargetBook(body?.target_book) || await selectBookBlogTarget(supabase);
+    if (!targetBook) throw new Error("No book with knowledge data is available for blog grounding");
     const targetBookTerms = targetBook
       ? Array.from(new Set([...(targetBook.keywords || []), ...(targetBook.topics || []), ...(targetBook.concepts || []), ...(targetBook.entities || [])])).slice(0, 80)
       : [];
@@ -477,8 +479,9 @@ Deno.serve(async (req) => {
       .map((k: any) => `- ${k.term}${k.category ? ` [${k.category}]` : ""}${k.related_terms?.length ? ` — related: ${k.related_terms.slice(0, 6).join(", ")}` : ""}`)
       .join("\n");
     // Rotate through the pool so batch runs don't all pick the same term.
-    const targetKeyword: string | undefined = keywordPool.length
-      ? keywordPool[batchIndex % keywordPool.length].term
+    const targetKeyword: string | undefined = targetBookTerms.length
+      ? targetBookTerms[batchIndex % targetBookTerms.length]
+      : keywordPool.length ? keywordPool[batchIndex % keywordPool.length].term
       : undefined;
     log.keyword_pool_size = keywordPool.length;
     log.target_keyword = targetKeyword ?? null;
@@ -657,6 +660,7 @@ Return STRICT JSON (no markdown fences):
       return validSlugs.has(slug) ? m : anchor;
     });
     bodyHtml = ensureTargetBookLink(bodyHtml, targetBook);
+    if (!bodyHtml.includes(`/books/${targetBook.slug}`)) throw new Error("Article is missing its source book link");
 
     const faqSchema = {
       "@context": "https://schema.org", "@type": "FAQPage",

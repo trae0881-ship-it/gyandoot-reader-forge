@@ -3,6 +3,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { assertSeoAuthorized } from "../_shared/seo-auth.ts";
+import { selectBookBlogTarget } from "../_shared/book-blog-target.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -17,10 +18,12 @@ Deno.serve(async (req) => {
 
   // 1) Run the SEO blog agent (writes + schedules an article).
   try {
+    const targetBook = await selectBookBlogTarget(supabase);
+    if (!targetBook) throw new Error("No book with knowledge data is available for blog grounding");
     const r = await fetch(`${url}/functions/v1/seo-blog-agent`, {
       method: "POST",
       headers: { Authorization: `Bearer ${svc}`, apikey: svc, "x-cron-secret": Deno.env.get("SEO_CRON_TOKEN") ?? "", "Content-Type": "application/json" },
-      body: JSON.stringify({ auto: true, publish_status: "scheduled" }),
+      body: JSON.stringify({ auto: true, publish_status: "scheduled", target_book: targetBook }),
     });
     results.agent = { status: r.status, body: await r.json().catch(() => ({})) };
   } catch (e: any) {

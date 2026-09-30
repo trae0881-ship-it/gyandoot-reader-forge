@@ -429,7 +429,7 @@ Deno.serve(async (req) => {
     const confirmPublish: boolean = body?.confirm_publish === true;
     const batchIndex: number = Number.isInteger(body?.batch_index) ? body.batch_index : 0;
     const targetBook = parseTargetBook(body?.target_book) || await selectBookBlogTarget(supabase);
-    if (!targetBook) throw new Error("No book with knowledge data is available for blog grounding");
+    if (!targetBook) throw new Error("No book is available for blog grounding");
     const targetBookTerms = targetBook
       ? Array.from(new Set([...(targetBook.keywords || []), ...(targetBook.topics || []), ...(targetBook.concepts || []), ...(targetBook.entities || [])])).slice(0, 80)
       : [];

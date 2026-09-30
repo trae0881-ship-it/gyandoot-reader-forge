@@ -1,0 +1,1 @@
+Use `supabase/functions/_shared/book-blog-target.ts` to choose the least-recently-covered catalogue book for automated articles; one shared selector keeps independent scheduled writers consistent.

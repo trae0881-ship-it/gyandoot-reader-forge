@@ -236,7 +236,7 @@ async function runAgent(body: any): Promise<any> {
 
     // 2) keyword research from live search + trends
     const targetBook = await selectBookBlogTarget(supabase);
-    if (!targetBook) throw new Error("No book with knowledge data is available for blog grounding");
+    if (!targetBook) throw new Error("No book is available for blog grounding");
     log.target_book_id = targetBook.id;
     log.target_book = targetBook.title;
     const pillar = `${targetBook.title} ${(targetBook.keywords || []).slice(0, 3).join(" ")}`;
@@ -336,7 +336,7 @@ Return JSON: {"topic":"article title idea in Hindi","focus_keyword":"...","secon
       if (metrics.words < MIN_WORDS) hard.push(`article सिर्फ़ ${metrics.words} words का है, कम से कम ${MIN_WORDS} चाहिए।`);
       if (metrics.overlap > MAX_SOURCE_OVERLAP) hard.push(`sources से ${(metrics.overlap * 100).toFixed(1)}% text मेल खा रहा है — पूरी तरह अपने शब्दों में दोबारा लिखो।`);
       if (metrics.similarity > MAX_INTERNAL_SIMILARITY) hard.push("हमारी ही किसी पुरानी post से बहुत मिलता-जुलता है — नया angle लो।");
-      if (metrics.internal < 3) hard.push("कम से कम 3 internal links चाहिए।");
+       if (metrics.internal < 3) hard.push("कम से कम 3 internal links चाहिए।");
        if (metrics.books < 1) hard.push("चुनी हुई पुस्तक का लिंक चाहिए।");
       if (!/<h2/i.test(draft.body_html)) hard.push("H2 headings नहीं हैं।");
       if ((review.critical || []).length) hard.push(...review.critical);

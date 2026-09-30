@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
     // rotation state is needed, and a failed run does not consume a book turn.
     const { data: kb } = await sb.from("book_knowledge").select("*");
     const targetBook: TargetBook | null = await selectBookBlogTarget(sb);
-    if (!targetBook) throw new Error("No book with knowledge data is available for blog grounding");
+    if (!targetBook) throw new Error("No book is available for blog grounding");
     const bookTopics = Array.from(new Set((kb || []).flatMap((k: any) => [
       ...(k.topics || []), ...(k.concepts || []), ...(k.keywords || []), ...(k.entities || []),
     ]))).slice(0, 200);

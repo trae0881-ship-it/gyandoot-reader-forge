@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
   // 1) Run the SEO blog agent (writes + schedules an article).
   try {
     const targetBook = await selectBookBlogTarget(supabase);
-    if (!targetBook) throw new Error("No book with knowledge data is available for blog grounding");
+    if (!targetBook) throw new Error("No book is available for blog grounding");
     const r = await fetch(`${url}/functions/v1/seo-blog-agent`, {
       method: "POST",
       headers: { Authorization: `Bearer ${svc}`, apikey: svc, "x-cron-secret": Deno.env.get("SEO_CRON_TOKEN") ?? "", "Content-Type": "application/json" },

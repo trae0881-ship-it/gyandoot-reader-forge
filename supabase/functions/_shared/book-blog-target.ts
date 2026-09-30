@@ -2,7 +2,7 @@
 // provide the durable cursor: a failed generation never consumes a book turn.
 export async function selectBookBlogTarget(sb: any, excluded = new Set<string>()) {
   const [{ data: books, error: booksError }, { data: knowledge, error: kbError }, { data: posts, error: postsError }] = await Promise.all([
-    sb.from("books").select("id,title,slug,author").order("created_at", { ascending: true }),
+    sb.from("books").select("id,title,slug,author,description,category").order("created_at", { ascending: true }),
     sb.from("book_knowledge").select("book_id,summary,topics,concepts,keywords,entities,faqs"),
     sb.from("posts").select("source_book_ids,created_at").eq("post_type", "article")
       .not("source_book_ids", "is", null).order("created_at", { ascending: false }).limit(1000),
@@ -16,13 +16,14 @@ export async function selectBookBlogTarget(sb: any, excluded = new Set<string>()
     }
   }
   const book = [...(books || [])]
-    .filter((b: any) => b.slug && byId.has(b.id) && !excluded.has(b.id))
+    .filter((b: any) => b.slug && !excluded.has(b.id))
     .sort((a: any, b: any) => (lastCovered.get(a.id) || 0) - (lastCovered.get(b.id) || 0))[0];
   if (!book) return null;
-  const kb: any = byId.get(book.id);
+  const kb: any = byId.get(book.id) || {};
   return {
     id: book.id, title: book.title, slug: book.slug, author: book.author,
-    summary: kb.summary || "", topics: kb.topics || [], concepts: kb.concepts || [],
-    keywords: kb.keywords || [], entities: kb.entities || [], faqs: kb.faqs || [],
+    summary: kb.summary || book.description || "", topics: kb.topics || (book.category ? [book.category] : []),
+    concepts: kb.concepts || [], keywords: kb.keywords || [book.title],
+    entities: kb.entities || [], faqs: kb.faqs || [],
   };
 }

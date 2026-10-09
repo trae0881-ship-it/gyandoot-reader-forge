@@ -1,3 +1,3 @@
 - [x] Soften the light-background brightness across the site.
 - [x] Ground automated blog articles in rotating catalogue books and link each article to its source book.
-- [ ] Confirm a generated article reaches the live blog (blocked while Lovable Cloud is still starting).
+- [ ] Confirm a generated article reaches the live blog (blocked while Lovable Cloud is still starting).- [x] Railway deploy kit for frontend + self-hosted backend (DEPLOY_RAILWAY.md); live Railway deploy must be done by the owner.

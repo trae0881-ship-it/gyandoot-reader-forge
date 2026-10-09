@@ -1,1 +1,1 @@
-Use `supabase/functions/_shared/book-blog-target.ts` to choose the least-recently-covered catalogue book for automated articles; one shared selector keeps independent scheduled writers consistent.
+Use `supabase/functions/_shared/book-blog-target.ts` to choose the least-recently-covered catalogue book for automated articles; one shared selector keeps independent scheduled writers consistent.- Build backend URLs from `VITE_SUPABASE_URL`, never from the project id; the same build must work on Lovable Cloud and the self-hosted Railway backend (`deploy/backend/`).

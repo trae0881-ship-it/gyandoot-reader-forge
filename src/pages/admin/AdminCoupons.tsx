@@ -246,9 +246,8 @@ const AdminCoupons = () => {
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       const res = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/send-coupon-email`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-coupon-email`,
         {
           method: "POST",
           headers: {

@@ -36,8 +36,7 @@ const Profile = () => {
     const { data: sessionData } = await supabase.auth.getSession();
     const token = sessionData.session?.access_token;
     if (!token) throw new Error("Please sign in again to generate this invoice.");
-    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-    const url = `https://${projectId}.supabase.co/functions/v1/generate-invoice?purchase_id=${purchaseId}&preview=1`;
+    const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-invoice?purchase_id=${purchaseId}&preview=1`;
     const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
     if (!res.ok) {
       // Server always returns JSON error bodies; fall back to raw text for safety.

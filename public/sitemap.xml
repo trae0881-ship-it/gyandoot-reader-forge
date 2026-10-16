@@ -260,8 +260,8 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://gyandootnova.in/articles/kakaradi-krishna-sahasranam-vyas-samvad-brahmajnana</loc>
-    <lastmod>2026-10-14</lastmod>
+    <loc>https://gyandootnova.in/articles/rigveda-gyandootnova-devatva-anubhav-adhunik-jeevan</loc>
+    <lastmod>2026-10-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -284,6 +284,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://gyandootnova.in/articles/kakaradi-krishna-sahasranam-vyas-samvad-brahmajnana</loc>
+    <lastmod>2026-10-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://gyandootnova.in/articles/navdha-bhakti-bhagavat-purana-aatmiya-utthan</loc>
     <lastmod>2026-08-24</lastmod>
     <changefreq>weekly</changefreq>
@@ -302,18 +308,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gyandootnova.in/articles/rigveda-gyandootnova-devatva-anubhav-adhunik-jeevan</loc>
-    <lastmod>2026-10-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://gyandootnova.in/articles/bhagavad-gita-gyandootnova-self-realization-modern-spiritual-growth</loc>
-    <lastmod>2026-10-14</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://gyandootnova.in/articles/what-is-mindfulness-in-hindi</loc>
     <lastmod>2026-08-24</lastmod>
     <changefreq>weekly</changefreq>
@@ -322,12 +316,6 @@
   <url>
     <loc>https://gyandootnova.in/articles/shat-chakra-dhyan-kundalini-jagran-atm-sakshatkar</loc>
     <lastmod>2026-08-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://gyandootnova.in/articles/rigved-part-2-agni-rahasya-vaidik-karmakand-tribhashi-anuvad</loc>
-    <lastmod>2026-10-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -386,14 +374,14 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gyandootnova.in/articles/vishnu-sahasranama-atm-sakshatkar-moksha-gyandootnova</loc>
-    <lastmod>2026-10-14</lastmod>
+    <loc>https://gyandootnova.in/articles/bhagavad-gita-online-padhe</loc>
+    <lastmod>2026-08-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gyandootnova.in/articles/bhagavad-gita-online-padhe</loc>
-    <lastmod>2026-08-16</lastmod>
+    <loc>https://gyandootnova.in/articles/bhagavad-gita-gyandootnova-self-realization-modern-spiritual-growth</loc>
+    <lastmod>2026-10-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -670,6 +658,12 @@
   <url>
     <loc>https://gyandootnova.in/articles/atma-aur-prana-mein-antar-aadhyatmik-drishtikon</loc>
     <lastmod>2026-08-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/vishnu-sahasranama-atm-sakshatkar-moksha-gyandootnova</loc>
+    <lastmod>2026-10-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -1018,6 +1012,12 @@
   <url>
     <loc>https://gyandootnova.in/articles/rigved-part-2-agni-shuddhikaran-ekagrata-narakaratmakta-mukti</loc>
     <lastmod>2026-10-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gyandootnova.in/articles/rigved-part-2-agni-rahasya-vaidik-karmakand-tribhashi-anuvad</loc>
+    <lastmod>2026-10-16</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

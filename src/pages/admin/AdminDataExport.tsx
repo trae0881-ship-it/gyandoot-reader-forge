@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Database, Download, Loader2, Plug, UploadCloud } from "lucide-react";
+import DatabaseRestoreCard from "@/components/admin/DatabaseRestoreCard";
 
 const AdminDataExport = () => {
   const { toast } = useToast();
@@ -128,6 +129,8 @@ const AdminDataExport = () => {
           </p>
         </CardContent>
       </Card>
+
+      <DatabaseRestoreCard />
 
       <Card>
         <CardHeader>

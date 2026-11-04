@@ -185,7 +185,7 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: `No active ${channel} provider configured. Admin needs to set one up.` }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const code = (100000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 900000)).toString();
     const code_hash = await sha256(code);
     const expires_at = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 

@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Authenticated can insert purchases" ON public.purchases;

@@ -286,6 +286,21 @@ Deno.serve(async (req) => {
       const normalized = normalizeQuestion(question);
       const qHash = await hashQuestion(normalized, effectiveBookId);
 
+      // Entitlement check BEFORE cache lookup for book-specific questions
+      if (!isGeneralQuery) {
+        const { data: bk } = await supabase.from("books").select("is_free").eq("id", book_id).maybeSingle();
+        let ok = !!bk?.is_free;
+        if (bk && !ok) {
+          const { data: purchased } = await supabase.rpc("has_purchased_book", { _user_id: user.id, _book_id: book_id });
+          ok = !!purchased || await isAdmin(supabase, user.id);
+        }
+        if (!ok) {
+          return new Response(JSON.stringify({ error: bk ? "Please purchase this book to ask questions about it" : "Book not found" }), {
+            status: bk ? 403 : 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
+
       // 1. Check cache
       const { data: cached } = await supabase
         .from("ai_cache").select("response").eq("question_hash", qHash).eq("book_id", effectiveBookId).maybeSingle();

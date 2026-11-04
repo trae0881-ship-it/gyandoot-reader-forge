@@ -28,7 +28,8 @@ Deno.serve(async (req) => {
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
-  if (q) query = query.or(`title.ilike.%${q}%,excerpt.ilike.%${q}%`);
+  const safeQ = (q || "").replace(/[^\p{L}\p{N}\s-]/gu, " ").trim().slice(0, 100);
+  if (safeQ) query = query.or(`title.ilike.%${safeQ}%,excerpt.ilike.%${safeQ}%`);
 
   const { data, count, error } = await query;
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: cors });

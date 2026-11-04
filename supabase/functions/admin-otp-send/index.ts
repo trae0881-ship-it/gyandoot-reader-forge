@@ -53,7 +53,7 @@ serve(async (req) => {
     }
 
     // Generate 6-digit OTP (valid 5 minutes)
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const code = (100000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 900000)).toString();
     const code_hash = await sha256(code);
     const expires_at = new Date(Date.now() + 5 * 60 * 1000).toISOString();
 

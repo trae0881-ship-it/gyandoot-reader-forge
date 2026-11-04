@@ -9,8 +9,9 @@ type Options = {
   orderBy?: { column: string; ascending?: boolean };
 };
 
+export const neutralizeFormula = (s: string) => (/^[=+\-@\t\r]/.test(s) ? `'${s}` : s);
 const csvEscape = (v: unknown) => {
-  const s = v === null || v === undefined ? "" : typeof v === "object" ? JSON.stringify(v) : String(v);
+  const s = neutralizeFormula(v === null || v === undefined ? "" : typeof v === "object" ? JSON.stringify(v) : String(v));
   return `"${s.replace(/"/g, '""').replace(/\r?\n/g, " ")}"`;
 };
 

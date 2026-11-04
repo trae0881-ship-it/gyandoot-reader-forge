@@ -204,7 +204,7 @@ async function sendReceipt(
       const errText = await emailRes.text();
       console.error("Resend email error:", errText);
     } else {
-      console.log("Receipt email sent to", recipientEmail);
+      console.log("Receipt email sent");
     }
   } catch (err) {
     console.error("Email send error:", err);
@@ -387,6 +387,25 @@ async function verifyPaypal(supabase: any, user: any, orderId: string, type: str
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+  }
+
+  // SECURITY: only capture orders that this server created and are still pending
+  // (and, for purchases by a signed-in user, belong to that user).
+  if (!/^[A-Z0-9-]{5,64}$/i.test(orderId)) {
+    return new Response(JSON.stringify({ error: "Invalid order" }), {
+      status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  {
+    const tbl = type === "purchase" ? "purchases" : "donations";
+    const { data: pending } = await supabase
+      .from(tbl).select("status, user_id").eq("razorpay_order_id", orderId).maybeSingle();
+    const ownerOk = !(type === "purchase" && user) || !pending?.user_id || pending.user_id === user.id;
+    if (!pending || pending.status === "completed" || !ownerOk) {
+      return new Response(JSON.stringify({ error: "Order not found" }), {
+        status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
   }
 
   const tokenRes = await fetch(`${PAYPAL_API_BASE}/v1/oauth2/token`, {

@@ -1,3 +1,4 @@
+import { neutralizeFormula } from "@/lib/exportCsv";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -110,7 +111,7 @@ export default function AdminEnquiries() {
         "status","admin_notes","source_ip","user_agent",
       ];
       const esc = (v: unknown) => {
-        const s = v === null || v === undefined ? "" : String(v);
+        const s = neutralizeFormula(v === null || v === undefined ? "" : String(v));
         return `"${s.replace(/"/g, '""').replace(/\r?\n/g, " ")}"`;
       };
       const csv = [

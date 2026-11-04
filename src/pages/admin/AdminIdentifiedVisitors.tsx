@@ -1,3 +1,4 @@
+import { neutralizeFormula } from "@/lib/exportCsv";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -139,7 +140,7 @@ const AdminIdentifiedVisitors = () => {
       g.user_id, g.name, g.email, g.phone, g.visits, g.firstVisit, g.lastVisit,
       g.countries.join("|"), g.devices.join("|"),
       g.latest.ip_address, g.latest.city, g.latest.country, g.latest.landing_path, g.latest.referrer,
-    ])].map(r => r.map(c => `"${String(c ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+    ])].map(r => r.map(c => `"${neutralizeFormula(String(c ?? "")).replace(/"/g, '""')}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

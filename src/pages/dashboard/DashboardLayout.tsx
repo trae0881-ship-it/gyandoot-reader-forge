@@ -43,7 +43,7 @@ const DashboardLayout = () => {
                 <Link to="/dashboard" className="hover:text-primary">Dashboard</Link>
               </nav>
             </div>
-            <div className="p-4 md:p-6 lg:p-8 max-w-6xl mx-auto w-full">
+            <div className="p-4 md:p-6 lg:p-8 max-w-6xl mx-auto w-full min-w-0 overflow-x-clip">
               <Outlet />
             </div>
           </main>

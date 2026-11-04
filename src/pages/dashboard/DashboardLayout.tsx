@@ -46,10 +46,10 @@ const DashboardLayout = () => {
             <div className="p-4 md:p-6 lg:p-8 max-w-6xl mx-auto w-full min-w-0 overflow-x-clip">
               <Outlet />
             </div>
+            <Footer />
           </main>
         </div>
       </SidebarProvider>
-      <Footer />
     </div>
   );
 };

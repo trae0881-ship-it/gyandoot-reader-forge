@@ -121,7 +121,7 @@ export function DashboardSidebar() {
     url === "/dashboard" ? pathname === "/dashboard" : pathname === url || pathname.startsWith(url + "/");
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border/60">
+    <Sidebar collapsible="icon" className="border-r border-border/60 md:top-[76px] md:h-[calc(100svh-76px)]">
       <SidebarContent>
         {groups.map((g) => (
           <SidebarGroup key={g.label}>

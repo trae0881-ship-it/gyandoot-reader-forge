@@ -21,7 +21,7 @@ const PrivacyPolicy = () => {
 
         <h2>2. Information We Collect</h2>
         <ul>
-          <li><strong>Account Information:</strong> Name, email address when you register.</li>
+          <li><strong>Account Information:</strong> Name and email address when you register.</li>
           <li><strong>Payment Information:</strong> Processed securely through Razorpay. We do not store your card details.</li>
           <li><strong>Usage Data:</strong> Pages visited, reading progress, and interaction data to improve our services.</li>
           <li><strong>Cookies:</strong> We use essential cookies for authentication and session management.</li>

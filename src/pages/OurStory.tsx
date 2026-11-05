@@ -65,7 +65,7 @@ const OurStory = () => {
     {
       icon: Sparkles,
       title: "For The Dreamer",
-      text: "Explore stories that give imagination a room to wander freely.",
+      text: "Explore stories that give imagination room to wander freely.",
     },
     {
       icon: Compass,

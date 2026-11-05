@@ -1188,7 +1188,7 @@ const Index = () => {
             <p>
               Beyond books, GyandootNova publishes insightful articles on meditation techniques, the significance of{" "}
               <strong className="text-foreground">Sanskrit shlokas</strong>, guides to performing{" "}
-              <strong className="text-foreground">Ramayana path at home</strong>, deep dives into Geeta's 18 chapters,
+              <strong className="text-foreground">Ramayana paath at home</strong>, deep dives into the Gita's 18 chapters,
               and the spiritual meaning behind Hindu festivals. Our content helps seekers worldwide deepen their
               understanding of Sanatan Dharma.
             </p>

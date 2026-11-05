@@ -17,7 +17,7 @@ const supportTopics = [
   {
     icon: HelpCircle,
     title: "Account & Login Issues",
-    description: "Having trouble signing in or creating an account? Check your email for verification link or try resetting your password.",
+    description: "Having trouble signing in or creating an account? Check your email for the verification link or try resetting your password.",
   },
   {
     icon: MessageSquare,

@@ -95,7 +95,7 @@ const Donate = () => {
                 <Link to="/auth" className="text-primary hover:underline inline-flex items-center gap-1">
                   <LogIn className="h-3.5 w-3.5" /> Sign in
                 </Link>{" "}
-                karein taaki daan history profile mein dikhaye — ya bina login ke bhi daan kar sakte hain.
+                karein taaki daan history profile mein dikhe — ya bina login ke bhi daan kar sakte hain.
               </p>
             )}
           </div>
@@ -200,7 +200,7 @@ const Donate = () => {
               </Button>
 
               <p className="text-xs text-center text-muted-foreground">
-                🔒 Secure payment via {gateway === "razorpay" ? "Razorpay" : gateway === "paypal" ? "PayPal" : "—"} · Login required nahi
+                Secure payment via {gateway === "razorpay" ? "Razorpay" : gateway === "paypal" ? "PayPal" : "—"} · Login required nahi
               </p>
             </CardContent>
           </Card>

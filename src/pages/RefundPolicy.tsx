@@ -37,12 +37,12 @@ const RefundPolicy = () => {
         <ol>
           <li>Email us at <a href="mailto:gyandootnova57@gmail.com" className="text-primary">gyandootnova57@gmail.com</a> with your purchase details.</li>
           <li>Include your registered email and order/payment ID.</li>
-          <li>Our team will review and respond within 3-5 business days.</li>
+          <li>Our team will review and respond within 3–5 business days.</li>
         </ol>
 
         <h2>5. Refund Processing</h2>
         <p>
-          Approved refunds will be credited to your original payment method within 7-10 business days. Refunds are processed through Razorpay.
+          Approved refunds will be credited to your original payment method within 7–10 business days. Refunds are processed through Razorpay.
         </p>
 
         <h2>6. Cancellation</h2>

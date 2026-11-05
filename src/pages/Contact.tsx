@@ -133,7 +133,7 @@ const Contact = () => {
                 Suggest a text
               </h3>
               <p className="mt-3 text-sm text-muted-foreground leading-[1.8]">
-                Twelve of last month's twelve new titles came from reader requests alone. Ask for a
+                All twelve of last month's new titles came from reader requests. Ask for a
                 scripture, an edition, or a translation — we take every note seriously.
               </p>
               <p className="mt-4 text-xs uppercase tracking-[0.14em] text-primary">

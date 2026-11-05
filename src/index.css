@@ -6,28 +6,28 @@
   :root {
     /* Premium spiritual publication — warm white base, deep temple red,
        saffron yellow accents, royal indigo blue for trust. */
-    --background: 42 34% 93%;
+    --background: 42 30% 89%;
     --foreground: 0 0% 13%;
 
-    --card: 42 28% 96%;
+    --card: 42 26% 93%;
     --card-foreground: 0 0% 13%;
 
-    --popover: 42 28% 96%;
+    --popover: 42 26% 93%;
     --popover-foreground: 0 0% 13%;
 
     /* Deep spiritual red — primary CTA / heading accents */
-    --primary: 0 76% 41%;
-    --primary-foreground: 45 100% 98%;
-    --primary-glow: 0 72% 52%;
+    --primary: 0 72% 38%;
+    --primary-foreground: 45 100% 96%;
+    --primary-glow: 0 68% 46%;
 
     /* Saffron yellow — secondary accents, badges, highlights */
-    --secondary: 45 96% 48%;
+    --secondary: 43 88% 42%;
     --secondary-foreground: 0 0% 13%;
 
-    --muted: 40 22% 89%;
-    --muted-foreground: 0 0% 40%;
+    --muted: 40 20% 85%;
+    --muted-foreground: 0 0% 36%;
 
-    --accent: 45 96% 48%;
+    --accent: 43 88% 42%;
     --accent-foreground: 0 0% 13%;
 
     --destructive: 0 74% 46%;

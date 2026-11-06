@@ -6,6 +6,7 @@ import { assertSeoAuthorized } from "../_shared/seo-auth.ts";
 const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-2.5-flash";
 const SITE = "https://gyandootnova.in";
+const PAUSE_KEY = "seo_social_captions_paused_until";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -17,6 +18,13 @@ Deno.serve(async (req) => {
   const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   try {
     const { post_id } = await req.json();
+
+    // Circuit breaker: skip AI calls while a credit/policy pause is active.
+    const { data: pauseRow } = await supabase.from("settings").select("value").eq("key", PAUSE_KEY).maybeSingle();
+    const pausedUntil = pauseRow?.value ? Date.parse(pauseRow.value) : 0;
+    if (pausedUntil && pausedUntil > Date.now()) {
+      return new Response(JSON.stringify({ success: false, paused: true, error: `AI credits exhausted — caption generation paused until ${new Date(pausedUntil).toISOString()}. Top up AI credits to resume.` }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
     const { data: post, error } = await supabase.from("posts").select("id,title,slug,excerpt,primary_keyword,secondary_keywords,meta_description").eq("id", post_id).maybeSingle();
     if (error) throw error;
     if (!post) throw new Error("post not found");
@@ -56,6 +64,13 @@ Return STRICT JSON with keys (no markdown, no explanation):
     });
     if (!r.ok) {
       const text = await r.text();
+      if (r.status === 402 || r.status === 403 || r.status === 429) {
+        const hours = r.status === 429 ? 1 : 12;
+        const until = new Date(Date.now() + hours * 3600_000).toISOString();
+        await supabase.from("settings").upsert({ key: PAUSE_KEY, value: until, updated_at: new Date().toISOString() }, { onConflict: "key" });
+        const msg = r.status === 429 ? "AI rate limit reached — try again later." : "AI credits exhausted — top up AI credits to resume caption generation.";
+        return new Response(JSON.stringify({ success: false, paused: true, error: msg }), { status: r.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
       throw new Error(`AI ${r.status}: ${text.slice(0, 300)}`);
     }
     const body = await r.json();
@@ -63,6 +78,7 @@ Return STRICT JSON with keys (no markdown, no explanation):
     const captions = JSON.parse(raw);
 
     await supabase.from("posts").update({ social_captions: captions }).eq("id", post.id);
+    await supabase.from("settings").delete().eq("key", PAUSE_KEY);
 
     return new Response(JSON.stringify({ success: true, captions }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e: any) {

@@ -6,6 +6,7 @@ import { assertSeoAuthorized } from "../_shared/seo-auth.ts";
 const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const MODEL = "google/gemini-2.5-flash";
 const SITE = "https://gyandootnova.in";
+const PAUSE_KEY = "seo_social_captions_paused_until";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
